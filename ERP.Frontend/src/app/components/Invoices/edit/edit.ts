@@ -12,7 +12,7 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { InvoiceDto, InvoiceService, TaxCalculationMode } from '../../../services/invoice.service';
 import { ArticleResponseDto, ArticleService, UnitEnum } from '../../../services/articles/articles.service';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subject, tap } from 'rxjs';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomToggleComponent } from "../../toggle-slider/toggle-slider";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

@@ -12,7 +12,7 @@ import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { CurrencyConfigService } from '../../../services/currency-config.service';
 import { ModalComponent } from '../../modal/modal';
 import { PaginationComponent } from '../../pagination/pagination';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { ArticleCategoryResponseDto, CategoryService } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';

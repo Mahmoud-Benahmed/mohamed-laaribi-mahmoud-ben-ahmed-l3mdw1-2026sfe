@@ -15,7 +15,7 @@ import { NotSameAsDirective } from '../../../util/NotSameAsDirective';
 import { ChangeProfilePasswordRequestDto } from '../../../interfaces/AuthDto';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({

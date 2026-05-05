@@ -8,7 +8,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { ModalComponent } from '../../modal/modal';
 import { PaginationComponent } from '../../pagination/pagination';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { CategoriesService, CategoryStatsDto, CreateCategoryRequestDto, UpdateCategoryRequestDto } from '../../../services/clients/categories.service';
 import { ClientCategoryResponseDto } from '../../../services/clients/categories.service';
 import { CustomToggleComponent } from '../../toggle-slider/toggle-slider';

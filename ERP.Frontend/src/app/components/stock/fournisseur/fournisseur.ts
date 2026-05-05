@@ -14,7 +14,7 @@ import {
   FournisseurStatsDto,
 } from '../../../services/fournisseur.service';
 import { MatTableDataSource } from '@angular/material/table';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

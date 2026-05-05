@@ -17,7 +17,7 @@ import { ArticleService, UnitEnum } from '../../services/articles/articles.servi
 import { StockItem, StockService } from '../../services/stock.service';
 import { PaginationComponent } from '../pagination/pagination';
 import { ModalComponent } from '../modal/modal';
-import { HttpError } from '../../interfaces/ErrorDto';
+import { HttpError } from '../../interfaces/HttpError';
 
 type ViewMode = 'list' | 'list-deleted' | 'stats';
 

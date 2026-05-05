@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { MatIcon } from '@angular/material/icon';
 import { ModalComponent } from '../../modal/modal';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PaginationComponent } from '../../pagination/pagination';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';

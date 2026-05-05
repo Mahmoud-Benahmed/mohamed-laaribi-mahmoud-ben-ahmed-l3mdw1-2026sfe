@@ -12,7 +12,7 @@ import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subject } fr
 import { AuthService } from '../../../services/auth/auth.service';
 import { CreateInvoiceDto, InvoiceService, TaxCalculationMode } from '../../../services/invoice.service';
 import { ArticleResponseDto, ArticleService, UnitEnum } from '../../../services/articles/articles.service';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

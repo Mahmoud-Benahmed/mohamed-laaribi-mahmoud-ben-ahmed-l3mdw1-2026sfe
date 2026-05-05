@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { InvoiceCacheDto, PaymentDto, PaymentService, PaymentStatsDto, PaymentStatus } from '../../services/payment.service';
 import { InvoiceDto, InvoiceService } from '../../services/invoice.service';
-import { HttpError } from '../../interfaces/ErrorDto';
+import { HttpError } from '../../interfaces/HttpError';
 import { forkJoin } from 'rxjs';
 import { ClientResponseDto, ClientsService } from '../../services/clients/clients.service';
 import { AuthService, PRIVILEGES } from '../../services/auth/auth.service';

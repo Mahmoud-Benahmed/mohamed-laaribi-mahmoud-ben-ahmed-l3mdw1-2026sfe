@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthUserGetResponseDto } from '../../interfaces/AuthDto';
-import { HttpError } from '../../interfaces/ErrorDto';
+import { HttpError } from '../../interfaces/HttpError';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    
+
     this.updateLastLogin();
 
     if (this.authService.UserProfile) {

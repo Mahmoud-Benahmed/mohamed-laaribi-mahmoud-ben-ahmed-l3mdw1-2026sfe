@@ -15,7 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { forkJoin } from 'rxjs';
 import { RegisterRequestDto, RoleResponseDto } from '../../../../interfaces/AuthDto';
-import { HttpError } from '../../../../interfaces/ErrorDto';
+import { HttpError } from '../../../../interfaces/HttpError';
 import { RoleService } from '../../../../services/auth/roles.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PasswordService } from '../../../../services/password.service';

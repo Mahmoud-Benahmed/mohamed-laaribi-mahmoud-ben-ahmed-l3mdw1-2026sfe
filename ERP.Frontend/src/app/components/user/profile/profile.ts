@@ -19,7 +19,7 @@ import { AuthUserGetResponseDto } from '../../../interfaces/AuthDto';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 
 @Component({
   selector: 'app-profile',

@@ -9,7 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { ModalComponent } from '../../modal/modal';
 import { PaginationComponent } from '../../pagination/pagination';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { CategoryRequestDto, ArticleCategoryResponseDto, CategoryService, ArticleCategoryStatsDto } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';

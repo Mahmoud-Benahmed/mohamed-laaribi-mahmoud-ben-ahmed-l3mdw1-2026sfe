@@ -12,7 +12,7 @@ import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { InvoiceDto, InvoiceService } from '../../../services/invoice.service';
 import { ArticleService, UnitEnum } from '../../../services/articles/articles.service';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModalComponent } from '../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

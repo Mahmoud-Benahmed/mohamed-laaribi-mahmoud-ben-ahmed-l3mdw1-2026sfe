@@ -1,5 +1,5 @@
 import { ModalComponent } from './../../../modal/modal';
-import { HttpError } from './../../../../interfaces/ErrorDto';
+import { HttpError } from '../../../../interfaces/HttpError';
 import { AdminChangeProfileRequest } from './../../../../interfaces/AuthDto';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { PasswordService } from '../../../../services/password.service';        // ← added
@@ -30,7 +30,7 @@ export class ChangePasswordComponent implements OnInit {
   @ViewChild('passwordFormRef') passwordFormRef!: NgForm;
 
   private location= inject(Location);
-  
+
   // ── Route context ─────────────────────────────────────────────────────────
   targetUserId: string | null = null;
 

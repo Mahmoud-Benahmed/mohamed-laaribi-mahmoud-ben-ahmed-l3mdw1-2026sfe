@@ -13,7 +13,7 @@ import {
 } from '../../../services/clients/clients.service';
 import { ModalComponent } from '../../modal/modal';
 import { PaginationComponent } from '../../pagination/pagination';
-import { HttpError } from '../../../interfaces/ErrorDto';
+import { HttpError } from '../../../interfaces/HttpError';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { CategoriesService, ClientCategoryResponseDto } from '../../../services/clients/categories.service';
 import { CurrencyConfigService } from '../../../services/currency-config.service';
