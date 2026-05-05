@@ -35,14 +35,13 @@
 }
 
 // ── HERO CARD ─────────────────────────────────────
-// FIX: was targeting mat-card + mat-card-content — now targets plain div
 .hero-card {
-  background: $bg-card;
-  border: 1px solid $border;
-  border-radius: 20px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 24px 64px rgba(0,0,0,0.5);
-  position: relative; overflow: hidden;
-  padding: 20px 28px; // FIX: padding moved here from mat-card-content override
+  background: $bg-card !important;
+  border: 1px solid $border !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 24px 64px rgba(0,0,0,0.5) !important;
+  position: relative;
+  padding: 0.75rem 1rem !important;
 
   &::before {
     content: '';
@@ -63,7 +62,6 @@
 
 .hero-card__layout {
   display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  position: relative; z-index: 1;
   @media (max-width: 640px) { flex-direction: column; align-items: flex-start; }
 }
 
@@ -81,16 +79,12 @@
 
   &__status {
     position: absolute;
-    width: 12px;
-    height: 12px;
-    bottom: 2px;
-    right: 2px;
+    width: 12px; height: 12px;
+    bottom: 2px; right: 2px;
     border-radius: 50%;
-    border-width: 2px ;
-    border-style: solid;
-    border-color: transparent;
+    border: 2px solid $bg-card;  // use card bg so it looks cut-out
     &--active   { background: $green; box-shadow: 0 0 2px $green; }
-    &--inactive { background: $red;   box-shadow: 0 0 2px $red;}
+    &--inactive { background: $red;   box-shadow: 0 0 2px $red; }
   }
 }
 
@@ -101,13 +95,13 @@
   &__name {
     font-size: 20px; font-weight: 800;
     letter-spacing: -0.8px; color: $text-hi; line-height: 1.1;
-    margin-bottom: 4px;
+    margin: 0 0 4px;
   }
 
   &__email {
     font-size: 13px; color: $text-mid;
     font-family: 'Fira Code', monospace;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
   }
 
   &__chips {
@@ -121,55 +115,55 @@
   display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
   @media (max-width: 640px) { flex-direction: row; width: 100%; }
 }
+
 .edit-btn {
-  border: 1px solid $border-hi;
-  color: $text-hi;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
+  border: 1px solid $border-hi !important;
+  color: $text-hi !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
   height: 40px;
-  background: $bg-card;  // was $-bg — undefined
+  background: $bg-card !important;
   cursor: pointer;
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   gap: 6px;
-  padding: 1rem;
+  padding: 0 1rem !important;
   transition: all 0.2s;
   mat-icon { font-size: 18px; }
 
   &:hover {
-    background: $amber-bg;
-    border-color: $amber;
+    background: $amber-bg !important;
+    border-color: $amber !important;
     box-shadow: 0 0 16px $amber-border;
   }
-
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .password-btn {
-  border: 1px solid $border;
-  color: $text-mid;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 13px;
+  border: 1px solid $border !important;
+  color: $text-mid !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
   height: 40px;
-  background: transparent;
+  background: transparent !important;
   cursor: pointer;
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   gap: 6px;
-  padding: 0 14px;
+  padding: 0 14px !important;
   transition: all 0.2s;
   mat-icon { font-size: 18px; }
 
   &:hover {
-    background: $blue-bg;
-    border-color: $blue;
+    background: $blue-bg !important;
+    border-color: $blue !important;
     box-shadow: 0 0 16px $blue-border;
   }
-
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
+
 // ── CHIPS ─────────────────────────────────────────
 .chip {
   display: inline-flex; align-items: center; gap: 4px;
@@ -177,7 +171,6 @@
   font-size: 12px; font-weight: 600;
   height: 28px; letter-spacing: 0.02em;
 
-  // FIX: $purple-light was not defined — replaced with $purple
   &--role {
     background: $purple-bg; color: $purple;
     mat-icon { color: $purple; font-size: 15px; }
@@ -192,26 +185,80 @@
 }
 
 // ── CARD BASE ─────────────────────────────────────
-// FIX: removed mat-card-content padding override — template uses div.panel__body
 .info-card,
 .account-card {
   background: $bg-card;
   border: 1px solid $border;
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  overflow: hidden; transition: border-color 0.2s;
+  // NO overflow:hidden here — it would clip the collapse animation
+  transition: border-color 0.2s;
   &:hover { border-color: $border-hi; }
+}
+
+// ── CARD HEADER ───────────────────────────────────
+// Replaces the old mat-card-header rule — now targets plain div.card-header
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  padding-right: 12px; // tighter right so btn sits flush
 }
 
 .card-title {
   display: flex; align-items: center; gap: 10px;
   font-size: 14px; font-weight: 700; color: $text-hi;
-  padding: 14px 20px 10px; letter-spacing: 0.01em; margin: 0;
+  letter-spacing: 0.01em; margin: 0;
 
   mat-icon {
     color: $blue; font-size: 19px; width: 19px; height: 19px;
     background: $blue-bg; padding: 6px; border-radius: 8px;
     box-sizing: content-box;
+  }
+}
+
+// ── CARD COLLAPSE ─────────────────────────────────
+.card-collapse-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $text-lo;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover { color: $text-hi; background: rgba(255,255,255,0.06); }
+
+  mat-icon {
+    font-size: 20px; width: 20px; height: 20px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    &.rotated { transform: rotate(180deg); }
+  }
+}
+
+.card-collapse {
+  overflow: hidden;  // clipping lives HERE, not on the card
+  max-height: 1000px;
+  opacity: 1;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity    0.25s ease;
+
+  &--closed {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  // Strip mat-card-content padding so it doesn't bleed when closed
+  ::ng-deep mat-card-content,
+  ::ng-deep .mat-mdc-card-content {
+    padding: 0 !important;
   }
 }
 
@@ -247,47 +294,26 @@
   border-radius: 50%; background: $text-lo;
   margin-right: 8px; vertical-align: middle;
   transition: background 0.3s, box-shadow 0.3s;
-  &--active { background: $green; box-shadow: 0 0 6px $green; }
-  &--inactive { background: $red; box-shadow: 0 0 6px $red; }
-
+  &--active   { background: $green; box-shadow: 0 0 6px $green; }
+  &--inactive { background: $red;   box-shadow: 0 0 6px $red; }
 }
 
 // ── EDIT FORM ─────────────────────────────────────
+// The slide-in is now driven purely by .card-collapse transition above.
+// Remove the conflicting slideDown keyframe from here.
 .edit-form {
-  padding: 20px; display: flex; flex-direction: column; gap: 8px;
-  animation: slideDown 0.2s ease;
-  &__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
-}
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 8px;
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.full-width {
-  width: 100%;
-  ::ng-deep {
-    .mat-mdc-text-field-wrapper { background: $bg-card-hi !important; border-radius: 8px; }
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing { border-color: $border !important; }
-    &.mat-focused {
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing { border-color: $blue !important; }
-    }
-    input { color: $text-hi !important; caret-color: $blue; }
-    .mat-mdc-floating-label { color: $text-lo !important; }
-    .mat-icon { color: $text-lo; font-size: 18px; }
+  &__actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;
   }
 }
 
-.cancel-btn {
-  color: $text-lo; border-radius: 8px; font-size: 13px;
-  background: none; border: none; cursor: pointer;
-  padding: 0 12px; height: 36px;
-  transition: color 0.15s, background 0.15s;
-  &:hover { color: $text-hi; background: $blue-bg; }
+// ── WARNING HINT ──────────────────────────────────
+.warning-hint {
+  color: $amber; display: flex; align-items: center; gap: 4px;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
 }
 
 // ── SECTION HEADER ────────────────────────────────
@@ -295,7 +321,8 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px; cursor: pointer;
   border-top: 1px solid $border;
-  transition: background ease 1; user-select: none;
+  transition: background 0.15s ease; // fixed: was `ease 1` (invalid)
+  user-select: none;
   &:hover { background: rgba(255,255,255,0.03); }
 
   &__title {
@@ -310,65 +337,17 @@
   }
 }
 
-// ── FORM COLLAPSE ─────────────────────────────────
+// ── FORM COLLAPSE (section-level, separate from card-collapse) ────────────
 .form-collapse {
   max-height: 0; overflow: hidden; opacity: 0;
   transition: max-height 300ms ease-out, opacity 250ms ease-out;
   &--open {
-    max-height: 600px; opacity: 1;
+    max-height: 1000px; opacity: 1;
     transition: max-height 300ms ease-in, opacity 250ms ease-in;
   }
 }
 
-@media (prefers-reduced-motion: reduce) { .form-collapse { transition: none; } }
-
-// ── WARNING HINT ──────────────────────────────────
-.warning-hint {
-  color: $amber; display: flex; align-items: center; gap: 4px;
-  mat-icon { font-size: 14px; width: 14px; height: 14px; }
-}
-
-// ── CARD COLLAPSE ─────────────────────────────────
-mat-card-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding-right: 1rem; // room for the button
-}
-
-.card-collapse-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: $text-lo;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  margin-left: auto;
-  transition: color .2s, background .2s;
-
-  &:hover { color: $text-hi; background: rgba(255,255,255,0.06); }
-
-  mat-icon {
-    font-size: 20px; width: 20px; height: 20px;
-    transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
-    &.rotated { transform: rotate(180deg); }
-  }
-}
-
-.card-collapse {
-  max-height: 1000px;
-  overflow: hidden;
-  transition: max-height .3s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity .25s ease;
-  opacity: 1;
-
-  &--closed {
-    max-height: 0;
-    opacity: 0;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .card-collapse,
+  .form-collapse { transition: none; }
 }
