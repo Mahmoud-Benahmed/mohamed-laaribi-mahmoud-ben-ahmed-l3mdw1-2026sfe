@@ -123,6 +123,7 @@ export class AuthService {
     this.loadProfileFromStorage()
   );
   readonly userProfile$ = this._userProfile$.asObservable();
+  
   private _loggingOut = false;
 
   private _onLogout$ = new Subject<void>();
