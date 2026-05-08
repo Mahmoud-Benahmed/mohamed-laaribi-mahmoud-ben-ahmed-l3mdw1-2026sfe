@@ -15,12 +15,14 @@ builder.Configuration.AddEnvironmentVariables();
 // =========================
 // DATABASE
 // =========================
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
-        "ConnectionString 'DefaultConnection' is not configured.");
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TenantConnectionString>();
 
-builder.Services.AddDbContext<ClientDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<ClientDbContext>((serviceProvider, options) =>
+{
+    var tenantConnectionString = serviceProvider.GetRequiredService<TenantConnectionString>();
+    options.UseSqlServer(tenantConnectionString.Resolve());
+});
 
 // =========================
 // DEPENDENCY INJECTION
@@ -35,6 +37,8 @@ builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddScoped<CategorySeeder>();
 builder.Services.AddScoped<ClientSeeder>();
 
+builder.Services.AddHostedService<TenantProvisioningConsumer>();
+
 // =========================
 // CONTROLLERS & API
 // =========================
@@ -45,10 +49,9 @@ builder.Services
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler =
-            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles; // ← add this
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     }).ConfigureApiBehaviorOptions(options =>
     {
-        // Unified validation error response — Data Annotations return this shape
         options.InvalidModelStateResponseFactory = context =>
         {
             string message = string.Join(" | ", context.ModelState.Values
@@ -66,7 +69,6 @@ builder.Services
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddDatabaseSeeders();
 
 // =========================
@@ -100,6 +102,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<TenantResolver>();
 app.MapControllers();
 
 app.Run();

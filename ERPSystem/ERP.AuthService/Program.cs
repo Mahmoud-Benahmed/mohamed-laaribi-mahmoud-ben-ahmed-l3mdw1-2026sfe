@@ -4,6 +4,7 @@ using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Infrastructure.Configuration;
+using ERP.AuthService.Infrastructure.Http;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Infrastructure.Persistence.Repositories;
 using ERP.AuthService.Infrastructure.Security;
@@ -50,14 +51,12 @@ builder.Services
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-
 builder.Services.AddSingleton<MongoDbContext>(sp =>
 {
     MongoSettings settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
     return new MongoDbContext(settings.ConnectionString, settings.DatabaseName);
 });
 
-// ── Read JWT secret from env
 // ── JWT Settings
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JWT"));
@@ -82,10 +81,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Secret not found"),
+            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Issuer not found"),
 
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Secret not found"),
+            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Audience not found"),
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(5),
@@ -128,15 +127,19 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IControleService, ControleService>();
 builder.Services.AddScoped<IPrivilegeService, PrivilegeService>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
-
-
 builder.Services.AddScoped<IAuditLogger, AuditLogger>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-
 builder.Services.AddHttpContextAccessor();
 
-//builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+// ── Tenant Service Client (must be before Build())
+builder.Services.AddHttpClient<ITenantServiceClient, TenantServiceClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5098/");
+});
 
+// =========================
+// BUILD
+// =========================
 WebApplication app = builder.Build();
 
 // ── Seed data

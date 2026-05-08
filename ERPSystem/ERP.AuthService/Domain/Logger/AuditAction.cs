@@ -34,7 +34,8 @@
         ControleCreated,
         ControleUpdated,
         ControleDeleted,
-
+        // tenant
+        TenantAssigned,
         Unauthorized,
         UserNotFound,
         UnhandledError,

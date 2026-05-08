@@ -27,10 +27,17 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
                     || req.url.includes('/auth/login');
 
   const token = !isPublicCall ? auth.getAccessToken() : null;
-  const authReq = token
+  /*const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
+*/
+const tenantSlug = auth.getTenantSlug();
+const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+if (tenantSlug) headers['X-Tenant'] = tenantSlug;
 
+const authReq = token
+  ? req.clone({ setHeaders: headers })
+  : req;
   if (isPublicCall) {
     return next(authReq); // ← bypass all error handling below
   }

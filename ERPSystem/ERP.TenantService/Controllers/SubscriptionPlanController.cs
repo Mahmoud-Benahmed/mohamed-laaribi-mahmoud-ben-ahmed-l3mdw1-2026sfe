@@ -61,14 +61,14 @@ public class SubscriptionPlanController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut(ApiRoutes.Plans.Activate)]
+    [HttpPatch(ApiRoutes.Plans.Activate)]
     public async Task<IActionResult> Activate(Guid id)
     {
         await _planService.ActivateAsync(id);
         return NoContent();
     }
 
-    [HttpPut(ApiRoutes.Plans.Deactivate)]
+    [HttpPatch(ApiRoutes.Plans.Deactivate)]
     public async Task<IActionResult> Deactivate(Guid id)
     {
         await _planService.DeactivateAsync(id);

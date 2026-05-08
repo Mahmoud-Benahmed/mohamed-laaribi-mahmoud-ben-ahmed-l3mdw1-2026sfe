@@ -368,6 +368,10 @@ builder.Services.AddReverseProxy()
             if (!string.IsNullOrEmpty(role))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-User-Role", role);
+            string? tenant = transformContext.HttpContext.Request.Headers["X-Tenant"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(tenant))
+                transformContext.ProxyRequest.Headers
+                    .TryAddWithoutValidation("X-Tenant", tenant);
         });
     });
 

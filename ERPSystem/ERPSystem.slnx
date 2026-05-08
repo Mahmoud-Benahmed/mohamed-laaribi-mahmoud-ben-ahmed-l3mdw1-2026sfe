@@ -12,4 +12,5 @@
   <Project Path="ERP.InvoiceService/ERP.InvoiceService.csproj" Id="f828b99f-6319-4b8e-a7d8-52d457e92e4c" />
   <Project Path="ERP.PaymentService/ERP.PaymentService.csproj" Id="25a12cba-7aef-445e-86b4-c43341a0404a" />
   <Project Path="ERP.StockService/ERP.StockService.csproj" Id="6ab33e3b-f21f-4b85-8002-04af02d56e87" />
+  <Project Path="ERP.TenantService/ERP.TenantService.csproj" />
 </Solution>

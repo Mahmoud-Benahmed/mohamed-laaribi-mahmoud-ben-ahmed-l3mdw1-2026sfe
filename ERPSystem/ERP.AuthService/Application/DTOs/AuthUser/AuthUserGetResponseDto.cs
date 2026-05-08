@@ -12,6 +12,7 @@
         bool IsActive,
         DateTime CreatedAt,
         DateTime? UpdatedAt,
-        DateTime? LastLoginAt
+        DateTime? LastLoginAt,
+        Guid? TenantId  
     );
 }

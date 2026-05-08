@@ -27,7 +27,7 @@ namespace ERP.AuthService.Application.Services
         private readonly IControleRepository _controleRepository;
         private readonly IPrivilegeRepository _privilegeRepository;
         //private readonly IEventPublisher _eventPublisher;
-
+        private readonly ITenantServiceClient _tenantClient;
         public AuthUserService(
             IAuditLogger auditLogger,
             IHttpContextAccessor httpContextAccessor,
@@ -37,8 +37,8 @@ namespace ERP.AuthService.Application.Services
             IJwtTokenGenerator jwtGenerator,
             IPasswordHasher<AuthUser> passwordHasher,
             IControleRepository controleRepository,
-            IPrivilegeRepository privilegeRepository
-
+            IPrivilegeRepository privilegeRepository,
+            ITenantServiceClient tenantClient
             )
         //,IEventPublisher eventPublisher
         {
@@ -52,6 +52,7 @@ namespace ERP.AuthService.Application.Services
             _auditLogger = auditLogger;
             _httpContext = httpContextAccessor;
             //_eventPublisher = eventPublisher;
+            _tenantClient = tenantClient;
         }
 
         // ============================================
@@ -343,7 +344,7 @@ namespace ERP.AuthService.Application.Services
                 role.Libelle,
                 privilegeNames,
                 user.Settings,
-                user.TenantId   // 👈 only change in this file
+                user.TenantId   
             );
 
             string refreshTokenValue = _jwtGenerator.GenerateRefreshToken();
@@ -355,11 +356,16 @@ namespace ERP.AuthService.Application.Services
 
             await _refreshTokenRepository.AddAsync(refreshToken);
 
+            string? tenantSlug = null;
+            if (user.TenantId.HasValue)
+                tenantSlug = await _tenantClient.GetSlugByIdAsync(user.TenantId.Value);
+
             return new AuthResponseDto(
                 accessToken,
                 refreshTokenValue,
                 user.MustChangePassword,
-                expiresAt
+                expiresAt,
+                tenantSlug
             );
         }
 
@@ -753,7 +759,8 @@ namespace ERP.AuthService.Application.Services
                 IsActive: user.IsActive,
                 CreatedAt: user.CreatedAt,
                 UpdatedAt: user.UpdatedAt,
-                LastLoginAt: user.LastLoginAt
+                LastLoginAt: user.LastLoginAt,
+                TenantId: user.TenantId
             );
         }
 

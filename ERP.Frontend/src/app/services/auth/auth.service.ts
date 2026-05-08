@@ -126,7 +126,7 @@ export class AuthService {
   readonly onLogout$ = this._onLogout$.asObservable();
 
 
-
+  private readonly TENANT_SLUG_KEY = 'tenant_slug';  //for multi-tenants support////
   private readonly baseUrl = `${environment.apiUrl}${environment.routes.auth}`;
 
   constructor(private http: HttpClient,   private router: Router) {}
@@ -138,8 +138,15 @@ export class AuthService {
     localStorage.setItem(this.ACCESS_TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
     localStorage.setItem('expiresAt', response.expiresAt);
-    localStorage.setItem('mustChangePassword', String(response.mustChangePassword)); // ADD THIS
+    localStorage.setItem('mustChangePassword', String(response.mustChangePassword));
+    if (response.tenantSlug)
+    localStorage.setItem(this.TENANT_SLUG_KEY, response.tenantSlug);
   }
+
+getTenantSlug(): string | null {
+  return localStorage.getItem(this.TENANT_SLUG_KEY);
+}
+
 
   getAccessToken(): string | null {
     return localStorage.getItem(this.ACCESS_TOKEN_KEY);
@@ -428,7 +435,6 @@ export class AuthService {
       })
     );
   }
-
 
   // =========================
   // REVOKE + LOGOUT

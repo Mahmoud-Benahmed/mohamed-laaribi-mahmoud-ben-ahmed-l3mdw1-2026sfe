@@ -4,6 +4,7 @@
         string AccessToken,
         string RefreshToken,
         bool MustChangePassword,
-        DateTime ExpiresAt
+        DateTime ExpiresAt,
+        string? TenantSlug
     );
 }

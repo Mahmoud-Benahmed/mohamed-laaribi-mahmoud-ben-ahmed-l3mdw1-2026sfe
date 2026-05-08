@@ -26,6 +26,7 @@ export interface AuthResponseDto {
   refreshToken: string;
   mustChangePassword: boolean;
   expiresAt: string;
+  tenantSlug: string | null;
 }
 
 export interface LoginRequestDto {
