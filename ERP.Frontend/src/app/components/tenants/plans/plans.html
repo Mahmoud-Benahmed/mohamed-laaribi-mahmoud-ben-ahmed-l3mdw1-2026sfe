@@ -1,19 +1,13 @@
-<div class="plans-page" (mousemove)="onMouseMove($event)">
-  <div class="bg-shapes">
+<div class="plans-page">
+  <div class="bg-canvas">
     <div class="aurora"></div>
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
   </div>
-
-  <!-- Top bar: Sign In + Lang toggle -->
+  <!--Top bar-->
   <div class="plans-topbar">
-
-    <!-- Language toggle -->
     <div class="lang-toggle">
       <button class="lang-btn" [class.lang-btn--active]="userSettings.isEn"
               (click)="userSettings.toggleLanguage()" type="button" title="English">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
           <mask id="mask-en-p"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
           <g mask="url(#mask-en-p)">
             <path fill="#0052b4" d="M512 0v512H0l16-34l-16-34V336l64-80l-64-80V68L68 0h108l80 64l80-64h108l34 16z"/>
@@ -25,7 +19,7 @@
       </button>
       <button class="lang-btn" [class.lang-btn--active]="!userSettings.isEn"
               (click)="userSettings.toggleLanguage()" type="button" title="Français">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
           <mask id="mask-fr-p"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
           <g mask="url(#mask-fr-p)">
             <path fill="#eee" d="M167 0h178l25.9 252.3L345 512H167l-29.8-253.4z"/>
@@ -36,140 +30,157 @@
         <span class="lang-label">FR</span>
       </button>
     </div>
-
-    <!--Sign In button -->
+    <button class="theme-toggle-btn" (click)="userSettings.toggleTheme()" type="button"
+            [title]="userSettings.isDark ? ('TOGGLE_THEME.LIGHT' | translate) : ('TOGGLE_THEME.DARK' | translate)">
+      <svg *ngIf="userSettings.isDark" width="15" height="15" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+      </svg>
+      <svg *ngIf="!userSettings.isDark" width="15" height="15" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
     <a routerLink="/login" class="btn-signin-top">
       {{ 'PLANS.ALREADY_HAVE_ACCOUNT' | translate }}
-      <span>{{ 'PLANS.SIGN_IN' | translate }} <span class="arrow">→</span></span>
+      <span>{{ 'PLANS.SIGN_IN' | translate }}</span>
     </a>
-
   </div>
-
   <div class="plans-container">
+    <!-- Header -->
     <header class="plans-header">
       <div class="logo">
-        <span class="logo-icon">
-          <div class="login-brand__icon"><img src="favicon.ico" alt="" height="100" width="100"></div>
-        </span>
+        <div class="logo-icon-wrap">
+          <img src="favicon.ico" alt="ERPSuite" height="30" width="30">
+        </div>
         <span class="logo-text">ERPSuite</span>
       </div>
       <h1>{{ 'PLANS.TITLE' | translate }}</h1>
-      <p>{{ 'PLANS.SUBTITLE' | translate }}</p>
-
+      <p class="header-sub">{{ 'PLANS.SUBTITLE' | translate }}</p>
+      <!--toggle yearly/monthly-->
       <div class="billing-toggle">
-        <span [class.active]="!billingYearly">{{ 'PLANS.MONTHLY' | translate }}</span>
-        <button class="toggle-btn" (click)="billingYearly = !billingYearly" [class.yearly]="billingYearly">
-          <span class="toggle-knob"></span>
-        </button>
-        <span [class.active]="billingYearly">
-          {{ 'PLANS.YEARLY' | translate }}
-          <em class="badge">{{ 'PLANS.SAVE_BADGE' | translate }}</em>
-        </span>
+        <button
+          class="toggle-option"
+          [class.toggle-option--active]="!billingYearly"
+          (click)="billingYearly = false"
+          type="button"
+        >{{ 'PLANS.MONTHLY' | translate }}</button>
+        <button
+          class="toggle-option"
+          [class.toggle-option--active]="billingYearly"
+          (click)="billingYearly = true"
+          type="button"
+        >{{ 'PLANS.YEARLY' | translate }}</button>
       </div>
     </header>
-
+    <!-- Error -->
     <div class="plans-error" *ngIf="error">
       <p>{{ error }}</p>
     </div>
-
+    <!-- Cards grid -->
     <div class="plans-grid" *ngIf="!error">
       <div
         class="plan-card"
         *ngFor="let plan of plans"
-        [class.selected]="selectedPlan?.id === plan.id"
-        [class.popular]="plan.code === 'PRO'"
+        [class.plan-card--highlighted]="plan.code === 'PRO'"
+        [class.plan-card--selected]="selectedPlan?.id === plan.id"
         (click)="selectPlan(plan)"
       >
-        <div class="popular-badge" *ngIf="plan.code === 'PRO'">{{ 'PLANS.MOST_POPULAR' | translate }}</div>
-
-        <div class="plan-header">
-          <!-- STARTER icon -->
-          <div class="plan-icon plan-icon--starter" *ngIf="plan.code === 'STARTER'">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22V12"/>
-              <path d="M12 12C12 12 8 10 5 6c4-1 8 1 9 5"/>
-              <path d="M12 12c0 0 4-2 7-6-4-1-8 1-9 5"/>
-              <path d="M5 22h14"/>
-            </svg>
+        <!--Card Header name and price section-->
+        <div class="card-header" [class.card-header--highlighted]="plan.code === 'PRO'">
+          <div class="card-badges-abs">
+            <span class="badge-popular" *ngIf="plan.code === 'PRO'">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Popular
+            </span>
+            <span class="badge-discount" *ngIf="billingYearly">
+              {{ getSavings(plan) }}% off
+            </span>
           </div>
-          <!-- PRO icon -->
-          <div class="plan-icon plan-icon--pro" *ngIf="plan.code === 'PRO'">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-              <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-              <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-              <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-            </svg>
+          <!--Plan name-->
+          <div class="card-plan-name">{{ plan.name }}</div>
+          <p class="card-plan-info">
+            <span *ngIf="plan.code === 'STARTER'">For most individuals</span>
+            <span *ngIf="plan.code === 'PRO'">For small businesses</span>
+            <span *ngIf="plan.code === 'ENTERPRISE'">For large organizations</span>
+            <span *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">Custom solution</span>
+          </p>
+          <!-- Price -->
+          <div class="card-price">
+            <span class="price-amount">TND {{ getPrice(plan) | number:'1.0-0' }}</span>
+            <span class="price-period" *ngIf="plan.code !== 'FREE'">
+              /{{ billingYearly ? ('PLANS.YEARLY' | translate | lowercase) : ('PLANS.MONTHLY' | translate | lowercase) }}
+            </span>
           </div>
-          <!-- ENTERPRISE icon -->
-          <div class="plan-icon plan-icon--enterprise" *ngIf="plan.code === 'ENTERPRISE'">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="13" height="18" rx="1"/>
-              <path d="M21 8h-5"/><path d="M21 12h-5"/><path d="M21 16h-5"/>
-              <path d="M7 8h1"/><path d="M7 12h1"/><path d="M7 16h1"/>
-              <path d="M11 8h1"/><path d="M11 12h1"/><path d="M11 16h1"/>
-              <path d="M3 21h18"/>
-            </svg>
-          </div>
-          <!-- DEFAULT icon -->
-          <div class="plan-icon plan-icon--default" *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
-
-          <h2 class="plan-name">{{ plan.name }}</h2>
         </div>
-
-        <div class="plan-price">
-          <span class="currency">TND</span>
-          <span class="amount">{{ getPrice(plan) | number:'1.0-0' }}</span>
-          <span class="period">/mo</span>
-        </div>
-
-        <div class="savings-badge" *ngIf="billingYearly">
-          {{ 'PLANS.SAVE_YEARLY' | translate : { percent: getSavings(plan) } }}
-        </div>
-
-        <ul class="plan-features">
-          <li>
-            <span class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            {{ 'PLANS.USERS' | translate : { count: plan.maxUsers } }}
-          </li>
-          <li>
-            <span class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            {{ 'PLANS.STORAGE' | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}
-          </li>
-          <li>
-            <span class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            {{ 'PLANS.FEATURE_ERP' | translate }}
-          </li>
-          <li>
-            <span class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            {{ 'PLANS.FEATURE_ISOLATION' | translate }}
-          </li>
-          <li>
-            <span class="check"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            {{ 'PLANS.FEATURE_SUPPORT' | translate }}
-          </li>
-        </ul>
-
-        <div class="plan-select-indicator">
-          <span *ngIf="selectedPlan?.id === plan.id">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle;margin-right:4px">
-              <path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!--End Card Header-->
+        <!--Features-->
+        <div class="card-features" [class.card-features--highlighted]="plan.code === 'PRO'">
+          <div class="feature-row">
+            <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
-            {{ 'PLANS.SELECTED' | translate }}
-          </span>
-          <span *ngIf="selectedPlan?.id !== plan.id">{{ 'PLANS.SELECT_PLAN' | translate }}</span>
+            <span>{{ 'PLANS.USERS' | translate : { count: plan.maxUsers } }}</span>
+          </div>
+          <div class="feature-row">
+            <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>{{ 'PLANS.STORAGE' | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
+          </div>
+          <div class="feature-row">
+            <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>{{ 'PLANS.FEATURE_ERP' | translate }}</span>
+          </div>
+          <div class="feature-row">
+            <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>{{ 'PLANS.FEATURE_ISOLATION' | translate }}</span>
+          </div>
+          <div class="feature-row">
+            <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>{{ 'PLANS.FEATURE_SUPPORT' | translate }}</span>
+          </div>
+        </div>
+        <!--End Features-->
+        <div class="card-footer" [class.card-footer--highlighted]="plan.code === 'PRO'">
+          <button
+            class="plan-cta"
+            [class.plan-cta--default]="plan.code === 'PRO' && selectedPlan?.id !== plan.id"
+            [class.plan-cta--outline]="plan.code !== 'PRO' && selectedPlan?.id !== plan.id"
+            [class.plan-cta--selected]="selectedPlan?.id === plan.id"
+            type="button"
+          >
+            <svg *ngIf="selectedPlan?.id === plan.id" width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle;margin-right:5px;flex-shrink:0">
+              <path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ 'PLANS.SELECTED' | translate }}</ng-container>
+            <ng-container *ngIf="selectedPlan?.id !== plan.id">
+              <ng-container *ngIf="plan.code === 'STARTER'">Start Your Free Trial</ng-container>
+              <ng-container *ngIf="plan.code === 'PRO'">Get started</ng-container>
+              <ng-container *ngIf="plan.code === 'ENTERPRISE'">Contact team</ng-container>
+              <ng-container *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">{{ 'PLANS.SELECT_PLAN' | translate }}</ng-container>
+            </ng-container>
+          </button>
         </div>
       </div>
     </div>
-
+    <!-- Proceed action -->
     <div class="plans-action" *ngIf="!error">
       <button class="btn-proceed" [disabled]="!selectedPlan" (click)="proceed()">
-        {{ selectedPlan ? ('PLANS.CONTINUE_WITH' | translate : { name: selectedPlan.name }) : ('PLANS.CONTINUE_DEFAULT' | translate) }}
-        <span class="arrow">→</span>
+        <span *ngIf="selectedPlan">{{ 'PLANS.CONTINUE_WITH' | translate : { name: selectedPlan.name } }}</span>
+        <span *ngIf="!selectedPlan">{{ 'PLANS.CONTINUE_DEFAULT' | translate }}</span>
       </button>
     </div>
   </div>
