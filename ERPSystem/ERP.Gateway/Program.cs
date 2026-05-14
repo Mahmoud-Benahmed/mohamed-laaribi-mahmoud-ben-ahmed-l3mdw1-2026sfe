@@ -3,6 +3,7 @@ using ERP.Gateway.Middleware;
 using ERP.Gateway.Properties;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -86,6 +87,7 @@ builder.Services.AddAuthentication(options =>
 
             // Call AuthService to validate token and check user existence
             IAuthServiceClient authServiceClient = context.HttpContext.RequestServices.GetRequiredService<IAuthServiceClient>();
+
             TokenValidationResponse validationResult = await authServiceClient.ValidateTokenAsync(tokenString);
             if (!validationResult.IsValid)
             {
@@ -101,6 +103,18 @@ builder.Services.AddAuthentication(options =>
                 identity.AddClaim(new Claim("user_email", validationResult.User.Email ?? ""));
                 identity.AddClaim(new Claim("user_fullname", validationResult.User.FullName ?? ""));
             }
+
+            var cookieTenant = context.Request.Cookies["tenant_id"];
+            var jwtTenant = context.Principal.FindFirst("tenantId")?.Value;
+
+            if (!string.IsNullOrEmpty(cookieTenant) && !string.IsNullOrEmpty(jwtTenant))
+            {
+                // Multi-tenant mode
+                if (cookieTenant != jwtTenant)
+                    context.Fail("Tenant mismatch");
+            }
+
+            context.HttpContext.Items["tenantId"] = jwtTenant ?? Guid.Empty.ToString();
         },
         OnChallenge = async context =>
         {
@@ -406,5 +420,25 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapReverseProxy();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Name != "self"
+});
+
+app.Use(async (context, next) =>
+{
+    var userId = context.User.FindFirst("sub")?.Value ?? "anonymous";
+    var start = DateTime.UtcNow;
+    var logger= context.RequestServices.GetRequiredService<ILogger<Program>>();
+    await next();
+
+    logger.LogInformation(
+        "Request {Path} {Method} {Status} {Duration}ms User:{UserId}",
+        context.Request.Path, context.Request.Method,
+        context.Response.StatusCode,
+        DateTime.UtcNow - start, userId);
+});
 
 app.Run();
