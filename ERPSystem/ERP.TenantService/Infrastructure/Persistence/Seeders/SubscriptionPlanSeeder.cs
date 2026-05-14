@@ -10,50 +10,78 @@ public static class SubscriptionPlanSeeder
     {
         var codes = new[] { "STARTER", "PRO", "ENTERPRISE" };
 
-        var existingCodes = await context.SubscriptionPlans
+        var existingPlans = await context.SubscriptionPlans
             .Where(p => codes.Contains(p.Code))
-            .Select(p => p.Code)
             .ToListAsync();
-
-        var plans = new List<SubscriptionPlan>();
-
-        if (!existingCodes.Contains("STARTER"))
+        //Starter 
+        var starter = existingPlans.FirstOrDefault(p => p.Code == "STARTER");
+        if (starter is null)
         {
-            plans.Add(SubscriptionPlan.Create(
+            context.SubscriptionPlans.Add(SubscriptionPlan.Create(
                 name: "Starter",
                 code: "STARTER",
                 monthlyPrice: 29.00m,
-                yearlyPrice: 290.00m,
+                yearlyPrice: 24.00m * 12, 
                 maxUsers: 5,
-                maxStorageMb: 1024));
+                maxStorageMb: 1024));         
+        }
+        else
+        {
+            starter.Update(
+                name: "Starter",
+                code: "STARTER",
+                monthlyPrice: 29.00m,
+                yearlyPrice: 24.00m * 12,
+                maxUsers: 5,
+                maxStorageMb: 1024);
         }
 
-        if (!existingCodes.Contains("PRO"))
+        // Pro
+        var pro = existingPlans.FirstOrDefault(p => p.Code == "PRO");
+        if (pro is null)
         {
-            plans.Add(SubscriptionPlan.Create(
+            context.SubscriptionPlans.Add(SubscriptionPlan.Create(
                 name: "Pro",
                 code: "PRO",
                 monthlyPrice: 79.00m,
-                yearlyPrice: 790.00m,
+                yearlyPrice: 66.00m * 12,  
                 maxUsers: 25,
-                maxStorageMb: 10240));
+                maxStorageMb: 10240));        
+        }
+        else
+        {
+            pro.Update(
+                name: "Pro",
+                code: "PRO",
+                monthlyPrice: 79.00m,
+                yearlyPrice: 66.00m * 12,
+                maxUsers: 25,
+                maxStorageMb: 10240);
         }
 
-        if (!existingCodes.Contains("ENTERPRISE"))
+        //Enterprise 
+        var enterprise = existingPlans.FirstOrDefault(p => p.Code == "ENTERPRISE");
+        if (enterprise is null)
         {
-            plans.Add(SubscriptionPlan.Create(
+            context.SubscriptionPlans.Add(SubscriptionPlan.Create(
                 name: "Enterprise",
                 code: "ENTERPRISE",
                 monthlyPrice: 199.00m,
-                yearlyPrice: 1990.00m,
+                yearlyPrice: 166.00m * 12,  
                 maxUsers: 200,
-                maxStorageMb: 102400));
+                maxStorageMb: 102400));      
+        }
+        else
+        {
+            enterprise.Update(
+                name: "Enterprise",
+                code: "ENTERPRISE",
+                monthlyPrice: 199.00m,
+                yearlyPrice: 166.00m * 12,
+                maxUsers: 200,
+                maxStorageMb: 102400);
         }
 
-        if (plans.Any())
-        {
-            await context.SubscriptionPlans.AddRangeAsync(plans);
-            await context.SaveChangesAsync();
-        }
+        await context.SaveChangesAsync();
     }
 }
