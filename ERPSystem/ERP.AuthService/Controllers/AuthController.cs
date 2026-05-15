@@ -27,10 +27,17 @@ namespace ERP.AuthService.Controllers
             if (!TryGetRequesterId(out Guid requesterId))
                 return Unauthorized();
 
+            if(!TryGetTenantId(out Guid tenantId))
+                return BadRequest(new { error = "Tenant context required" });
+
+
             AuthUserGetResponseDto user = await _authService.GetByIdAsync(requesterId);
 
             if (user == null)
                 return NotFound();
+
+            if (tenantId != user.TenantId)
+                return Forbid();
 
             return Ok(user);
         }
@@ -209,7 +216,11 @@ namespace ERP.AuthService.Controllers
         {
             if (!TryGetRequesterId(out Guid requesterId))
                 return Unauthorized();
-            AuthUserGetResponseDto result = await _authService.RegisterAsync(request, requesterId);
+
+            if (!TryGetTenantId(out Guid tenantId))
+                return BadRequest(new { error = "Tenant context required" });
+
+            AuthUserGetResponseDto result = await _authService.RegisterAsync(request, requesterId, tenantId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
@@ -289,12 +300,6 @@ namespace ERP.AuthService.Controllers
             await _authService.RevokeRefreshTokenAsync(request.RefreshToken);
             return NoContent();
         }
-        private bool TryGetRequesterId(out Guid requesterId)
-        {
-            requesterId = Guid.Empty;
-            string? raw = HttpContext.Request.Headers["X-User-Id"].FirstOrDefault();
-            return !string.IsNullOrWhiteSpace(raw) && Guid.TryParse(raw, out requesterId);
-        }
 
         [HttpGet("validate-token")]
         public async Task<IActionResult> ValidateToken([FromHeader(Name = "Authorization")] string authorization)
@@ -320,6 +325,20 @@ namespace ERP.AuthService.Controllers
                     result.IsActive
                 }
             });
+        }
+
+        private bool TryGetRequesterId(out Guid requesterId)
+        {
+            requesterId = Guid.Empty;
+            string? raw = HttpContext.Request.Headers["X-User-Id"].FirstOrDefault();
+            return !string.IsNullOrWhiteSpace(raw) && Guid.TryParse(raw, out requesterId);
+        }
+
+        private bool TryGetTenantId(out Guid tenantId)
+        {
+            tenantId = Guid.Empty;
+            string? raw = HttpContext.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+            return !string.IsNullOrWhiteSpace(raw) && Guid.TryParse(raw, out tenantId);
         }
     }
 }

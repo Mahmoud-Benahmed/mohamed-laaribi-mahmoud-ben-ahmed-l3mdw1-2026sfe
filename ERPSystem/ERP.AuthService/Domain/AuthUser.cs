@@ -28,6 +28,9 @@ public class AuthUser
         Language = Language.en
     };
 
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid? TenantId { get; private set; }  // Nullable ✅
+
     public bool IsActive { get; private set; } = true; // Login control
     public bool IsDeleted { get; private set; } = false; // alternative to hard delete: in case the instance has related records
 
@@ -44,7 +47,7 @@ public class AuthUser
 
     private AuthUser() { }
 
-    public AuthUser(string login, string email, string fullName, Guid roleId, UserSettings? settings = null)
+    public AuthUser(string login, string email, string fullName, Guid roleId, UserSettings? settings = null, Guid? tenantId = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new ArgumentNullException("FullName is required");
@@ -60,6 +63,7 @@ public class AuthUser
         Login = login;
         FullName = fullName;
         RoleId = roleId;
+        TenantId= tenantId ?? Guid.Empty;
         Settings = settings ?? new UserSettings { Theme = Theme.light, Language = Language.en };
         CreatedAt = DateTime.UtcNow;
     }

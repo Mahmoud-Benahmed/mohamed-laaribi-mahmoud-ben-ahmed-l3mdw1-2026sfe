@@ -168,7 +168,7 @@ namespace ERP.AuthService.Application.Services
             );
         }
 
-        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById)
+        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? tenantId=null)
         {
             if (await _userRepository.ExistsByLoginAsync(request.Login))
                 throw new LoginAlreadyExsistException();
@@ -180,7 +180,7 @@ namespace ERP.AuthService.Application.Services
 
             string capitalizedFullName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(request.FullName.ToLower());
 
-            AuthUser user = new AuthUser(request.Login, request.Email, capitalizedFullName, role.Id);
+            AuthUser user = new AuthUser(request.Login, request.Email, capitalizedFullName, role.Id, tenantId: tenantId);
             string hashedPassword = _passwordHasher.HashPassword(user, request.Password);
             user.SetPasswordHash(hashedPassword);
 
@@ -225,7 +225,7 @@ namespace ERP.AuthService.Application.Services
                         AuditAction.Login,
                         success: true,
                         performedBy: user.Id,
-                        metadata: new() { ["login"] = request.Login },
+                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId?.ToString() ?? "tenantId is null" },
                         ipAddress: GetIp(),
                         userAgent: GetUserAgent());
                 return token;
@@ -341,7 +341,8 @@ namespace ERP.AuthService.Application.Services
                 user.Id,
                 user.Login,
                 role.Libelle,
-                privilegeNames
+                privilegeNames,
+                user.TenantId
             );
 
             string refreshTokenValue = _jwtGenerator.GenerateRefreshToken();
@@ -732,6 +733,7 @@ namespace ERP.AuthService.Application.Services
                 IsActive: user.IsActive,
                 Settings: MapUserSettingsToDto(user.Settings),
                 CreatedAt: user.CreatedAt,
+                TenantId: user.TenantId,
                 UpdatedAt: user.UpdatedAt,
                 LastLoginAt: user.LastLoginAt
             );

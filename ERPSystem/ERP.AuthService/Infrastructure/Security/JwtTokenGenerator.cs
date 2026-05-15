@@ -16,6 +16,7 @@ namespace ERP.AuthService.Infrastructure.Security
         private const string CLAIM_LOGIN = "login";
         private const string CLAIM_ROLE = "role";
         private const string CLAIM_PRIVILEGE = "privilege";
+        private const string CLAIM_TENANT_ID = "tenantId";
 
         public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
         {
@@ -26,7 +27,8 @@ namespace ERP.AuthService.Infrastructure.Security
                 Guid userId,
                 string login,
                 string role,
-                IEnumerable<string> privileges)
+                IEnumerable<string> privileges,
+                Guid? tenantId = null)
         {
             SymmetricSecurityKey key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtSettings.Secret));
@@ -41,7 +43,8 @@ namespace ERP.AuthService.Infrastructure.Security
                 new Claim(CLAIM_ROLE, role),
                 new Claim(JwtRegisteredClaimNames.Iat,
                     new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
-                    ClaimValueTypes.Integer64)
+                    ClaimValueTypes.Integer64),
+                new Claim(CLAIM_TENANT_ID, tenantId.HasValue ? tenantId.Value.ToString() : Guid.Empty.ToString())
             }
             .Concat(privileges.Select(p => new Claim(CLAIM_PRIVILEGE, p)))
             .ToList();
