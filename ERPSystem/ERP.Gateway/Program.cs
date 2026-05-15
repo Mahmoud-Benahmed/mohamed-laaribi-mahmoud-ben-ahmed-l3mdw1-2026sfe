@@ -1,9 +1,9 @@
-using ERP.Gateway.AuthServiceClient;
 using ERP.Gateway.Middleware;
 using ERP.Gateway.Properties;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -14,33 +14,29 @@ using Yarp.ReverseProxy.Transforms;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 ConfigurationManager config = builder.Configuration;
 
-string GetAuthServiceAddress()
+// HELPERS — these can be moved to separate classes/files as needed
+static string? ExtractSlug(string host)
 {
-    // Read from ReverseProxy configuration
-    IConfigurationSection authCluster = config.GetSection("ReverseProxy:Clusters:authCluster");
-    IConfigurationSection destination = authCluster.GetSection("Destinations:authDestination");
-    string? address = destination["Address"];
-
-    if (string.IsNullOrEmpty(address))
-    {
-        throw new InvalidOperationException("AuthService address not found in ReverseProxy configuration");
-    }
-
-    return address.TrimEnd('/'); // Remove trailing slash if present
+    var parts = host.Split('.');
+    if (parts.Length >= 3) return parts[0].ToLowerInvariant();
+    return null; // handle local dev separately
 }
 
-string authServiceUrl = GetAuthServiceAddress();
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-builder.Services.AddHttpClient<IAuthServiceClient, AuthServiceClient>(client =>
-{
-    client.BaseAddress = new Uri(authServiceUrl);
-    client.Timeout = TimeSpan.FromSeconds(5);
-});
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy());
+builder.Services.AddHttpContextAccessor();
 
-
-//////////////////////////////////////////////////
-// JWT Authentication
-//////////////////////////////////////////////////
+var jwtSecret = config["JWT:Secret"] ?? throw new InvalidOperationException("JWT:Secret is not configured.");
+var jwtIssuer = config["JWT:Issuer"] ?? throw new InvalidOperationException("JWT:Issuer is not configured.");
+var jwtAudience = config["JWT:Audience"] ?? throw new InvalidOperationException("JWT:Audience is not configured.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -51,9 +47,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.MapInboundClaims = false;
 
-    SymmetricSecurityKey signingKey = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(config["JWT:Secret"]
-            ?? throw new InvalidOperationException("JWT:Secret is not configured.")));
+    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
     signingKey.KeyId = "erp-key-1";
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -62,8 +56,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = config["JWT:Issuer"],
-        ValidAudience = config["JWT:Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey,
         RoleClaimType = "role",
         ClockSkew = TimeSpan.FromMinutes(5),
@@ -71,65 +65,60 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
-        OnAuthenticationFailed = context =>
+        OnAuthenticationFailed = context => Task.CompletedTask,
+
+        OnTokenValidated = context =>
         {
+            var user = context.Principal;
+            var identity = user?.Identity as ClaimsIdentity;
+            if (identity == null) return Task.CompletedTask;
+
+            // Ensure tenantId is present
+            var tenantId = user.FindFirstValue("tenantId");
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                context.HttpContext.Items["tenantId"] = tenantId;
+            }
+            else
+            {
+                // Fallback to slug-derived tenantId if set earlier
+                if (context.HttpContext.Items["tenantId"] is string slugTenantId)
+                {
+                    context.HttpContext.Items["tenantId"] = slugTenantId;
+                }
+                else
+                {
+                    context.Fail("tenantId missing in token and request");
+                    return Task.CompletedTask;
+                }
+            }
+
             return Task.CompletedTask;
         },
-        OnTokenValidated = async context =>
-        {
-            string? tokenString = context.Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
 
-            if (string.IsNullOrEmpty(tokenString))
-            {
-                context.Fail("No token provided");
-                return;
-            }
-
-            // Call AuthService to validate token and check user existence
-            IAuthServiceClient authServiceClient = context.HttpContext.RequestServices.GetRequiredService<IAuthServiceClient>();
-
-            TokenValidationResponse validationResult = await authServiceClient.ValidateTokenAsync(tokenString);
-            if (!validationResult.IsValid)
-            {
-                context.Fail(validationResult.Reason ?? "User validation failed");
-                return;
-            }
-
-            // Optionally: Add additional claims from the validation result
-            ClaimsIdentity? identity = context.Principal?.Identity as ClaimsIdentity;
-            if (identity != null && validationResult.User != null)
-            {
-                identity.AddClaim(new Claim("user_validated", "true"));
-                identity.AddClaim(new Claim("user_email", validationResult.User.Email ?? ""));
-                identity.AddClaim(new Claim("user_fullname", validationResult.User.FullName ?? ""));
-            }
-
-            var cookieTenant = context.Request.Cookies["tenant_id"];
-            var jwtTenant = context.Principal.FindFirst("tenantId")?.Value;
-
-            if (!string.IsNullOrEmpty(cookieTenant) && !string.IsNullOrEmpty(jwtTenant))
-            {
-                // Multi-tenant mode
-                if (cookieTenant != jwtTenant)
-                    context.Fail("Tenant mismatch");
-            }
-
-            context.HttpContext.Items["tenantId"] = jwtTenant ?? Guid.Empty.ToString();
-        },
         OnChallenge = async context =>
         {
             context.HandleResponse();
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(
-               """{"statusCode":401,"code":"AUTH_006","message":"Authentication required. Please log in."}""");
+            await context.Response.WriteAsJsonAsync(new
+            {
+                statusCode = 401,
+                code = "AUTH_006",
+                message = "Authentication required. Please log in."
+            });
         },
+
         OnForbidden = async context =>
         {
             context.Response.StatusCode = 403;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(
-                """{"statusCode":403,"code":"AUTH_007","message":"You do not have permission to access this resource."}""");
+            await context.Response.WriteAsJsonAsync(new
+            {
+                statusCode = 403,
+                code = "AUTH_007",
+                message = "You do not have permission to access this resource."
+            });
         }
     };
 });
@@ -389,11 +378,33 @@ builder.Services.AddReverseProxy()
         {
             ClaimsPrincipal user = transformContext.HttpContext.User;
 
+            // For authenticated requests: use JWT tenantId
+            string? tenantId = user.FindFirstValue("tenantId");
+
+            // For pre-auth requests (login): use slug-derived tenantId
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                var slug = transformContext.HttpContext.Items["TenantSlug"]?.ToString();
+                if (!string.IsNullOrEmpty(slug))
+                {
+                    // TODO: resolve slug to tenantId via cache
+                    // For now, pass slug through
+                    tenantId = slug; // temporary - replace with actual lookup
+                }
+            }
+
+            // Add tenantId header if we have it
+            if (!string.IsNullOrEmpty(tenantId))
+                transformContext.ProxyRequest.Headers
+                    .TryAddWithoutValidation("X-Tenant-Id", tenantId);
+
+            // Optionally add user info headers for downstream services
             string? sub = user.FindFirstValue("sub");
             if (!string.IsNullOrEmpty(sub))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-User-Id", sub);
 
+            // Role is optional and may not be present in all tokens, but if it is, pass it along
             string? role = user.FindFirstValue("role");
             if (!string.IsNullOrEmpty(role))
                 transformContext.ProxyRequest.Headers
@@ -415,6 +426,25 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }
+
+app.Use(async (context, next) =>
+{
+    // Extract slug from Host header for pre-auth requests
+    var host = context.Request.Host.Host;
+    var slug = ExtractSlug(host);
+
+    if (!string.IsNullOrEmpty(slug))
+    {
+        context.Items["TenantSlug"] = slug;
+        context.Request.Headers["X-Tenant-Slug"] = slug;
+        if (!context.Items.ContainsKey("tenantId"))
+        {
+            context.Items["tenantId"] = slug; // temporary
+        }
+    }
+
+    await next();
+});
 
 app.UseRateLimiter();
 app.UseAuthentication();
