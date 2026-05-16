@@ -1,3 +1,5 @@
+using ERP.TenantService.Application.DTOs;
+using ERP.TenantService.Application.Exceptions;
 using System.Net;
 using System.Text.Json;
 
@@ -31,22 +33,34 @@ public class GlobalExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        var (statusCode, code, message) = exception switch
+        ErrorResponse response = exception switch
         {
-            KeyNotFoundException => (HttpStatusCode.NotFound, "NOT_FOUND", exception.Message),
-            InvalidOperationException => (HttpStatusCode.BadRequest, "VALIDATION_ERROR", exception.Message),
-            UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "UNAUTHORIZED", exception.Message),
-            _ => (HttpStatusCode.InternalServerError, "INTERNAL_SERVER_ERROR", "An unexpected error occurred.")
+            TenantNotFoundException ex => new ErrorResponse
+            {
+                Code = "TENANT_001",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.NotFound
+            },
+            TenantSubscriptionNotFoundException ex => new ErrorResponse
+            {
+                Code = "TENANT_002",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.NotFound
+            },
+            SubdomainAlreadyTakenException ex => new ErrorResponse
+            {
+                Code = "TENANT_003",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict
+            },
+            KeyNotFoundException => new ErrorResponse{ StatusCode= (int) HttpStatusCode.NotFound, Code = "NOT_FOUND", Message= exception.Message},
+            InvalidOperationException => new ErrorResponse{ StatusCode = (int)HttpStatusCode.BadRequest,Code = "VALIDATION_ERROR",Message = exception.Message},
+            UnauthorizedAccessException => new ErrorResponse { StatusCode = (int)HttpStatusCode.Unauthorized, Code = "UNAUTHORIZED", Message = exception.Message },
+            ArgumentException => new ErrorResponse { StatusCode = (int)HttpStatusCode.BadRequest, Code = "INVALID_ARGUMENT", Message = exception.Message },
+            _ => new ErrorResponse { StatusCode = (int)HttpStatusCode.InternalServerError, Code = "INTERNAL_SERVER_ERROR", Message = "An unexpected error occurred." }
         };
 
-        context.Response.StatusCode = (int)statusCode;
-
-        var response = new
-        {
-            statusCode = (int)statusCode,
-            code,
-            message
-        };
+        context.Response.StatusCode = response.StatusCode;
 
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
