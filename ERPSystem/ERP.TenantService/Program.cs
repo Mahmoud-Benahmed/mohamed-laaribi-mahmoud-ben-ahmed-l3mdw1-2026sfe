@@ -5,13 +5,47 @@ using ERP.TenantService.Infrastructure.Persistence;
 using ERP.TenantService.Infrastructure.Persistence.Repositories;
 using ERP.TenantService.Infrastructure.Persistence.Seeders;
 using ERP.TenantService.Middleware;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NSwag.AspNetCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ConnectionString 'DefaultConnection' is not configured.");
 
 builder.Services.AddDbContext<TenantDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddControllers(options =>
+{
+    options.SuppressAsyncSuffixInActionNames = false;
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+})
+.ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        string message = string.Join(" | ", context.ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage));
+
+        return new BadRequestObjectResult(new
+        {
+            statusCode = 400,
+            code = "VALIDATION_ERROR",
+            message
+        });
+    };
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddHostedService<SubscriptionExpiryJob>();
 
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
@@ -19,43 +53,29 @@ builder.Services.AddScoped<ITenantSubscriptionRepository, TenantSubscriptionRepo
 
 builder.Services.AddScoped<ITenantService, ERP.TenantService.Application.Services.TenantService>();
 builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
-builder.Services.AddScoped<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-    });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApiDocument(config =>
-{
-    config.Title = "ERP TenantService API";
-    config.Version = "ERP.TenantService";
-    config.Description = "Tenant management microservice";
-});
-
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
     await db.Database.EnsureDeletedAsync();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
     await SubscriptionPlanSeeder.SeedAsync(db);
+    await TenantSeeder.SeedAsync(db);
+}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+    app.UseHsts();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi();
-    app.UseSwaggerUi(settings =>
-    {
-        settings.DocumentTitle = "ERP TenantService API";
-        settings.Path = "/swagger";
-    });
-}
 
 app.UseRouting();
 app.UseAuthorization();
