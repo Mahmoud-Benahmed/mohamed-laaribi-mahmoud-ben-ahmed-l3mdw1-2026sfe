@@ -42,7 +42,25 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Unified validation error response — Data Annotations return this shape
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            string message = string.Join(" | ", context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+
+            return new BadRequestObjectResult(new
+            {
+                statusCode = 400,
+                code = "VALIDATION ERROR",
+                message
+            });
+        };
+    }); ;
+
 
 // =========================
 // DEPENDENCY INJECTION
@@ -92,29 +110,9 @@ builder.Services.AddScoped<IInvoiceEventHandler, InvoiceEventHandler>();
 builder.Services.AddHostedService<InvoiceEventConsumer>();
 
 builder.Services.AddScoped<IInvoiceBonSortieMappingRepository, InvoiceBonSortieMappingRepository>();
-
+// =========================
 // CONTROLLERS & API
 // =========================
-builder.Services
-    .AddControllers(options =>
-        options.SuppressAsyncSuffixInActionNames = false)
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        // Unified validation error response — Data Annotations return this shape
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            string message = string.Join(" | ", context.ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage));
-
-            return new BadRequestObjectResult(new
-            {
-                statusCode = 400,
-                code = "VALIDATION ERROR",
-                message
-            });
-        };
-    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
