@@ -1,4 +1,5 @@
 using ERP.Gateway.Middleware;
+using ERP.Gateway.Middleware.ApiKeyAuthentication;
 using ERP.Gateway.Properties;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,8 @@ using System.Threading.RateLimiting;
 using Yarp.ReverseProxy.Transforms;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
 ConfigurationManager config = builder.Configuration;
 
 // HELPERS — these can be moved to separate classes/files as needed
@@ -241,6 +244,12 @@ builder.Services.AddAuthorization(options =>
              c.Value == Privileges.Stock.VIEW_STOCK ||
               c.Value == Privileges.Stock.ADD_ENTRY ||
               c.Value == Privileges.Stock.UPDATE_STOCK))));
+
+    options.AddPolicy("ApiKeyPolicy", policy =>
+    {
+        policy.AuthenticationSchemes.Add("ApiKey");
+        policy.RequireAuthenticatedUser();
+    });
 });
 
 //////////////////////////////////////////////////
@@ -411,6 +420,10 @@ builder.Services.AddReverseProxy()
                     .TryAddWithoutValidation("X-User-Role", role);
         });
     });
+
+builder.Services.AddAuthentication()
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
+builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
 
 //////////////////////////////////////////////////
 // Pipeline
