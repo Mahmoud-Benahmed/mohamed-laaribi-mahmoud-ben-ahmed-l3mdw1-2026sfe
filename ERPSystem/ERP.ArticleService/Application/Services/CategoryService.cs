@@ -3,7 +3,6 @@ using ERP.ArticleService.Application.Exceptions;
 using ERP.ArticleService.Application.Interfaces;
 using ERP.ArticleService.Domain;
 using ERP.ArticleService.Infrastructure.Messaging;
-using Sprache;
 
 namespace ERP.ArticleService.Application.Services
 {
