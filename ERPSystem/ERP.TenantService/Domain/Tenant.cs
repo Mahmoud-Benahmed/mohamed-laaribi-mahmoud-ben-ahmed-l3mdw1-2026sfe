@@ -3,18 +3,21 @@ namespace ERP.TenantService.Domain;
 public class Tenant
 {
     public Guid Id { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public string Email { get; private set; } = string.Empty;
-    public string Phone { get; private set; } = string.Empty;
-    public string SubdomainSlug { get; private set; } = string.Empty;
+    public string Name { get; private set; }
+    public string Email { get; private set; }
+    public string Phone { get; private set; }
+    public string SubdomainSlug { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? PrimaryColor { get; private set; }
     public string? SecondaryColor { get; private set; }
-    public string Currency { get; private set; } = "TND";
-    public string Locale { get; private set; } = "fr-TN";
-    public string Timezone { get; private set; } = "Africa/Tunisia";
-    public bool IsActive { get; private set; } = true;
+    public string Currency { get; private set; }
+    public string Locale { get; private set; }
+    public string Timezone { get; private set; }
+    public bool IsActive { get; private set; }
+    public bool IsDeleted { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public void SetSubscription(TenantSubscription subscription)
+        => Subscription = subscription;
 
     public TenantSubscription? Subscription { get; private set; }
 
@@ -30,7 +33,8 @@ public class Tenant
         string? secondaryColor = null,
         string currency = "TND",
         string locale = "fr-TN",
-        string timezone = "Africa/Tunisia")
+        string timezone = "Africa/Tunisia"
+    )
     {
         return new Tenant
         {
@@ -46,6 +50,7 @@ public class Tenant
             Locale = locale,
             Timezone = timezone,
             IsActive = true,
+            IsDeleted = false,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -78,8 +83,14 @@ public class Tenant
 
     public void Deactivate() => IsActive = false;
 
+    public void Delete() => IsDeleted = true;
+    public void Restore() => IsDeleted = false;
+
+
     public void AssignSubscription(Guid subscriptionPlanId, DateTime startDate, DateTime endDate)
     {
+        if (IsDeleted) throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
+        if (!IsActive) throw new InvalidOperationException("Tenant Deactivated, unable to assign a subscription to.");
         Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, endDate);
     }
 }
