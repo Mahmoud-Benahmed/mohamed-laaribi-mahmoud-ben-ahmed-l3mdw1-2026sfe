@@ -3,8 +3,8 @@ namespace ERP.TenantService.Domain;
 public class SubscriptionPlan
 {
     public Guid Id { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public string Code { get; private set; } = string.Empty;
+    public string Name { get; private set; }
+    public string Code { get; private set; }
     public decimal MonthlyPrice { get; private set; }
     public decimal YearlyPrice { get; private set; }
     public int MaxUsers { get; private set; }
