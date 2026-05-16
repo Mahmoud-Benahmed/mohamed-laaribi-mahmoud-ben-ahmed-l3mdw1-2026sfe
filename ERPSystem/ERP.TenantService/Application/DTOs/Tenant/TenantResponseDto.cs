@@ -15,6 +15,7 @@ public record TenantResponseDto(
     string Locale,
     string Timezone,
     bool IsActive,
+    bool IsDeleted,
     DateTime CreatedAt,
     TenantSubscriptionResponseDto? Subscription
 );
