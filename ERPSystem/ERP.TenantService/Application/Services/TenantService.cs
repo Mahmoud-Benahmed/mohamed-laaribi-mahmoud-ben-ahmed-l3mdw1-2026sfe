@@ -1,11 +1,13 @@
+using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.SubscriptionPlan;
 using ERP.TenantService.Application.DTOs.Tenant;
 using ERP.TenantService.Application.DTOs.TenantSubscription;
+using ERP.TenantService.Application.Events;
+using ERP.TenantService.Application.Exceptions;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Domain;
 using ERP.TenantService.Infrastructure.Messaging;
-using ERP.TenantService.Application.Events;
-using ERP.TenantService.Infrastructure.Messaging;
+using ERP.TenantService.Infrastructure.Persistence.Repositories;
 namespace ERP.TenantService.Application.Services;
 
 public class TenantService : ITenantService
@@ -27,52 +29,68 @@ public class TenantService : ITenantService
         _eventPublisher = eventPublisher;
     }
 
-    public async Task<(IEnumerable<TenantResponseDto> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+    public async Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default)
     {
-        var tenants = await _tenantRepository.GetAllAsync(page, pageSize);
-        var total = await _tenantRepository.CountAsync();
-        return (tenants.Select(MapToDto), total);
+        (page, pageSize) = NormalizePagination(page, pageSize);
+        var (items, totalCount) = await _tenantRepository.GetAllAsync(page, pageSize, ct);
+        return new PagedResultDto<TenantResponseDto>(items.Select(MapToDto).ToList(), totalCount, page, pageSize);
     }
 
-    public async Task<TenantResponseDto?> GetByIdAsync(Guid id)
+    public async Task<PagedResultDto<TenantResponseDto>> GetDeletedAsync(int page= 1, int pageSize = 10, CancellationToken ct = default)
     {
-        var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id);
-        return tenant is null ? null : MapToDto(tenant);
+        (page, pageSize) = NormalizePagination(page, pageSize);
+        var (items, totalCount) = await _tenantRepository.GetDeletedAsync(page, pageSize, ct);
+        return new PagedResultDto<TenantResponseDto>(items.Select(MapToDto).ToList(), totalCount, page, pageSize);
     }
 
-    public async Task<TenantResponseDto?> GetBySubdomainSlugAsync(string slug)
+    public async Task<TenantResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var tenant = await _tenantRepository.GetBySubdomainSlugAsync(slug);
-        return tenant is null ? null : MapToDto(tenant);
+        var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id, ct) ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+        return MapToDto(tenant);
     }
 
-    public async Task<TenantResponseDto> CreateAsync(CreateTenantRequestDto dto)
+    public async Task<TenantResponseDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
     {
-        var slugExists = await _tenantRepository.SubdomainSlugExistsAsync(dto.SubdomainSlug);
-        if (slugExists)
-            throw new InvalidOperationException($"Subdomain slug '{dto.SubdomainSlug}' is already taken.");
+        var tenant = await _tenantRepository.GetBySlugAsync(slug, ct) ?? throw new KeyNotFoundException($"Tenant with slugn {slug} not found.");
+        return MapToDto(tenant);
+    }
 
+    public async Task<TenantResponseDto> CreateAsync(CreateTenantRequestDto dto, CancellationToken ct = default)
+    {
+        // 1. Validate slug uniqueness
+        if (await _tenantRepository.SubdomainSlugExistsAsync(dto.SubdomainSlug))
+            throw new InvalidOperationException($"Subdomain '{dto.SubdomainSlug}' is already taken.");
+
+        // 2. Create tenant
         var tenant = Tenant.Create(
-            dto.Name,
-            dto.Email,
-            dto.Phone,
-            dto.SubdomainSlug,
-            dto.LogoUrl,
-            dto.PrimaryColor,
-            dto.SecondaryColor,
-            dto.Currency,
-            dto.Locale,
-            dto.Timezone);
+            dto.Name, dto.Email, dto.Phone, dto.SubdomainSlug,
+            dto.LogoUrl, dto.PrimaryColor, dto.SecondaryColor,
+            dto.Currency, dto.Locale, dto.Timezone);
+
+        // 3. Auto-assign default plan (Starter) on creation
+        var starterPlan = await _planRepository.GetByCodeAsync("STARTER", ct)
+            ?? throw new InvalidOperationException("Default STARTER plan not configured.");
+
+        var startDate = DateTime.UtcNow;
+        ////////////////////////////////////////////
+        /// CHANGE TO .AddMonth(1);
+        ////////////////////////////////////////////
+        var endDate = startDate.AddMinutes(1); // trial period
+        tenant.AssignSubscription(starterPlan.Id, startDate, endDate);
 
         await _tenantRepository.AddAsync(tenant);
         await _tenantRepository.SaveChangesAsync();
 
-        await _eventPublisher.PublishAsync("tenant.created", new { tenant.Id, tenant.Name, tenant.SubdomainSlug });
+        // 4. Publish events for downstream services to provision resources
+        await _eventPublisher.PublishAsync("tenant.created", new TenantCreatedEvent(
+            tenant.Id, tenant.Name, tenant.SubdomainSlug,
+            starterPlan.Id, starterPlan.Code,
+            starterPlan.MaxUsers, starterPlan.MaxStorageMb));
 
         return MapToDto(tenant);
     }
 
-    public async Task<TenantResponseDto> UpdateAsync(Guid id, UpdateTenantRequestDto dto)
+    public async Task<TenantResponseDto> UpdateAsync(Guid id, UpdateTenantRequestDto dto, CancellationToken ct = default)
     {
         var tenant = await _tenantRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
@@ -94,82 +112,96 @@ public class TenantService : ITenantService
             dto.Timezone);
 
         await _tenantRepository.UpdateAsync(tenant);
-        await _tenantRepository.SaveChangesAsync();
+        await _tenantRepository.SaveChangesAsync(ct);
 
         return MapToDto(tenant);
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var tenant = await _tenantRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
-        tenant.Deactivate();
-        await _tenantRepository.UpdateAsync(tenant);
-        await _tenantRepository.SaveChangesAsync();
+        tenant.Delete();
 
-        await _eventPublisher.PublishAsync("tenant.deactivated", new { tenant.Id });
+        await _tenantRepository.UpdateAsync(tenant);
+        await _tenantRepository.SaveChangesAsync(ct);
     }
 
-    public async Task ActivateAsync(Guid id)
+    public async Task RestoreAsync(Guid id, CancellationToken ct = default)
+    {
+        var tenant = await _tenantRepository.GetByIdDeletedAsync(id)
+            ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+
+        tenant.Restore();
+
+        await _tenantRepository.UpdateAsync(tenant);
+        await _tenantRepository.SaveChangesAsync(ct);
+    }
+
+    public async Task ActivateAsync(Guid id, CancellationToken ct = default)
     {
         var tenant = await _tenantRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
         tenant.Activate();
         await _tenantRepository.UpdateAsync(tenant);
-        await _tenantRepository.SaveChangesAsync();
+        await _tenantRepository.SaveChangesAsync(ct);
 
-        await _eventPublisher.PublishAsync(TenantTopics.TenantActivated, new TenantActivatedEvent(
+        await _eventPublisher.PublishAsync(TenantTopics.TenantActivated, new TenantEvents(
             TenantId: tenant.Id,
             TenantName: tenant.Name,
             SubdomainSlug: tenant.SubdomainSlug
         ));
     }
 
-    public async Task DeactivateAsync(Guid id)
+    public async Task DeactivateAsync(Guid id, CancellationToken ct = default)
     {
         var tenant = await _tenantRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
         tenant.Deactivate();
         await _tenantRepository.UpdateAsync(tenant);
-        await _tenantRepository.SaveChangesAsync();
+        await _tenantRepository.SaveChangesAsync(ct);
     }
 
-    public async Task<TenantSubscriptionResponseDto> AssignSubscriptionAsync(Guid tenantId, AssignSubscriptionRequestDto dto)
+    public async Task<TenantSubscriptionResponseDto> AssignSubscriptionAsync(Guid tenantId, AssignSubscriptionRequestDto dto, CancellationToken ct = default)
     {
         var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId)
             ?? throw new KeyNotFoundException($"Tenant with id '{tenantId}' not found.");
 
-        var plan = await _planRepository.GetByIdAsync(dto.SubscriptionPlanId)
+        var newplan = await _planRepository.GetByIdAsync(dto.SubscriptionPlanId)
             ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{dto.SubscriptionPlanId}' not found.");
 
-        if (!plan.IsActive)
+        if (!newplan.IsActive)
             throw new InvalidOperationException("Cannot assign an inactive subscription plan.");
+        
+        var oldPlanId = tenant.Subscription?.SubscriptionPlanId;
 
         tenant.AssignSubscription(dto.SubscriptionPlanId, dto.StartDate, dto.EndDate);
 
         await _tenantRepository.UpdateAsync(tenant);
-        await _tenantRepository.SaveChangesAsync();
+        await _tenantRepository.SaveChangesAsync(ct);
 
-        await _eventPublisher.PublishAsync("tenant.subscription.assigned", new
-        {
-            TenantId = tenantId,
-            PlanId = dto.SubscriptionPlanId
-        });
+        await _eventPublisher.PublishAsync("tenant.subscription.assigned", new SubscriptionChangedEvent(
+            tenantId,
+            OldPlanId: oldPlanId ?? Guid.Empty,
+            NewPlanId: newplan.Id,
+            NewMaxUsers: newplan.MaxUsers,
+            NewMaxStorageMb: newplan.MaxStorageMb));
 
-        return MapSubscriptionToDto(tenant.Subscription!, plan);
+        return new TenantSubscriptionResponseDto(
+            tenant.Id, dto.StartDate, dto.EndDate, MapPlanToDto(newplan));
     }
 
-    public async Task<TenantSubscriptionResponseDto?> GetSubscriptionAsync(Guid tenantId)
+    public async Task<TenantSubscriptionResponseDto?> GetSubscriptionAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var subscription = await _subscriptionRepository.GetByTenantIdAsync(tenantId);
-        if (subscription is null) return null;
+        var tenant= await _tenantRepository.GetByIdAsync(tenantId) ?? throw new TenantNotFoundException(tenantId);
 
-        var plan = subscription.Plan is not null
-            ? MapPlanToDto(subscription.Plan)
-            : null;
+        var subscription = await _subscriptionRepository.GetByTenantIdAsync(tenantId, ct) 
+            ?? throw new TenantSubscriptionNotFoundException(tenantId);
+
+        var plan = subscription.Plan is not null ? MapPlanToDto(subscription.Plan) : null;
 
         return new TenantSubscriptionResponseDto(
             subscription.TenantId,
@@ -192,19 +224,20 @@ public class TenantService : ITenantService
         }
 
         return new TenantResponseDto(
-            tenant.Id,
-            tenant.Name,
-            tenant.Email,
-            tenant.Phone,
-            tenant.SubdomainSlug,
-            tenant.LogoUrl,
-            tenant.PrimaryColor,
-            tenant.SecondaryColor,
-            tenant.Currency,
-            tenant.Locale,
-            tenant.Timezone,
-            tenant.IsActive,
-            tenant.CreatedAt,
+            Id:tenant.Id,
+            Name: tenant.Name,
+            Email: tenant.Email,
+            Phone: tenant.Phone,
+            SubdomainSlug: tenant.SubdomainSlug,
+            LogoUrl: tenant.LogoUrl,
+            PrimaryColor: tenant.PrimaryColor,
+            SecondaryColor:tenant.SecondaryColor,
+            Currency:tenant.Currency,
+            Locale: tenant.Locale,
+            Timezone: tenant.Timezone,
+            IsActive: tenant.IsActive,
+            IsDeleted:tenant.IsDeleted,
+            CreatedAt: tenant.CreatedAt,
             subDto);
     }
 
@@ -229,5 +262,12 @@ public class TenantService : ITenantService
             plan.MaxUsers,
             plan.MaxStorageMb,
             plan.IsActive);
+    }
+
+    private static (int Page, int PageSize) NormalizePagination(int page, int pageSize, int defaultPageSize = 10, int maxPageSize = 100)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > maxPageSize) pageSize = defaultPageSize;
+        return (page, pageSize);
     }
 }
