@@ -8,72 +8,51 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 builder.Configuration.AddEnvironmentVariables();
-
-// =========================
-// DATABASE
-// =========================
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionString 'DefaultConnection' is not configured.");
 
-// ── Database
 builder.Services.AddDbContext<ArticleDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            string message = string.Join(" | ", context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+
+            return new BadRequestObjectResult(new
+            {
+                statusCode = 400,
+                code = "VALIDATION_ERROR",
+                message
+            });
+        };
     });
 
-// API responses normalization
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        string message = string.Join(" | ", context.ModelState.Values
-            .SelectMany(v => v.Errors)
-            .Select(e => e.ErrorMessage));
-
-        return new BadRequestObjectResult(new
-        {
-            statusCode = 400,
-            code = "VALIDATION ERROR",
-            message
-        });
-    };
-});
-
-// =========================
-// REPOSITORIES
-// =========================
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArticleCodeRepository, ArticleCodeRepository>();
 
-// =========================
-// SERVICES
-// =========================
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IArticleCodeService, ArticleCodeService>();
 
-// =========================
-// MESSAGING
-// =========================
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
 builder.Services.AddScoped<ArticleCodeSeeder>();
 builder.Services.AddScoped<CategorySeeder>();
 builder.Services.AddScoped<ArticleSeeder>();
 
-// =========================
-// CONTROLLERS & API
-// =========================
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
@@ -87,44 +66,29 @@ using (IServiceScope scope = app.Services.CreateScope())
 
     try
     {
-        ArticleDbContext context = services.GetRequiredService<ArticleDbContext>();
+        ERP.ArticleService.Infrastructure.Persistence.ArticleDbContext context = services.GetRequiredService<ERP.ArticleService.Infrastructure.Persistence.ArticleDbContext>();
 
-        logger.LogInformation("Resetting database...");
-        await context.Database.EnsureDeletedAsync();
+        logger.LogInformation("Applying migrations...");
         await context.Database.MigrateAsync();
 
-        logger.LogInformation("Clearing existing data...");
-        await context.ArticleCodes.IgnoreQueryFilters().ExecuteDeleteAsync();
-        await context.Articles.IgnoreQueryFilters().ExecuteDeleteAsync();
-        await context.Categories.IgnoreQueryFilters().ExecuteDeleteAsync();
-
-        // ✅ RESOLVE SEEDERS FROM DI (NOT using 'new')
         logger.LogInformation("Seeding article codes...");
-        ArticleCodeSeeder articleCodeSeeder = services.GetRequiredService<ArticleCodeSeeder>();
-        await articleCodeSeeder.SeedAsync();
+        await services.GetRequiredService<ArticleCodeSeeder>().SeedAsync();
 
         logger.LogInformation("Seeding categories...");
-        CategorySeeder categorySeeder = services.GetRequiredService<CategorySeeder>();
-        await categorySeeder.SeedAsync();
+        await services.GetRequiredService<CategorySeeder>().SeedAsync();
 
         logger.LogInformation("Seeding articles...");
-        ArticleSeeder articleSeeder = services.GetRequiredService<ArticleSeeder>();
-        await articleSeeder.SeedAsync();
+        await services.GetRequiredService<ArticleSeeder>().SeedAsync();
 
-        logger.LogInformation("✅ All seeding completed successfully!");
+        logger.LogInformation("All seeding completed successfully.");
     }
     catch (Exception ex)
     {
-
-        logger.LogError(ex, "❌ An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred while seeding the database.");
         throw;
     }
 }
 
-
-// =========================
-// PIPELINE
-// =========================
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -134,8 +98,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
-
 app.Run();
