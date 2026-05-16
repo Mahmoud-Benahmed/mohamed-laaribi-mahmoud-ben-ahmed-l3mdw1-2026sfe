@@ -16,62 +16,52 @@ public class SubscriptionPlanController : ControllerBase
     }
 
     [HttpGet(ApiRoutes.Plans.GetAll)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(int page, int pageSize, CancellationToken ct = default)
     {
-        var plans = await _planService.GetAllAsync();
+        var plans = await _planService.GetAllAsync(page, pageSize, ct);
         return Ok(plans);
     }
 
     [HttpGet(ApiRoutes.Plans.GetById)]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById([FromRoute]Guid id, CancellationToken ct = default)
     {
-        var plan = await _planService.GetByIdAsync(id);
-        return plan is null
-            ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"SubscriptionPlan '{id}' not found." })
-            : Ok(plan);
+        var plan = await _planService.GetByIdAsync(id, ct);
+        return Ok(plan);
     }
 
     [HttpPost(ApiRoutes.Plans.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateSubscriptionPlanRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateSubscriptionPlanRequestDto dto, CancellationToken ct = default)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(new
-            {
-                statusCode = 400,
-                code = "VALIDATION_ERROR",
-                message = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))
-            });
-
-        var result = await _planService.CreateAsync(dto);
+        var result = await _planService.CreateAsync(dto, ct);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut(ApiRoutes.Plans.Update)]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSubscriptionPlanRequestDto dto)
+    public async Task<IActionResult> Update([FromRoute]Guid id, [FromBody] UpdateSubscriptionPlanRequestDto dto, CancellationToken ct = default)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(new
-            {
-                statusCode = 400,
-                code = "VALIDATION_ERROR",
-                message = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))
-            });
-
-        var result = await _planService.UpdateAsync(id, dto);
+        var result = await _planService.UpdateAsync(id, dto, ct);
         return Ok(result);
     }
 
-    [HttpPatch(ApiRoutes.Plans.Activate)]
-    public async Task<IActionResult> Activate(Guid id)
+
+    [HttpDelete(ApiRoutes.Plans.Delete)]
+    public async Task<IActionResult> Delete([FromRoute]Guid id, CancellationToken ct = default)
     {
-        await _planService.ActivateAsync(id);
+        await _planService.DeleteAsync(id, ct);
+        return NoContent();
+    }
+
+    [HttpPatch(ApiRoutes.Plans.Activate)]
+    public async Task<IActionResult> Activate([FromRoute]Guid id, CancellationToken ct = default)
+    {
+        await _planService.ActivateAsync(id, ct);
         return NoContent();
     }
 
     [HttpPatch(ApiRoutes.Plans.Deactivate)]
-    public async Task<IActionResult> Deactivate(Guid id)
+    public async Task<IActionResult> Deactivate([FromRoute]Guid id, CancellationToken ct = default)
     {
-        await _planService.DeactivateAsync(id);
+        await _planService.DeactivateAsync(id, ct);
         return NoContent();
     }
 }
