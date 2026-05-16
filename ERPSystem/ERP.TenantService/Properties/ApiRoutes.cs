@@ -7,11 +7,13 @@ public static class ApiRoutes
         private const string Base = "tenants";
 
         public const string GetAll = Base;
+        public const string GetDeleted = Base + "/deleted";
         public const string GetById = Base + "/{id:guid}";
-        public const string GetBySubdomain = Base + "/subdomain/{slug}";
+        public const string GetBySlug = Base + "/slug/{slug}";
         public const string Create = Base;
         public const string Update = Base + "/{id:guid}";
         public const string Delete = Base + "/{id:guid}";
+        public const string Restore = Base + "/{id:guid}/restore";
         public const string Activate = Base + "/{id:guid}/activate";
         public const string Deactivate = Base + "/{id:guid}/deactivate";
         public const string AssignSubscription = Base + "/{id:guid}/subscription";
@@ -26,6 +28,7 @@ public static class ApiRoutes
         public const string GetById = Base + "/{id:guid}";
         public const string Create = Base;
         public const string Update = Base + "/{id:guid}";
+        public const string Delete = Base + "/{id:guid}";
         public const string Activate = Base + "/{id:guid}/activate";
         public const string Deactivate = Base + "/{id:guid}/deactivate";
     }
