@@ -19,33 +19,36 @@ public static class SubscriptionPlanSeeder
 
         if (!existingCodes.Contains("STARTER"))
         {
+            decimal starterMonthlyPrice = 29.00m;
             plans.Add(SubscriptionPlan.Create(
                 name: "Starter",
                 code: "STARTER",
                 monthlyPrice: 29.00m,
-                yearlyPrice: 290.00m,
+                yearlyPrice: DiscountNPercent(20, starterMonthlyPrice*12),
                 maxUsers: 5,
                 maxStorageMb: 1024));
         }
 
         if (!existingCodes.Contains("PRO"))
         {
+            decimal proMonthlyPrice = 79.00m;
             plans.Add(SubscriptionPlan.Create(
                 name: "Pro",
                 code: "PRO",
                 monthlyPrice: 79.00m,
-                yearlyPrice: 790.00m,
+                yearlyPrice: DiscountNPercent(20, proMonthlyPrice * 12),
                 maxUsers: 25,
                 maxStorageMb: 10240));
         }
 
         if (!existingCodes.Contains("ENTERPRISE"))
         {
+            decimal entrMonthlyPrice = 199.00m;
             plans.Add(SubscriptionPlan.Create(
                 name: "Enterprise",
                 code: "ENTERPRISE",
-                monthlyPrice: 199.00m,
-                yearlyPrice: 1990.00m,
+                monthlyPrice: entrMonthlyPrice,
+                yearlyPrice: DiscountNPercent(20, entrMonthlyPrice * 12),
                 maxUsers: 200,
                 maxStorageMb: 102400));
         }
@@ -55,5 +58,15 @@ public static class SubscriptionPlanSeeder
             await context.SubscriptionPlans.AddRangeAsync(plans);
             await context.SaveChangesAsync();
         }
+    }
+
+    private static decimal DiscountNPercent(int percentageToDiscount, decimal from)
+    {
+        if (percentageToDiscount >= 100) return 0m;
+        if (percentageToDiscount <= 0) return from;
+
+        decimal discounted = from * (100 - percentageToDiscount) / 100m;
+        // Use conventional rounding for money
+        return Math.Round(discounted, 2, MidpointRounding.AwayFromZero);
     }
 }
