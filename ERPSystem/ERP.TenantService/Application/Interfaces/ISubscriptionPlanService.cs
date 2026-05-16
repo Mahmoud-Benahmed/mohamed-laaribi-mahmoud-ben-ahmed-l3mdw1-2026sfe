@@ -1,13 +1,15 @@
+using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.SubscriptionPlan;
 
 namespace ERP.TenantService.Application.Interfaces;
 
 public interface ISubscriptionPlanService
 {
-    Task<IEnumerable<SubscriptionPlanResponseDto>> GetAllAsync();
-    Task<SubscriptionPlanResponseDto?> GetByIdAsync(Guid id);
-    Task<SubscriptionPlanResponseDto> CreateAsync(CreateSubscriptionPlanRequestDto dto);
-    Task<SubscriptionPlanResponseDto> UpdateAsync(Guid id, UpdateSubscriptionPlanRequestDto dto);
-    Task ActivateAsync(Guid id);
-    Task DeactivateAsync(Guid id);
+    Task<PagedResultDto<SubscriptionPlanResponseDto>> GetAllAsync(int page = 1, int pageSize = 10, CancellationToken ct = default);
+    Task<SubscriptionPlanResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<SubscriptionPlanResponseDto> CreateAsync(CreateSubscriptionPlanRequestDto dto, CancellationToken ct = default);
+    Task<SubscriptionPlanResponseDto> UpdateAsync(Guid id, UpdateSubscriptionPlanRequestDto dto, CancellationToken ct = default);
+    Task DeleteAsync(Guid id, CancellationToken ct = default);
+    Task ActivateAsync(Guid id, CancellationToken ct = default);
+    Task DeactivateAsync(Guid id, CancellationToken ct = default);
 }
