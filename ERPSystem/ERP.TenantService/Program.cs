@@ -1,10 +1,11 @@
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Application.Services;
+using ERP.TenantService.Middleware;
 using ERP.TenantService.Infrastructure.Messaging;
 using ERP.TenantService.Infrastructure.Persistence;
 using ERP.TenantService.Infrastructure.Persistence.Repositories;
 using ERP.TenantService.Infrastructure.Persistence.Seeders;
-using ERP.TenantService.Middleware;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using NSwag.AspNetCore;
 
@@ -21,6 +22,15 @@ builder.Services.AddScoped<ITenantService, ERP.TenantService.Application.Service
 builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
 builder.Services.AddScoped<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+
+// API Key Policy
+builder.Services.AddSingleton<IAuthorizationHandler, ApiKeyAuthorizationHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ApiKeyPolicy", policy =>
+        policy.AddRequirements(new ApiKeyRequirement()));
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
