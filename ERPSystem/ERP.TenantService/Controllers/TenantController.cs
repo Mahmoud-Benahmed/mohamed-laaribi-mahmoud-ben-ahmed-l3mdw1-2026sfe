@@ -25,28 +25,37 @@ public class TenantController : ControllerBase
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
         var (items, total) = await _tenantService.GetAllAsync(page, pageSize);
+        return Ok(new { data = items, page, pageSize, totalCount = total });
+    }
 
-        return Ok(new
-        {
-            data = items,
-            page,
-            pageSize,
-            totalCount = total
-        });
+    [HttpGet(ApiRoutes.Tenants.GetDeleted)]
+    public async Task<IActionResult> GetDeleted(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 20;
+
+        var (items, total) = await _tenantService.GetDeletedAsync(page, pageSize);
+        return Ok(new { data = items, page, pageSize, totalCount = total });
     }
 
     [HttpGet(ApiRoutes.Tenants.GetById)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenant = await _tenantService.GetByIdAsync(id);
-        return tenant is null ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"Tenant '{id}' not found." }) : Ok(tenant);
+        return tenant is null
+            ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"Tenant '{id}' not found." })
+            : Ok(tenant);
     }
 
     [HttpGet(ApiRoutes.Tenants.GetBySubdomain)]
     public async Task<IActionResult> GetBySubdomain(string slug)
     {
         var tenant = await _tenantService.GetBySubdomainSlugAsync(slug);
-        return tenant is null ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"Tenant with subdomain '{slug}' not found." }) : Ok(tenant);
+        return tenant is null
+            ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"Tenant with subdomain '{slug}' not found." })
+            : Ok(tenant);
     }
 
     [HttpPost(ApiRoutes.Tenants.Create)]
@@ -82,18 +91,25 @@ public class TenantController : ControllerBase
     [HttpDelete(ApiRoutes.Tenants.Delete)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _tenantService.DeleteAsync(id);
+        await _tenantService.DeleteAsync(id);   
         return NoContent();
     }
 
-    [HttpPut(ApiRoutes.Tenants.Activate)]
+    [HttpPatch(ApiRoutes.Tenants.Restore)]
+    public async Task<IActionResult> Restore(Guid id)
+    {
+        await _tenantService.RestoreAsync(id);
+        return NoContent();
+    }
+
+    [HttpPatch(ApiRoutes.Tenants.Activate)]
     public async Task<IActionResult> Activate(Guid id)
     {
         await _tenantService.ActivateAsync(id);
         return NoContent();
     }
 
-    [HttpPut(ApiRoutes.Tenants.Deactivate)]
+    [HttpPatch(ApiRoutes.Tenants.Deactivate)]
     public async Task<IActionResult> Deactivate(Guid id)
     {
         await _tenantService.DeactivateAsync(id);
@@ -119,6 +135,8 @@ public class TenantController : ControllerBase
     public async Task<IActionResult> GetSubscription(Guid id)
     {
         var result = await _tenantService.GetSubscriptionAsync(id);
-        return result is null ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"No subscription found for tenant '{id}'." }) : Ok(result);
+        return result is null
+            ? NotFound(new { statusCode = 404, code = "NOT_FOUND", message = $"No subscription found for tenant '{id}'." })
+            : Ok(result);
     }
 }
