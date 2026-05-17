@@ -67,6 +67,25 @@ public class TenantRepository : ITenantRepository
         return Task.CompletedTask;
     }
 
+    public async Task<IEnumerable<Tenant>> GetDeletedAsync(int page, int pageSize)
+    {
+        return await _context.Tenants
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(t => t.IsDeleted)
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
+    public async Task<int> CountDeletedAsync()
+    {
+        return await _context.Tenants
+            .IgnoreQueryFilters()
+            .CountAsync(t => t.IsDeleted);
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
