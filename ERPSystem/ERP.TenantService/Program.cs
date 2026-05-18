@@ -8,22 +8,39 @@ using ERP.TenantService.Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using NSwag.AspNetCore;
+using Microsoft.AspNetCore.RateLimiting;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Database
 builder.Services.AddDbContext<TenantDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//Repositories
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
 builder.Services.AddScoped<ITenantSubscriptionRepository, TenantSubscriptionRepository>();
 
+//Application Services
 builder.Services.AddScoped<ITenantService, ERP.TenantService.Application.Services.TenantService>();
 builder.Services.AddScoped<ISubscriptionPlanService, SubscriptionPlanService>();
-builder.Services.AddScoped<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
-// API Key Policy
+//Rate Limiting(protect from spam) 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("OnboardingLimit", config =>
+    {
+        config.PermitLimit = 3;                          // 3 attempts
+        config.Window = TimeSpan.FromMinutes(10);        // per 10 minutes for ip
+        config.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = 429; //Many Requests
+});
+
+//API Key Policy
 builder.Services.AddSingleton<IAuthorizationHandler, ApiKeyAuthorizationHandler>();
 builder.Services.AddAuthorization(options =>
 {
@@ -31,6 +48,7 @@ builder.Services.AddAuthorization(options =>
         policy.AddRequirements(new ApiKeyRequirement()));
 });
 
+//Controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -43,8 +61,20 @@ builder.Services.AddOpenApiDocument(config =>
     config.Title = "ERP TenantService API";
     config.Version = "ERP.TenantService";
     config.Description = "Tenant management microservice";
+
+    // Add API Key security definition
+    config.AddSecurity("ApiKey", new OpenApiSecurityScheme
+    {
+        Type = OpenApiSecuritySchemeType.ApiKey,
+        Name = "X-Api-Key",
+        In = OpenApiSecurityApiKeyLocation.Header,
+        Description = "Enter your API key in the field below"
+    });
+
+    config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("ApiKey"));
 });
 
+//Build
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -55,6 +85,7 @@ using (var scope = app.Services.CreateScope())
     await SubscriptionPlanSeeder.SeedAsync(db);
 }
 
+// Middleware Pipeline 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -68,6 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 
