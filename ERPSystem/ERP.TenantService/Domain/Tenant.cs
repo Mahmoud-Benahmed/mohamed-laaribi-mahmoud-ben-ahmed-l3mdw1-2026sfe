@@ -16,9 +16,6 @@ public class Tenant
     public bool IsActive { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public void SetSubscription(TenantSubscription subscription)
-        => Subscription = subscription;
-
     public TenantSubscription? Subscription { get; private set; }
 
     private Tenant() { }
@@ -85,16 +82,26 @@ public class Tenant
 
     public void Delete()
     {
+        if (Subscription is not null)
+            throw new InvalidOperationException("Unable to delete tenant: It has an active subscription.");
         IsActive = false;
         IsDeleted = true;
     }
     public void Restore() => IsDeleted = false;
 
-
+    public void SetSubscription(TenantSubscription subscription) => Subscription = subscription;
     public void AssignSubscription(Guid subscriptionPlanId, DateTime startDate, DateTime endDate)
     {
         if (IsDeleted) throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
-        //if (!IsActive) throw new InvalidOperationException("Tenant Deactivated, unable to assign a subscription to.");
+        if (Subscription is not null)
+            throw new InvalidOperationException("Unable to assign new plan, current tenant has an active subscription.");
         Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, endDate);
     }
+    public void RemoveSubscription()
+    {
+        if (Subscription == null)
+            throw new InvalidOperationException("Tenant has no active subscription to remove.");
+        Subscription = null;
+    }
+
 }
