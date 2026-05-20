@@ -42,6 +42,15 @@ public class TenantSubscriptionRepository : ITenantSubscriptionRepository
             .ToListAsync(ct);
     }
 
+    public async Task DeleteByTenantIdAsync(Guid tenantId, CancellationToken ct = default)
+    {
+        var subscription = await _context.TenantSubscriptions
+            .FirstOrDefaultAsync(s => s.TenantId == tenantId, ct);
+
+        if (subscription != null)
+            _context.TenantSubscriptions.Remove(subscription);
+    }
+
     public async Task AddAsync(TenantSubscription subscription, CancellationToken ct = default)
     {
         await _context.TenantSubscriptions.AddAsync(subscription, ct);
