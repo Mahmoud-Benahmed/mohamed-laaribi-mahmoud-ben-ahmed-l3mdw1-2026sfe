@@ -16,14 +16,15 @@ public class SubscriptionExpiryJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        int totalSeconds = 0;
-        int checkEverySeconds = 15;
+        int totalDelay = 0;
+        int checkInterval = 15;
+        string delayUnit = "minutes";
+
         while (!ct.IsCancellationRequested)
         {
             await CheckExpirations(ct);
-            //await Task.Delay(TimeSpan.FromHours(1), ct); // run every hour
-            await Task.Delay(TimeSpan.FromSeconds(checkEverySeconds), ct); // run every hour
-            _logger.LogInformation($"Check done after: {totalSeconds+= checkEverySeconds} seconds");
+            await Task.Delay(TimeSpan.FromMinutes(checkInterval), ct); // run every 15 minutes (default)
+            _logger.LogInformation($"Check done after: {totalDelay+= checkInterval} {delayUnit}");
         }
     }
 
@@ -45,7 +46,7 @@ public class SubscriptionExpiryJob : BackgroundService
                     continue;
 
                 if (!tenant.IsActive)
-                    return;
+                    continue;
 
                 await tenantRepo.SaveChangesAsync();
 
