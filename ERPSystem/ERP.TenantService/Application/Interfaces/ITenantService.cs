@@ -17,5 +17,6 @@ public interface ITenantService
     Task ActivateAsync(Guid id, CancellationToken ct = default);
     Task DeactivateAsync(Guid id, CancellationToken ct = default);
     Task<TenantSubscriptionResponseDto> AssignSubscriptionAsync(Guid tenantId, AssignSubscriptionRequestDto dto, CancellationToken ct = default);
+    Task RemoveSubscriptionAsync(Guid tenantId, CancellationToken ct = default);
     Task<TenantSubscriptionResponseDto?> GetSubscriptionAsync(Guid tenantId, CancellationToken ct = default);
 }

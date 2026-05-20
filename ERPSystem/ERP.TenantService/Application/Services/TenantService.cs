@@ -67,19 +67,21 @@ public class TenantService : ITenantService
             dto.LogoUrl, dto.PrimaryColor, dto.SecondaryColor,
             dto.Currency, dto.Locale, dto.Timezone);
 
+        
         // 3. Auto-assign default plan (Starter) on creation
         var starterPlan = await _planRepository.GetByCodeAsync("STARTER", ct)
             ?? throw new InvalidOperationException("Default STARTER plan not configured.");
 
+
         var startDate = DateTime.UtcNow;
-        ////////////////////////////////////////////
-        /// CHANGE TO .AddMonth(1);
-        ////////////////////////////////////////////
-        var endDate = startDate.AddSeconds(120); // trial period
+        var endDate = startDate.AddMonths(1);
+
+        tenant.Activate();
         tenant.AssignSubscription(starterPlan.Id, startDate, endDate);
 
         await _tenantRepository.AddAsync(tenant);
         await _tenantRepository.SaveChangesAsync();
+
 
         // 4. Publish events for downstream services to provision resources
         await _eventPublisher.PublishAsync(TenantTopics.TenantCreated, new TenantCreatedEvent(
@@ -127,8 +129,8 @@ public class TenantService : ITenantService
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
-        var tenant = await _tenantRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+        var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id) 
+                                            ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
         tenant.Delete();
 
@@ -201,10 +203,22 @@ public class TenantService : ITenantService
         
         var oldPlanId = tenant.Subscription?.SubscriptionPlanId;
 
+        if (dto.StartDate >= dto.EndDate)
+            throw new ArgumentException("Invalid subscription period: StartDate must be strictly earlier than EndDate.");
+
+        var wasInactive = !tenant.IsActive;
+        if (wasInactive)
+            tenant.Activate();
+
         tenant.AssignSubscription(dto.SubscriptionPlanId, dto.StartDate, dto.EndDate);
 
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
+        
+        if (wasInactive)
+            await _eventPublisher.PublishAsync(
+                TenantTopics.TenantActivated,
+                new TenantActivatedEvent(tenant.Id, tenant.Slug));
 
         await _eventPublisher.PublishAsync("tenant.subscription.assigned", new SubscriptionChangedEvent(
             tenantId,
@@ -217,12 +231,44 @@ public class TenantService : ITenantService
             tenant.Id, dto.StartDate, dto.EndDate, MapPlanToDto(newplan));
     }
 
+    public async Task RemoveSubscriptionAsync(Guid tenantId, CancellationToken ct = default)
+    {
+        var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId, ct)
+            ?? throw new KeyNotFoundException($"Tenant '{tenantId}' not found.");
+
+        if (tenant.Subscription is null)
+            throw new InvalidOperationException("Tenant has no subscription to remove.");
+
+        var removedPlanId = tenant.Subscription.SubscriptionPlanId;
+
+        tenant.RemoveSubscription();
+        tenant.Deactivate();
+
+        // 2. Persist — single save
+        await _subscriptionRepository.DeleteByTenantIdAsync(tenantId, ct);
+        await _tenantRepository.UpdateAsync(tenant);
+        await _tenantRepository.SaveChangesAsync(ct);
+
+        // 3. Publish AFTER successful save — order matters:
+        //    deactivated first so gateway cache updates before expiry consumers react
+        await _eventPublisher.PublishAsync(
+            TenantTopics.TenantDeactivated,
+            new TenantDeactivatedEvent(tenant.Id, tenant.Slug));
+
+        await _eventPublisher.PublishAsync(
+            TenantTopics.SubscriptionExpired,
+            new SubscriptionExpiredEvent(tenantId, removedPlanId));
+    }
+
     public async Task<TenantSubscriptionResponseDto?> GetSubscriptionAsync(Guid tenantId, CancellationToken ct = default)
     {
-        var tenant= await _tenantRepository.GetByIdAsync(tenantId) ?? throw new TenantNotFoundException(tenantId);
+        var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId, ct)
+            ?? throw new TenantNotFoundException(tenantId);
 
-        var subscription = await _subscriptionRepository.GetByTenantIdAsync(tenantId, ct) 
-            ?? throw new TenantSubscriptionNotFoundException(tenantId);
+        if (tenant.Subscription is null)
+            throw new TenantSubscriptionNotFoundException(tenantId);
+
+        var subscription = tenant.Subscription;
 
         var plan = subscription.Plan is not null ? MapPlanToDto(subscription.Plan) : null;
 
