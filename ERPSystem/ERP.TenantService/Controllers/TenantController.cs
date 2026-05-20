@@ -98,6 +98,14 @@ public class TenantController : ControllerBase
         return Ok(result);
     }
 
+    // DELETE /api/tenants/{id}/subscription
+    [HttpDelete(ApiRoutes.Tenants.RemoveSubscription)]
+    public async Task<IActionResult> RemoveSubscription([FromRoute] Guid id, CancellationToken ct)
+    {
+        await _tenantService.RemoveSubscriptionAsync(id, ct);
+        return NoContent();
+    }
+
     [HttpGet(ApiRoutes.Tenants.GetSubscription)]
     public async Task<IActionResult> GetSubscription([FromRoute]Guid id, CancellationToken ct = default)
     {
