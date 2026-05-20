@@ -1,4 +1,5 @@
 ﻿using ERP.ClientService.Application.DTOs;
+using ERP.ClientService.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.ClientService.Infrastructure.Persistence.Seeders;
@@ -34,7 +35,7 @@ public class DatabaseSeeder
 
         _logger.LogInformation("Starting database seed...");
 
-        List<CategoryResponseDto> categories = await _categorySeeder.SeedAsync();
+        List<Category> categories = await _categorySeeder.SeedAsync();
 
         await _clientSeeder.SeedAsync(categories);
 

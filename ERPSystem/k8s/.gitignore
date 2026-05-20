@@ -1,0 +1,5 @@
+secrets.txt
+secrets/create-secrets.ps1
+secrets/*.env
+secrets/*.values.yaml
+secrets/*-actual.ps1

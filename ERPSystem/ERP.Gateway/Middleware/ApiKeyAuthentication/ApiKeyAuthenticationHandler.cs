@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 
 namespace ERP.Gateway.Middleware.ApiKeyAuthentication;
@@ -38,6 +39,11 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
             return AuthenticateResult.Fail("Invalid API Key");
         }
 
+        // ✅ Set tenantId in HttpContext.Items so YARP transform forwards X-Tenant-Id
+        var tenantId = principal.FindFirstValue("tenantId");
+        if (!string.IsNullOrEmpty(tenantId))
+            Context.Items["tenantId"] = tenantId;
+
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
         return AuthenticateResult.Success(ticket);
     }
@@ -48,5 +54,4 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         Response.ContentType = "application/json";
         return Response.WriteAsync("""{"code":"UNAUTHORIZED","message":"API key is missing or invalid."}""");
     }
-
 }

@@ -1,6 +1,7 @@
 ﻿using ERP.TenantService.Application.Events;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Infrastructure.Messaging;
+using Microsoft.AspNetCore.SignalR;
 
 public class SubscriptionExpiryJob : BackgroundService
 {
@@ -15,10 +16,14 @@ public class SubscriptionExpiryJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
+        int totalSeconds = 0;
+        int checkEverySeconds = 15;
         while (!ct.IsCancellationRequested)
         {
             await CheckExpirations(ct);
-            await Task.Delay(TimeSpan.FromHours(1), ct); // run every hour
+            //await Task.Delay(TimeSpan.FromHours(1), ct); // run every hour
+            await Task.Delay(TimeSpan.FromSeconds(checkEverySeconds), ct); // run every hour
+            _logger.LogInformation($"Check done after: {totalSeconds+= checkEverySeconds} seconds");
         }
     }
 
@@ -33,16 +38,33 @@ public class SubscriptionExpiryJob : BackgroundService
 
         foreach (var sub in expired)
         {
-            var tenant = await tenantRepo.GetByIdAsync(sub.TenantId, ct);
-            if (tenant is null) continue;
+            try
+            {
+                var tenant = await tenantRepo.GetByIdAsync(sub.TenantId, ct);
+                if (tenant is null)
+                    continue;
 
-            tenant.Deactivate();
-            await tenantRepo.SaveChangesAsync();
+                if (!tenant.IsActive)
+                    return;
 
-            await publisher.PublishAsync("tenant.subscription.expired",
-                new SubscriptionExpiredEvent(sub.TenantId, sub.SubscriptionPlanId));
+                await tenantRepo.SaveChangesAsync();
 
-            _logger.LogWarning("Subscription expired for tenant {TenantId}", sub.TenantId);
+                await publisher.PublishAsync(TenantTopics.TenantDeactivated,
+                    new TenantDeactivatedEvent(tenant.Id, tenant.Slug));
+
+                await publisher.PublishAsync(TenantTopics.SubscriptionExpired,
+                    new SubscriptionExpiredEvent(sub.TenantId, sub.SubscriptionPlanId));
+
+
+                _logger.LogWarning("Subscription expired for tenant {TenantId}", sub.TenantId);
+            }
+            catch (Exception ex)
+            {
+                // Log and continue — this tenant will be retried on the next hourly run
+                _logger.LogError(ex,
+                    "Failed to process expired subscription for tenant {TenantId}",
+                    sub.TenantId);
+            }
         }
     }
 }

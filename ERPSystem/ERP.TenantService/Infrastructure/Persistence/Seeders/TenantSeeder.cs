@@ -11,8 +11,8 @@ public static class TenantSeeder
         var slugs = new[] { "acme", "xyz", "bard" };
 
         var existingSlugs = await context.Tenants
-            .Where(t => slugs.Contains(t.SubdomainSlug))
-            .Select(t => t.SubdomainSlug)
+            .Where(t => slugs.Contains(t.Slug))
+            .Select(t => t.Slug)
             .ToListAsync();
 
         var plans = await context.SubscriptionPlans.ToListAsync();
@@ -94,6 +94,7 @@ public static class TenantSeeder
                 var startDate = DateTime.UtcNow.AddDays(rand.Next(30));
                 var endDate = startDate.AddMonths(rand.Next(1, 13)); // ✅ endDate based on startDate
 
+                tenant.Activate();
                 tenant.AssignSubscription(plan.Id, startDate, endDate);
             }
 

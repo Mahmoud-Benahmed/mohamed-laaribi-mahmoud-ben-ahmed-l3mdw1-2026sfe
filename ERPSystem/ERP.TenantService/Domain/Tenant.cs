@@ -6,7 +6,7 @@ public class Tenant
     public string Name { get; private set; }
     public string Email { get; private set; }
     public string Phone { get; private set; }
-    public string SubdomainSlug { get; private set; }
+    public string Slug { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? PrimaryColor { get; private set; }
     public string? SecondaryColor { get; private set; }
@@ -42,14 +42,14 @@ public class Tenant
             Name = name,
             Email = email,
             Phone = phone,
-            SubdomainSlug = subdomainSlug,
+            Slug = subdomainSlug,
             LogoUrl = logoUrl,
             PrimaryColor = primaryColor,
             SecondaryColor = secondaryColor,
             Currency = currency,
             Locale = locale,
             Timezone = timezone,
-            IsActive = true,
+            IsActive = false,
             IsDeleted = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -70,7 +70,7 @@ public class Tenant
         Name = name;
         Email = email;
         Phone = phone;
-        SubdomainSlug = subdomainSlug;
+        Slug = subdomainSlug;
         LogoUrl = logoUrl;
         PrimaryColor = primaryColor;
         SecondaryColor = secondaryColor;
@@ -83,14 +83,18 @@ public class Tenant
 
     public void Deactivate() => IsActive = false;
 
-    public void Delete() => IsDeleted = true;
+    public void Delete()
+    {
+        IsActive = false;
+        IsDeleted = true;
+    }
     public void Restore() => IsDeleted = false;
 
 
     public void AssignSubscription(Guid subscriptionPlanId, DateTime startDate, DateTime endDate)
     {
         if (IsDeleted) throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
-        if (!IsActive) throw new InvalidOperationException("Tenant Deactivated, unable to assign a subscription to.");
+        //if (!IsActive) throw new InvalidOperationException("Tenant Deactivated, unable to assign a subscription to.");
         Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, endDate);
     }
 }

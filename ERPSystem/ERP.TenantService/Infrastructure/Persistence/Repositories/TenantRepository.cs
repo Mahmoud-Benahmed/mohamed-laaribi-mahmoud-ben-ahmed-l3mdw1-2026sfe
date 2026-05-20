@@ -97,13 +97,13 @@ public class TenantRepository : ITenantRepository
         return await _context.Tenants
             .Include(t => t.Subscription)
             .ThenInclude(s => s!.Plan)
-            .FirstOrDefaultAsync(t => t.SubdomainSlug == slug, ct);
+            .FirstOrDefaultAsync(t => t.Slug == slug, ct);
     }
 
     public async Task<bool> SubdomainSlugExistsAsync(string slug, Guid? excludeId = null, CancellationToken ct = default)
     {
         return await _context.Tenants
-            .AnyAsync(t => t.SubdomainSlug == slug
+            .AnyAsync(t => t.Slug == slug
                 && (excludeId == null || t.Id != excludeId), ct);
     }
 

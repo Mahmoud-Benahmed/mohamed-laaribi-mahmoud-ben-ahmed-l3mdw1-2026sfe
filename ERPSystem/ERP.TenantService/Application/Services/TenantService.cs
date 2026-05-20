@@ -75,17 +75,18 @@ public class TenantService : ITenantService
         ////////////////////////////////////////////
         /// CHANGE TO .AddMonth(1);
         ////////////////////////////////////////////
-        var endDate = startDate.AddMinutes(1); // trial period
+        var endDate = startDate.AddSeconds(120); // trial period
         tenant.AssignSubscription(starterPlan.Id, startDate, endDate);
 
         await _tenantRepository.AddAsync(tenant);
         await _tenantRepository.SaveChangesAsync();
 
         // 4. Publish events for downstream services to provision resources
-        await _eventPublisher.PublishAsync("tenant.created", new TenantCreatedEvent(
-            tenant.Id, tenant.Name, tenant.SubdomainSlug,
-            starterPlan.Id, starterPlan.Code,
-            starterPlan.MaxUsers, starterPlan.MaxStorageMb));
+        await _eventPublisher.PublishAsync(TenantTopics.TenantCreated, new TenantCreatedEvent(
+            tenant.Id, 
+            tenant.Slug, 
+            tenant.IsActive
+        ));
 
         return MapToDto(tenant);
     }
@@ -114,6 +115,13 @@ public class TenantService : ITenantService
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
 
+        await _eventPublisher.PublishAsync(TenantTopics.TenantUpdated, new TenantUpdatedEvent(
+            tenant.Id,
+            tenant.Slug,
+            dto.SubdomainSlug,
+            tenant.IsActive
+        ));
+
         return MapToDto(tenant);
     }
 
@@ -126,6 +134,11 @@ public class TenantService : ITenantService
 
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
+
+        await _eventPublisher.PublishAsync(TenantTopics.TenantDeleted, new TenantDeletedEvent(
+            tenant.Id,
+            tenant.Slug
+        ));
     }
 
     public async Task RestoreAsync(Guid id, CancellationToken ct = default)
@@ -137,6 +150,12 @@ public class TenantService : ITenantService
 
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
+
+        await _eventPublisher.PublishAsync(TenantTopics.TenantRestored, new TenantRestoredEvent(
+            tenant.Id,
+            tenant.Slug,
+            tenant.IsActive
+        ));
     }
 
     public async Task ActivateAsync(Guid id, CancellationToken ct = default)
@@ -148,10 +167,9 @@ public class TenantService : ITenantService
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
 
-        await _eventPublisher.PublishAsync(TenantTopics.TenantActivated, new TenantEvents(
-            TenantId: tenant.Id,
-            TenantName: tenant.Name,
-            SubdomainSlug: tenant.SubdomainSlug
+        await _eventPublisher.PublishAsync(TenantTopics.TenantActivated, new TenantActivatedEvent(
+            tenant.Id,
+            tenant.Slug
         ));
     }
 
@@ -163,6 +181,11 @@ public class TenantService : ITenantService
         tenant.Deactivate();
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
+
+        await _eventPublisher.PublishAsync(TenantTopics.TenantDeactivated, new TenantDeactivatedEvent(
+            TenantId: tenant.Id,
+            Slug:tenant.Slug
+        ));
     }
 
     public async Task<TenantSubscriptionResponseDto> AssignSubscriptionAsync(Guid tenantId, AssignSubscriptionRequestDto dto, CancellationToken ct = default)
@@ -228,7 +251,7 @@ public class TenantService : ITenantService
             Name: tenant.Name,
             Email: tenant.Email,
             Phone: tenant.Phone,
-            SubdomainSlug: tenant.SubdomainSlug,
+            SubdomainSlug: tenant.Slug,
             LogoUrl: tenant.LogoUrl,
             PrimaryColor: tenant.PrimaryColor,
             SecondaryColor:tenant.SecondaryColor,
@@ -239,16 +262,6 @@ public class TenantService : ITenantService
             IsDeleted:tenant.IsDeleted,
             CreatedAt: tenant.CreatedAt,
             subDto);
-    }
-
-    private static TenantSubscriptionResponseDto MapSubscriptionToDto(
-        Domain.TenantSubscription sub, Domain.SubscriptionPlan plan)
-    {
-        return new TenantSubscriptionResponseDto(
-            sub.TenantId,
-            sub.StartDate,
-            sub.EndDate,
-            MapPlanToDto(plan));
     }
 
     private static SubscriptionPlanResponseDto MapPlanToDto(Domain.SubscriptionPlan plan)

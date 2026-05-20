@@ -1,3 +1,4 @@
+# .\reset-db.ps1 -InfraProject "ERP.TenantService\ERP.TenantService.csproj" -StartupProject "ERP.TenantService\ERP.TenantService.csproj" -DbContext "TenantDbContext" -MigrationName "InitialCreate"
 param (
     [string]$InfraProject = $null,
     [string]$StartupProject = $null,

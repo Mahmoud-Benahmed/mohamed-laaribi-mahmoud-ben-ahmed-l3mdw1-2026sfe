@@ -1,11 +1,14 @@
+using Confluent.Kafka;
 using ERP.ArticleService.Application.Interfaces;
 using ERP.ArticleService.Application.Services;
 using ERP.ArticleService.Infrastructure.Messaging;
 using ERP.ArticleService.Infrastructure.Persistence;
 using ERP.ArticleService.Infrastructure.Persistence.Seeders;
 using ERP.ArticleService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -39,6 +42,19 @@ builder.Services.AddControllers()
         };
     });
 
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
+
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArticleCodeRepository, ArticleCodeRepository>();
@@ -48,6 +64,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IArticleCodeService, ArticleCodeService>();
 
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+
 
 builder.Services.AddScoped<ArticleCodeSeeder>();
 builder.Services.AddScoped<CategorySeeder>();
@@ -66,7 +84,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 
     try
     {
-        ERP.ArticleService.Infrastructure.Persistence.ArticleDbContext context = services.GetRequiredService<ERP.ArticleService.Infrastructure.Persistence.ArticleDbContext>();
+        ArticleDbContext context = services.GetRequiredService<ArticleDbContext>();
 
         logger.LogInformation("Applying migrations...");
         await context.Database.MigrateAsync();
@@ -100,4 +118,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
+
+
 app.Run();

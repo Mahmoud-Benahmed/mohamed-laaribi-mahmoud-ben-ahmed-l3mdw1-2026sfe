@@ -270,7 +270,7 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
                     Language = languages[random.Next(languages.Length)]
                 };
 
-                AuthUser user = new AuthUser(login, email, fullName, roleId, settings);
+                AuthUser user = new AuthUser(login, email, fullName, roleId, Guid.Empty, settings);
 
 
                 string hashedPassword = passwordHasher.HashPassword(user, password);

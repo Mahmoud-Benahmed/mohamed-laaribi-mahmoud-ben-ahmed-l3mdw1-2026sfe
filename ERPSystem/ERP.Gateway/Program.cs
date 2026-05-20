@@ -1,3 +1,5 @@
+using ERP.Gateway.Cache;
+using ERP.Gateway.Infrastructure.Messaging;
 using ERP.Gateway.Middleware;
 using ERP.Gateway.Middleware.ApiKeyAuthentication;
 using ERP.Gateway.Properties;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +20,7 @@ builder.Configuration.AddEnvironmentVariables();
 
 ConfigurationManager config = builder.Configuration;
 
-// HELPERS — these can be moved to separate classes/files as needed
+// HELPERS
 static string? ExtractSlug(string host)
 {
     var parts = host.Split('.');
@@ -25,14 +28,20 @@ static string? ExtractSlug(string host)
     return null; // handle local dev separately
 }
 
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////
+string GetClusterAddress(string clusterName, string destinationName)
+{
+    var address = config[
+        $"ReverseProxy:Clusters:{clusterName}:Destinations:{destinationName}:Address"]
+        ?? throw new InvalidOperationException(
+            $"Cluster '{clusterName}' destination '{destinationName}' not found in ReverseProxy configuration.");
 
-///////////////////////////////////////////////////
+    return address.TrimEnd('/');
+}
+
+
+/////////////////////////////////////////////////////////////
 // Health Checks
-///////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy());
 builder.Services.AddHttpContextAccessor();
@@ -40,6 +49,14 @@ builder.Services.AddHttpContextAccessor();
 var jwtSecret = config["JWT:Secret"] ?? throw new InvalidOperationException("JWT:Secret is not configured.");
 var jwtIssuer = config["JWT:Issuer"] ?? throw new InvalidOperationException("JWT:Issuer is not configured.");
 var jwtAudience = config["JWT:Audience"] ?? throw new InvalidOperationException("JWT:Audience is not configured.");
+
+builder.Services.AddHttpClient<ITenantDirectoryClient, TenantDirectoryClient>(
+    client =>
+    {
+        client.BaseAddress = new Uri(GetClusterAddress("tenantCluster", "tenantDestination"));
+
+        client.Timeout = TimeSpan.FromSeconds(5);
+    });
 
 builder.Services.AddAuthentication(options =>
 {
@@ -70,30 +87,18 @@ builder.Services.AddAuthentication(options =>
     {
         OnAuthenticationFailed = context => Task.CompletedTask,
 
+        // ✅ ONLY validates consistency — does NOT resolve tenant
         OnTokenValidated = context =>
         {
-            var user = context.Principal;
-            var identity = user?.Identity as ClaimsIdentity;
-            if (identity == null) return Task.CompletedTask;
+            var jwtTenantId = context.Principal?.FindFirstValue("tenantId");
+            var resolvedTenantId = context.HttpContext.Items["tenantId"]?.ToString();
 
-            // Ensure tenantId is present
-            var tenantId = user.FindFirstValue("tenantId");
-            if (!string.IsNullOrEmpty(tenantId))
+            // Both are now strings — comparison is safe
+            if (!string.IsNullOrEmpty(jwtTenantId) &&
+                !string.IsNullOrEmpty(resolvedTenantId) &&
+                !string.Equals(jwtTenantId, resolvedTenantId, StringComparison.OrdinalIgnoreCase))
             {
-                context.HttpContext.Items["tenantId"] = tenantId;
-            }
-            else
-            {
-                // Fallback to slug-derived tenantId if set earlier
-                if (context.HttpContext.Items["tenantId"] is string slugTenantId)
-                {
-                    context.HttpContext.Items["tenantId"] = slugTenantId;
-                }
-                else
-                {
-                    context.Fail("tenantId missing in token and request");
-                    return Task.CompletedTask;
-                }
+                context.Fail("Tenant mismatch: JWT tenantId does not match the resolved tenant.");
             }
 
             return Task.CompletedTask;
@@ -125,6 +130,8 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 
 //////////////////////////////////////////////////
 // Authorization
@@ -136,7 +143,7 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 
-    options.AddPolicy("JwtPolicy", p => p.RequireAuthenticatedUser()); // ← single declaration
+    options.AddPolicy("JwtPolicy", p => p.RequireAuthenticatedUser());
 
     options.AddPolicy("AdminOnly", p =>
         p.RequireAuthenticatedUser()
@@ -236,14 +243,14 @@ builder.Services.AddAuthorization(options =>
          .RequireClaim("privilege", Privileges.Audit.MANAGE_AUDITLOGS));
 
     options.AddPolicy("MANAGE_CLIENTS_STOCK", p =>
-    p.RequireAuthenticatedUser()
-     .RequireAssertion(context =>
-         context.User.Claims.Any(c =>
-             c.Type == "privilege" &&
-             (c.Value == Privileges.Clients.VIEW_CLIENTS ||
-             c.Value == Privileges.Stock.VIEW_STOCK ||
-              c.Value == Privileges.Stock.ADD_ENTRY ||
-              c.Value == Privileges.Stock.UPDATE_STOCK))));
+        p.RequireAuthenticatedUser()
+         .RequireAssertion(context =>
+             context.User.Claims.Any(c =>
+                 c.Type == "privilege" &&
+                 (c.Value == Privileges.Clients.VIEW_CLIENTS ||
+                  c.Value == Privileges.Stock.VIEW_STOCK ||
+                  c.Value == Privileges.Stock.ADD_ENTRY ||
+                  c.Value == Privileges.Stock.UPDATE_STOCK))));
 
     options.AddPolicy("ApiKeyPolicy", policy =>
     {
@@ -253,7 +260,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 //////////////////////////////////////////////////
-// Rate Limiting  — unchanged
+// Rate Limiting
 //////////////////////////////////////////////////
 
 builder.Services.AddRateLimiter(options =>
@@ -271,11 +278,8 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("LoginPolicy", context =>
     {
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
         var userId = context.User?.FindFirst("sub")?.Value;
-
         var login = context.Request.Headers["X-Login"].FirstOrDefault();
-
         var identity = userId ?? login ?? ip;
 
         var userAgent = context.Request.Headers.UserAgent.ToString();
@@ -364,7 +368,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 //////////////////////////////////////////////////
-// CORS  — unchanged
+// CORS
 //////////////////////////////////////////////////
 
 builder.Services.AddCors(options =>
@@ -376,7 +380,7 @@ builder.Services.AddCors(options =>
 });
 
 //////////////////////////////////////////////////
-// YARP  — unchanged
+// YARP
 //////////////////////////////////////////////////
 
 builder.Services.AddReverseProxy()
@@ -385,45 +389,39 @@ builder.Services.AddReverseProxy()
     {
         context.AddRequestTransform(async transformContext =>
         {
-            ClaimsPrincipal user = transformContext.HttpContext.User;
+            // ✅ Read the already-resolved tenantId — no lookup here
+            var tenantId = transformContext.HttpContext.Items["tenantId"]?.ToString();
 
-            // For authenticated requests: use JWT tenantId
-            string? tenantId = user.FindFirstValue("tenantId");
-
-            // For pre-auth requests (login): use slug-derived tenantId
-            if (string.IsNullOrEmpty(tenantId))
-            {
-                var slug = transformContext.HttpContext.Items["TenantSlug"]?.ToString();
-                if (!string.IsNullOrEmpty(slug))
-                {
-                    // TODO: resolve slug to tenantId via cache
-                    // For now, pass slug through
-                    tenantId = slug; // temporary - replace with actual lookup
-                }
-            }
-
-            // Add tenantId header if we have it
             if (!string.IsNullOrEmpty(tenantId))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-Tenant-Id", tenantId);
 
-            // Optionally add user info headers for downstream services
+            ClaimsPrincipal user = transformContext.HttpContext.User;
+
             string? sub = user.FindFirstValue("sub");
             if (!string.IsNullOrEmpty(sub))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-User-Id", sub);
 
-            // Role is optional and may not be present in all tokens, but if it is, pass it along
             string? role = user.FindFirstValue("role");
             if (!string.IsNullOrEmpty(role))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-User-Role", role);
+
+            await Task.CompletedTask;
         });
     });
 
-builder.Services.AddAuthentication()
-    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
+builder.Services.AddAuthentication().AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
 builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration =
+        builder.Configuration.GetConnectionString("REDIS");
+
+    return ConnectionMultiplexer.Connect(configuration);
+});
+builder.Services.AddSingleton<ITenantCache, RedisTenantCache>();
 
 //////////////////////////////////////////////////
 // Pipeline
@@ -432,7 +430,6 @@ builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
 WebApplication app = builder.Build();
 
 app.UseCors("AllowFrontend");
-
 app.UseSecurityHeaders();
 
 if (!app.Environment.IsDevelopment())
@@ -440,48 +437,73 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseMiddleware<RequestLoggingMiddleware>();
+
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.Use(async (context, next) =>
 {
-    // Extract slug from Host header for pre-auth requests
-    var host = context.Request.Host.Host;
-    var slug = ExtractSlug(host);
-
-    if (!string.IsNullOrEmpty(slug))
+    try
     {
-        context.Items["TenantSlug"] = slug;
-        context.Request.Headers["X-Tenant-Slug"] = slug;
-        if (!context.Items.ContainsKey("tenantId"))
-        {
-            context.Items["tenantId"] = slug; // temporary
-        }
+        await next();
     }
+    catch (HttpRequestException ex)
+    {
+        context.Response.StatusCode = 503;
+        context.Response.ContentType = "application/json";
 
-    await next();
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 503,
+            code = "TENANT_SERVICE_UNAVAILABLE",
+            message = "Tenant service is unavailable."
+        });
+    }
+    catch (TaskCanceledException ex)
+    {
+        context.Response.StatusCode = 503;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 503,
+            code = "TENANT_SERVICE_TIMEOUT",
+            message = "Tenant service request timed out."
+        });
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 500,
+            code = "INTERNAL_ERROR",
+            message = "An unexpected error occurred."
+        });
+    }
 });
 
 app.UseRateLimiter();
+
+// ✅ STEP 4: Authentication — OnTokenValidated reads Items["tenantId"] set above
 app.UseAuthentication();
+
+
 app.UseAuthorization();
+
+// ✅ STEP 6: YARP — transform reads Items["tenantId"], no re-resolution
 app.MapReverseProxy();
 
 app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
-    Predicate = check => check.Name != "self"
+    Predicate = r => r.Name != "self"
 });
-
-app.Use(async (context, next) =>
+app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
-    var userId = context.User.FindFirst("sub")?.Value ?? "anonymous";
-    var start = DateTime.UtcNow;
-    var logger= context.RequestServices.GetRequiredService<ILogger<Program>>();
-    await next();
-
-    logger.LogInformation(
-        "Request {Path} {Method} {Status} {Duration}ms User:{UserId}",
-        context.Request.Path, context.Request.Method,
-        context.Response.StatusCode,
-        DateTime.UtcNow - start, userId);
+    Predicate = r => r.Name == "self"
 });
 
 app.Run();

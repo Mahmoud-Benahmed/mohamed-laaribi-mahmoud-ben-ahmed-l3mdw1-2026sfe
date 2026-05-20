@@ -1,32 +1,39 @@
 ﻿using ERP.ArticleService.Application.DTOs;
 using ERP.ArticleService.Application.Interfaces;
+using ERP.ArticleService.Domain;
 
 namespace ERP.ArticleService.Infrastructure.Persistence.Seeders
 {
     public class CategorySeeder
     {
-        private readonly ICategoryService _categoryService;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly ILogger<CategorySeeder> _logger;
 
-        public CategorySeeder(ICategoryService categoryService, ILogger<CategorySeeder> logger)
+        public CategorySeeder(ICategoryRepository categoryRepository, ILogger<CategorySeeder> logger)
         {
-            _categoryService = categoryService;
+            _categoryRepository = categoryRepository;
             _logger = logger;
         }
 
         public async Task SeedAsync()
         {
-            foreach ((string? name, int tva) in SeedDataConstants.Categories.All)
+            var existing = await _categoryRepository.GetAllAsync();
+            var existingNames = new HashSet<string>(existing.Select(c => c.Name));
+
+            foreach ((string name, int tva) in SeedDataConstants.Categories.All)
             {
-                try
-                {
-                    CategoryRequestDto dto = new CategoryRequestDto(name, tva);
-                    await _categoryService.CreateAsync(dto);
-                    _logger.LogInformation("✓ Seeded category: '{Name}' (TVA: {TVA}%)", name, tva);
-                }
-                catch (InvalidOperationException)
+                if (existingNames.Contains(name))
                 {
                     _logger.LogInformation("→ Category '{Name}' already exists, skipping.", name);
+                    continue;
+                }
+
+                try
+                {
+                    Category category = new Category(name, tva);
+                    await _categoryRepository.AddAsync(category);
+                    await _categoryRepository.SaveChangesAsync();
+                    _logger.LogInformation("✓ Seeded category: '{Name}' (TVA: {TVA}%)", name, tva);
                 }
                 catch (Exception ex)
                 {

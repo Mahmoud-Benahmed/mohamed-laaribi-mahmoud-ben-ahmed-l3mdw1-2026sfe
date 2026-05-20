@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.TenantService.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20260516002043_InitialCreate")]
+    [Migration("20260520042602_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -124,7 +124,7 @@ namespace ERP.TenantService.Migrations
                         .HasMaxLength(7)
                         .HasColumnType("nvarchar(7)");
 
-                    b.Property<string>("SubdomainSlug")
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -138,7 +138,7 @@ namespace ERP.TenantService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubdomainSlug")
+                    b.HasIndex("Slug")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 

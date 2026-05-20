@@ -6,7 +6,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5242"
+      "applicationUrl": "http://localhost:5001"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"

@@ -37,7 +37,7 @@ namespace ERP.TenantService.Migrations
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    SubdomainSlug = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Slug = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LogoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     PrimaryColor = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: true),
                     SecondaryColor = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: true),
@@ -86,9 +86,9 @@ namespace ERP.TenantService.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tenants_SubdomainSlug",
+                name: "IX_Tenants_Slug",
                 table: "Tenants",
-                column: "SubdomainSlug",
+                column: "Slug",
                 unique: true,
                 filter: "[IsDeleted] = 0");
 

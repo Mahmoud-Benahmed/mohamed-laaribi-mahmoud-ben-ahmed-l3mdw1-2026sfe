@@ -1,3 +1,4 @@
+using Confluent.Kafka;
 using ERP.AuthService.Application.Interfaces;
 using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
@@ -10,13 +11,16 @@ using ERP.AuthService.Infrastructure.Security;
 using ERP.AuthService.Middleware;
 using ERPrivileges.AuthService.Infrastructure.Persistence.Seeder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 using System.Text;
 
 
@@ -43,13 +47,29 @@ BsonSerializer.RegisterSerializer(new EnumSerializer<Language>(BsonType.String))
 // ── Mongo GUID Serializer
 BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
+/////////////////////////////
 // ── Mongo Configuration
+/////////////////////////////
 builder.Services
     .AddOptions<MongoSettings>()
     .Bind(builder.Configuration.GetSection("MongoSettings"))
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    return new MongoClient(settings.ConnectionString);
+});
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+builder.Services.AddHealthChecks()
+    .AddMongoDb(sp => sp.GetRequiredService<IMongoClient>(), name: "mongo")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 builder.Services.AddSingleton<MongoDbContext>(sp =>
 {
@@ -82,10 +102,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Secret not found"),
+            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Issuer not found"),
 
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Secret not found"),
+            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Audience not found"),
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(5),
@@ -165,17 +185,28 @@ using (IServiceScope scope = app.Services.CreateScope())
 // =========================
 // PIPELINE
 // =========================
-app.UseSwagger();
-app.UseSwaggerUI();
 
 if (!app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.UseHttpsRedirection();
     app.UseHsts();
 }
 
-app.UseMiddleware<ValidateUserMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<ValidateUserMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Name != "self"
+});
+
 
 app.Run();

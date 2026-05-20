@@ -168,7 +168,7 @@ namespace ERP.AuthService.Application.Services
             );
         }
 
-        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? tenantId=null)
+        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid tenantId)
         {
             if (await _userRepository.ExistsByLoginAsync(request.Login))
                 throw new LoginAlreadyExsistException();
@@ -225,7 +225,7 @@ namespace ERP.AuthService.Application.Services
                         AuditAction.Login,
                         success: true,
                         performedBy: user.Id,
-                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId?.ToString() ?? "tenantId is null" },
+                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId.ToString() },
                         ipAddress: GetIp(),
                         userAgent: GetUserAgent());
                 return token;

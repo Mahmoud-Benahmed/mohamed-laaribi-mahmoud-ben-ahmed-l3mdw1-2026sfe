@@ -20,8 +20,10 @@ using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache.ArticleCache;
 using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache.ClientCache;
 using ERP.StockService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -61,6 +63,18 @@ builder.Services.AddControllers()
         };
     }); ;
 
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // =========================
 // DEPENDENCY INJECTION
@@ -213,12 +227,18 @@ using (IServiceScope scope = app.Services.CreateScope())
 using (IServiceScope scope = app.Services.CreateScope())
 {
     StockDbContext db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
-    await db.Database.EnsureDeletedAsync();
+    
+    if (app.Environment.IsDevelopment())
+        await db.Database.EnsureDeletedAsync();
+
     await db.Database.MigrateAsync();
 }
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -228,5 +248,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

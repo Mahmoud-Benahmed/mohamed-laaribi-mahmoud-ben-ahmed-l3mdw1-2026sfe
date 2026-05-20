@@ -1,3 +1,4 @@
+using Confluent.Kafka;
 using ERP.ClientService.Application.Interfaces;
 using ERP.ClientService.Application.Services;
 using ERP.ClientService.Infrastructure.Messaging;
@@ -5,8 +6,10 @@ using ERP.ClientService.Infrastructure.Persistence;
 using ERP.ClientService.Infrastructure.Persistence.Repositories;
 using ERP.ClientService.Infrastructure.Persistence.Seeders;
 using ERP.ClientService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -21,6 +24,19 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 
 builder.Services.AddDbContext<ClientDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // =========================
 // DEPENDENCY INJECTION
@@ -82,7 +98,9 @@ using (IServiceScope scope = app.Services.CreateScope())
     ClientDbContext db = scope.ServiceProvider.GetRequiredService<ClientDbContext>();
     DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
 
-    await db.Database.EnsureDeletedAsync();
+    if (app.Environment.IsDevelopment())
+        await db.Database.EnsureDeletedAsync();
+
     await db.Database.MigrateAsync();
     await seeder.SeedAsync();
 }
@@ -90,8 +108,11 @@ using (IServiceScope scope = app.Services.CreateScope())
 // =========================
 // PIPELINE
 // =========================
-app.UseSwagger();
-app.UseSwaggerUI();
+if(app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -101,5 +122,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

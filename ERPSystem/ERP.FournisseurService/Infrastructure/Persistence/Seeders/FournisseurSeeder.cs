@@ -9,15 +9,15 @@ public class FournisseurSeeder
 {
     private readonly FournisseurDbContext _context;
     private readonly ILogger<FournisseurSeeder> _logger;
-    private readonly IFournisseurService _fournisseurService;
+    private readonly IFournisseurRepository _fournisseurRepository;
 
     public FournisseurSeeder(FournisseurDbContext context,
                             ILogger<FournisseurSeeder> logger,
-                            IFournisseurService fournisseurService)
+                            IFournisseurRepository fournisseurRepository)
     {
         _context = context;
         _logger = logger;
-        _fournisseurService = fournisseurService;
+        _fournisseurRepository = fournisseurRepository;
     }
 
     public async Task SeedAsync()
@@ -31,10 +31,10 @@ public class FournisseurSeeder
         List<Fournisseur> fournisseurs = BuildFournisseurs();
         foreach (Fournisseur f in fournisseurs)
         {
-            CreateFournisseurRequestDto dto = MapToDto(f);
-            await _fournisseurService.CreateAsync(dto);
+            await _fournisseurRepository.AddAsync(f);
         }
-
+        
+        await _fournisseurRepository.SaveChangesAsync();
         _logger.LogInformation("Seeded {Count} fournisseurs.", fournisseurs.Count);
     }
 
@@ -158,13 +158,4 @@ public class FournisseurSeeder
 
         return fournisseurs;
     }
-
-    private static CreateFournisseurRequestDto MapToDto(Fournisseur f) => new CreateFournisseurRequestDto(
-            Name: f.Name,
-            Address: f.Address,
-            Phone: f.Phone,
-            Email: f.Email,
-            TaxNumber: f.TaxNumber,
-            RIB: f.RIB
-        );
 }

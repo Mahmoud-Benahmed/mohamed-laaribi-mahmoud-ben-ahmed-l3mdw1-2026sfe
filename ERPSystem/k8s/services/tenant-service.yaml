@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenant-service
+  namespace: erp
+  labels:
+    app: tenant-service
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: tenant-service
+
+  template:
+    metadata:
+      labels:
+        app: tenant-service
+
+    spec:
+      initContainers:
+        - name: wait-for-sql
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z sqlserver 1433; do echo waiting for sqlserver; sleep 3; done
+
+        - name: wait-for-kafka
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z kafka 9092; do echo waiting for kafka; sleep 3; done
+
+      containers:
+        - name: tenant-service
+          image: tenant-service:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Docker"
+
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secret
+                  key: tenant-connection-string
+
+            - name: ConnectionStrings__MasterConnection
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secret
+                  key: master-connection-string
+
+            - name: ConnectionStrings__TenantDbTemplate
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secret
+                  key: template-connection-string
+
+            - name: Kafka__BootstrapServers
+              value: "kafka:9092"
+
+            - name: InternalApi__Key
+              valueFrom:
+                secretKeyRef:
+                  name: internal-secret
+                  key: api-key
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenant-service
+  namespace: erp
+spec:
+  selector:
+    app: tenant-service
+  ports:
+    - port: 80
+      targetPort: 8080

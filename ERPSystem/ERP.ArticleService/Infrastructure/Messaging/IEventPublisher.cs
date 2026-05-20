@@ -1,7 +1,6 @@
-﻿namespace ERP.ArticleService.Infrastructure.Messaging
+﻿namespace ERP.ArticleService.Infrastructure.Messaging;
+
+public interface IEventPublisher
 {
-    public interface IEventPublisher
-    {
-        Task PublishAsync<T>(string topic, T @event);
-    }
+    Task PublishAsync<T>(string topic, T @event);
 }

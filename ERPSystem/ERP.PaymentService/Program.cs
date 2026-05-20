@@ -11,8 +11,10 @@ using ERP.PaymentService.Infrastructure.Persistence;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.PaymentService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -55,6 +57,20 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         });
     };
 });
+
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // =========================
 // REPOSITORIES
@@ -166,8 +182,10 @@ using (IServiceScope scope = app.Services.CreateScope())
 using (IServiceScope scope = app.Services.CreateScope())
 {
     PaymentDbContext context = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
+
     if(app.Environment.IsDevelopment())
         await context.Database.EnsureDeletedAsync();
+
     await context.Database.MigrateAsync();
 }
 
@@ -176,8 +194,11 @@ using (IServiceScope scope = app.Services.CreateScope())
 // =========================
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -187,5 +208,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

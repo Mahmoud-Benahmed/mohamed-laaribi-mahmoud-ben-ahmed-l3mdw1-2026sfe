@@ -2,5 +2,5 @@ namespace ERP.TenantService.Infrastructure.Messaging;
 
 public interface IEventPublisher
 {
-    Task PublishAsync(string topic, object payload);
+    Task PublishAsync<T>(string topic, T @event);
 }

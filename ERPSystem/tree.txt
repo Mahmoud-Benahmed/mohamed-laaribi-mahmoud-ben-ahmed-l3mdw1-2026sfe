@@ -1,0 +1,656 @@
+.
+├── ERP.ArticleService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── ArticleDto.cs
+│   │   │   ├── CategoryRequestDto.cs
+│   │   │   ├── ErrorResponse.cs
+│   │   │   ├── PagedResultDto.cs
+│   │   │   └── RegexPatterns.cs
+│   │   ├── Exceptions
+│   │   │   └── Exceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── IArticleCodeRepository.cs
+│   │   │   ├── IArticleCodeService.cs
+│   │   │   ├── IArticleRepository.cs
+│   │   │   ├── IArticleService.cs
+│   │   │   ├── ICategoryRepository.cs
+│   │   │   └── ICategoryService.cs
+│   │   └── Services
+│   │       ├── ArticleCodeService.cs
+│   │       ├── ArticleService.cs
+│   │       └── CategoryService.cs
+│   ├── Controllers
+│   │   ├── ArticleController.cs
+│   │   └── CategoryController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── Article.cs
+│   │   ├── ArticleCode.cs
+│   │   └── Category.cs
+│   ├── ERP.ArticleService.csproj
+│   ├── ERP.ArticleService.csproj.user
+│   ├── ERP.ArticleService.http
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   ├── ArticleTopics.cs
+│   │   │   ├── CategoryTopics.cs
+│   │   │   ├── IEventPublisher.cs
+│   │   │   └── KafkaEventPublisher.cs
+│   │   └── Persistence
+│   │       ├── ArticleCodeRepository.cs
+│   │       ├── ArticleDbContext.cs
+│   │       ├── ArticleDbContextFactory.cs
+│   │       ├── ArticleRepository.cs
+│   │       ├── CategoryRepository.cs
+│   │       ├── PaginationHelper.cs
+│   │       └── Seeders
+│   │           ├── ArticleCodeSeeder.cs
+│   │           ├── ArticleSeeder.cs
+│   │           ├── CategorySeeder.cs
+│   │           └── SeedDataConstants.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.AuthService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── AuditLogResponseDto.cs
+│   │   │   ├── AuthUser
+│   │   │   │   ├── AdminChangePasswordRequestDto.cs
+│   │   │   │   ├── AuthResponseDto.cs
+│   │   │   │   ├── AuthUserGetResponseDto.cs
+│   │   │   │   ├── ChangePasswordRequestDto.cs
+│   │   │   │   ├── JwtTokenValidationDto.cs
+│   │   │   │   ├── LoginRequestDto.cs
+│   │   │   │   ├── PagedResultDto.cs
+│   │   │   │   ├── RefreshTokenRequestDto.cs
+│   │   │   │   ├── RegisterRequestDto.cs
+│   │   │   │   ├── UpdateProfileDto.cs
+│   │   │   │   ├── UserSettingDto.cs
+│   │   │   │   └── UserStatsDto.cs
+│   │   │   ├── RegexPatterns.cs
+│   │   │   └── Role
+│   │   │       ├── ControleRequestDto.cs
+│   │   │       ├── ControleResponseDto.cs
+│   │   │       ├── PrivilegeResponseDto.cs
+│   │   │       ├── RoleRequestDto.cs
+│   │   │       └── RoleResponseDto.cs
+│   │   ├── Events
+│   │   │   ├── Topics.cs
+│   │   │   ├── UserActivated.cs
+│   │   │   ├── UserDeactivated.cs
+│   │   │   └── UserRegistered.cs
+│   │   ├── Exceptions
+│   │   │   └── Exceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── IJwtTokenGenerator.cs
+│   │   │   ├── Repositories
+│   │   │   │   ├── IAuditLogRepository.cs
+│   │   │   │   ├── IAuthUserRepository.cs
+│   │   │   │   ├── IControleRepository.cs
+│   │   │   │   ├── IPrivilegeRepository.cs
+│   │   │   │   ├── IRefreshTokenRepository.cs
+│   │   │   │   └── IRoleRepository.cs
+│   │   │   └── Services
+│   │   │       ├── IAuditLogService.cs
+│   │   │       ├── IAuditLogger.cs
+│   │   │       ├── IAuthUserService.cs
+│   │   │       ├── IControleService.cs
+│   │   │       ├── IEventPublisher.cs
+│   │   │       ├── IPrivilegeService.cs
+│   │   │       └── IRoleService.cs
+│   │   └── Services
+│   │       ├── AuditLogService.cs
+│   │       ├── AuditLogger.cs
+│   │       ├── AuthUserService.cs
+│   │       ├── ControleService.cs
+│   │       ├── PrivilegeService.cs
+│   │       └── RoleService.cs
+│   ├── Controllers
+│   │   ├── AuditLogController.cs
+│   │   ├── AuthController.cs
+│   │   ├── ControlesController.cs
+│   │   ├── PrivilegesController.cs
+│   │   └── RolesController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── AuthUser.cs
+│   │   ├── Controle.cs
+│   │   ├── Logger
+│   │   │   ├── AuditAction.cs
+│   │   │   └── AuditLog.cs
+│   │   ├── Privilege.cs
+│   │   ├── RefreshToken.cs
+│   │   └── Role.cs
+│   ├── ERP.AuthService.csproj
+│   ├── ERP.AuthService.csproj.user
+│   ├── ERP.AuthService.http
+│   ├── ERP.AuthService.sln
+│   ├── Infrastructure
+│   │   ├── Configuration
+│   │   │   ├── JwtSettings.cs
+│   │   │   └── MongoSettings.cs
+│   │   ├── Messaging
+│   │   │   └── KafkaEventPublisher.cs
+│   │   ├── Persistence
+│   │   │   ├── MongoDbContext.cs
+│   │   │   ├── MongoDbInitializer.cs
+│   │   │   ├── Repositories
+│   │   │   │   ├── AuditLogRepository.cs
+│   │   │   │   ├── AuthUserRepository.cs
+│   │   │   │   ├── ControleRepository.cs
+│   │   │   │   ├── PrivilegeRepository.cs
+│   │   │   │   ├── RefreshTokenRepository.cs
+│   │   │   │   └── RoleRepository.cs
+│   │   │   └── Seeder
+│   │   │       └── AuthServiceSeeder.cs
+│   │   └── Security
+│   │       ├── CustomTokenValidationResult.cs
+│   │       └── JwtTokenGenerator.cs
+│   ├── Middleware
+│   │   ├── GlobalExceptionMiddleware.cs
+│   │   └── ValidateUserMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.ClientService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── CategoryDto.cs
+│   │   │   ├── CategoryMapping.cs
+│   │   │   ├── ClientDto.cs
+│   │   │   ├── ClientMapping.cs
+│   │   │   ├── ErrorResponse.cs
+│   │   │   ├── PagedResultDto.cs
+│   │   │   └── RegexPatterns.cs
+│   │   ├── Exceptions
+│   │   │   └── Exceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── ICategoryRepository.cs
+│   │   │   ├── ICategoryService.cs
+│   │   │   ├── IClientRepository.cs
+│   │   │   └── IClientService.cs
+│   │   ├── Services
+│   │   │   ├── CategoryService.cs
+│   │   │   └── ClientService.cs
+│   │   └── Validators
+│   │       └── DtosValidator.cs
+│   ├── Controllers
+│   │   ├── CategoryController.cs
+│   │   └── ClientController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── Category.cs
+│   │   ├── Client.cs
+│   │   └── ClientCategory.cs
+│   ├── ERP.ClientService.csproj
+│   ├── ERP.ClientService.csproj.user
+│   ├── ERP.ClientService.http
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   ├── CategoryTopics.cs
+│   │   │   ├── ClientTopics.cs
+│   │   │   ├── IEventPublisher.cs
+│   │   │   └── KafkaEventPublisher.cs
+│   │   └── Persistence
+│   │       ├── ClientDbContext.cs
+│   │       ├── ClientDbContextFactory.cs
+│   │       ├── PaginationHelper.cs
+│   │       ├── Repositories
+│   │       │   ├── CategoryRepository.cs
+│   │       │   └── ClientRepository.cs
+│   │       └── Seeders
+│   │           ├── CategorySeeder.cs
+│   │           ├── ClientSeeder.cs
+│   │           └── DatabaseSeeder.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.FournisseurService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── FournisseurDto.cs
+│   │   │   ├── RegexPatterns.cs
+│   │   │   └── Shared.cs
+│   │   ├── Exceptions
+│   │   │   └── FournisseurException.cs
+│   │   ├── Interfaces
+│   │   │   ├── IFournisseurRepository.cs
+│   │   │   └── IFournisseurService.cs
+│   │   └── Services
+│   │       └── FournisseurService.cs
+│   ├── Controllers
+│   │   └── FournisseurController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   └── Fournisseur.cs
+│   ├── ERP.FournisseurService.csproj
+│   ├── ERP.FournisseurService.csproj.user
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   ├── FournisseurTopics.cs
+│   │   │   ├── IEventPublisher.cs
+│   │   │   └── KafkaEventPublisher.cs
+│   │   └── Persistence
+│   │       ├── FournisseurDbContext.cs
+│   │       ├── FournisseurDbContextFactory.cs
+│   │       ├── Repositories
+│   │       │   └── FournisseurRepository.cs
+│   │       └── Seeders
+│   │           ├── DatabaseSeeder.cs
+│   │           └── FournisseurSeeder.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.Gateway
+│   ├── Dockerfile
+│   ├── ERP.Gateway.csproj
+│   ├── ERP.Gateway.csproj.user
+│   ├── ERP.Gateway.http
+│   ├── Middleware
+│   │   ├── ApiKeyAuthentication
+│   │   │   ├── ApiKeyAuthenticationHandler.cs
+│   │   │   ├── ApiKeyAuthenticationOptions.cs
+│   │   │   ├── ApiKeyValidator.cs
+│   │   │   └── IApiKeyValidator.cs
+│   │   └── SecurityHeadersMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.InvoiceService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── EventDto.cs
+│   │   │   ├── InvoiceDto.cs
+│   │   │   ├── InvoiceMapping.cs
+│   │   │   └── RegexPatterns.cs
+│   │   ├── Exceptions
+│   │   │   └── InvoiceException.cs
+│   │   ├── Interfaces
+│   │   │   ├── ICacheRepository.cs
+│   │   │   ├── ICacheServices.cs
+│   │   │   ├── IInvoiceRepository.cs
+│   │   │   └── IInvoicesService.cs
+│   │   └── Services
+│   │       ├── InvoiceNumberGenerator.cs
+│   │       ├── InvoicePdfGenerator.cs
+│   │       ├── InvoicesService.cs
+│   │       └── LocalCache
+│   │           ├── ArticleCache
+│   │           │   ├── ArticleCacheService.cs
+│   │           │   └── ArticleCategoryCacheService.cs
+│   │           └── ClientCache
+│   │               ├── ClientCacheService.cs
+│   │               └── ClientCategoryCacheService.cs
+│   ├── Controllers
+│   │   └── InvoicesController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── Invoice.cs
+│   │   ├── InvoiceItem.cs
+│   │   ├── InvoiceSequence.cs
+│   │   └── LocalCache
+│   │       ├── Article
+│   │       │   ├── ArticleCache .cs
+│   │       │   └── ArticleCategoryCache.cs
+│   │       └── Client
+│   │           ├── CategoryCache.cs
+│   │           ├── ClientCache.cs
+│   │           └── ClientCategoryCache.cs
+│   ├── ERP.InvoiceService.csproj
+│   ├── ERP.InvoiceService.csproj.user
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   ├── Events
+│   │   │   │   ├── ArticleEvents
+│   │   │   │   │   ├── Article
+│   │   │   │   │   │   ├── ArticleEventConsumer.cs
+│   │   │   │   │   │   ├── ArticleEventHandler.cs
+│   │   │   │   │   │   ├── ArticleTopics.cs
+│   │   │   │   │   │   ├── IArticleEventConsumer.cs
+│   │   │   │   │   │   └── IArticleEventHandler.cs
+│   │   │   │   │   └── ArticleCategory
+│   │   │   │   │       ├── ArticleCategoryEventConsumer.cs
+│   │   │   │   │       ├── ArticleCategoryEventHandler.cs
+│   │   │   │   │       ├── ArticleCategoryTopics.cs
+│   │   │   │   │       ├── IArticleCategoryEventConsumer.cs
+│   │   │   │   │       └── IArticleCategoryEventHandler.cs
+│   │   │   │   ├── ClientEvents
+│   │   │   │   │   ├── Category
+│   │   │   │   │   │   ├── ClientCategoryEventConsumer.cs
+│   │   │   │   │   │   ├── ClientCategoryEventHandler.cs
+│   │   │   │   │   │   ├── ClientCategoryTopics.cs
+│   │   │   │   │   │   ├── IClientCategoryEventConsumer.cs
+│   │   │   │   │   │   └── IClientCategoryEventHandler.cs
+│   │   │   │   │   └── Client
+│   │   │   │   │       ├── ClientEventConsumer.cs
+│   │   │   │   │       ├── ClientEventHandler.cs
+│   │   │   │   │       ├── ClientTopics.cs
+│   │   │   │   │       ├── IClientEventConsumer.cs
+│   │   │   │   │       └── IClientEventHandler.cs
+│   │   │   │   ├── IEventPublisher.cs
+│   │   │   │   ├── InvoiceTopics.cs
+│   │   │   │   ├── KafkaEventPublisher.cs
+│   │   │   │   └── Payment
+│   │   │   │       ├── IPaymentEventConsumer.cs
+│   │   │   │       ├── IPaymentEventHandler.cs
+│   │   │   │       ├── PaymentEventConsumer.cs
+│   │   │   │       ├── PaymentEventHandler.cs
+│   │   │   │       └── PaymentTopics.cs
+│   │   │   └── Http
+│   │   │       ├── HttpClientResponseDto.cs
+│   │   │       ├── IStockServiceHttpClient.cs
+│   │   │       └── StockServiceHttpClient.cs
+│   │   └── Persistence
+│   │       ├── InvoiceDbContext.cs
+│   │       ├── InvoiceDbContextFactory.cs
+│   │       ├── InvoiceRepository.cs
+│   │       └── LocalCache
+│   │           ├── ArticleCache
+│   │           │   ├── ArticleCacheRepository.cs
+│   │           │   └── CategoryCacheRepository.cs
+│   │           └── ClientCache
+│   │               ├── ClientCacheRepository.cs
+│   │               └── ClientCategoryCacheRepository.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.PaymentService
+│   ├── Application
+│   │   ├── DTO
+│   │   │   ├── EventDto.cs
+│   │   │   ├── PagedResultDto.cs
+│   │   │   └── PaymentDto.cs
+│   │   ├── Exceptions
+│   │   │   └── PaymentExceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── IPaymentRepository.cs
+│   │   │   ├── IPaymentService.cs
+│   │   │   └── LocalCache
+│   │   │       ├── ICacheRepository.cs
+│   │   │       └── ICacheService.cs
+│   │   └── Services
+│   │       ├── LocalCache
+│   │       │   └── InvoiceCacheService.cs
+│   │       ├── PaymentNumberGenerator.cs
+│   │       ├── PaymentService.cs
+│   │       └── RefundService.cs
+│   ├── Controller
+│   │   ├── LocalCache
+│   │   │   └── InvoiceCacheController.cs
+│   │   ├── PaymentController.cs
+│   │   └── RefundController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── LocalCache
+│   │   │   └── InvoiceCache.cs
+│   │   ├── Payment.cs
+│   │   ├── PaymentInvoice.cs
+│   │   ├── PaymentSequence.cs
+│   │   ├── RefundLine.cs
+│   │   └── RefundRequest.cs
+│   ├── ERP.PaymentService.csproj
+│   ├── ERP.PaymentService.csproj.user
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   ├── Events
+│   │   │   │   └── Invoice
+│   │   │   │       ├── IInvoiceEventConsumer.cs
+│   │   │   │       ├── IInvoiceEventHandler.cs
+│   │   │   │       ├── InvoiceEventConsumer.cs
+│   │   │   │       ├── InvoiceEventHandler.cs
+│   │   │   │       └── InvoiceTopics.cs
+│   │   │   ├── IEventPublisher.cs
+│   │   │   ├── KafkaEventPublisher.cs
+│   │   │   └── PaymentTopics.cs
+│   │   └── Persistence
+│   │       ├── OutboxMessage.cs
+│   │       ├── PaymentDbContext.cs
+│   │       ├── PaymentDbContextFactory.cs
+│   │       └── Repositories
+│   │           ├── LocalCache
+│   │           │   └── InvoiceCacheRepository.cs
+│   │           ├── PaymentInvoiceRepository.cs
+│   │           ├── PaymentRepository.cs
+│   │           └── RefundRequestRepository.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.StockService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── EventDto.cs
+│   │   │   ├── PaginationHelper.cs
+│   │   │   └── StockDto.cs
+│   │   ├── Exceptions
+│   │   │   └── Exceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── ICacheRepository.cs
+│   │   │   ├── ICacheServices.cs
+│   │   │   ├── IStockRepositories.cs
+│   │   │   └── IStockServices.cs
+│   │   └── Services
+│   │       ├── BonEntreService.cs
+│   │       ├── BonRetourService.cs
+│   │       ├── BonSortieService.cs
+│   │       └── LocalCache
+│   │           ├── ArticleCache
+│   │           │   ├── ArticleCacheService.cs
+│   │           │   └── ArticleCategoryCacheService.cs
+│   │           ├── ClientCache
+│   │           │   ├── ClientCacheService.cs
+│   │           │   └── ClientCategoryCacheService.cs
+│   │           ├── FournisseurCache
+│   │           │   └── FournisseurCacheService.cs
+│   │           └── InvoiceCache
+│   │               └── InvoiceCacheService.cs
+│   ├── Controllers
+│   │   ├── BonEntreController.cs
+│   │   ├── BonRetourController.cs
+│   │   ├── BonSortieController.cs
+│   │   └── StockController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── BonNumber.cs
+│   │   ├── Entre
+│   │   │   ├── BonEntre.cs
+│   │   │   └── LigneEntre.cs
+│   │   ├── JournalStock.cs
+│   │   ├── LigneStock.cs
+│   │   ├── LocalCache
+│   │   │   ├── Article
+│   │   │   │   ├── ArticleCache .cs
+│   │   │   │   └── ArticleCategoryCache.cs
+│   │   │   ├── Client
+│   │   │   │   ├── CategoryCache.cs
+│   │   │   │   ├── ClientCache.cs
+│   │   │   │   └── ClientCategoryCache.cs
+│   │   │   └── Fournisseur
+│   │   │       └── FournisseurCache.cs
+│   │   ├── PieceStock.cs
+│   │   ├── Retour
+│   │   │   ├── BonRetour.cs
+│   │   │   └── LigneRetour.cs
+│   │   └── Sortie
+│   │       ├── BonSortie.cs
+│   │       ├── InvoiceBonSortieMapping.cs
+│   │       └── LigneSortie.cs
+│   ├── ERP.StockService.csproj
+│   ├── ERP.StockService.csproj.user
+│   ├── ERP.StockService.http
+│   ├── Infrastructure
+│   │   ├── Messaging
+│   │   │   └── Events
+│   │   │       ├── ArticleEvents
+│   │   │       │   ├── Article
+│   │   │       │   │   ├── ArticleEventConsumer.cs
+│   │   │       │   │   ├── ArticleEventHandler.cs
+│   │   │       │   │   ├── ArticleTopics.cs
+│   │   │       │   │   ├── IArticleEventConsumer.cs
+│   │   │       │   │   └── IArticleEventHandler.cs
+│   │   │       │   └── Category
+│   │   │       │       ├── ArticleCategoryEventConsumer.cs
+│   │   │       │       ├── ArticleCategoryEventHandler.cs
+│   │   │       │       ├── ArticleCategoryTopics.cs
+│   │   │       │       ├── IArticleCategoryEventConsumer.cs
+│   │   │       │       └── IArticleCategoryEventHandler.cs
+│   │   │       ├── ClientEvents
+│   │   │       │   ├── Category
+│   │   │       │   │   ├── ClientCategoryEventConsumer.cs
+│   │   │       │   │   ├── ClientCategoryEventHandler.cs
+│   │   │       │   │   ├── ClientCategoryTopics.cs
+│   │   │       │   │   ├── IClientCategoryEventConsumer.cs
+│   │   │       │   │   └── IClientCategoryEventHandler.cs
+│   │   │       │   └── Client
+│   │   │       │       ├── ClientEventConsumer.cs
+│   │   │       │       ├── ClientEventHandler.cs
+│   │   │       │       ├── ClientTopics.cs
+│   │   │       │       ├── IClientEventConsumer.cs
+│   │   │       │       └── IClientEventHandler.cs
+│   │   │       ├── FournisseurEvents
+│   │   │       │   ├── FournisseurEventConsumer.cs
+│   │   │       │   ├── FournisseurEventHandler.cs
+│   │   │       │   ├── FournisseurTopics.cs
+│   │   │       │   ├── IFournisseurEventConsumer.cs
+│   │   │       │   └── IFournisseurEventHandler.cs
+│   │   │       └── InvoiceEvents
+│   │   │           ├── IInvoiceEventConsumer.cs
+│   │   │           ├── IInvoiceEventHandler.cs
+│   │   │           ├── InvoiceEventConsumer.cs
+│   │   │           ├── InvoiceEventHandler.cs
+│   │   │           └── InvoiceTopics.cs
+│   │   └── Persistence
+│   │       ├── Repositories
+│   │       │   ├── BonEntreRepository.cs
+│   │       │   ├── BonNumeroRepository.cs
+│   │       │   ├── BonRetourRepository.cs
+│   │       │   ├── BonSortieRepository.cs
+│   │       │   ├── InvoiceBonSortieMappingRepository.cs
+│   │       │   ├── JournalStockRepository.cs
+│   │       │   └── LocalCache
+│   │       │       ├── ArticleCache
+│   │       │       │   ├── ArticleCacheRepository.cs
+│   │       │       │   └── ArticleCategoryCacheRepository.cs
+│   │       │       ├── ClientCache
+│   │       │       │   ├── ClientCacheRepository.cs
+│   │       │       │   └── ClientCategoryCacheRepository.cs
+│   │       │       └── FournisseurCache
+│   │       │           └── FournisseurCacheRepository.cs
+│   │       ├── StockDbContext.cs
+│   │       └── StockDbContextFactory.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── README.md
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERP.TenantService
+│   ├── Application
+│   │   ├── DTOs
+│   │   │   ├── ErrorResponse.cs
+│   │   │   ├── PagedResultDto.cs
+│   │   │   ├── SubscriptionPlan
+│   │   │   │   ├── CreateSubscriptionPlanRequestDto.cs
+│   │   │   │   ├── SubscriptionPlanResponseDto.cs
+│   │   │   │   └── UpdateSubscriptionPlanRequestDto.cs
+│   │   │   ├── Tenant
+│   │   │   │   ├── CreateTenantRequestDto.cs
+│   │   │   │   ├── TenantResponseDto.cs
+│   │   │   │   └── UpdateTenantRequestDto.cs
+│   │   │   └── TenantSubscription
+│   │   │       ├── AssignSubscriptionRequestDto.cs
+│   │   │       └── TenantSubscriptionResponseDto.cs
+│   │   ├── Events
+│   │   │   ├── SubscriptionEvents.cs
+│   │   │   └── TenantEvents.cs
+│   │   ├── Exceptions
+│   │   │   └── Exceptions.cs
+│   │   ├── Interfaces
+│   │   │   ├── ISubscriptionPlanRepository.cs
+│   │   │   ├── ISubscriptionPlanService.cs
+│   │   │   ├── ITenantRepository.cs
+│   │   │   ├── ITenantService.cs
+│   │   │   └── ITenantSubscriptionRepository.cs
+│   │   └── Services
+│   │       ├── SubscriptionPlanService.cs
+│   │       └── TenantService.cs
+│   ├── Controllers
+│   │   ├── SubscriptionPlanController.cs
+│   │   └── TenantController.cs
+│   ├── Dockerfile
+│   ├── Domain
+│   │   ├── SubscriptionPlan.cs
+│   │   ├── Tenant.cs
+│   │   └── TenantSubscription.cs
+│   ├── ERP.TenantService.csproj
+│   ├── ERP.TenantService.csproj.user
+│   ├── Infrastructure
+│   │   ├── BackgroundServices
+│   │   │   └── SubscriptionExpiryJob.cs
+│   │   ├── Messaging
+│   │   │   ├── IEventPublisher.cs
+│   │   │   ├── KafkaEventPublisher.cs
+│   │   │   └── TenantTopics.cs
+│   │   └── Persistence
+│   │       ├── Repositories
+│   │       │   ├── SubscriptionPlanRepository.cs
+│   │       │   ├── TenantRepository.cs
+│   │       │   └── TenantSubscriptionRepository.cs
+│   │       ├── Seeders
+│   │       │   ├── SubscriptionPlanSeeder.cs
+│   │       │   └── TenantSeeder.cs
+│   │       ├── TenantDbContext.cs
+│   │       └── TenantDbContextFactory.cs
+│   ├── Middleware
+│   │   └── GlobalExceptionMiddleware.cs
+│   ├── Program.cs
+│   ├── appsettings.Development.json
+│   ├── appsettings.Docker.json
+│   ├── appsettings.json
+│   └── docker-compose.yaml
+├── ERPSystem.slnLaunch.user
+├── ERPSystem.slnx
+├── README.md
+├── docker-compose.yaml
+├── kafka
+│   └── docker-compose.yaml
+├── reset-db.ps1
+├── scripts
+│   ├── start-kafka.sh
+│   ├── start-services.sh
+│   └── stop-services.sh
+└── tree.txt
+
+177 directories, 477 files

@@ -11,7 +11,6 @@ public class TenantDbContext : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<TenantSubscription> TenantSubscriptions => Set<TenantSubscription>();
     public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
-
     protected override void OnModelCreating(ModelBuilder mb) =>
         mb.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
 }
@@ -80,11 +79,11 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .IsRequired()
             .HasMaxLength(20);
 
-        builder.Property(t => t.SubdomainSlug)
+        builder.Property(t => t.Slug)
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.HasIndex(t => t.SubdomainSlug)
+        builder.HasIndex(t => t.Slug)
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
 
