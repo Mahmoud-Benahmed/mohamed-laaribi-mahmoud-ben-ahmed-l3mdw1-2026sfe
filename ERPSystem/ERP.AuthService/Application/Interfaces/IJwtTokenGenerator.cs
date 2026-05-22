@@ -11,9 +11,7 @@ namespace ERP.AuthService.Application.Interfaces
             string login,
             string role,
             IEnumerable<string> privileges,
-            Guid? tenantId = null);
-
-        string GenerateRefreshToken();
+            Guid? tenantId= null);
 
         // Basic validation - returns ClaimsPrincipal if valid, null if invalid
         ClaimsPrincipal? ValidateToken(string token);

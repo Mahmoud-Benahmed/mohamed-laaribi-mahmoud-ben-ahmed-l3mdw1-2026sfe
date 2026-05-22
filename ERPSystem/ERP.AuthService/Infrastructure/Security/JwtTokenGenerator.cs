@@ -43,11 +43,13 @@ namespace ERP.AuthService.Infrastructure.Security
                 new Claim(CLAIM_ROLE, role),
                 new Claim(JwtRegisteredClaimNames.Iat,
                     new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
-                    ClaimValueTypes.Integer64),
-                new Claim(CLAIM_TENANT_ID, tenantId.HasValue ? tenantId.Value.ToString() : Guid.Empty.ToString())
+                    ClaimValueTypes.Integer64)
             }
             .Concat(privileges.Select(p => new Claim(CLAIM_PRIVILEGE, p)))
             .ToList();
+
+            if (tenantId.HasValue)
+                claims.Add(new Claim(CLAIM_TENANT_ID, tenantId.Value.ToString()));
 
             DateTime expires = DateTime.UtcNow
                 .AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
@@ -62,13 +64,6 @@ namespace ERP.AuthService.Infrastructure.Security
             return (new JwtSecurityTokenHandler().WriteToken(token), expires);
         }
 
-        public string GenerateRefreshToken()
-        {
-            byte[] randomBytes = new byte[64];
-            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
-        }
 
         /// <summary>
         /// Validates a JWT token and returns the ClaimsPrincipal if valid

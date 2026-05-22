@@ -2,9 +2,10 @@
 {
     public class MongoSettings
     {
+        public string RootConnectionString { get; set; } = default!;
         public string ConnectionString { get; set; } = default!;
         public string DatabaseName { get; set; } = default!;
-        public string Username { get; set; } = default!;
-        public required string Password { get; set; }
+        public string AppUsername { get; set; } = default!;
+        public string AppPassword { get; set; } = default!;
     }
 }

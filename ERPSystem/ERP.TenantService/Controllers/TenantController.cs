@@ -84,8 +84,8 @@ public class TenantController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch(ApiRoutes.Tenants.Deactivate)]
-    public async Task<IActionResult> Deactivate([FromRoute]Guid id, CancellationToken ct = default)
+    [HttpPatch(ApiRoutes.Tenants.Suspend)]
+    public async Task<IActionResult> Suspend([FromRoute]Guid id, CancellationToken ct = default)
     {
         await _tenantService.DeactivateAsync(id, ct);
         return NoContent();

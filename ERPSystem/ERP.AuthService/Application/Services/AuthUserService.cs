@@ -6,6 +6,7 @@ using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Domain.Logger;
+using ERP.AuthService.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
@@ -24,9 +25,11 @@ namespace ERP.AuthService.Application.Services
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtTokenGenerator _jwtGenerator;
         private readonly IPasswordHasher<AuthUser> _passwordHasher;
+
         private readonly IControleRepository _controleRepository;
         private readonly IPrivilegeRepository _privilegeRepository;
-        //private readonly IEventPublisher _eventPublisher;
+        private readonly ITenantContext _tenantContext;
+        private readonly IRefreshTokenHashingHelper _refreshTokenHelper;
 
         public AuthUserService(
             IAuditLogger auditLogger,
@@ -37,10 +40,10 @@ namespace ERP.AuthService.Application.Services
             IJwtTokenGenerator jwtGenerator,
             IPasswordHasher<AuthUser> passwordHasher,
             IControleRepository controleRepository,
-            IPrivilegeRepository privilegeRepository
-
+            IPrivilegeRepository privilegeRepository,
+            ITenantContext tenantContext,
+            IRefreshTokenHashingHelper refreshTokenHelper
             )
-        //,IEventPublisher eventPublisher
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
@@ -51,7 +54,8 @@ namespace ERP.AuthService.Application.Services
             _privilegeRepository = privilegeRepository;
             _auditLogger = auditLogger;
             _httpContext = httpContextAccessor;
-            //_eventPublisher = eventPublisher;
+            _tenantContext = tenantContext;
+            _refreshTokenHelper = refreshTokenHelper;
         }
 
         // ============================================
@@ -168,7 +172,7 @@ namespace ERP.AuthService.Application.Services
             );
         }
 
-        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid tenantId)
+        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? TenantId)
         {
             if (await _userRepository.ExistsByLoginAsync(request.Login))
                 throw new LoginAlreadyExsistException();
@@ -180,7 +184,11 @@ namespace ERP.AuthService.Application.Services
 
             string capitalizedFullName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(request.FullName.ToLower());
 
-            AuthUser user = new AuthUser(request.Login, request.Email, capitalizedFullName, role.Id, tenantId: tenantId);
+            AuthUser user = new AuthUser(request.Login, request.Email, capitalizedFullName, role.Id, tenantId: _tenantContext.TenantId);
+
+            if (role.IsGlobal)
+                throw new InvalidOperationException("Cannot assign a global role to a tenant user.");
+
             string hashedPassword = _passwordHasher.HashPassword(user, request.Password);
             user.SetPasswordHash(hashedPassword);
 
@@ -345,18 +353,21 @@ namespace ERP.AuthService.Application.Services
                 user.TenantId
             );
 
-            string refreshTokenValue = _jwtGenerator.GenerateRefreshToken();
+            string refreshTokenRaw = _refreshTokenHelper.GenerateRawToken();
+            string tokenHashed= _refreshTokenHelper.Hash(refreshTokenRaw);
+
             RefreshToken refreshToken = new RefreshToken(
                 user.Id,
-                refreshTokenValue,
-                DateTime.UtcNow.AddDays(7)
+                tokenHashed,
+                DateTime.UtcNow.AddDays(7),
+                tenantId: user.TenantId
             );
 
             await _refreshTokenRepository.AddAsync(refreshToken);
 
             return new AuthResponseDto(
                 accessToken,
-                refreshTokenValue,
+                refreshTokenRaw,
                 user.MustChangePassword,
                 expiresAt
             );
@@ -422,23 +433,26 @@ namespace ERP.AuthService.Application.Services
         {
             if (authUserId == performedById)
                 throw new UnauthorizedOperationException("You cannot apply this operation on your account.");
+
             AuthUser user = await _userRepository.GetByIdAsync(authUserId)
                        ?? throw new UserNotFoundException(authUserId);
-
 
             AuthUser performedBy = await _userRepository.GetByIdAsync(performedById)
                        ?? throw new UserNotFoundException(performedById);
 
             if (user.IsActive)
                 throw new UserActiveException();
+
             user.Activate();
             await _userRepository.UpdateAsync(user);
+
             await _auditLogger.LogAsync(
-                    AuditAction.UserActivated,
-                    success: true,
-                    performedBy: performedById,
-                    targetUserId: user.Id,
-                    ipAddress: GetIp());
+                AuditAction.UserActivated,
+                success: true,
+                tenantId: _tenantContext.TenantId ?? Guid.Empty,  // ← was _tenantId
+                performedBy: performedById,
+                targetUserId: user.Id,
+                ipAddress: GetIp());
         }
 
         public async Task DeactivateAsync(Guid authUserId, Guid performedById)

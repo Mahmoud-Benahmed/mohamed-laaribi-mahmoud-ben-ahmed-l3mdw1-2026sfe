@@ -99,3 +99,18 @@
         public const string EXPORT_REPORTS = "EXPORT_REPORTS";
     }
 }
+
+public static class TenantPrivileges
+{
+    // Tenant lifecycle
+    public const string VIEW_TENANTS = "VIEW_TENANTS";
+    public const string CREATE_TENANT = "CREATE_TENANT";
+    public const string UPDATE_TENANT = "UPDATE_TENANT";
+    public const string DELETE_TENANT = "DELETE_TENANT";
+    public const string SUSPEND_TENANT = "SUSPEND_TENANT";
+    public const string ACTIVATE_TENANT = "ACTIVATE_TENANT";
+
+    // Subscription / billing
+    public const string MANAGE_SUBSCRIPTIONS = "MANAGE_SUBSCRIPTIONS";
+    public const string VIEW_BILLING = "VIEW_BILLING";
+}

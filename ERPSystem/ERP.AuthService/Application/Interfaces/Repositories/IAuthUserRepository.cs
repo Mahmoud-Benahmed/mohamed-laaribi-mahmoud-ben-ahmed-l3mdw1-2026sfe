@@ -16,6 +16,7 @@ namespace ERP.AuthService.Application.Interfaces.Repositories
         Task<(List<AuthUser> Items, int TotalCount)> GetPagedByRoleAsync(Guid role, int pageNumber, int pageSize, Guid? excludeId = null);
         Task<(List<AuthUser> Items, int TotalCount)> GetDeletedPagedAsync(int pageNumber, int pageSize, Guid? excludeId = null);
 
+        Task<int> CountByTenantIdAsync(Guid tenantId);
         Task<AuthUser?> UpdateAsync(AuthUser user);
         Task<bool> ExistsByLoginAsync(string login);
         Task<bool> ExistsByEmailAsync(string email);

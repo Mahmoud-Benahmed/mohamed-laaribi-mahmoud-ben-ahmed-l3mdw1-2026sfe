@@ -1,10 +1,11 @@
-﻿using MongoDB.Bson;
+﻿using ERP.AuthService.Infrastructure.Persistence.Repositories;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 
 namespace ERP.AuthService.Domain;
 
-public class AuthUser
+public class AuthUser : ITenantFilterable
 {
     [BsonId]
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
@@ -29,10 +30,11 @@ public class AuthUser
     };
 
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
-    public Guid TenantId { get; private set; }  // Nullable ✅
+    public Guid? TenantId { get; private set; }
+    public bool IsGlobal => TenantId == null;
 
     public bool IsActive { get; private set; } = true; // Login control
-    public bool IsDeleted { get; private set; } = false; // alternative to hard delete: in case the instance has related records
+    public bool IsDeleted { get; private set; } = false;
 
 
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
@@ -47,7 +49,7 @@ public class AuthUser
 
     private AuthUser() { }
 
-    public AuthUser(string login, string email, string fullName, Guid roleId, Guid tenantId, UserSettings? settings = null)
+    public AuthUser(string login, string email, string fullName, Guid roleId, Guid? tenantId= null, UserSettings? settings = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new ArgumentNullException("FullName is required");
@@ -63,7 +65,7 @@ public class AuthUser
         Login = login;
         FullName = fullName;
         RoleId = roleId;
-        TenantId= tenantId;
+        TenantId = tenantId;
         Settings = settings ?? new UserSettings { Theme = Theme.light, Language = Language.en };
         CreatedAt = DateTime.UtcNow;
     }

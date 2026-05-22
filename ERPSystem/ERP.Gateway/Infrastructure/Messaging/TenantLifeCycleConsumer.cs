@@ -37,7 +37,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         {
             TenantTopics.TenantCreated,
             TenantTopics.TenantUpdated,
-            TenantTopics.TenantDeactivated,
+            TenantTopics.TenantSuspended,
             TenantTopics.TenantActivated,
             TenantTopics.TenantDeleted,
             TenantTopics.TenantRestored
@@ -82,9 +82,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                                 IsActive = evt.IsActive
                             });
 
-                            _logger.LogInformation(
-                                "Tenant created cached: {Slug}",
-                                evt);
+                            _logger.LogInformation("Tenant created cached: {Slug}", evt.Slug);
 
                             break;
                         }
@@ -120,10 +118,10 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             break;
                         }
 
-                    case TenantTopics.TenantDeactivated:
+                    case TenantTopics.TenantSuspended:
                         {
-                            TenantDeactivatedEvent? evt =
-                                JsonSerializer.Deserialize<TenantDeactivatedEvent>(json, _jsonOptions);
+                            TenantSuspendedEvent? evt =
+                                JsonSerializer.Deserialize<TenantSuspendedEvent>(json, _jsonOptions);
 
                             if (evt == null)
                                 continue;
@@ -139,7 +137,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             }
 
                             _logger.LogWarning(
-                                "Tenant deactivated: {Slug}",
+                                "Tenant suspended: {Slug}",
                                 evt.Slug);
 
                             break;

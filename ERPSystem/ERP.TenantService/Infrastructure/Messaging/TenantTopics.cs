@@ -8,7 +8,7 @@ public static class TenantTopics
     public const string TenantDeleted = "tenant.deleted";
     public const string TenantRestored = "tenant.restored";
     public const string TenantActivated = "tenant.activated";
-    public const string TenantDeactivated = "tenant.deactivated";
+    public const string TenantSuspended = "tenant.suspended";
 
     // Subscription
     public const string SubscriptionAssigned = "tenant.subscription.assigned";

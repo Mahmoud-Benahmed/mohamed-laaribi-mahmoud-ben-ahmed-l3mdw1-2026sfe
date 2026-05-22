@@ -15,7 +15,7 @@ public static class ApiRoutes
         public const string Delete = Base + "/{id:guid}";
         public const string Restore = Base + "/{id:guid}/restore";
         public const string Activate = Base + "/{id:guid}/activate";
-        public const string Deactivate = Base + "/{id:guid}/deactivate";
+        public const string Suspend = Base + "/{id:guid}/suspend";
         public const string AssignSubscription = Base + "/{id:guid}/subscription";
         public const string RemoveSubscription = Base + "/{id:guid}/subscription";
         public const string GetSubscription = Base + "/{id:guid}/subscription";
@@ -31,6 +31,6 @@ public static class ApiRoutes
         public const string Update = Base + "/{id:guid}";
         public const string Delete = Base + "/{id:guid}";
         public const string Activate = Base + "/{id:guid}/activate";
-        public const string Deactivate = Base + "/{id:guid}/deactivate";
+        public const string Suspend = Base + "/{id:guid}/suspend";
     }
 }

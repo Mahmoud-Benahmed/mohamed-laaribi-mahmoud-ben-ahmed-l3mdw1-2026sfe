@@ -9,10 +9,12 @@ namespace ERP.AuthService.Application.Services
     public class AuditLogService : IAuditLogService
     {
         private readonly IAuditLogRepository _repository;
+        private readonly ITenantContext _tenantContext;
 
-        public AuditLogService(IAuditLogRepository repository)
+        public AuditLogService(IAuditLogRepository repository, ITenantContext tenantContext)
         {
             _repository = repository;
+            _tenantContext = tenantContext;
         }
 
         /// <summary>Get all audit logs, paginated, sorted by most recent.</summary>

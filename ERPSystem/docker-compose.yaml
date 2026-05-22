@@ -61,6 +61,8 @@ services:
       retries: 10
   nginx:
     image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -103,7 +105,7 @@ services:
     networks:
       - erp-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--username", "${MONGO_USERNAME}", "--password", "${MONGO_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -147,8 +149,11 @@ services:
         condition: service_healthy
     environment:
       <<: *common-env
-      MongoSettings__ConnectionString: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017
-      MongoSettings__DatabaseName: ${MONGO_DB}
+      MongoSettings__RootConnectionString: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
+      MongoSettings__ConnectionString: ${MongoSettings__ConnectionString}
+      MongoSettings__DatabaseName: ${MongoSettings__DatabaseName}
+      MongoSettings__AppUsername: ${MongoSettings__AppUsername}
+      MongoSettings__AppPassword: ${MongoSettings__AppPassword}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/health/live"]
       interval: 30s

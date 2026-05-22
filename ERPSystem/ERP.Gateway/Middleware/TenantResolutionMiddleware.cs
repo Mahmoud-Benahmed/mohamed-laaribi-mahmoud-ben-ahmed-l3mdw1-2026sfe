@@ -7,6 +7,37 @@ public sealed class TenantResolutionMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<TenantResolutionMiddleware> _logger;
 
+    private static readonly string[] ExcludedPaths =
+    [
+        "/health",
+        "/health/live",
+        "/health/ready",
+        "/swagger",
+        "/favicon.ico",
+        "/admin"
+    ];
+
+    private static readonly string[] TenantRequiredPaths =
+    [
+        "/users",
+        "/clients",
+        "/invoices",
+        "/stock",
+        "/orders",
+        "/audit",
+        "/articles",
+        "/fournisseurs",
+        "/payment",
+        "/plans"
+    ];
+
+    private static readonly string[] TenantOptionalAuthPaths =
+    [
+        "/auth/login",
+        "/auth/register",
+        "/auth/refresh"
+    ];
+
     public TenantResolutionMiddleware(
         RequestDelegate next,
         ILogger<TenantResolutionMiddleware> logger)
@@ -17,15 +48,69 @@ public sealed class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Request.Headers.ContainsKey("X-Api-Key"))
+
+        // 1. Skip system endpoints
+        if (ExcludedPaths.Any(p => context.Request.Path.StartsWithSegments(p)))
         {
             await _next(context);
             return;
         }
 
-        string? slug = ExtractSlug(context.Request.Host.Host);
+        bool hasJwt = context.User?.Identity?.IsAuthenticated == true;
+        TenantCacheEntry? tenant = null;
+        if (hasJwt)
+        {
+            // =========================
+            // POST-AUTH: JWT ONLY
+            // =========================
+            var tenantId = context.User.FindFirst("tenantId")?.Value;
 
-        if (string.IsNullOrWhiteSpace(slug))
+            if (Guid.TryParse(tenantId, out var parsedTenantId))
+            {
+                ITenantCache cache = context.RequestServices.GetRequiredService<ITenantCache>();
+                tenant = await cache.GetAsync(parsedTenantId);
+            }
+        }
+        else
+        {
+            // =========================
+            // PRE-AUTH: HEADER ONLY
+            // =========================
+            if (context.Request.Headers.TryGetValue("X-Tenant", out var slug))
+            {
+                ITenantCache cache = context.RequestServices.GetRequiredService<ITenantCache>();
+
+                tenant = await cache.GetAsync(slug!);
+
+                if (tenant == null)
+                {
+                    ITenantDirectoryClient client =
+                        context.RequestServices.GetRequiredService<ITenantDirectoryClient>();
+
+                    tenant = await client.ResolveAsync(slug!);
+
+                    if (tenant != null)
+                        await cache.SetAsync(tenant);
+                }
+            }
+        }
+
+        bool tenantRequired = IsTenantRequired(context);
+
+        TenantCacheEntry? tenantCacheEntry = null;
+
+        string? jwtTenantId = context.User?.FindFirst("tenantId")?.Value;
+
+        if (Guid.TryParse(jwtTenantId, out var parsedJwtTenantId))
+        {
+            ITenantCache cache = context.RequestServices.GetRequiredService<ITenantCache>();
+            tenant = await cache.GetAsync(parsedJwtTenantId.ToString());
+        }
+
+        bool isAuthBypass = TenantOptionalAuthPaths.Any(p =>
+                                context.Request.Path.Value?.StartsWith(p, StringComparison.OrdinalIgnoreCase) == true);
+
+        if (tenantRequired && tenant == null && !isAuthBypass)
         {
             context.Response.StatusCode = 400;
 
@@ -39,68 +124,55 @@ public sealed class TenantResolutionMiddleware
             return;
         }
 
-        ITenantCache cache = context.RequestServices.GetRequiredService<ITenantCache>();
-        TenantCacheEntry? tenant = await cache.GetAsync(slug);
-
-        // Fallback → TenantService
-        if (tenant == null)
+        // 3. Enforce ONLY if endpoint requires tenant
+        if (tenantRequired && tenant == null)
         {
-            _logger.LogInformation(
-                "Tenant cache miss for slug '{Slug}'",
-                slug);
+            context.Response.StatusCode = 400;
 
-            ITenantDirectoryClient client = context.RequestServices.GetRequiredService<ITenantDirectoryClient>();
-
-            tenant = await client.ResolveAsync(slug);
-
-            if (tenant == null)
+            await context.Response.WriteAsJsonAsync(new
             {
-                context.Response.StatusCode = 404;
+                statusCode = 400,
+                code = "TENANT_001",
+                message = "Unable to resolve tenant from request."
+            });
 
-                await context.Response.WriteAsJsonAsync(new
-                {
-                    statusCode = 404,
-                    code = "TENANT_NOT_FOUND",
-                    message = $"Tenant '{slug}' not found"
-                });
-
-                return;
-            }
-
-            await cache.SetAsync(tenant);
+            return;
         }
 
-        if (!tenant.IsActive)
+        // 4. If tenant exists, validate it
+        if (tenant != null && !tenant.IsActive)
         {
             context.Response.StatusCode = 403;
-            context.Response.ContentType = "application/json";
+
             await context.Response.WriteAsJsonAsync(new
             {
                 statusCode = 403,
                 code = "TENANT_INACTIVE",
-                message = $"Tenant '{slug}' is currently inactive"
+                message = $"Tenant '{tenant.Slug}' is inactive"
             });
+
             return;
         }
 
-        // Canonical tenant context
-        context.Items["tenantId"] = tenant.TenantId.ToString();
-        context.Items["tenant"] = tenant;
+        // 5. Attach tenant context (ONLY if exists)
+        if (tenant != null)
+        {
+            context.Items["tenantId"] = tenant.TenantId;
+            context.Items["tenantSlug"] = tenant.Slug;
+            context.Items["tenant"] = tenant;
 
-        // Optional trusted internal propagation
-        context.Request.Headers["X-Tenant-Id"] = tenant.TenantId.ToString();
+            context.Request.Headers["X-Tenant-Id"] = tenant.TenantId.ToString();
+            context.Request.Headers["X-Tenant-Slug"] = tenant.Slug;
+        }
 
         await _next(context);
     }
 
-    private static string? ExtractSlug(string host)
+    private static bool IsTenantRequired(HttpContext context)
     {
-        string[] parts = host.Split('.');
+        var path = context.Request.Path.Value?.ToLowerInvariant();
+        if (path == null) return false;
 
-        // acme.erp.local
-        if (parts.Length >= 3)
-            return parts[0].ToLowerInvariant();
-
-        return null;
+        return TenantRequiredPaths.Any(p => path.StartsWith(p));
     }
 }

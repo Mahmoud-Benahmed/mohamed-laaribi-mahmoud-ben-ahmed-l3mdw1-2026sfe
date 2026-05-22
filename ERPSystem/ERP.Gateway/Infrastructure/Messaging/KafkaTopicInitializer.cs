@@ -16,7 +16,7 @@ public sealed class KafkaTopicInitializer : IHostedService
         TenantTopics.TenantDeleted,
         TenantTopics.TenantRestored,
         TenantTopics.TenantActivated,
-        TenantTopics.TenantDeactivated
+        TenantTopics.TenantSuspended
     ];
 
     public KafkaTopicInitializer(

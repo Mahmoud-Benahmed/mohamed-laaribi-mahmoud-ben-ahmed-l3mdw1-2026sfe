@@ -1,7 +1,8 @@
-﻿using Confluent.Kafka;
+﻿namespace ERP.AuthService.Infrastructure.Messaging;
+
+using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 
-namespace ERP.TenantService.Infrastructure.Messaging;
 
 public sealed class KafkaTopicInitializer : IHostedService
 {
@@ -10,18 +11,7 @@ public sealed class KafkaTopicInitializer : IHostedService
 
     private static readonly string[] Topics =
     [
-        TenantTopics.TenantCreated,
-        TenantTopics.TenantUpdated,
-        TenantTopics.TenantDeleted,
-        TenantTopics.TenantRestored,
-        TenantTopics.TenantActivated,
-        TenantTopics.TenantSuspended,
-
-        TenantTopics.SubscriptionPlanCreated,
-        TenantTopics.SubscriptionPlanUpdated,
-        TenantTopics.SubscriptionPlanDeleted,
-        TenantTopics.SubscriptionExpired,
-        TenantTopics.SubscriptionAssigned
+        TenantTopics.TenantCreated
     ];
 
     public KafkaTopicInitializer(
@@ -59,8 +49,7 @@ public sealed class KafkaTopicInitializer : IHostedService
             foreach (var result in ex.Results)
             {
                 // TopicAlreadyExists is fine — idempotent
-                if (result.Error.IsError &&
-                    result.Error.Code != ErrorCode.TopicAlreadyExists)
+                if (result.Error.Code != ErrorCode.TopicAlreadyExists)
                 {
                     _logger.LogError(
                         "Failed to create topic {Topic}: {Reason}",

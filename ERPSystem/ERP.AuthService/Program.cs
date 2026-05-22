@@ -5,8 +5,10 @@ using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Infrastructure.Configuration;
+using ERP.AuthService.Infrastructure.Messaging;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Infrastructure.Persistence.Repositories;
+using ERP.AuthService.Infrastructure.Persistence.Seeder;
 using ERP.AuthService.Infrastructure.Security;
 using ERP.AuthService.Middleware;
 using ERPrivileges.AuthService.Infrastructure.Persistence.Seeder;
@@ -43,9 +45,10 @@ builder.Services.AddSwaggerGen();
 // Enum Serializing (0 => "string")
 BsonSerializer.RegisterSerializer(new EnumSerializer<Theme>(BsonType.String));
 BsonSerializer.RegisterSerializer(new EnumSerializer<Language>(BsonType.String));
-
-// ── Mongo GUID Serializer
 BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 
 /////////////////////////////
 // ── Mongo Configuration
@@ -59,8 +62,16 @@ builder.Services
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
-    return new MongoClient(settings.ConnectionString);
+    return new MongoClient(settings.RootConnectionString);
 });
+
+builder.Services.AddScoped<MongoDbContext>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    var tenantContext = sp.GetRequiredService<ITenantContext>();
+    return new MongoDbContext(settings.ConnectionString, settings.DatabaseName, tenantContext);
+});
+
 
 var kafkaConfig = new ProducerConfig
 {
@@ -70,12 +81,6 @@ builder.Services.AddHealthChecks()
     .AddMongoDb(sp => sp.GetRequiredService<IMongoClient>(), name: "mongo")
     .AddKafka(kafkaConfig)
     .AddCheck("self", () => HealthCheckResult.Healthy());
-
-builder.Services.AddSingleton<MongoDbContext>(sp =>
-{
-    MongoSettings settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
-    return new MongoDbContext(settings.ConnectionString, settings.DatabaseName);
-});
 
 // ── Read JWT secret from env
 // ── JWT Settings
@@ -136,6 +141,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 // ── Dependency Injection
+builder.Services.AddScoped<IRefreshTokenHashingHelper, RefreshTokenHashingHelper>();
 builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
@@ -148,14 +154,12 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IControleService, ControleService>();
 builder.Services.AddScoped<IPrivilegeService, PrivilegeService>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
-
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 builder.Services.AddScoped<IAuditLogger, AuditLogger>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 
-builder.Services.AddHttpContextAccessor();
-
-//builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
 WebApplication app = builder.Build();
 
@@ -163,35 +167,49 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
+    var mongoSettings = services.GetRequiredService<IOptions<MongoSettings>>().Value;
 
-    MongoDbContext dbContext = services.GetRequiredService<MongoDbContext>();
+    // uses root connection string directly, bypasses MongoDbContext/ITenantContext
+    await MongoDbUserInitializer.EnsureAppUserCreatedAsync(mongoSettings);
 
-    // ── Initialize MongoDB indexes
-    await MongoDbInitializer.InitializeAsync(dbContext);
+    // create a context with no tenant for index initialization
+    var dbContext = new MongoDbContext(
+        mongoSettings.ConnectionString,
+        mongoSettings.DatabaseName,
+        tenantContext: null);  // ← no tenant, HasTenant = false, filters = empty
 
-    // ── Seed data
-    await AuthServiceSeeder.SeedAsync(
-        dbContext,
-        services.GetRequiredService<IAuditLogRepository>(),
-        services.GetRequiredService<IAuthUserRepository>(),
-        services.GetRequiredService<IRoleRepository>(),
-        services.GetRequiredService<IControleRepository>(),
-        services.GetRequiredService<IPrivilegeRepository>(),
-        services.GetRequiredService<IPasswordHasher<AuthUser>>(),
-        services.GetRequiredService<IConfiguration>()
-    );
+    await MongoDbInitializer.InitializeAsync(dbContext, app.Environment, mongoSettings);
+
+    MongoDbContext db =
+        services.GetRequiredService<MongoDbContext>();
+
+    MongoSettings settings =
+        services.GetRequiredService<IOptions<MongoSettings>>().Value;
+
+    IWebHostEnvironment env =
+        services.GetRequiredService<IWebHostEnvironment>();
+
+    await GlobalSeeder.InitializeAsync(
+        db,
+        settings,
+        env,
+        services);
 }
 
 // =========================
 // PIPELINE
 // =========================
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment()) 
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+if (!app.Environment.IsDevelopment())
+{
     app.UseHttpsRedirection();
-    app.UseHsts();
+    app.UseHsts(); 
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();

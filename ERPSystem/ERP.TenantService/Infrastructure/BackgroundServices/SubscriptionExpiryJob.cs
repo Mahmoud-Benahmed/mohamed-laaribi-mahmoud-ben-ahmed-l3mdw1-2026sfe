@@ -50,8 +50,8 @@ public class SubscriptionExpiryJob : BackgroundService
 
                 await tenantRepo.SaveChangesAsync();
 
-                await publisher.PublishAsync(TenantTopics.TenantDeactivated,
-                    new TenantDeactivatedEvent(tenant.Id, tenant.Slug));
+                await publisher.PublishAsync(TenantTopics.TenantSuspended,
+                    new TenantSuspendedEvent(tenant.Id, tenant.Slug));
 
                 await publisher.PublishAsync(TenantTopics.SubscriptionExpired,
                     new SubscriptionExpiredEvent(sub.TenantId, sub.SubscriptionPlanId));

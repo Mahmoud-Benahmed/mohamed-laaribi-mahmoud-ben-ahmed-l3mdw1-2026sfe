@@ -20,7 +20,7 @@ public record TenantRestoredEvent(
     string Slug,
     bool IsActive);
 
-public record TenantDeactivatedEvent(
+public record TenantSuspendedEvent(
     Guid TenantId,
     string Slug);
 

@@ -27,17 +27,15 @@ namespace ERP.AuthService.Controllers
             if (!TryGetRequesterId(out Guid requesterId))
                 return Unauthorized();
 
-            if(!TryGetTenantId(out Guid tenantId))
-                return BadRequest(new { error = "Tenant context required" });
-
-
             AuthUserGetResponseDto user = await _authService.GetByIdAsync(requesterId);
 
             if (user == null)
                 return NotFound();
 
-            if (tenantId != user.TenantId)
+            if (TryGetTenantId(out Guid? tenantId) && tenantId != user.TenantId)
+            {
                 return Forbid();
+            }
 
             return Ok(user);
         }
@@ -217,7 +215,7 @@ namespace ERP.AuthService.Controllers
             if (!TryGetRequesterId(out Guid requesterId))
                 return Unauthorized();
 
-            if (!TryGetTenantId(out Guid tenantId))
+            if (!TryGetTenantId(out Guid? tenantId))
                 return BadRequest(new { error = "Tenant context required" });
 
             AuthUserGetResponseDto result = await _authService.RegisterAsync(request, requesterId, tenantId);
@@ -334,11 +332,22 @@ namespace ERP.AuthService.Controllers
             return !string.IsNullOrWhiteSpace(raw) && Guid.TryParse(raw, out requesterId);
         }
 
-        private bool TryGetTenantId(out Guid tenantId)
+        private bool TryGetTenantId(out Guid? tenantId)
         {
-            tenantId = Guid.Empty;
+            tenantId = null;
+
             string? raw = HttpContext.Request.Headers["X-Tenant-Id"].FirstOrDefault();
-            return !string.IsNullOrWhiteSpace(raw) && Guid.TryParse(raw, out tenantId);
+
+            if (string.IsNullOrWhiteSpace(raw))
+                return false;
+
+            if (Guid.TryParse(raw, out Guid parsed))
+            {
+                tenantId = parsed;
+                return true;
+            }
+
+            return false;
         }
     }
 }

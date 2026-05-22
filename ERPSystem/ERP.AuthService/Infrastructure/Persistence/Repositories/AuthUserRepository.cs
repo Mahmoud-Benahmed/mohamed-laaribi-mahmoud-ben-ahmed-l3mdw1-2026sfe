@@ -6,15 +6,10 @@ using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class AuthUserRepository : IAuthUserRepository
+    public class AuthUserRepository : BaseRepository<AuthUser>, IAuthUserRepository
     {
-        private readonly IMongoCollection<AuthUser> _collection;
-
         public AuthUserRepository(MongoDbContext context)
-        {
-            _collection = context.AuthUsers;
-        }
-
+            : base(context, CollectionNames.Users){}
         public async Task AddAsync(AuthUser user)
             => await _collection.InsertOneAsync(user);
 
@@ -74,6 +69,9 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 
         public async Task<int> CountAsync()
             => (int)await _collection.CountDocumentsAsync(x => x.IsActive && !x.IsDeleted);
+
+        public async Task<int> CountByTenantIdAsync(Guid tenantId)
+            => (int)await _collection.CountDocumentsAsync(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted);
 
 
         public async Task<int> CountByStatusAsync(bool status) =>

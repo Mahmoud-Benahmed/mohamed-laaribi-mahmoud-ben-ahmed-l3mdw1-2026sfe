@@ -4,14 +4,10 @@ using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class RoleRepository : IRoleRepository
+    public class RoleRepository : BaseRepository<Role>, IRoleRepository
     {
-        private readonly IMongoCollection<Role> _collection;
-
         public RoleRepository(MongoDbContext context)
-        {
-            _collection = context.Roles;
-        }
+            : base(context, CollectionNames.Roles) { }
 
         public async Task<Role?> GetByIdAsync(Guid id)
             => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();

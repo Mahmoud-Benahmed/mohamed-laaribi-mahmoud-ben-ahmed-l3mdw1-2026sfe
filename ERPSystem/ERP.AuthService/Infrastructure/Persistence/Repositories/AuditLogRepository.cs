@@ -1,17 +1,14 @@
 ﻿using ERP.AuthService.Application.Interfaces.Repositories;
+using ERP.AuthService.Domain;
 using ERP.AuthService.Domain.Logger;
 using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class AuditLogRepository : IAuditLogRepository
+    public class AuditLogRepository : BaseRepository<AuditLog>, IAuditLogRepository
     {
-        private readonly IMongoCollection<AuditLog> _collection;
-
         public AuditLogRepository(MongoDbContext context)
-        {
-            _collection = context.AuditLogs;
-        }
+            : base(context, CollectionNames.AuditLogs) { }
 
         public async Task AddAsync(AuditLog log)
             => await _collection.InsertOneAsync(log);

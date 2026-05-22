@@ -1,10 +1,11 @@
-﻿using MongoDB.Bson;
+﻿using ERP.AuthService.Infrastructure.Persistence.Repositories;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.RegularExpressions;
 
 namespace ERP.AuthService.Domain
 {
-    public class Role
+    public class Role : ITenantFilterable
     {
         [BsonId]
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
@@ -13,9 +14,13 @@ namespace ERP.AuthService.Domain
         [BsonRepresentation(BsonType.String)]
         public string Libelle { get; private set; }
 
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid? TenantId { get; private set; }
+        public bool IsGlobal => TenantId == null;
+
         private Role() { }
 
-        public Role(string libelle)
+        public Role(string libelle, Guid? tenantId= null)
         {
             Id = Guid.NewGuid();
             Libelle = Regex.Replace(
@@ -23,6 +28,8 @@ namespace ERP.AuthService.Domain
                 @"\s+",
                 "_"
             );
+
+            TenantId = tenantId;
         }
 
         public void UpdateRole(string libelle)

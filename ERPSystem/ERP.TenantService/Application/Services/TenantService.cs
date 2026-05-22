@@ -136,7 +136,11 @@ public class TenantService : ITenantService
 
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
-
+        
+        await _eventPublisher.PublishAsync(TenantTopics.TenantSuspended, new TenantSuspendedEvent(
+            TenantId: tenant.Id,
+            Slug: tenant.Slug
+        ));
         await _eventPublisher.PublishAsync(TenantTopics.TenantDeleted, new TenantDeletedEvent(
             tenant.Id,
             tenant.Slug
@@ -180,11 +184,11 @@ public class TenantService : ITenantService
         var tenant = await _tenantRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
-        tenant.Deactivate();
+        tenant.Suspend();
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
 
-        await _eventPublisher.PublishAsync(TenantTopics.TenantDeactivated, new TenantDeactivatedEvent(
+        await _eventPublisher.PublishAsync(TenantTopics.TenantSuspended, new TenantSuspendedEvent(
             TenantId: tenant.Id,
             Slug:tenant.Slug
         ));
@@ -242,7 +246,7 @@ public class TenantService : ITenantService
         var removedPlanId = tenant.Subscription.SubscriptionPlanId;
 
         tenant.RemoveSubscription();
-        tenant.Deactivate();
+        tenant.Suspend();
 
         // 2. Persist — single save
         await _subscriptionRepository.DeleteByTenantIdAsync(tenantId, ct);
@@ -252,8 +256,8 @@ public class TenantService : ITenantService
         // 3. Publish AFTER successful save — order matters:
         //    deactivated first so gateway cache updates before expiry consumers react
         await _eventPublisher.PublishAsync(
-            TenantTopics.TenantDeactivated,
-            new TenantDeactivatedEvent(tenant.Id, tenant.Slug));
+            TenantTopics.TenantSuspended,
+            new TenantSuspendedEvent(tenant.Id, tenant.Slug));
 
         await _eventPublisher.PublishAsync(
             TenantTopics.SubscriptionExpired,

@@ -87,7 +87,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
     {
         var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
 
-        plan.Deactivate();
+        plan.Suspend();
         await _repository.UpdateAsync(plan);
         await _repository.SaveChangesAsync(ct);
     }

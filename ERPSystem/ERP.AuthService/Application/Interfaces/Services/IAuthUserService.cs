@@ -5,7 +5,7 @@ namespace ERP.AuthService.Application.Interfaces.Services;
 
 public interface IAuthUserService
 {
-    Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid tenantId);
+    Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? tenantId);
     Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
     Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
     Task RevokeRefreshTokenAsync(string refreshToken);

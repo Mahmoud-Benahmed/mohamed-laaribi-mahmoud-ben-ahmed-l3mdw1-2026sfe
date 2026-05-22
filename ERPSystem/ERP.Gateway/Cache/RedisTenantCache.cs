@@ -5,6 +5,7 @@ using System.Text.Json;
 public interface ITenantCache
 {
     Task<TenantCacheEntry?> GetAsync(string slug);
+    Task<TenantCacheEntry?> GetAsync(Guid tenantId);
     Task SetAsync(TenantCacheEntry tenant);
     Task RemoveAsync(string slug);
 }
@@ -32,6 +33,22 @@ public class RedisTenantCache : ITenantCache
 
         return JsonSerializer.Deserialize<TenantCacheEntry>(json);
     }
+
+    public async Task<TenantCacheEntry?> GetAsync(Guid tenantId)
+    {
+        var value = await _db.StringGetAsync($"tenant:id:{tenantId}");
+
+        if (!value.HasValue)
+            return null;
+
+        var json = value.ToString();
+
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+
+        return JsonSerializer.Deserialize<TenantCacheEntry>(json);
+    }
+
 
     public async Task SetAsync(TenantCacheEntry tenant)
     {

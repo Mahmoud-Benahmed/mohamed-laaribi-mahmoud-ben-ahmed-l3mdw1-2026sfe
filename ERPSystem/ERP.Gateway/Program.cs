@@ -1,7 +1,6 @@
 using ERP.Gateway.Cache;
 using ERP.Gateway.Infrastructure.Messaging;
 using ERP.Gateway.Middleware;
-using ERP.Gateway.Middleware.ApiKeyAuthentication;
 using ERP.Gateway.Properties;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -76,10 +75,14 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey,
+
         RoleClaimType = "role",
+        NameClaimType = "login",
+
         ClockSkew = TimeSpan.FromMinutes(5),
     };
 
@@ -252,11 +255,50 @@ builder.Services.AddAuthorization(options =>
                   c.Value == Privileges.Stock.ADD_ENTRY ||
                   c.Value == Privileges.Stock.UPDATE_STOCK))));
 
-    options.AddPolicy("ApiKeyPolicy", policy =>
-    {
-        policy.AuthenticationSchemes.Add("ApiKey");
-        policy.RequireAuthenticatedUser();
-    });
+    options.AddPolicy(TenantPrivileges.VIEW_TENANTS, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.VIEW_TENANTS));
+
+    options.AddPolicy(TenantPrivileges.CREATE_TENANT, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.CREATE_TENANT));
+
+    options.AddPolicy(TenantPrivileges.UPDATE_TENANT, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.UPDATE_TENANT));
+
+    options.AddPolicy(TenantPrivileges.DELETE_TENANT, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.DELETE_TENANT));
+
+    options.AddPolicy(TenantPrivileges.SUSPEND_TENANT, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.SUSPEND_TENANT));
+
+    options.AddPolicy(TenantPrivileges.ACTIVATE_TENANT, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.ACTIVATE_TENANT));
+
+    options.AddPolicy(TenantPrivileges.MANAGE_SUBSCRIPTIONS, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.MANAGE_SUBSCRIPTIONS));
+
+    options.AddPolicy(TenantPrivileges.VIEW_BILLING, p =>
+        p.RequireAuthenticatedUser()
+         .RequireClaim("privilege", TenantPrivileges.VIEW_BILLING));
+
+    // =====================================================
+    // COMPOSITE POLICIES
+    // =====================================================
+
+    AddManagePolicy(
+        TenantPrivileges.VIEW_TENANTS,
+        TenantPrivileges.CREATE_TENANT,
+        TenantPrivileges.UPDATE_TENANT,
+        TenantPrivileges.DELETE_TENANT,
+        TenantPrivileges.SUSPEND_TENANT,
+        TenantPrivileges.ACTIVATE_TENANT
+    );
 });
 
 //////////////////////////////////////////////////
@@ -412,8 +454,6 @@ builder.Services.AddReverseProxy()
         });
     });
 
-builder.Services.AddAuthentication().AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
-builder.Services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var configuration =

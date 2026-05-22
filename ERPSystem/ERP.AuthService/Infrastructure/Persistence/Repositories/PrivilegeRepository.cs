@@ -4,14 +4,10 @@ using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class PrivilegeRepository : IPrivilegeRepository
+    public class PrivilegeRepository : BaseRepository<Privilege>, IPrivilegeRepository
     {
-        private readonly IMongoCollection<Privilege> _collection;
-
         public PrivilegeRepository(MongoDbContext context)
-        {
-            _collection = context.Privileges;
-        }
+            : base(context, CollectionNames.Privileges) { }
 
         public async Task<Privilege?> GetByIdAsync(Guid id)
             => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();

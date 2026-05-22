@@ -4,14 +4,10 @@ using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class ControleRepository : IControleRepository
+    public class ControleRepository : BaseRepository<Controle>,IControleRepository
     {
-        private readonly IMongoCollection<Controle> _collection;
-
         public ControleRepository(MongoDbContext context)
-        {
-            _collection = context.Controles;
-        }
+            : base(context, CollectionNames.Controles) {}
         public async Task<List<Controle>> GetByIdsAsync(IEnumerable<Guid> ids)
         {
             FilterDefinition<Controle> filter = Builders<Controle>.Filter.In(x => x.Id, ids);

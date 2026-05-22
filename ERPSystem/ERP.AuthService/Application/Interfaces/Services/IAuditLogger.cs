@@ -7,6 +7,7 @@ namespace ERP.AuthService.Application.Interfaces.Services
         Task LogAsync(
             AuditAction action,
             bool success,
+            Guid? tenantId = null,
             Guid? performedBy = null,
             Guid? targetUserId = null,
             string? failureReason = null,

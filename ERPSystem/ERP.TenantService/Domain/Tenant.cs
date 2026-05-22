@@ -39,7 +39,7 @@ public class Tenant
             Name = name,
             Email = email,
             Phone = phone,
-            Slug = subdomainSlug,
+            Slug = subdomainSlug.ToLower(),
             LogoUrl = logoUrl,
             PrimaryColor = primaryColor,
             SecondaryColor = secondaryColor,
@@ -78,7 +78,7 @@ public class Tenant
 
     public void Activate() => IsActive = true;
 
-    public void Deactivate() => IsActive = false;
+    public void Suspend() => IsActive = false;
 
     public void Delete()
     {
