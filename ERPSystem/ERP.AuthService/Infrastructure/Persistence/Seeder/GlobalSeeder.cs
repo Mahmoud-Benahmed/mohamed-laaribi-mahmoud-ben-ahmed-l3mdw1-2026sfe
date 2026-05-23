@@ -212,12 +212,12 @@ public class GlobalSeeder
         Dictionary<string, Controle> result =
             new(StringComparer.OrdinalIgnoreCase);
 
-        IEnumerable<PrivilegeDefinition> distinctDefs =
-            PrivilegeRegistry.TenantsPrivilegeDefinition
-                .GroupBy(x => x.Code, StringComparer.OrdinalIgnoreCase)
-                .Select(g => g.First());
+        var allDefs = PrivilegeRegistry.All
+            .Concat(PrivilegeRegistry.TenantsPrivilegeDefinition)
+            .GroupBy(x => x.Code, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First());
 
-        foreach (PrivilegeDefinition def in distinctDefs)
+        foreach (PrivilegeDefinition def in allDefs)
         {
             Controle? existing =
                 await controleRepository.GetByLibelleAsync(def.Code);
@@ -256,10 +256,6 @@ public class GlobalSeeder
         string[] roleNames =
         [
             Roles.SystemAdmin,
-            Roles.Accountant,
-            Roles.SalesManager,
-            Roles.StockManager,
-
             TenantRoles.SUPER_PLATFORM_ADMIN,
             TenantRoles.TENANT_SUPPORT,
             TenantRoles.BILLING_MANAGER,
@@ -298,8 +294,19 @@ public class GlobalSeeder
         Dictionary<string, Controle> controles,
         Guid? tenantId)
     {
+        var platformRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            Roles.SystemAdmin,
+            TenantRoles.SUPER_PLATFORM_ADMIN,
+            TenantRoles.TENANT_SUPPORT,
+            TenantRoles.BILLING_MANAGER,
+            TenantRoles.TENANT_AUDITOR
+        };
+
         foreach ((string roleName, Role role) in roles)
         {
+            if (!platformRoles.Contains(roleName))
+                continue;
             foreach (PrivilegeDefinition def in PrivilegeRegistry.TenantsPrivilegeDefinition)
             {
                 if (!controles.TryGetValue(def.Code, out Controle? controle))
