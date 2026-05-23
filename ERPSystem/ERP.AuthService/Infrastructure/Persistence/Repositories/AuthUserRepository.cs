@@ -17,7 +17,7 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
             => await _collection.Find(x => x.Login == login && !x.IsDeleted).FirstOrDefaultAsync();
 
         public async Task<AuthUser?> GetByEmailAsync(string email)
-            => await _collection.Find(x => x.Email == email && x.IsActive && !x.IsDeleted).FirstOrDefaultAsync();
+            => await _collection.Find(WithTenant(x => x.Email == email && x.IsActive && !x.IsDeleted)).FirstOrDefaultAsync();
 
         public async Task<AuthUser?> GetByIdAsync(Guid id)
             => await _collection.Find(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
@@ -55,33 +55,45 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 
         public async Task<AuthUser?> UpdateAsync(AuthUser user)
         {
-            ReplaceOneResult result = await _collection.ReplaceOneAsync(x => x.Id == user.Id, user);
+            var filter = _hasTenant
+                ? Builders<AuthUser>.Filter.And(
+                    Builders<AuthUser>.Filter.Eq(x => x.Id, user.Id),
+                    Builders<AuthUser>.Filter.Eq("TenantId", _tenantId!.Value))
+                : Builders<AuthUser>.Filter.Eq(x => x.Id, user.Id);
+
+            ReplaceOneResult result = await _collection.ReplaceOneAsync(filter, user);
             return result.ModifiedCount > 0 ? user : null;
         }
-
-        //#if DEBUG
-        public async Task DeleteAllAsync() => await _collection.DeleteManyAsync(_ => true);
-        //#else
-        //[Obsolete("DeleteAllAsync is only permitted in test/dev environments.")]
-        //public Task DeleteAllAsync() 
-        //    => throw new InvalidOperationException("DeleteAllAsync is not allowed in production.");
-        //#endif
 
         public async Task<int> CountAsync()
             => (int)await _collection.CountDocumentsAsync(x => x.IsActive && !x.IsDeleted);
 
         public async Task<int> CountByTenantIdAsync(Guid tenantId)
-            => (int)await _collection.CountDocumentsAsync(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted);
+            => (int)await _collection.CountDocumentsAsync(WithTenant(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted));
 
 
         public async Task<int> CountByStatusAsync(bool status) =>
-            (int)await _collection.CountDocumentsAsync(x => x.IsActive == status);
+            (int)await _collection.CountDocumentsAsync(WithTenant(
+                    x => x.IsActive == status
+                ));
 
-        public async Task<UserStatsDto> GetStatsAsync(Guid? excludeId = default)
+        public async Task<UserStatsDto> GetStatsAsync(Guid? excludeId = null)
         {
-            List<BsonDocument> pipeline = new List<BsonDocument>();
+            var pipeline = new List<BsonDocument>();
 
-            // Stage 1: exclude specific ID if provided
+            // Stage 1: scope filter
+            if (_hasTenant && _tenantId.HasValue)
+            {
+                pipeline.Add(new BsonDocument("$match",
+                    new BsonDocument("TenantId",
+                        new BsonBinaryData(_tenantId.Value, GuidRepresentation.Standard))));
+            }
+            else
+            {
+                pipeline.Add(new BsonDocument("$match", new BsonDocument()));  // platform admin — all
+            }
+
+            // Stage 2: exclude specific ID
             if (excludeId.HasValue)
             {
                 pipeline.Add(new BsonDocument("$match",
@@ -89,15 +101,15 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
                         new BsonDocument("$ne",
                             new BsonBinaryData(excludeId.Value, GuidRepresentation.Standard)))));
             }
-            // Stage 2: group and count all buckets in one pass
+
+            // Stage 3: group and count
             pipeline.Add(new BsonDocument("$group", new BsonDocument
             {
                 { "_id", BsonNull.Value },
                 { "total", new BsonDocument("$sum",
                     new BsonDocument("$cond", new BsonArray
                     {
-                        new BsonDocument("$eq", new BsonArray { "$IsDeleted", false }),
-                        1, 0
+                        new BsonDocument("$eq", new BsonArray { "$IsDeleted", false }), 1, 0
                     }))},
                 { "active", new BsonDocument("$sum",
                     new BsonDocument("$cond", new BsonArray
@@ -106,8 +118,7 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
                         {
                             new BsonDocument("$eq", new BsonArray { "$IsDeleted", false }),
                             new BsonDocument("$eq", new BsonArray { "$IsActive", true })
-                        }),
-                        1, 0
+                        }), 1, 0
                     }))},
                 { "deactivated", new BsonDocument("$sum",
                     new BsonDocument("$cond", new BsonArray
@@ -116,23 +127,19 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
                         {
                             new BsonDocument("$eq", new BsonArray { "$IsDeleted", false }),
                             new BsonDocument("$eq", new BsonArray { "$IsActive", false })
-                        }),
-                        1, 0
+                        }), 1, 0
                     }))},
                 { "deleted", new BsonDocument("$sum",
                     new BsonDocument("$cond", new BsonArray
                     {
-                        new BsonDocument("$eq", new BsonArray { "$IsDeleted", true }),
-                        1, 0
+                        new BsonDocument("$eq", new BsonArray { "$IsDeleted", true }), 1, 0
                     }))}
             }));
 
-            BsonDocument result = await _collection
-                .Aggregate<BsonDocument>(pipeline)
-                .FirstOrDefaultAsync();
+            var result = await _collection.Aggregate<BsonDocument>(pipeline).FirstOrDefaultAsync();
 
             if (result == null)
-                return new UserStatsDto(); // all zeros
+                return new UserStatsDto();
 
             return new UserStatsDto
             {
@@ -156,29 +163,27 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
             pageNumber = Math.Max(pageNumber, 1);
             pageSize = Math.Max(pageSize, 1);
 
-            List<FilterDefinition<AuthUser>> filters = new List<FilterDefinition<AuthUser>>();
+            var filters = new List<FilterDefinition<AuthUser>>
+            {
+                ScopeFilter  // ✅ replaces manual TenantFilter insertion
+            };
 
-            // deleted filter
             if (!includeDeleted)
                 filters.Add(Builders<AuthUser>.Filter.Where(u => !u.IsDeleted));
             else
                 filters.Add(Builders<AuthUser>.Filter.Where(u => u.IsDeleted));
 
-            // custom filter
             if (filter != null)
                 filters.Add(filter);
 
-            // excludeId filter
             if (excludeId.HasValue)
                 filters.Add(Builders<AuthUser>.Filter.Where(u => u.Id != excludeId.Value));
 
-            FilterDefinition<AuthUser> finalFilter = Builders<AuthUser>.Filter.And(filters);
-
+            var finalFilter = Builders<AuthUser>.Filter.And(filters);
             sort ??= Builders<AuthUser>.Sort.Ascending(u => u.CreatedAt);
 
             int totalCount = (int)await _collection.CountDocumentsAsync(finalFilter);
-
-            List<AuthUser> items = await _collection
+            var items = await _collection
                 .Find(finalFilter)
                 .Sort(sort)
                 .Skip((pageNumber - 1) * pageSize)
