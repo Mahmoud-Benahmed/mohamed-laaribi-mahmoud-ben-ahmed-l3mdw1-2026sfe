@@ -227,9 +227,6 @@ using (IServiceScope scope = app.Services.CreateScope())
 using (IServiceScope scope = app.Services.CreateScope())
 {
     StockDbContext db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
-    
-    if (app.Environment.IsDevelopment())
-        await db.Database.EnsureDeletedAsync();
 
     await db.Database.MigrateAsync();
 }
