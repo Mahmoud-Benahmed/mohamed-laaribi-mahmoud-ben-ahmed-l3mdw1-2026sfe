@@ -19,12 +19,21 @@ public class TenantContext : ITenantContext
         get
         {
             var ctx = _httpContextAccessor.HttpContext;
-            var value = ctx?.Items["tenantId"]?.ToString();
+            if (ctx == null) return null;
 
-            return Guid.TryParse(value, out var id) ? id : null;
+            // Try header first (forwarded by gateway)
+            var header = ctx.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+            if (Guid.TryParse(header, out var fromHeader))
+                return fromHeader;
+
+            // Fallback to JWT claim
+            var claim = ctx.User?.FindFirst("tenantId")?.Value;
+            if (Guid.TryParse(claim, out var fromClaim))
+                return fromClaim;
+
+            return null;
         }
     }
-
     public string? Slug
     {
         get
