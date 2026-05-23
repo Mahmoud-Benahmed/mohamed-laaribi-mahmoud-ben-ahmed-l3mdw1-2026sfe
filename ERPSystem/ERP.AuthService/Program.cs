@@ -69,7 +69,7 @@ builder.Services.AddScoped<MongoDbContext>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
     var tenantContext = sp.GetRequiredService<ITenantContext>();
-    return new MongoDbContext(settings.ConnectionString, settings.DatabaseName, tenantContext);
+    return new MongoDbContext(settings.DatabaseName, tenantContext, sp.GetRequiredService<IMongoClient>());
 });
 
 
@@ -168,32 +168,16 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
     var mongoSettings = services.GetRequiredService<IOptions<MongoSettings>>().Value;
+    var env = services.GetRequiredService<IWebHostEnvironment>();
 
-    // uses root connection string directly, bypasses MongoDbContext/ITenantContext
     await MongoDbUserInitializer.EnsureAppUserCreatedAsync(mongoSettings);
 
-    // create a context with no tenant for index initialization
-    var dbContext = new MongoDbContext(
-        mongoSettings.ConnectionString,
-        mongoSettings.DatabaseName,
-        tenantContext: null);  // ← no tenant, HasTenant = false, filters = empty
+    // ✅ get from DI — no tenant context at startup so HasTenant = false naturally
+    var dbContext = services.GetRequiredService<MongoDbContext>();
 
-    await MongoDbInitializer.InitializeAsync(dbContext, app.Environment, mongoSettings);
+    await MongoDbInitializer.InitializeAsync(dbContext, env, mongoSettings);
 
-    MongoDbContext db =
-        services.GetRequiredService<MongoDbContext>();
-
-    MongoSettings settings =
-        services.GetRequiredService<IOptions<MongoSettings>>().Value;
-
-    IWebHostEnvironment env =
-        services.GetRequiredService<IWebHostEnvironment>();
-
-    await GlobalSeeder.InitializeAsync(
-        db,
-        settings,
-        env,
-        services);
+    await GlobalSeeder.InitializeAsync(dbContext, mongoSettings, env, services);
 }
 
 // =========================
