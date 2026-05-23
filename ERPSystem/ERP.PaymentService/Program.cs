@@ -183,9 +183,6 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     PaymentDbContext context = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
 
-    if(app.Environment.IsDevelopment())
-        await context.Database.EnsureDeletedAsync();
-
     await context.Database.MigrateAsync();
 }
 
