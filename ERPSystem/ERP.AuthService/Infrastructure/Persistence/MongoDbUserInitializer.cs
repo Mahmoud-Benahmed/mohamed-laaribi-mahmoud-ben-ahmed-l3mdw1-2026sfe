@@ -11,10 +11,18 @@ public static class MongoDbUserInitializer
         var rootClient = new MongoClient(settings.RootConnectionString);
         var adminDb = rootClient.GetDatabase("admin");
 
-        var filter = new BsonDocument("usersInfo", settings.AppUsername);
+        // ✅ correct usersInfo command structure
+        var userInfoCommand = new BsonDocument
+        {
+            { "usersInfo", new BsonDocument
+                {
+                    { "user", settings.AppUsername },
+                    { "db", "admin" }
+                }
+            }
+        };
 
-        var result = await adminDb.RunCommandAsync<BsonDocument>(filter);
-
+        var result = await adminDb.RunCommandAsync<BsonDocument>(userInfoCommand);
         var users = result["users"].AsBsonArray;
 
         if (users.Count > 0)
