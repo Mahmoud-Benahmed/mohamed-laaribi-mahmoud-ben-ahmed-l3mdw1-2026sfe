@@ -1,4 +1,5 @@
 ﻿using ERP.AuthService.Application.DTOs.Role;
+using ERP.AuthService.Infrastructure.Persistence.Repositories;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.RegularExpressions;
