@@ -343,7 +343,12 @@ namespace ERP.AuthService.Application.Services
                 .ToList();
 
             List<Controle> controles = await _controleRepository.GetByIdsAsync(grantedControleIds);
-            List<string> privilegeNames = controles.Select(c => c.Libelle).ToList();
+
+            bool isTenantUser = user.TenantId.HasValue;
+            List<string> privilegeNames = controles
+                .Where(c => !isTenantUser || c.Category != "TENANT")
+                .Select(c => c.Libelle)
+                .ToList();
 
             (string? accessToken, DateTime expiresAt) = _jwtGenerator.GenerateAccessToken(
                 user.Id,
