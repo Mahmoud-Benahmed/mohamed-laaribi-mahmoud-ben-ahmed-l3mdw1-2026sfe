@@ -10,12 +10,6 @@ namespace ERP.AuthService.Infrastructure.Persistence
     {
         public static async Task InitializeAsync(MongoDbContext context, IWebHostEnvironment env, MongoSettings settings)
         {
-            if (env.IsDevelopment())
-            {
-                var rootClient = new MongoClient(settings.RootConnectionString);
-                await rootClient.DropDatabaseAsync(settings.DatabaseName);
-            }
-
             var caseInsensitiveCollation =
                 new Collation("en", strength: CollationStrength.Secondary);
 
