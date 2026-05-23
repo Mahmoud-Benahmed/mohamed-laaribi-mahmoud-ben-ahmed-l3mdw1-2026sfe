@@ -22,7 +22,9 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
         {
             pageNumber = Math.Max(pageNumber, 1);
             pageSize = Math.Max(pageSize, 1);
-            FilterDefinition<Role> filter = Builders<Role>.Filter.Empty;
+
+            FilterDefinition<Role> filter = GlobalFilter;  // ✅ scope filter
+
             int totalCount = (int)await _collection.CountDocumentsAsync(filter);
             List<Role> items = await _collection.Find(filter)
                 .Sort(Builders<Role>.Sort.Ascending(r => r.Libelle))
@@ -34,7 +36,7 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 
         public async Task<List<Role>> GetAllAsync()
             => await _collection
-                .Find(Builders<Role>.Filter.Empty)
+                .Find(GlobalFilter)
                 .Sort(Builders<Role>.Sort.Ascending(r => r.Libelle))
                 .ToListAsync();
 
@@ -43,17 +45,26 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
             => await _collection.InsertOneAsync(role);
 
         public async Task UpdateAsync(Role role)
-            => await _collection.ReplaceOneAsync(x => x.Id == role.Id, role);
+        {
+            // Platform admin → only update platform roles (TenantId = null)
+            // Tenant user → only update their own tenant's roles
+            var filter = _hasTenant
+                ? WithTenant(x => x.Id == role.Id)
+                : WithGlobal(x => x.Id == role.Id);  // ✅ platform admin scoped to null-tenant roles
+
+            await _collection.ReplaceOneAsync(filter, role);
+        }
 
         public async Task DeleteAsync(Guid id)
-            => await _collection.DeleteOneAsync(x => x.Id == id);
-
-        public async Task DeleteAllAsync()
         {
-            await _collection.DeleteManyAsync(FilterDefinition<Role>.Empty);
+            var filter = _hasTenant
+                ? WithTenant(x => x.Id == id)
+                : WithGlobal(x => x.Id == id);  // ✅ platform admin scoped to null-tenant roles
+
+            await _collection.DeleteOneAsync(filter);
         }
 
         public async Task<long> CountAsync()
-            => await _collection.CountDocumentsAsync(_ => true);
+            => await _collection.CountDocumentsAsync(GlobalFilter);
     }
 }
