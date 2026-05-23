@@ -8,7 +8,7 @@ public static class TenantSeeder
     public static async Task SeedAsync(TenantDbContext context)
     {
         // ✅ Include all slugs you check below
-        var slugs = new[] { "acme", "xyz", "bard" };
+        var slugs = new[] { "acme", "xyz", "bard", "nord" };
 
         var existingSlugs = await context.Tenants
             .Where(t => slugs.Contains(t.Slug))
