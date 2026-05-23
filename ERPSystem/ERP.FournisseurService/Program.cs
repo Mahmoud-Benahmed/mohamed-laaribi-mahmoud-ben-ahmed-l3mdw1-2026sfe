@@ -94,9 +94,6 @@ using (IServiceScope scope = app.Services.CreateScope())
     FournisseurDbContext db = scope.ServiceProvider.GetRequiredService<FournisseurDbContext>();
     DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
 
-    if (app.Environment.IsDevelopment())
-        await db.Database.EnsureDeletedAsync();
-
     await db.Database.MigrateAsync();
     await seeder.SeedAsync();
 }
