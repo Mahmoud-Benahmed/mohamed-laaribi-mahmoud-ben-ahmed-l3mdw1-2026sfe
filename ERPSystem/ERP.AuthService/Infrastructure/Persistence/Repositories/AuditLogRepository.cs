@@ -15,10 +15,13 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 
         public async Task<List<AuditLog>> GetByUserAsync(Guid userId, int pageNumber, int pageSize)
         {
-            FilterDefinition<AuditLog> filter = Builders<AuditLog>.Filter.Or(
+            FilterDefinition<AuditLog> userFilter = Builders<AuditLog>.Filter.Or(
                 Builders<AuditLog>.Filter.Eq(x => x.PerformedBy, userId),
                 Builders<AuditLog>.Filter.Eq(x => x.TargetUserId, userId)
             );
+
+            var filter = WithTenant(userFilter);
+
             return await _collection.Find(filter)
                 .SortByDescending(x => x.Timestamp)
                 .Skip((pageNumber - 1) * pageSize)
@@ -27,17 +30,18 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
         }
 
         public async Task<List<AuditLog>> GetAllAsync(int pageNumber, int pageSize)
-            => await _collection.Find(_ => true)
+            => await _collection.Find(TenantFilter)
                 .SortByDescending(x => x.Timestamp)
                 .Skip((pageNumber - 1) * pageSize)
                 .Limit(pageSize)
                 .ToListAsync();
 
         public async Task<long> CountAsync()
-            => await _collection.CountDocumentsAsync(_ => true);
+            => await _collection.CountDocumentsAsync(TenantFilter);
+
 
         // AuditLogRepository
         public async Task ClearAsync()
-            => await _collection.DeleteManyAsync(FilterDefinition<AuditLog>.Empty);
+            => await _collection.DeleteManyAsync(TenantFilter);
     }
 }
