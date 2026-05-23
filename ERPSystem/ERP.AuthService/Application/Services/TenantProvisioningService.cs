@@ -99,11 +99,16 @@ public class TenantProvisioningService : ITenantProvisioningService
             Roles.StockManager
         ];
 
+        var existingRoles = await _db.Collection<Role>("Roles")
+            .Find(Builders<Role>.Filter.Eq(r => r.TenantId, tenantId))
+            .ToListAsync();
+
+        var existingByName = existingRoles
+            .ToDictionary(r => r.Libelle, r => r, StringComparer.OrdinalIgnoreCase);
+
         foreach (var roleName in roleNames)
         {
-            var existing = await _roles.GetByLibelleAsync(roleName.ToUpper());
-
-            if (existing != null)
+            if (existingByName.TryGetValue(roleName.ToUpper(), out var existing))
             {
                 result[roleName] = existing;
                 continue;
@@ -111,7 +116,6 @@ public class TenantProvisioningService : ITenantProvisioningService
 
             var role = new Role(roleName, tenantId);
             await _roles.AddAsync(role);
-
             result[roleName] = role;
         }
 
@@ -152,12 +156,15 @@ public class TenantProvisioningService : ITenantProvisioningService
     // =====================================================
     private async Task SeedTenantUsersAsync(Guid tenantId, string slug)
     {
-        var roles = await _roles.GetAllAsync();
+        var rolesFilter = Builders<Role>.Filter.Eq(r => r.TenantId, tenantId);
+        var roles = await _db.Collection<Role>("Roles")
+            .Find(rolesFilter)
+            .ToListAsync();
 
-        var adminRole = roles.First(r => r.Libelle == Roles.SystemAdmin);
-        var salesRole = roles.First(r => r.Libelle == Roles.SalesManager);
-        var stockRole = roles.First(r => r.Libelle == Roles.StockManager);
-        var accountRole = roles.First(r => r.Libelle == Roles.Accountant);
+        var adminRole = roles.First(r => r.Libelle == Roles.SystemAdmin.ToUpper());
+        var salesRole = roles.First(r => r.Libelle == Roles.SalesManager.ToUpper());
+        var stockRole = roles.First(r => r.Libelle == Roles.StockManager.ToUpper());
+        var accountRole = roles.First(r => r.Libelle == Roles.Accountant.ToUpper());
 
         var seedUsers = new[]
         {
