@@ -12,11 +12,13 @@ namespace ERP.AuthService.Application.Services
     {
         private readonly IAuditLogger _auditLogger;
         private readonly IRoleRepository _roleRepository;
+        private readonly ITenantContext _tenantContext;
 
-        public RoleService(IAuditLogger auditLogger, IRoleRepository roleRepository)
+        public RoleService(IAuditLogger auditLogger, IRoleRepository roleRepository, ITenantContext tenantContext)
         {
             _auditLogger = auditLogger;
             _roleRepository = roleRepository;
+            _tenantContext = tenantContext;
         }
 
         public async Task<PagedResultDto<RoleResponseDto>> GetAllPagedAsync(int pageNumber, int pageSize)
@@ -43,7 +45,8 @@ namespace ERP.AuthService.Application.Services
         {
             Role role = await _roleRepository.GetByIdAsync(id)
                        ?? throw new RoleNotFoundException(id);
-            return new RoleResponseDto(role.Id, role.Libelle);
+
+            return MapToDto(role);
         }
 
         public async Task<RoleResponseDto> CreateRole(RoleCreateDto dto, Guid performedById)
@@ -51,9 +54,9 @@ namespace ERP.AuthService.Application.Services
             Role? existing = await _roleRepository.GetByLibelleAsync(dto.Libelle);
             if (existing is not null)
                 throw new RoleAlreadyExistException(dto.Libelle);
-            Role newRole = new Role(dto.Libelle);
+            Role role = new Role(dto.Libelle, _tenantContext.TenantId);
 
-            await _roleRepository.AddAsync(newRole);
+            await _roleRepository.AddAsync(role);
 
             await _auditLogger.LogAsync(
                     AuditAction.RoleCreated,
@@ -61,7 +64,7 @@ namespace ERP.AuthService.Application.Services
                     performedBy: performedById,
                     metadata: new() { ["created"] = dto.Libelle.ToString(), ["createdBy"] = performedById.ToString() });
 
-            return new RoleResponseDto(newRole.Id, newRole.Libelle);
+            return MapToDto(role);
         }
         public async Task<RoleResponseDto> UpdateAsync(Guid id, RoleUpdateDto dto, Guid performedById)
         {
@@ -82,7 +85,7 @@ namespace ERP.AuthService.Application.Services
                         ["performedBy"] = performedById.ToString()
                     });
 
-            return new RoleResponseDto(role.Id, role.Libelle);
+            return MapToDto(role);
         }
 
         public async Task DeleteAsync(Guid id, Guid performedById)
@@ -100,7 +103,8 @@ namespace ERP.AuthService.Application.Services
         private static RoleResponseDto MapToDto(Role role) =>
             new(
                 role.Id,
-                role.Libelle
+                role.Libelle,
+                TenantId: role.TenantId
             );
 
         private static void ValidatePaging(int pageNumber, int pageSize)
