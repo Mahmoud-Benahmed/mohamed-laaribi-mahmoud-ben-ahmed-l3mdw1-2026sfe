@@ -249,8 +249,6 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     InvoiceDbContext context = scope.ServiceProvider.GetRequiredService<InvoiceDbContext>();
 
-    if (app.Environment.IsDevelopment())
-        await context.Database.EnsureDeletedAsync();
     await context.Database.MigrateAsync();
 }
 
