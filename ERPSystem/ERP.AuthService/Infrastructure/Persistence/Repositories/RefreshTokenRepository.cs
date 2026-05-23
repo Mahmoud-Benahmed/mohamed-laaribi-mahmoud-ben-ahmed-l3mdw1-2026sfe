@@ -10,7 +10,9 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
         private readonly IRefreshTokenHashingHelper _refreshTokenHashingHelper;
 
         public RefreshTokenRepository(MongoDbContext context, IRefreshTokenHashingHelper refreshTokenHashing) 
-            :base(context, CollectionNames.RefreshTokens) { }
+            :base(context, CollectionNames.RefreshTokens) {
+            _refreshTokenHashingHelper = refreshTokenHashing;
+        }
 
         public async Task AddAsync(RefreshToken token)
             => await _collection.InsertOneAsync(token);
