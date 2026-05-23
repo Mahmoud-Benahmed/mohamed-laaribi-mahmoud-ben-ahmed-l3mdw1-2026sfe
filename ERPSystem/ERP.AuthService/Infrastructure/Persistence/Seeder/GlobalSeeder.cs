@@ -303,11 +303,15 @@ public class GlobalSeeder
             TenantRoles.TENANT_AUDITOR
         };
 
+        var allDefs = PrivilegeRegistry.All
+                            .Concat(PrivilegeRegistry.TenantsPrivilegeDefinition)
+                            .ToList();
+
         foreach ((string roleName, Role role) in roles)
         {
             if (!platformRoles.Contains(roleName))
                 continue;
-            foreach (PrivilegeDefinition def in PrivilegeRegistry.TenantsPrivilegeDefinition)
+            foreach (PrivilegeDefinition def in allDefs)
             {
                 if (!controles.TryGetValue(def.Code, out Controle? controle))
                     continue;
