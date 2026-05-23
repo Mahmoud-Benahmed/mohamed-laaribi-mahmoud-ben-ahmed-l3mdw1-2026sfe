@@ -80,10 +80,6 @@ WebApplication app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
-    if (app.Environment.IsDevelopment())
-    {
-        await db.Database.EnsureDeletedAsync();
-    }
 
     await db.Database.MigrateAsync();
 
