@@ -1,3 +1,4 @@
+using ERP.TenantService.Application.DTOs.TenantSubscription;
 using System.ComponentModel.DataAnnotations;
 
 namespace ERP.TenantService.Application.DTOs.Tenant;
@@ -7,6 +8,7 @@ public record CreateTenantRequestDto(
     [Required][EmailAddress][MaxLength(200)] string Email,
     [Required][MaxLength(20)] string Phone,
     [Required][MaxLength(100)] string SubdomainSlug,
+    [Required] AssignSubscriptionRequestDto Subscription,
     [MaxLength(500)] string? LogoUrl,
     [MaxLength(7)] string? PrimaryColor,
     [MaxLength(7)] string? SecondaryColor,
