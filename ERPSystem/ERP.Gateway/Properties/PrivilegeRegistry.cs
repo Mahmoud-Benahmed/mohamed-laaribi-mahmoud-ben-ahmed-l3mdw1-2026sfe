@@ -26,6 +26,7 @@ public static class PrivilegeRegistry
         new(Privileges.Users.CREATE_CONTROLE,   "AUTH", "Create controle"),
         new(Privileges.Users.UPDATE_CONTROLE,   "AUTH", "Update controle"),
         new(Privileges.Users.DELETE_CONTROLE,   "AUTH", "Delete controle"),
+        new(Privileges.Users.BUY_SUBSCRIPTION,  "AUTH", "Buy subscription for tenant"),
         new(Privileges.Audit.MANAGE_AUDITLOGS,  "AUTH", "Manage audit logs"),
 
         // ── Clients
