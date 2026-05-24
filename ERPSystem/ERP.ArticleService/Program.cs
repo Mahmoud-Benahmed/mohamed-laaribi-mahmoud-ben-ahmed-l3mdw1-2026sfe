@@ -55,6 +55,7 @@ builder.Services.AddHealthChecks()
     .AddKafka(kafkaConfig)
     .AddCheck("self", () => HealthCheckResult.Healthy());
 
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArticleCodeRepository, ArticleCodeRepository>();
@@ -65,11 +66,11 @@ builder.Services.AddScoped<IArticleCodeService, ArticleCodeService>();
 
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 
 
 builder.Services.AddScoped<ArticleCodeSeeder>();
-builder.Services.AddScoped<CategorySeeder>();
-builder.Services.AddScoped<ArticleSeeder>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -80,41 +81,13 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
-    ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+    var db = scope.ServiceProvider.GetRequiredService<ArticleDbContext>();
 
-    try
-    {
-        ArticleDbContext context = services.GetRequiredService<ArticleDbContext>();
-
-        logger.LogInformation("Applying migrations...");
-        await context.Database.MigrateAsync();
-
-        logger.LogInformation("Seeding article codes...");
-        await services.GetRequiredService<ArticleCodeSeeder>().SeedAsync();
-
-        logger.LogInformation("Seeding categories...");
-        await services.GetRequiredService<CategorySeeder>().SeedAsync();
-
-        logger.LogInformation("Seeding articles...");
-        await services.GetRequiredService<ArticleSeeder>().SeedAsync();
-
-        logger.LogInformation("All seeding completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while seeding the database.");
-        throw;
-    }
+    await db.Database.MigrateAsync();
 }
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-    app.UseHsts();
-}
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
