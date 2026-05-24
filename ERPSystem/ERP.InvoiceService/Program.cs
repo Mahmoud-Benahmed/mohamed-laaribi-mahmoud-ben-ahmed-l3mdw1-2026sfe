@@ -4,6 +4,7 @@ using ERP.InvoiceService.Application.Interfaces;
 using ERP.InvoiceService.Application.Services.LocalCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ArticleCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ClientCache;
+using ERP.InvoiceService.Infrastructure.BackgroundServices;
 using ERP.InvoiceService.Infrastructure.Messaging;
 using ERP.InvoiceService.Infrastructure.Messaging.Events;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.Article;
@@ -130,6 +131,7 @@ builder.Services.AddHostedService<PaymentEventConsumer>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 builder.Services.AddScoped<IInvoicePdfGenerator, InvoicePdfGenerator>();
 
+builder.Services.AddHostedService<OverdueInvoiceJob>();
 
 // =========================
 // CONTROLLERS & API
