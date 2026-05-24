@@ -67,17 +67,15 @@ public class TenantService : ITenantService
             dto.LogoUrl, dto.PrimaryColor, dto.SecondaryColor,
             dto.Currency, dto.Locale, dto.Timezone);
 
+
+        var subscription = dto.Subscription;
         
         // 3. Auto-assign default plan (Starter) on creation
-        var starterPlan = await _planRepository.GetByCodeAsync("STARTER", ct)
-            ?? throw new InvalidOperationException("Default STARTER plan not configured.");
-
-
-        var startDate = DateTime.UtcNow;
-        var endDate = startDate.AddMonths(1);
+        var plan = await _planRepository.GetByIdAsync(subscription.SubscriptionPlanId, ct)
+            ?? throw new InvalidOperationException("Selected plan not found.");
 
         tenant.Activate();
-        tenant.AssignSubscription(starterPlan.Id, startDate, endDate);
+        tenant.AssignSubscription(subscription.SubscriptionPlanId, subscription.StartDate, subscription.Period);
 
         await _tenantRepository.AddAsync(tenant);
         await _tenantRepository.SaveChangesAsync();
@@ -198,6 +196,10 @@ public class TenantService : ITenantService
     {
         var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId)
             ?? throw new KeyNotFoundException($"Tenant with id '{tenantId}' not found.");
+        var subscription = await _subscriptionRepository.GetByTenantIdAsync(tenantId);
+        
+        if(subscription is not null)
+            throw new InvalidOperationException("Unable to assign new plan, current tenant has an active subscription.");
 
         var newplan = await _planRepository.GetByIdAsync(dto.SubscriptionPlanId)
             ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{dto.SubscriptionPlanId}' not found.");
@@ -207,14 +209,12 @@ public class TenantService : ITenantService
         
         var oldPlanId = tenant.Subscription?.SubscriptionPlanId;
 
-        if (dto.StartDate >= dto.EndDate)
-            throw new ArgumentException("Invalid subscription period: StartDate must be strictly earlier than EndDate.");
-
         var wasInactive = !tenant.IsActive;
+
         if (wasInactive)
             tenant.Activate();
 
-        tenant.AssignSubscription(dto.SubscriptionPlanId, dto.StartDate, dto.EndDate);
+        tenant.AssignSubscription(dto.SubscriptionPlanId, dto.StartDate, dto.Period);
 
         await _tenantRepository.UpdateAsync(tenant);
         await _tenantRepository.SaveChangesAsync(ct);
@@ -231,8 +231,15 @@ public class TenantService : ITenantService
             NewMaxUsers: newplan.MaxUsers,
             NewMaxStorageMb: newplan.MaxStorageMb));
 
+        var endDate= dto.Period switch
+        {
+            SubscriptionPeriodEnum.MONTH => dto.StartDate.AddMonths(1),
+            SubscriptionPeriodEnum.YEAR => dto.StartDate.AddYears(1),
+            _ => throw new NotImplementedException()
+        };
+
         return new TenantSubscriptionResponseDto(
-            tenant.Id, dto.StartDate, dto.EndDate, MapPlanToDto(newplan));
+            tenant.Id, dto.StartDate, endDate, MapPlanToDto(newplan));
     }
 
     public async Task RemoveSubscriptionAsync(Guid tenantId, CancellationToken ct = default)
@@ -274,7 +281,9 @@ public class TenantService : ITenantService
 
         var subscription = tenant.Subscription;
 
-        var plan = subscription.Plan is not null ? MapPlanToDto(subscription.Plan) : null;
+        var plan = subscription.Plan is null
+            ? null
+            : MapPlanToDto(subscription.Plan);
 
         return new TenantSubscriptionResponseDto(
             subscription.TenantId,
