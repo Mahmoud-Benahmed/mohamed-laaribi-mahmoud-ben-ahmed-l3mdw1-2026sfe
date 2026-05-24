@@ -18,15 +18,6 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
 ConfigurationManager config = builder.Configuration;
-
-// HELPERS
-static string? ExtractSlug(string host)
-{
-    var parts = host.Split('.');
-    if (parts.Length >= 3) return parts[0].ToLowerInvariant();
-    return null; // handle local dev separately
-}
-
 string GetClusterAddress(string clusterName, string destinationName)
 {
     var address = config[
@@ -146,30 +137,38 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 
+    void Add(string policy, params string[] privileges) =>
+        options.AddPolicy(policy, p =>
+            p.RequireAuthenticatedUser()
+             .RequireAssertion(ctx =>
+                 privileges.Any(r => ctx.User.HasClaim("privilege", r))));
+
     options.AddPolicy("JwtPolicy", p => p.RequireAuthenticatedUser());
 
     options.AddPolicy("AdminOnly", p =>
         p.RequireAuthenticatedUser()
          .RequireRole(Roles.SystemAdmin));
 
-    // ── Individual privilege policies ──────────────────────────────────────
+    // ── Individual tenant privileges (platform-scoped)
+    Add(TenantPrivileges.VIEW_TENANTS, TenantPrivileges.VIEW_TENANTS);
+    Add(TenantPrivileges.CREATE_TENANT, TenantPrivileges.CREATE_TENANT);
+    Add(TenantPrivileges.UPDATE_TENANT, TenantPrivileges.UPDATE_TENANT);
+    Add(TenantPrivileges.DELETE_TENANT, TenantPrivileges.DELETE_TENANT);
+    Add(TenantPrivileges.SUSPEND_TENANT, TenantPrivileges.SUSPEND_TENANT);
+    Add(TenantPrivileges.ACTIVATE_TENANT, TenantPrivileges.ACTIVATE_TENANT);
+    Add(TenantPrivileges.MANAGE_SUBSCRIPTIONS, TenantPrivileges.MANAGE_SUBSCRIPTIONS);
+    Add(TenantPrivileges.VIEW_BILLING, TenantPrivileges.VIEW_BILLING);
+
+    // ── Individual privilege policies (tenant-scoped, from registry)
     foreach (PrivilegeDefinition privilege in PrivilegeRegistry.All)
-    {
-        options.AddPolicy(privilege.Code, p =>
-            p.RequireAuthenticatedUser()
-             .RequireClaim("privilege", privilege.Code));
-    }
+        Add(privilege.Code, privilege.Code);
 
-    // ── MANAGE composite policies ──────────────────────────────────────────
-    void AddManagePolicy(string manageCode, params string[] related)
-    {
-        options.AddPolicy(manageCode, p =>
-            p.RequireAuthenticatedUser()
-             .RequireAssertion(ctx =>
-                 related.Any(r => ctx.User.HasClaim("privilege", r))));
-    }
+    // ── Composite policies
+    Add("ASSIGN_SUBSCRIPTION_OR_BUY",
+        TenantPrivileges.MANAGE_SUBSCRIPTIONS,
+        Privileges.Users.BUY_SUBSCRIPTION);
 
-    AddManagePolicy(Privileges.Users.MANAGE_USERS,
+    Add(Privileges.Users.MANAGE_USERS,
         Privileges.Users.VIEW_USERS,
         Privileges.Users.CREATE_USER,
         Privileges.Users.UPDATE_USER,
@@ -179,17 +178,17 @@ builder.Services.AddAuthorization(options =>
         Privileges.Users.RESTORE_USER,
         Privileges.Users.ASSIGN_ROLES);
 
-    AddManagePolicy("MANAGE_ROLES",
+    Add("MANAGE_ROLES",
         Privileges.Users.CREATE_ROLE,
         Privileges.Users.UPDATE_ROLE,
         Privileges.Users.DELETE_ROLE);
 
-    AddManagePolicy("MANAGE_CONTROLES",
+    Add("MANAGE_CONTROLES",
         Privileges.Users.CREATE_CONTROLE,
         Privileges.Users.UPDATE_CONTROLE,
         Privileges.Users.DELETE_CONTROLE);
 
-    AddManagePolicy("MANAGE_CLIENTS",
+    Add("MANAGE_CLIENTS",
         Privileges.Clients.VIEW_CLIENTS,
         Privileges.Clients.CREATE_CLIENT,
         Privileges.Clients.UPDATE_CLIENT,
@@ -200,7 +199,7 @@ builder.Services.AddAuthorization(options =>
         Privileges.Clients.DELETE_CLIENT_CATEGORIES,
         Privileges.Clients.RESTORE_CLIENT_CATEGORIES);
 
-    AddManagePolicy("MANAGE_ARTICLES",
+    Add("MANAGE_ARTICLES",
         Privileges.Articles.VIEW_ARTICLES,
         Privileges.Articles.CREATE_ARTICLE,
         Privileges.Articles.UPDATE_ARTICLE,
@@ -211,7 +210,7 @@ builder.Services.AddAuthorization(options =>
         Privileges.Articles.DELETE_ARTICLE_CATEGORIES,
         Privileges.Articles.RESTORE_ARTICLE_CATEGORIES);
 
-    AddManagePolicy("MANAGE_INVOICES",
+    Add("MANAGE_INVOICES",
         Privileges.Invoices.VIEW_INVOICES,
         Privileges.Invoices.CREATE_INVOICE,
         Privileges.Invoices.UPDATE_DRAFT_INVOICE,
@@ -220,85 +219,34 @@ builder.Services.AddAuthorization(options =>
         Privileges.Invoices.DELETE_INVOICE,
         Privileges.Invoices.RESTORE_INVOICE);
 
-    AddManagePolicy("MANAGE_PAYMENTS",
+    Add("MANAGE_PAYMENTS",
         Privileges.Payments.VIEW_PAYMENTS,
         Privileges.Payments.RECORD_PAYMENT,
         Privileges.Payments.CANCEL_PAYMENT);
 
-    AddManagePolicy("MANAGE_STOCK",
+    Add("MANAGE_STOCK",
         Privileges.Stock.VIEW_STOCK,
         Privileges.Stock.UPDATE_STOCK,
         Privileges.Stock.ADD_ENTRY);
 
-    AddManagePolicy("MANAGE_FOURNISSEURS",
+    Add("MANAGE_FOURNISSEURS",
         Privileges.Fournisseurs.VIEW_FOURNISSEURS,
         Privileges.Fournisseurs.CREATE_FOURNISSEUR,
         Privileges.Fournisseurs.UPDATE_FOURNISSEUR,
         Privileges.Fournisseurs.DELETE_FOURNISSEUR,
         Privileges.Fournisseurs.RESTORE_FOURNISSEUR);
 
-    AddManagePolicy("MANAGE_REPORTS",
+    Add("MANAGE_REPORTS",
         Privileges.Reports.VIEW_REPORTS,
         Privileges.Reports.EXPORT_REPORTS);
 
-    options.AddPolicy("MANAGE_AUDITLOGS", p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", Privileges.Audit.MANAGE_AUDITLOGS));
+    Add("MANAGE_CLIENTS_STOCK",
+        Privileges.Clients.VIEW_CLIENTS,
+        Privileges.Stock.VIEW_STOCK,
+        Privileges.Stock.ADD_ENTRY,
+        Privileges.Stock.UPDATE_STOCK);
 
-    options.AddPolicy("MANAGE_CLIENTS_STOCK", p =>
-        p.RequireAuthenticatedUser()
-         .RequireAssertion(context =>
-             context.User.Claims.Any(c =>
-                 c.Type == "privilege" &&
-                 (c.Value == Privileges.Clients.VIEW_CLIENTS ||
-                  c.Value == Privileges.Stock.VIEW_STOCK ||
-                  c.Value == Privileges.Stock.ADD_ENTRY ||
-                  c.Value == Privileges.Stock.UPDATE_STOCK))));
-
-    options.AddPolicy(TenantPrivileges.VIEW_TENANTS, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.VIEW_TENANTS));
-
-    options.AddPolicy(TenantPrivileges.CREATE_TENANT, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.CREATE_TENANT));
-
-    options.AddPolicy(TenantPrivileges.UPDATE_TENANT, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.UPDATE_TENANT));
-
-    options.AddPolicy(TenantPrivileges.DELETE_TENANT, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.DELETE_TENANT));
-
-    options.AddPolicy(TenantPrivileges.SUSPEND_TENANT, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.SUSPEND_TENANT));
-
-    options.AddPolicy(TenantPrivileges.ACTIVATE_TENANT, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.ACTIVATE_TENANT));
-
-    options.AddPolicy(TenantPrivileges.MANAGE_SUBSCRIPTIONS, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.MANAGE_SUBSCRIPTIONS));
-
-    options.AddPolicy(TenantPrivileges.VIEW_BILLING, p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", TenantPrivileges.VIEW_BILLING));
-
-    // =====================================================
-    // COMPOSITE POLICIES
-    // =====================================================
-
-    AddManagePolicy(
-        TenantPrivileges.VIEW_TENANTS,
-        TenantPrivileges.CREATE_TENANT,
-        TenantPrivileges.UPDATE_TENANT,
-        TenantPrivileges.DELETE_TENANT,
-        TenantPrivileges.SUSPEND_TENANT,
-        TenantPrivileges.ACTIVATE_TENANT
-    );
+    Add("MANAGE_AUDITLOGS", Privileges.Audit.MANAGE_AUDITLOGS);
 });
 
 //////////////////////////////////////////////////
@@ -431,13 +379,6 @@ builder.Services.AddReverseProxy()
     {
         context.AddRequestTransform(async transformContext =>
         {
-            // ✅ Read the already-resolved tenantId — no lookup here
-            var tenantId = transformContext.HttpContext.Items["tenantId"]?.ToString();
-
-            if (!string.IsNullOrEmpty(tenantId))
-                transformContext.ProxyRequest.Headers
-                    .TryAddWithoutValidation("X-Tenant-Id", tenantId);
-
             ClaimsPrincipal user = transformContext.HttpContext.User;
 
             string? sub = user.FindFirstValue("sub");
@@ -479,15 +420,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-app.UseMiddleware<TenantResolutionMiddleware>();
-
 app.Use(async (context, next) =>
 {
     try
     {
         await next();
     }
-    catch (HttpRequestException ex)
+    catch (HttpRequestException)
     {
         context.Response.StatusCode = 503;
         context.Response.ContentType = "application/json";
@@ -499,7 +438,7 @@ app.Use(async (context, next) =>
             message = "Tenant service is unavailable."
         });
     }
-    catch (TaskCanceledException ex)
+    catch (TaskCanceledException)
     {
         context.Response.StatusCode = 503;
         context.Response.ContentType = "application/json";
@@ -520,7 +459,8 @@ app.Use(async (context, next) =>
         {
             statusCode = 500,
             code = "INTERNAL_ERROR",
-            message = "An unexpected error occurred."
+            message = $"{ex.Message}"
+            //message = "An unexpected error occurred."
         });
     }
 });
@@ -530,6 +470,7 @@ app.UseRateLimiter();
 // ✅ STEP 4: Authentication — OnTokenValidated reads Items["tenantId"] set above
 app.UseAuthentication();
 
+app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.UseAuthorization();
 
