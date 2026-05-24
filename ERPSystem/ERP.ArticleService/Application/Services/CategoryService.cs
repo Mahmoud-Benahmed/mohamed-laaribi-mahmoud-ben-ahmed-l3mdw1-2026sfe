@@ -8,13 +8,15 @@ namespace ERP.ArticleService.Application.Services
 {
     public class CategoryService : ICategoryService
     {
+        private readonly ITenantContext _tenantContext;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IEventPublisher _eventPublisher;
 
-        public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher)
+        public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher, ITenantContext tenantContext)
         {
             _categoryRepository = categoryRepository;
             _eventPublisher = eventPublisher;
+            _tenantContext = tenantContext;
         }
 
         // =========================
@@ -26,7 +28,7 @@ namespace ERP.ArticleService.Application.Services
             if (existing is not null)
                 throw new CategoryAlreadyExistsException(dto.Name);
 
-            Category category = new Category(dto.Name, dto.TVA);
+            Category category = new Category(dto.Name, dto.TVA, _tenantContext.TenantId);
             await _categoryRepository.AddAsync(category);
             await _categoryRepository.SaveChangesAsync();
             CategoryResponseDto res = MapToDto(category);
@@ -55,7 +57,6 @@ namespace ERP.ArticleService.Application.Services
             List<Category> result = await _categoryRepository.GetAllAsync();
             return result.Select(MapToDto).ToList();
         }
-
 
         public async Task<List<CategoryResponseDto>> GetBelowTVAAsync(decimal tva)
         {
@@ -218,6 +219,7 @@ namespace ERP.ArticleService.Application.Services
         {
             return new CategoryResponseDto(
                 Id: category.Id,
+                TenantId: category.TenantId,
                 Name: category.Name,
                 TVA: category.TVA,
                 IsDeleted: category.IsDeleted,
