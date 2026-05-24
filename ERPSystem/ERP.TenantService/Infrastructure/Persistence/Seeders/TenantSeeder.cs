@@ -11,6 +11,7 @@ public static class TenantSeeder
         var slugs = new[] { "acme", "xyz", "bard", "nord" };
 
         var existingSlugs = await context.Tenants
+            .IgnoreQueryFilters()
             .Where(t => slugs.Contains(t.Slug))
             .Select(t => t.Slug)
             .ToListAsync();
@@ -64,24 +65,6 @@ public static class TenantSeeder
                 timezone: "America/New_York"
             ));
 
-        if (!existingSlugs.Contains("nord"))
-        {
-            Tenant deletedTenant = Tenant.Create(
-                                        name: "Nordic Tech OÜ",
-                                        email: "info@nordtech.ee",
-                                        phone: "+37255501234",
-                                        subdomainSlug: "nord",
-                                        logoUrl: null,
-                                        primaryColor: "#0EA5E9",
-                                        secondaryColor: "#0369A1",
-                                        currency: "EUR",
-                                        locale: "et-EE",
-                                        timezone: "Europe/Tallinn"
-                                    );
-            deletedTenant.Delete();
-            tenants.Add(deletedTenant);
-        }
-
         if (tenants.Any())
         {
             var rand = new Random();
@@ -89,13 +72,27 @@ public static class TenantSeeder
             {
                 if (tenant.IsDeleted) continue;
 
-                // ✅ Use plans.Count, not tenants.Count
-                var plan = plans[rand.Next(0, plans.Count)];
-                var startDate = DateTime.UtcNow.AddDays(rand.Next(30));
-                var endDate = startDate.AddMonths(rand.Next(1, 13)); // ✅ endDate based on startDate
+                var plan = plans[rand.Next(plans.Count)];
+
+                var periods = Enum.GetValues<SubscriptionPeriodEnum>();
+                var randomPeriod = periods[rand.Next(periods.Length)];
+
+                var startDate = DateTime.UtcNow;
+
+                var endDate = randomPeriod switch
+                {
+                    SubscriptionPeriodEnum.MONTH => startDate.AddMonths(1),
+                    SubscriptionPeriodEnum.YEAR => startDate.AddYears(1),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
 
                 tenant.Activate();
-                tenant.AssignSubscription(plan.Id, startDate, endDate);
+
+                tenant.AssignSubscription(
+                    plan.Id,
+                    startDate,
+                    randomPeriod
+                );
             }
 
             await context.Tenants.AddRangeAsync(tenants);
