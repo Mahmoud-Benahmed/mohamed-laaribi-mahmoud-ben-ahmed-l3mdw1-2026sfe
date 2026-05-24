@@ -85,7 +85,7 @@ services:
     networks:
       - erp-network
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SQLSERVER__SA_PASSWORD} -Q 'SELECT 1' -C"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SQLSERVER__SA_PASSWORD} -Q 'SELECT 1' -C"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -130,7 +130,7 @@ services:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=TenantDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -143,9 +143,9 @@ services:
       - "8080"
     networks: [erp-network]
     depends_on:
-      redis:
-        condition: service_healthy
       mongo:
+        condition: service_healthy
+      tenant-service:
         condition: service_healthy
     environment:
       <<: *common-env
@@ -155,7 +155,7 @@ services:
       MongoSettings__AppUsername: ${MongoSettings__AppUsername}
       MongoSettings__AppPassword: ${MongoSettings__AppPassword}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -174,7 +174,7 @@ services:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=ArticlesDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -192,6 +192,11 @@ services:
     environment:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=ClientsDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   fournisseur-service:
     build: ./ERP.FournisseurService
@@ -206,6 +211,11 @@ services:
     environment:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=FournisseurDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   stock-service:
     build: ./ERP.StockService
@@ -217,6 +227,12 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      article-service:
+        condition: service_healthy
+      client-service:
+        condition: service_healthy
+      fournisseur-service:
+        condition: service_healthy
     environment:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=StockDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
@@ -226,6 +242,11 @@ services:
       Kafka__ConsumerGroups__ClientCategory: stock-service-client-category-cache
       Kafka__ConsumerGroups__Fournisseur: stock-service-fournisseur-cache
       Kafka__ConsumerGroups__Invoice: stock-service-invoice-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   invoice-service:
     build: ./ERP.InvoiceService
@@ -237,6 +258,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      stock-service:
+        condition: service_healthy
     environment:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=InvoiceDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
@@ -244,7 +267,12 @@ services:
       Kafka__ConsumerGroups__ArticleCategory: invoice-service-article-category-cache
       Kafka__ConsumerGroups__Client: invoice-service-client-cache
       Kafka__ConsumerGroups__ClientCategory: invoice-service-client-category-cache
-      Kafka__ConsumerGroups__Payment: invoice-service-payment
+      Kafka__ConsumerGroups__Payment: invoice-service-payment-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   payment-service:
     build: ./ERP.PaymentService
@@ -260,6 +288,11 @@ services:
       <<: *common-env
       ConnectionStrings__DefaultConnection: Server=sqlserver;Database=PaymentDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
       Kafka__ConsumerGroups__Invoice: payment-service-invoice-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   gateway:
     build: ./ERP.Gateway
@@ -270,11 +303,18 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      tenant-service:
+        condition: service_healthy
     environment:
       <<: *common-env
       ConnectionStrings__REDIS: ${ConnectionStrings__REDIS},password=${REDIS_PASSWORD}
       TenantService__BaseUrl: http://tenant-service:8080
       ApiKey__Secret: ${ApiKey__Secret}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 # ─────────────────────────────────────────────────────────────
 # NETWORKS & VOLUMES
