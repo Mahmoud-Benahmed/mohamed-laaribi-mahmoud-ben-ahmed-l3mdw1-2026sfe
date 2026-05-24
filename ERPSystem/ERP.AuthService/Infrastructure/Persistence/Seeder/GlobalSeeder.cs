@@ -101,9 +101,9 @@ public class GlobalSeeder
         IPasswordHasher<AuthUser> hasher)
     {
         Role adminRole =
-            await roleRepository.GetByLibelleAsync(Roles.SystemAdmin)
+            await roleRepository.GetByLibelleAsync(TenantRoles.SUPER_PLATFORM_ADMIN)
             ?? throw new InvalidOperationException(
-                "SystemAdmin role missing.");
+                "Admin role missing.");
 
         foreach (var (login, email, fullName, password) in SystemAdmins)
         {
@@ -255,7 +255,6 @@ public class GlobalSeeder
 
         string[] roleNames =
         [
-            Roles.SystemAdmin,
             TenantRoles.SUPER_PLATFORM_ADMIN,
             TenantRoles.TENANT_SUPPORT,
             TenantRoles.BILLING_MANAGER,
@@ -296,7 +295,6 @@ public class GlobalSeeder
     {
         var platformRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            Roles.SystemAdmin,
             TenantRoles.SUPER_PLATFORM_ADMIN,
             TenantRoles.TENANT_SUPPORT,
             TenantRoles.BILLING_MANAGER,
