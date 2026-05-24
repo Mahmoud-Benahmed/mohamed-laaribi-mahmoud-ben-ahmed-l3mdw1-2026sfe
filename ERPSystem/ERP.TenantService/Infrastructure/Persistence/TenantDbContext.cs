@@ -149,6 +149,10 @@ public sealed class TenantSubscriptionConfiguration : IEntityTypeConfiguration<T
         builder.Property(s => s.EndDate)
             .IsRequired();
 
+        builder.Property(s => s.Period)
+            .IsRequired()
+            .HasConversion<string>();
+
         builder.HasOne(s => s.Plan)
             .WithMany()
             .HasForeignKey(s => s.SubscriptionPlanId)
