@@ -6,7 +6,9 @@ using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Domain.Logger;
+using ERP.AuthService.Infrastructure.ApiClient;
 using ERP.AuthService.Infrastructure.Security;
+using ERP.AuthService.Properties;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
@@ -25,11 +27,12 @@ namespace ERP.AuthService.Application.Services
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtTokenGenerator _jwtGenerator;
         private readonly IPasswordHasher<AuthUser> _passwordHasher;
-
+        private readonly ILogger<AuthUserService> _logger;
         private readonly IControleRepository _controleRepository;
         private readonly IPrivilegeRepository _privilegeRepository;
         private readonly ITenantContext _tenantContext;
         private readonly IRefreshTokenHashingHelper _refreshTokenHelper;
+        private readonly ITenantApiClient _tenantApi;
 
         public AuthUserService(
             IAuditLogger auditLogger,
@@ -42,7 +45,9 @@ namespace ERP.AuthService.Application.Services
             IControleRepository controleRepository,
             IPrivilegeRepository privilegeRepository,
             ITenantContext tenantContext,
-            IRefreshTokenHashingHelper refreshTokenHelper
+            IRefreshTokenHashingHelper refreshTokenHelper,
+            ITenantApiClient tenantApi,
+            ILogger<AuthUserService> logger
             )
         {
             _userRepository = userRepository;
@@ -56,6 +61,8 @@ namespace ERP.AuthService.Application.Services
             _httpContext = httpContextAccessor;
             _tenantContext = tenantContext;
             _refreshTokenHelper = refreshTokenHelper;
+            _tenantApi = tenantApi;
+            _logger = logger;
         }
 
         // ============================================
@@ -172,7 +179,7 @@ namespace ERP.AuthService.Application.Services
             );
         }
 
-        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? TenantId)
+        public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? tenantId)
         {
             if (await _userRepository.ExistsByLoginAsync(request.Login))
                 throw new LoginAlreadyExsistException();
@@ -180,14 +187,62 @@ namespace ERP.AuthService.Application.Services
             if (await _userRepository.ExistsByEmailAsync(request.Email))
                 throw new EmailAlreadyExistsException();
 
+            if (_tenantContext.TenantId is not null)
+            {
+                _logger.LogInformation(
+                    "Validating subscription limits for tenant '{TenantId}'",
+                    _tenantContext.TenantId);
+
+                var subscription =
+                    await _tenantApi.ResolveAsync(_tenantContext.TenantId.Value);
+
+                if (subscription?.Plan is null)
+                {
+                    _logger.LogWarning(
+                        "Tenant '{TenantId}' has no active subscription plan",
+                        _tenantContext.TenantId);
+
+                    return null;
+                }
+
+                _logger.LogInformation(
+                    "Tenant '{TenantId}' uses plan '{PlanCode}' with max users {MaxUsers}",
+                    subscription.TenantId,
+                    subscription.Plan.Code,
+                    subscription.Plan.MaxUsers);
+
+                int currentUserCount = await _userRepository.CountByTenantIdAsync(_tenantContext.TenantId.Value);
+
+                _logger.LogInformation(
+                    "Tenant '{TenantId}' current user count: {CurrentUserCount}",
+                    subscription.TenantId,
+                    currentUserCount);
+
+                if (currentUserCount >= subscription.Plan.MaxUsers)
+                {
+                    _logger.LogWarning(
+                        "Tenant '{TenantId}' exceeded user limit ({CurrentUserCount}/{MaxUsers})",
+                        subscription.TenantId,
+                        currentUserCount,
+                        subscription.Plan.MaxUsers);
+
+                    throw new InvalidOperationException(
+                        "Unable to register user: Tenant user limit reached.");
+                }
+
+                _logger.LogInformation(
+                    "Tenant '{TenantId}' passed subscription validation",
+                    subscription.TenantId);
+            }
+
             Role role = await _roleRepository.GetByIdAsync(request.RoleId) ?? throw new InvalidOperationException("Role not found.");
+            if (role.IsGlobal && tenantId.HasValue)
+                throw new InvalidOperationException($"Cannot assign a global role to a tenant user. {tenantId}");
 
             string capitalizedFullName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(request.FullName.ToLower());
 
             AuthUser user = new AuthUser(request.Login, request.Email, capitalizedFullName, role.Id, tenantId: _tenantContext.TenantId);
 
-            if (role.IsGlobal)
-                throw new InvalidOperationException("Cannot assign a global role to a tenant user.");
 
             string hashedPassword = _passwordHasher.HashPassword(user, request.Password);
             user.SetPasswordHash(hashedPassword);
@@ -488,16 +543,34 @@ namespace ERP.AuthService.Application.Services
         // ======================
         public async Task SoftDeleteAsync(Guid deletedId, Guid performedById)
         {
-
+            // check if whoever is performing this operation exists and is active (we don't want to log a delete action performed by a deleted user for example)
+            AuthUser performedBy = await _userRepository.GetByIdAsync(performedById) ?? throw new UserNotFoundException(performedById);
+            
             if (deletedId == performedById)
                 throw new UnauthorizedOperationException("You cannot apply this operation on your account.");
 
             AuthUser user = await _userRepository.GetByIdAsync(deletedId)
                         ?? throw new UserNotFoundException(deletedId);
 
-            AuthUser performedBy = await _userRepository.GetByIdAsync(performedById) ?? throw new UserNotFoundException(performedById);
+            Role userRole = await _roleRepository.GetByIdAsync(user.RoleId) ?? throw new RoleNotFoundException(user.RoleId);
 
-            if (user.IsDeleted) return; // no need to update
+            if (userRole.Libelle.Equals(Roles.SystemAdmin))
+            {
+                int adminCount= await _userRepository.CountByRoleIdAsync(user.RoleId);
+                if (adminCount <= 1)
+                    throw new InvalidOperationException("Cannot delete the last system administrator.");
+            }
+
+            if (user.IsDeleted) {
+                await _auditLogger.LogAsync(
+                    AuditAction.UserDeleted,
+                    success: true,
+                    performedBy: performedById,
+                    targetUserId: user.Id,
+                    ipAddress: GetIp(),
+                    metadata: new() { ["deleted"] = user.Login, ["deletedBy"] = performedById.ToString() });
+                return;
+            } 
 
             user.Delete();
             await _userRepository.UpdateAsync(user);
@@ -513,27 +586,60 @@ namespace ERP.AuthService.Application.Services
 
         public async Task RestoreAsync(Guid deletedId, Guid performedById)
         {
-
             if (deletedId == performedById)
                 throw new UnauthorizedOperationException("You cannot apply this operation on your account.");
 
+            AuthUser performedBy = await _userRepository.GetByIdAsync(performedById)
+                ?? throw new UserNotFoundException(performedById);
+
+            if (performedBy.IsDeleted)
+                throw new UnauthorizedOperationException("Your account is inactive.");
+
             AuthUser user = await _userRepository.GetByDeletedIdAsync(deletedId)
-                        ?? throw new UserNotFoundException(deletedId);
+                ?? throw new UserNotFoundException(deletedId);
 
-            AuthUser perfomedBy = await _userRepository.GetByIdAsync(performedById) ?? throw new UserNotFoundException(performedById);
+            if (!user.IsDeleted) return;
 
-            if (!user.IsDeleted) return; // no need to update
+            if (_tenantContext.TenantId is not null)
+            {
+                var subscription = await _tenantApi.ResolveAsync(_tenantContext.TenantId.Value);
+
+                if (subscription?.Plan is null)
+                {
+                    _logger.LogWarning(
+                        "Tenant '{TenantId}' has no active subscription plan",
+                        _tenantContext.TenantId);
+
+                    throw new InvalidOperationException(
+                        "Unable to restore user: No active subscription plan found.");
+                }
+
+                int currentUserCount = await _userRepository.CountByTenantIdAsync(_tenantContext.TenantId.Value);
+
+                if (currentUserCount >= subscription.Plan.MaxUsers)
+                {
+                    _logger.LogWarning(
+                        "Tenant '{TenantId}' exceeded user limit ({CurrentUserCount}/{MaxUsers})",
+                        _tenantContext.TenantId,
+                        currentUserCount,
+                        subscription.Plan.MaxUsers);
+
+                    throw new InvalidOperationException(
+                        "Unable to restore user: Tenant user limit reached.");
+                }
+            }
+
             user.Restore();
             await _userRepository.UpdateAsync(user);
 
             await _auditLogger.LogAsync(
-                    AuditAction.UserRestored,
-                    success: true,
-                    performedBy: performedById,
-                    targetUserId: user.Id,
-                    ipAddress: GetIp(),
-                    metadata: new() { ["restored"] = user.Login, ["restoredBy"] = performedById.ToString() });
-        }
+                AuditAction.UserRestored,
+                success: true,
+                performedBy: performedById,
+                targetUserId: user.Id,
+                ipAddress: GetIp(),
+                metadata: new() { ["restored"] = user.Login, ["restoredBy"] = performedById.ToString() });
+        } 
 
         public async Task<PagedResultDto<AuthUserGetResponseDto>> GetDeletedPagedAsync(int pageNumber, int pageSize, Guid? excludeId)
         {
