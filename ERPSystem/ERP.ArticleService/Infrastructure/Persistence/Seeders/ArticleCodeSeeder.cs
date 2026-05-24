@@ -14,20 +14,22 @@ namespace ERP.ArticleService.Infrastructure.Persistence.Seeders
             _logger = logger;
         }
 
-        public async Task SeedAsync()
+        public async Task SeedAsync(Guid tenantId, string slug)
         {
-            bool exists = await _context.ArticleCodes.AnyAsync();
+            // ✅ Check if this tenant already has a sequence row
+            bool exists = await _context.ArticleCodes
+                .AnyAsync(a => a.TenantId == tenantId);
+
             if (exists)
             {
-                _logger.LogInformation("ArticleCode row already exists, skipping.");
+                _logger.LogInformation("ArticleCode row already exists for tenant {TenantId}, skipping.", tenantId);
                 return;
             }
 
-            // Single config row — prefix and padding must match FormatCode expectations
-            ArticleCode articleCode = new ArticleCode("ART", 6);
+            var articleCode = new ArticleCode(slug, tenantId, 6);
             await _context.ArticleCodes.AddAsync(articleCode);
             await _context.SaveChangesAsync();
-            _logger.LogInformation("ArticleCode config row seeded: ART, padding 6.");
+            _logger.LogInformation("ArticleCode config row seeded for tenant {TenantId}: ART, padding 6.", tenantId);
         }
     }
 }
