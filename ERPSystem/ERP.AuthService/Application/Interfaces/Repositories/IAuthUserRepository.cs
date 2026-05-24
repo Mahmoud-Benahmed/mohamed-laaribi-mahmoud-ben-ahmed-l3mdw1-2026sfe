@@ -20,8 +20,9 @@ namespace ERP.AuthService.Application.Interfaces.Repositories
         Task<AuthUser?> UpdateAsync(AuthUser user);
         Task<bool> ExistsByLoginAsync(string login);
         Task<bool> ExistsByEmailAsync(string email);
-        Task<int> CountAsync();
+        Task<int> CountActiveAsync();
         Task<int> CountByStatusAsync(bool status);
+        Task<int> CountByRoleIdAsync(Guid roleId);
         Task<UserStatsDto> GetStatsAsync(Guid? excludeId = default);
 
         Task DeleteAllAsync();
