@@ -215,8 +215,7 @@ namespace ERP.AuthService.Controllers
             if (!TryGetRequesterId(out Guid requesterId))
                 return Unauthorized();
 
-            if (!TryGetTenantId(out Guid? tenantId))
-                return BadRequest(new { error = "Tenant context required" });
+            TryGetTenantId(out Guid? tenantId);
 
             AuthUserGetResponseDto result = await _authService.RegisterAsync(request, requesterId, tenantId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
