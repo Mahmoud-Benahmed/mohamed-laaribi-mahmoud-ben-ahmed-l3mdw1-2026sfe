@@ -27,6 +27,25 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
             _context = context;
         }
 
+        public async Task<List<Invoice>> GetOverdueAsync(DateTime asOf)
+        {
+            return await _context.Invoices
+                .Include(i => i.Items)
+                .AsSplitQuery()
+                .Where(i => i.Status == InvoiceStatus.UNPAID
+                         && i.DueDate <= asOf
+                         && !i.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber)
+        {
+            return await _context.Invoices
+                .AnyAsync(i => i.AdditionalNotes != null
+                            && i.AdditionalNotes.Contains(originalInvoiceNumber)
+                            && !i.IsDeleted);
+        }
+
         // ── Existing queries ─────────────────────────────────────────────────────
 
         public async Task<Invoice?> GetByIdAsync(Guid id)
