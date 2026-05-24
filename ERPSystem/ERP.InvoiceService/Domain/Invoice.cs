@@ -59,6 +59,39 @@ namespace InvoiceService.Domain
             UpdatedAt = DateTime.UtcNow;
         }
 
+        // In Invoice.cs
+        public Invoice CreatePenaltyInvoice(string invoiceNumber, decimal penaltyRate = 0.02m)
+        {
+            if (Status != InvoiceStatus.UNPAID)
+                throw new InvoiceDomainException("Penalty invoices can only be created for UNPAID invoices.");
+
+            decimal penaltyAmount = Math.Round(TotalTTC * penaltyRate, 2, MidpointRounding.AwayFromZero);
+
+            Invoice penalty = new Invoice(
+                invoiceNumber,
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddDays(30),
+                TaxCalculationMode,
+                0,
+                ClientId,
+                ClientFullName,
+                ClientAddress,
+                $"Penalty invoice for overdue invoice {InvoiceNumber}");
+
+            penalty.AddItem(new InvoiceItem(
+                penalty.Id,
+                Guid.Empty,              // no article — penalty line
+                $"Late payment penalty ({penaltyRate * 100}%) on {InvoiceNumber}",
+                null,                    // no barcode
+                1,
+                penaltyAmount,
+                0));                     // no tax on penalty
+
+            penalty.CalculateTotals();
+            penalty.FinalizeInvoice();
+            return penalty;
+        }
+
         // ────────────────────────────────────────────────────────────────────────
         // BUSINESS METHODS
         // ────────────────────────────────────────────────────────────────────────
