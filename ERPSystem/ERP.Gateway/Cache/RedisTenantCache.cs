@@ -53,15 +53,19 @@ public class RedisTenantCache : ITenantCache
     public async Task SetAsync(TenantCacheEntry tenant)
     {
         var json = JsonSerializer.Serialize(tenant);
+        var expiry = TimeSpan.FromMinutes(30);
 
-        await _db.StringSetAsync(
-            $"tenant:slug:{tenant.Slug}",
-            json,
-            TimeSpan.FromMinutes(30));
+        await _db.StringSetAsync($"tenant:slug:{tenant.Slug}", json, expiry);
+        await _db.StringSetAsync($"tenant:id:{tenant.TenantId}", json, expiry);
     }
 
     public async Task RemoveAsync(string slug)
     {
+        var entry = await GetAsync(slug);
+
         await _db.KeyDeleteAsync($"tenant:slug:{slug}");
+
+        if (entry != null)
+            await _db.KeyDeleteAsync($"tenant:id:{entry.TenantId}");
     }
 }
