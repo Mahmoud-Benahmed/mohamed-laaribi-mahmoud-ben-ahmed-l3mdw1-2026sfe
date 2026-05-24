@@ -1,4 +1,6 @@
-﻿public static class Privileges
+﻿namespace ERP.AuthService.Properties;
+
+public static class Privileges
 {
     public static class Users
     {
@@ -17,6 +19,7 @@
         public const string CREATE_CONTROLE = "CREATE_CONTROLE";
         public const string UPDATE_CONTROLE = "UPDATE_CONTROLE";
         public const string DELETE_CONTROLE = "DELETE_CONTROLE";
+        public const string BUY_SUBSCRIPTION = "BUY_SUBSCRIPTION";
     }
 
     public static class Audit
