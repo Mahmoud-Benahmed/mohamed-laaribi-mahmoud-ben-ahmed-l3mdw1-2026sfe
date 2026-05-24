@@ -14,6 +14,7 @@ namespace ERP.ArticleService.Application.DTOs
 
     public record CategoryResponseDto(
         Guid Id,
+        Guid? TenantId,
         string Name,
         int TVA,
         bool IsDeleted,
