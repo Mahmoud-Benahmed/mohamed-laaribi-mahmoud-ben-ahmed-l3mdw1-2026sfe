@@ -90,17 +90,18 @@ public class Tenant
     public void Restore() => IsDeleted = false;
 
     public void SetSubscription(TenantSubscription subscription) => Subscription = subscription;
-    public void AssignSubscription(Guid subscriptionPlanId, DateTime startDate, DateTime endDate)
+    public void AssignSubscription(Guid subscriptionPlanId, DateTime startDate, SubscriptionPeriodEnum period)
     {
-        if (IsDeleted) throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
+        if (IsDeleted) 
+            throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
         if (Subscription is not null)
             throw new InvalidOperationException("Unable to assign new plan, current tenant has an active subscription.");
-        Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, endDate);
+        Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, period);
     }
     public void RemoveSubscription()
     {
         if (Subscription == null)
-            throw new InvalidOperationException("Tenant has no active subscription to remove.");
+            return;
         Subscription = null;
     }
 
