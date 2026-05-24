@@ -18,6 +18,7 @@ public static class Privileges
         public const string CREATE_CONTROLE = "CREATE_CONTROLE";
         public const string UPDATE_CONTROLE = "UPDATE_CONTROLE";
         public const string DELETE_CONTROLE = "DELETE_CONTROLE";
+        public const string BUY_SUBSCRIPTION = "BUY_SUBSCRIPTION";
     }
 
     public static class Audit
