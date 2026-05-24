@@ -1,13 +1,19 @@
-﻿using ERP.ArticleService.Domain;
+﻿using ERP.ArticleService.Application.Services;
+using ERP.ArticleService.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.ArticleService.Infrastructure.Persistence
 {
     public class ArticleDbContext : DbContext
     {
-        public ArticleDbContext(DbContextOptions<ArticleDbContext> options)
+        private readonly Guid? _tenantId;
+
+        public ArticleDbContext(
+            DbContextOptions<ArticleDbContext> options,
+            ITenantContext? tenantContext= null)  // ✅ inject tenant context
             : base(options)
         {
+            _tenantId = tenantContext?.TenantId;
         }
 
         public DbSet<Article> Articles { get; set; }
@@ -16,6 +22,21 @@ namespace ERP.ArticleService.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Always apply soft-delete + tenant filter together
+            modelBuilder.Entity<Article>()
+                .HasQueryFilter(a =>
+                    !a.IsDeleted &&
+                    (_tenantId == null || a.TenantId == _tenantId));
+
+            modelBuilder.Entity<Category>()
+                .HasQueryFilter(c =>
+                    !c.IsDeleted &&
+                    (_tenantId == null || c.TenantId == _tenantId));
+
+            modelBuilder.Entity<ArticleCode>()
+                .HasQueryFilter(c =>
+                    (_tenantId == null || c.TenantId == _tenantId));
+
             base.OnModelCreating(modelBuilder);
 
             // Configure Article
@@ -65,16 +86,11 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                       .OnDelete(DeleteBehavior.Restrict);
 
                 // Unique indexes (active articles only)
-                entity.HasIndex(a => a.CodeRef)
-                      .IsUnique()
-                      .HasFilter("[IsDeleted] = 0");
+                entity.HasIndex(a => new { a.TenantId, a.CodeRef }).IsUnique();
 
                 entity.HasIndex(a => a.BarCode)
                       .IsUnique()
                       .HasFilter("[IsDeleted] = 0 AND [BarCode] IS NOT NULL");
-
-                // Global soft-delete filter
-                entity.HasQueryFilter(a => !a.IsDeleted);
             });
 
             // Configure ArticleCode
@@ -98,8 +114,7 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                       .HasDefaultValue(6);
 
                 // Unique index on Prefix
-                entity.HasIndex(c => c.Prefix)
-                      .IsUnique();
+                entity.HasIndex(a => new { a.TenantId, a.Prefix }).IsUnique();
             });
 
             // Configure Category
@@ -119,20 +134,19 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                 entity.Property(a => a.TVA)
                       .HasColumnType("int");
 
-                // Unique index on Name
-                entity.HasIndex(c => c.Name)
-                      .IsUnique();
-
-
                 entity.Property(c => c.IsDeleted)
                       .HasDefaultValue(false);
+
                 entity.Property(c => c.CreatedAt)
                       .HasDefaultValueSql("GETUTCDATE()");
 
                 entity.Property(c => c.UpdatedAt)
                       .IsRequired(false);
 
-                entity.HasQueryFilter(c => !c.IsDeleted);
+
+                entity.HasIndex(a => new { a.TenantId, a.Name })
+                      .IsUnique()
+                      .HasFilter("[IsDeleted] = 0");
             });
         }
     }
