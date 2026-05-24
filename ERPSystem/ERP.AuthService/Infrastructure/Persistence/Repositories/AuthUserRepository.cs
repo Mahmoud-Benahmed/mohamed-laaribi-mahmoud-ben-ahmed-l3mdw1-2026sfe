@@ -65,12 +65,14 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
             return result.ModifiedCount > 0 ? user : null;
         }
 
-        public async Task<int> CountAsync()
+        public async Task<int> CountActiveAsync()
             => (int)await _collection.CountDocumentsAsync(x => x.IsActive && !x.IsDeleted);
 
         public async Task<int> CountByTenantIdAsync(Guid tenantId)
             => (int)await _collection.CountDocumentsAsync(WithTenant(x => x.TenantId == tenantId && x.IsActive && !x.IsDeleted));
 
+        public async Task<int> CountByRoleIdAsync(Guid roleId)
+            => (int)await _collection.CountDocumentsAsync(WithTenant(x => x.RoleId == roleId && x.IsActive && !x.IsDeleted));
 
         public async Task<int> CountByStatusAsync(bool status) =>
             (int)await _collection.CountDocumentsAsync(WithTenant(
