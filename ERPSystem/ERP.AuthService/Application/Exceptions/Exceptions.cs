@@ -1,4 +1,6 @@
-﻿namespace ERP.AuthService.Application.Exceptions;
+﻿using ERP.AuthService.Properties;
+
+namespace ERP.AuthService.Application.Exceptions;
 
 public class EmailAlreadyExistsException : Exception
 {
