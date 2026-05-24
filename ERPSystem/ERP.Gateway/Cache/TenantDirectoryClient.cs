@@ -23,53 +23,18 @@ public class TenantDirectoryClient : ITenantDirectoryClient
 
     public async Task<TenantCacheEntry?> ResolveAsync(string slug)
     {
-        try
+        var response = await _httpClient.GetAsync($"/tenants/slug/{slug}");
+
+        return response.StatusCode switch
         {
-            HttpResponseMessage response =
-                await _httpClient.GetAsync($"/tenants/slug/{slug}");
+            HttpStatusCode.NotFound =>
+                null,
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                _logger.LogWarning(
-                    "Tenant slug '{Slug}' not found",
-                    slug);
+            var code when response.IsSuccessStatusCode =>
+                await response.Content.ReadFromJsonAsync<TenantCacheEntry>(),
 
-                return null; // VALID: business case
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError(
-                    "TenantService returned {StatusCode} for slug '{Slug}'",
-                    response.StatusCode,
-                    slug);
-
-                throw new HttpRequestException(
-                    $"TenantService returned {response.StatusCode}");
-            }
-
-            TenantCacheEntry? tenant =
-                await response.Content.ReadFromJsonAsync<TenantCacheEntry>();
-
-            return tenant;
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(
-                ex,
-                "HTTP failure while resolving tenant '{Slug}'",
-                slug);
-
-            throw;
-        }
-        catch (TaskCanceledException ex)
-        {
-            _logger.LogError(
-                ex,
-                "Timeout while resolving tenant '{Slug}'",
-                slug);
-
-            throw;
-        }
+            _ => throw new HttpRequestException(
+                $"TenantService returned {response.StatusCode}")
+        };
     }
 }
