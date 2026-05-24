@@ -1,3 +1,4 @@
+using ERP.TenantService.Application.DTOs.TenantSubscription;
 using System.ComponentModel.DataAnnotations;
 
 namespace ERP.TenantService.Application.DTOs.Tenant;
@@ -10,7 +11,7 @@ public record UpdateTenantRequestDto(
     [MaxLength(500)] string? LogoUrl,
     [MaxLength(7)] string? PrimaryColor,
     [MaxLength(7)] string? SecondaryColor,
-    [Required][MaxLength(10)] string Currency,
-    [Required][MaxLength(10)] string Locale,
-    [Required][MaxLength(50)] string Timezone
+    [MaxLength(10)] string Currency = "TND",
+    [MaxLength(10)] string Locale = "fr-TN",
+    [MaxLength(50)] string Timezone = "Africa/Tunisia"
 );
