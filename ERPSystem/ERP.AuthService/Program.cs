@@ -4,6 +4,7 @@ using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Infrastructure.ApiClient;
 using ERP.AuthService.Infrastructure.Configuration;
 using ERP.AuthService.Infrastructure.Messaging;
 using ERP.AuthService.Infrastructure.Persistence;
@@ -31,6 +32,8 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // ── Add environment variables
 builder.Configuration.AddEnvironmentVariables();
 
+ConfigurationManager config = builder.Configuration;
+
 // ── Controllers & Swagger
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -39,10 +42,21 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
+
+builder.Services.AddHttpClient<ITenantApiClient, TenantApiClient>(client =>
+{
+    var address = config[$"TenantService:Address"]
+       ?? throw new InvalidOperationException(
+           $"TenantService address not found in configuration."
+        );
+
+    client.BaseAddress = new Uri(address);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Enum Serializing (0 => "string")
+
 BsonSerializer.RegisterSerializer(new EnumSerializer<Theme>(BsonType.String));
 BsonSerializer.RegisterSerializer(new EnumSerializer<Language>(BsonType.String));
 BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
@@ -52,7 +66,7 @@ builder.Services.AddScoped<ITenantContext, TenantContext>();
 
 /////////////////////////////
 // ── Mongo Configuration
-/////////////////////////////
+////////////////////////////
 builder.Services
     .AddOptions<MongoSettings>()
     .Bind(builder.Configuration.GetSection("MongoSettings"))
@@ -188,12 +202,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-    app.UseHsts(); 
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
