@@ -4,7 +4,7 @@ namespace ERP.TenantService.Application.DTOs.TenantSubscription;
 
 public record TenantSubscriptionResponseDto(
     Guid TenantId,
-    DateTime StartDate,
-    DateTime EndDate,
+    DateTimeOffset StartDate,
+    DateTimeOffset EndDate,
     SubscriptionPlanResponseDto? Plan
 );
