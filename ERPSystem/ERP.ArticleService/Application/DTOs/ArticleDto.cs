@@ -60,6 +60,7 @@ namespace ERP.ArticleService.Application.DTOs
 
     public record ArticleResponseDto(
         Guid Id,
+        Guid? TenantId,
         CategoryResponseDto Category,
         string CodeRef,
         string BarCode,
