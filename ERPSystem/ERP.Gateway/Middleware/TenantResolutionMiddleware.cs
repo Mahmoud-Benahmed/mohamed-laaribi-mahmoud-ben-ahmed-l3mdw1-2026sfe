@@ -1,4 +1,5 @@
 ﻿using ERP.Gateway.Cache;
+using ERP.Gateway.Properties;
 
 public sealed class TenantResolutionMiddleware
 {
@@ -27,6 +28,13 @@ public sealed class TenantResolutionMiddleware
         "/payment"
     ];
 
+    private static readonly HashSet<string> PlatformAdminRoles =
+    [
+        TenantRoles.TENANT_SUPPORT,
+        TenantRoles.BILLING_MANAGER,
+        TenantRoles.SUPER_PLATFORM_ADMIN
+    ];
+
     public TenantResolutionMiddleware(
         RequestDelegate next,
         ILogger<TenantResolutionMiddleware> logger)
@@ -34,38 +42,66 @@ public sealed class TenantResolutionMiddleware
         _next = next;
         _logger = logger;
     }
-
     public async Task InvokeAsync(HttpContext context)
     {
-        // 1. Skip system endpoints
-        if (ExcludedPaths.Any(p => context.Request.Path.StartsWithSegments(p)))
+        var path = context.Request.Path;
+
+        // 1. Always skip excluded paths first
+        if (ExcludedPaths.Any(p => path.StartsWithSegments(p)))
         {
             await _next(context);
             return;
         }
 
         bool hasJwt = context.User?.Identity?.IsAuthenticated == true;
+
+        // 2. Platform admin: authenticated, has role, tenantId is null → cross-tenant access
+
+        // Then in InvokeAsync:
+        bool isPlatformAdmin = hasJwt
+            && PlatformAdminRoles.Any(role => context.User!.IsInRole(role))
+            && context.User!.FindFirst("tenantId")?.Value is null or "";
+
+        if (isPlatformAdmin)
+        {
+            // Optionally allow them to pass an explicit tenant via header for scoped operations
+            var overrideTenantId = context.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+            if (Guid.TryParse(overrideTenantId, out var adminTenantId))
+            {
+                var cache = context.RequestServices.GetRequiredService<ITenantCache>();
+                var overrideTenant = await cache.GetAsync(adminTenantId);
+
+                if (overrideTenant != null)
+                {
+                    AttachTenant(context, overrideTenant);
+                }
+            }
+
+            // Platform admin passes through regardless
+            await _next(context);
+            return;
+        }
+
+        // 3. Regular tenant resolution
         TenantCacheEntry? tenant = null;
 
         if (hasJwt)
         {
-            // POST-AUTH: resolve tenant from JWT claim only
-            var tenantId = context.User!.FindFirst("tenantId")?.Value;
-            if (Guid.TryParse(tenantId, out var parsedTenantId))
+            var tenantIdClaim = context.User!.FindFirst("tenantId")?.Value;
+
+            if (Guid.TryParse(tenantIdClaim, out var parsedTenantId))
             {
+                context.Items["tenantId"] = parsedTenantId;
+                context.Request.Headers.Remove("X-Tenant-Id");
+                context.Request.Headers["X-Tenant-Id"] = parsedTenantId.ToString();
+
                 var cache = context.RequestServices.GetRequiredService<ITenantCache>();
                 tenant = await cache.GetAsync(parsedTenantId);
             }
         }
-        // ✅ No X-Tenant header resolution at all — tenant always comes from JWT
 
-        bool tenantRequired = IsTenantRequired(context);
-
-        // Authenticated users with tenantId claim satisfy tenant requirement
-        bool tenantSatisfied = tenant != null ||
-            (hasJwt && !string.IsNullOrEmpty(context.User?.FindFirst("tenantId")?.Value));
-
-        if (tenantRequired && !tenantSatisfied)
+        // 4. Reject if tenant is required but not resolved
+        if (IsTenantRequired(context) && tenant == null)
         {
             context.Response.StatusCode = 400;
             await context.Response.WriteAsJsonAsync(new
@@ -77,9 +113,19 @@ public sealed class TenantResolutionMiddleware
             return;
         }
 
-        // Reject inactive tenant
+        // 5. Reject inactive tenant
         if (tenant != null && !tenant.IsActive)
         {
+            // Allow tenant SystemAdmin to renew subscription even when inactive
+            if (IsSubscriptionRenewalEndpoint(context.Request)
+                && context.User!.Claims.Any(c => c.Type == "privilege"
+                                             && c.Value == Privileges.Users.BUY_SUBSCRIPTION))
+            {
+                AttachTenant(context, tenant);
+                await _next(context);
+                return;
+            }
+
             context.Response.StatusCode = 403;
             await context.Response.WriteAsJsonAsync(new
             {
@@ -90,17 +136,21 @@ public sealed class TenantResolutionMiddleware
             return;
         }
 
-        // Attach tenant context if resolved
+        // 6. Attach tenant context
         if (tenant != null)
         {
-            context.Items["tenantId"] = tenant.TenantId;
-            context.Items["tenantSlug"] = tenant.Slug;
-            context.Items["tenant"] = tenant;
-            context.Request.Headers["X-Tenant-Id"] = tenant.TenantId.ToString();
-            context.Request.Headers["X-Tenant-Slug"] = tenant.Slug;
+            AttachTenant(context, tenant);
         }
 
         await _next(context);
+    }
+
+    private static void AttachTenant(HttpContext context, TenantCacheEntry tenant)
+    {
+        context.Items["tenant"] = tenant;
+        context.Items["tenantSlug"] = tenant.Slug;
+        context.Request.Headers.Remove("X-Tenant-Slug");
+        context.Request.Headers["X-Tenant-Slug"] = tenant.Slug;
     }
 
     private static bool IsTenantRequired(HttpContext context)
@@ -109,4 +159,10 @@ public sealed class TenantResolutionMiddleware
         if (path == null) return false;
         return TenantRequiredPaths.Any(p => path.StartsWith(p));
     }
+
+    // helper
+    private static bool IsSubscriptionRenewalEndpoint(HttpRequest request) =>
+        request.Method == HttpMethods.Post
+        && request.Path.StartsWithSegments("/tenants")
+        && request.Path.Value?.EndsWith("/subscription") == true;
 }
