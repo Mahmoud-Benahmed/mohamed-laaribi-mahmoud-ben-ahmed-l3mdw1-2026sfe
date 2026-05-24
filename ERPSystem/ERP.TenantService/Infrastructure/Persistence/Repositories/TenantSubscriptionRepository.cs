@@ -38,6 +38,12 @@ public class TenantSubscriptionRepository : ITenantSubscriptionRepository
     {
         return await _context.TenantSubscriptions
             .Where(s => s.EndDate <= asOf)
+            .Join(_context.Tenants,
+                s => s.TenantId,
+                t => t.Id,
+                (s, t) => new { Subscription = s, Tenant = t })
+            .Where(x => x.Tenant.IsActive && !x.Tenant.IsDeleted)
+            .Select(x => x.Subscription)
             .Include(s => s.Plan)
             .ToListAsync(ct);
     }
