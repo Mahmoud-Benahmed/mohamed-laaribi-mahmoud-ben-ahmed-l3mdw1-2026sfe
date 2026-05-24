@@ -61,6 +61,9 @@ namespace ERP.ArticleService.Migrations
                     b.Property<int>("TVA")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -77,9 +80,9 @@ namespace ERP.ArticleService.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CodeRef")
+                    b.HasIndex("TenantId", "CodeRef")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("Articles", (string)null);
                 });
@@ -104,10 +107,14 @@ namespace ERP.ArticleService.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Prefix")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Prefix")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("ArticleCodes", (string)null);
                 });
@@ -135,13 +142,17 @@ namespace ERP.ArticleService.Migrations
                     b.Property<int>("TVA")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Categories", (string)null);
                 });
