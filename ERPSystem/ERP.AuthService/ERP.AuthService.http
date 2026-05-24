@@ -1,6 +1,0 @@
-@ERP.AuthService_HostAddress = http://localhost:5188
-
-GET {{ERP.AuthService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
