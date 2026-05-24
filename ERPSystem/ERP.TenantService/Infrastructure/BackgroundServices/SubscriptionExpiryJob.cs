@@ -1,7 +1,6 @@
 ﻿using ERP.TenantService.Application.Events;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Infrastructure.Messaging;
-using Microsoft.AspNetCore.SignalR;
 
 public class SubscriptionExpiryJob : BackgroundService
 {
@@ -16,15 +15,18 @@ public class SubscriptionExpiryJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        int totalDelay = 0;
-        int checkInterval = 15;
-        string delayUnit = "minutes";
+        const DelayUnit delayUnit = DelayUnit.Minute;
+        TimeSpan delay = ToTimeSpan(delayUnit);
+        TimeSpan totalElapsed = TimeSpan.Zero;
 
         while (!ct.IsCancellationRequested)
         {
             await CheckExpirations(ct);
-            await Task.Delay(TimeSpan.FromMinutes(checkInterval), ct); // run every 15 minutes (default)
-            _logger.LogInformation($"Check done after: {totalDelay+= checkInterval} {delayUnit}");
+            await Task.Delay(delay, ct);
+            totalElapsed += delay;
+            _logger.LogInformation(
+                "Check done — total elapsed: {Elapsed}",
+                totalElapsed);
         }
     }
 
@@ -42,13 +44,17 @@ public class SubscriptionExpiryJob : BackgroundService
             try
             {
                 var tenant = await tenantRepo.GetByIdAsync(sub.TenantId, ct);
-                if (tenant is null)
+
+                if (tenant is null || !tenant.IsActive)
                     continue;
 
-                if (!tenant.IsActive)
-                    continue;
+                tenant.RemoveSubscription();
+                tenant.Suspend();
 
-                await tenantRepo.SaveChangesAsync();
+                // 2. Persist — single save
+                await repo.DeleteByTenantIdAsync(sub.TenantId, ct);
+                await tenantRepo.UpdateAsync(tenant);
+                await tenantRepo.SaveChangesAsync(ct);
 
                 await publisher.PublishAsync(TenantTopics.TenantSuspended,
                     new TenantSuspendedEvent(tenant.Id, tenant.Slug));
@@ -56,16 +62,34 @@ public class SubscriptionExpiryJob : BackgroundService
                 await publisher.PublishAsync(TenantTopics.SubscriptionExpired,
                     new SubscriptionExpiredEvent(sub.TenantId, sub.SubscriptionPlanId));
 
-
                 _logger.LogWarning("Subscription expired for tenant {TenantId}", sub.TenantId);
+                _logger.LogWarning("Tenant {TenantId} was Suspended", sub.TenantId);
             }
             catch (Exception ex)
             {
-                // Log and continue — this tenant will be retried on the next hourly run
                 _logger.LogError(ex,
                     "Failed to process expired subscription for tenant {TenantId}",
                     sub.TenantId);
             }
         }
     }
+
+    private static TimeSpan ToTimeSpan(DelayUnit unit) => unit switch
+    {
+        DelayUnit.Day => TimeSpan.FromDays(1),
+        DelayUnit.Hour => TimeSpan.FromHours(1),
+        DelayUnit.Minute => TimeSpan.FromMinutes(1),
+        _ => throw new ArgumentOutOfRangeException(nameof(unit))
+    };
 }
+
+public enum DelayUnit
+{
+    Minute,
+    Hour,
+    Day
+}
+
+// Day => 1
+// Hours => 6
+// Minute => 5
