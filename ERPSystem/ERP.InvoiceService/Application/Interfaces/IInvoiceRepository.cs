@@ -4,6 +4,9 @@ namespace InvoiceService.Application.Interfaces
 {
     public interface IInvoiceRepository
     {
+        Task<List<Invoice>> GetOverdueAsync(DateTime asOf);
+        Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber);
+
         // ── Existing queries ─────────────────────────────────────────────────────
         Task<Invoice?> GetByIdAsync(Guid id);
         Task<Invoice?> GetByInvoiceNumberAsync(string invoiceNumber);
