@@ -13,19 +13,22 @@ namespace ERP.ArticleService.Application.Services
         private readonly IArticleCodeService _articleCodeService;
         private readonly IEventPublisher _eventPublisher;
         private readonly ILogger<ArticleService> logger;
+        private readonly ITenantContext _tenantContext;
 
         public ArticleService(
             IArticleRepository articleRepository,
             ICategoryRepository categoryRepository,
             IArticleCodeService articleCodeService,
             IEventPublisher eventPublisher,
-            ILogger<ArticleService> logger)
+            ILogger<ArticleService> logger,
+            ITenantContext tenantContext)
         {
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _articleCodeService = articleCodeService;
             _eventPublisher = eventPublisher;
             this.logger = logger;
+            _tenantContext = tenantContext;
         }
 
         // =========================
@@ -43,7 +46,7 @@ namespace ERP.ArticleService.Application.Services
 
             string code = await _articleCodeService.GenerateArticleCodeAsync();
 
-            Article article = new Article(code, request.Libelle, request.Prix, request.Unit, category, request.BarCode, request.TVA);
+            Article article = new Article(code, request.Libelle, request.Prix, request.Unit, category, request.BarCode, request.TVA, _tenantContext.TenantId);
             await _articleRepository.AddAsync(article);
             await _articleRepository.SaveChangesAsync();
             ArticleResponseDto dto = MapToDto(article);
@@ -198,6 +201,7 @@ namespace ERP.ArticleService.Application.Services
 
         private static CategoryResponseDto CategoryMapToDto(Category cat) => new CategoryResponseDto(
             Id: cat.Id,
+            TenantId: cat.TenantId,
             Name: cat.Name,
             TVA: cat.TVA,
             IsDeleted: cat.IsDeleted,
@@ -206,6 +210,7 @@ namespace ERP.ArticleService.Application.Services
             );
         private static ArticleResponseDto MapToDto(Article article) => new ArticleResponseDto(
             Id: article.Id,
+            TenantId: article.TenantId,
             Category: CategoryMapToDto(article.Category),
             CodeRef: article.CodeRef,
             BarCode: article.BarCode,
