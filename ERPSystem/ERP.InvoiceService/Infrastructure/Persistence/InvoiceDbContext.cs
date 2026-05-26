@@ -1,5 +1,7 @@
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Domain.LocalCache.Article;
 using ERP.InvoiceService.Domain.LocalCache.Client;
+using ERP.InvoiceService.Domain.LocalCache.Tenant;
 using InvoiceService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,22 +10,48 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
 {
     public class InvoiceDbContext : DbContext
     {
-        public InvoiceDbContext(DbContextOptions<InvoiceDbContext> options)
-            : base(options) { }
+        private readonly Guid? _tenantId;
 
         public DbSet<Invoice> Invoices => Set<Invoice>();
         public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
         public DbSet<InvoiceSequence> InvoiceSequences { get; set; }
 
         public DbSet<ArticleCache> ArticleCaches => Set<ArticleCache>();
-        public DbSet<Domain.LocalCache.Article.ArticleCategoryCache> ArticleCategoryCaches => Set<Domain.LocalCache.Article.ArticleCategoryCache>();
+        public DbSet<ArticleCategoryCache> ArticleCategoryCaches => Set<ArticleCategoryCache>();
 
         public DbSet<ClientCache> ClientCaches => Set<ClientCache>();
-        public DbSet<Domain.LocalCache.Client.CategoryCache> ClientCategoryMasterCaches => Set<Domain.LocalCache.Client.CategoryCache>();
+        public DbSet<CategoryCache> ClientCategoryMasterCaches => Set<CategoryCache>();
         public DbSet<ClientCategoryCache> ClientCategoryAssignments => Set<ClientCategoryCache>();
+        public DbSet<TenantCache> TenantCaches => Set<TenantCache>();
 
-        protected override void OnModelCreating(ModelBuilder m) =>
+        public InvoiceDbContext(DbContextOptions<InvoiceDbContext> options, ITenantContext? tenantContext = null): base(options)
+        {
+            _tenantId = tenantContext?.TenantId;
+        }
+
+
+        protected override void OnModelCreating(ModelBuilder m)
+        {
             m.ApplyConfigurationsFromAssembly(typeof(InvoiceDbContext).Assembly);
+            m.Entity<Invoice>()
+                .HasQueryFilter(i =>
+                    !i.IsDeleted &&
+                    (_tenantId == null || i.TenantId == _tenantId));
+            m.Entity<InvoiceSequence>()
+                .HasQueryFilter(i =>
+                    (_tenantId == null || i.TenantId == _tenantId));
+
+            m.Entity<ArticleCategoryCache>()
+                .HasQueryFilter(a => !a.IsDeleted && (_tenantId == null || a.TenantId == _tenantId));
+            m.Entity<ArticleCache>()
+                .HasQueryFilter(a => !a.IsDeleted && (_tenantId == null || a.TenantId == _tenantId));
+
+            m.Entity<ClientCache>()
+                .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
+
+            m.Entity<InvoiceSequence>()
+                .HasQueryFilter(c => _tenantId == null || c.TenantId == _tenantId);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -73,15 +101,13 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
                   .HasConversion<string>()
                   .HasMaxLength(20);
 
-            entity.HasIndex(i => i.InvoiceNumber).IsUnique();
+            entity.HasIndex(i => new { i.TenantId, i.InvoiceNumber }).IsUnique();
 
             entity.HasMany(i => i.Items)
                   .WithOne()
                   .HasForeignKey(ii => ii.InvoiceId)
                   .OnDelete(DeleteBehavior.Cascade)
                   .IsRequired();
-
-            entity.HasQueryFilter(i => !i.IsDeleted);
         }
     }
 
@@ -128,9 +154,10 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
         public void Configure(EntityTypeBuilder<InvoiceSequence> entity)
         {
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Year).IsUnique();
             entity.Property(e => e.Year).IsRequired();
             entity.Property(e => e.CurrentNumber).IsRequired();
+
+            entity.HasIndex(e => new { e.TenantId, e.Year }).IsUnique();
         }
     }
 
@@ -138,13 +165,14 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
     // CACHE CONFIGURATIONS
     // ═══════════════════════════════════════════════════════════════════════════
 
-    internal sealed class ArtCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Article.ArticleCategoryCache>
+    internal sealed class ArtCategoryCacheConfiguration : IEntityTypeConfiguration<ArticleCategoryCache>
     {
-        public void Configure(EntityTypeBuilder<Domain.LocalCache.Article.ArticleCategoryCache> b)
+        public void Configure(EntityTypeBuilder<ArticleCategoryCache> b)
         {
             b.ToTable("ArticleCategoryCache");
             b.HasKey(c => c.Id);
             b.Property(c => c.Id).ValueGeneratedNever();
+            b.Property(c => c.TenantId).IsRequired(false);
             b.Property(c => c.Name).IsRequired().HasMaxLength(100);
             b.Property(c => c.TVA).HasPrecision(5, 2);
             b.Property(c => c.IsDeleted).HasDefaultValue(false);
@@ -224,9 +252,9 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
         }
     }
 
-    internal sealed class CltCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.CategoryCache>
+    internal sealed class CltCategoryCacheConfiguration : IEntityTypeConfiguration<CategoryCache>
     {
-        public void Configure(EntityTypeBuilder<Domain.LocalCache.Client.CategoryCache> b)
+        public void Configure(EntityTypeBuilder<CategoryCache> b)
         {
             b.ToTable("ClientCategoryCache");
             b.HasKey(c => c.Id);
@@ -252,9 +280,9 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
         }
     }
 
-    internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.ClientCategoryCache>
+    internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<ClientCategoryCache>
     {
-        public void Configure(EntityTypeBuilder<Domain.LocalCache.Client.ClientCategoryCache> b)
+        public void Configure(EntityTypeBuilder<ClientCategoryCache> b)
         {
             b.ToTable("ClientCategoriesCache");
 
@@ -273,5 +301,22 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
              .IsRequired()
              .OnDelete(DeleteBehavior.Restrict);
         }
+    }
+}
+
+internal sealed class TenantCacheConfiguration : IEntityTypeConfiguration<TenantCache>
+{
+    public void Configure(EntityTypeBuilder<TenantCache> b)
+    {
+        b.ToTable("TenantCaches");
+        b.HasKey(t => t.TenantId);
+        b.Property(t => t.TenantId).ValueGeneratedNever();
+        b.Property(t => t.Slug).IsRequired().HasMaxLength(100);
+        b.Property(t => t.Name).IsRequired().HasMaxLength(150);
+        b.Property(t => t.Address).IsRequired().HasMaxLength(500);
+        b.Property(t => t.Email).IsRequired().HasMaxLength(200);
+        b.Property(t => t.Phone).IsRequired().HasMaxLength(20);
+        b.Property(t => t.Currency).IsRequired().HasMaxLength(10);
+        b.HasIndex(t => t.Slug).IsUnique();
     }
 }
