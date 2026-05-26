@@ -20,14 +20,14 @@ namespace ERP.ArticleService.Application.Services
             ICategoryRepository categoryRepository,
             IArticleCodeService articleCodeService,
             IEventPublisher eventPublisher,
-            ILogger<ArticleService> logger,
+            ILogger<ArticleService> _logger,
             ITenantContext tenantContext)
         {
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _articleCodeService = articleCodeService;
             _eventPublisher = eventPublisher;
-            this.logger = logger;
+            logger = _logger;
             _tenantContext = tenantContext;
         }
 
@@ -201,16 +201,15 @@ namespace ERP.ArticleService.Application.Services
 
         private static CategoryResponseDto CategoryMapToDto(Category cat) => new CategoryResponseDto(
             Id: cat.Id,
-            TenantId: cat.TenantId,
             Name: cat.Name,
             TVA: cat.TVA,
             IsDeleted: cat.IsDeleted,
             CreatedAt: cat.CreatedAt,
-            UpdatedAt: cat.UpdatedAt
+            UpdatedAt: cat.UpdatedAt,
+            TenantId: cat.TenantId
             );
         private static ArticleResponseDto MapToDto(Article article) => new ArticleResponseDto(
             Id: article.Id,
-            TenantId: article.TenantId,
             Category: CategoryMapToDto(article.Category),
             CodeRef: article.CodeRef,
             BarCode: article.BarCode,
@@ -220,7 +219,8 @@ namespace ERP.ArticleService.Application.Services
             TVA: article.TVA,
             IsDeleted: article.IsDeleted,
             CreatedAt: article.CreatedAt,
-            UpdatedAt: article.UpdatedAt
+            UpdatedAt: article.UpdatedAt,
+            TenantId: article.TenantId
             );
     }
 }
