@@ -17,7 +17,7 @@ namespace ERP.FournisseurService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -66,12 +66,15 @@ namespace ERP.FournisseurService.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TaxNumber")
+                    b.HasIndex("TaxNumber", "TenantId")
                         .IsUnique()
                         .HasDatabaseName("IX_Fournisseurs_TaxNumber")
                         .HasFilter("[IsDeleted] = 0");
