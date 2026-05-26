@@ -215,15 +215,17 @@ public sealed class ArticleCacheService : IArticleCacheService
         TVA: a.TVA,
         IsDeleted: a.IsDeleted,
         CreatedAt: a.CreatedAt,
-        UpdatedAt: a.UpdatedAt);
+        UpdatedAt: a.UpdatedAt,
+        TenantId: a.TenantId);
 
     private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => c is null
-        ? new ArticleCategoryResponseDto(Guid.Empty, string.Empty, 0, false, DateTime.MinValue, null)
+        ? new ArticleCategoryResponseDto(Guid.Empty, string.Empty, 0, false, DateTime.MinValue, null, null)
         : new ArticleCategoryResponseDto(
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
             IsDeleted: c.IsDeleted,
             CreatedAt: c.CreatedAt,
-            UpdatedAt: c.UpdatedAt);
+            UpdatedAt: c.UpdatedAt,
+            TenantId: c.TenantId);
 }
