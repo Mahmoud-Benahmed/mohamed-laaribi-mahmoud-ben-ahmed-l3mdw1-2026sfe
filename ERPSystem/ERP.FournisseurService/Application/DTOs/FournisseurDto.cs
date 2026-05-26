@@ -38,7 +38,7 @@ public sealed record FournisseurResponseDto(
     Guid Id, string Name, string Address, string Phone,
     string? Email, string TaxNumber, string RIB,
     bool IsDeleted, bool IsBlocked,
-    DateTime CreatedAt, DateTime? UpdatedAt);
+    DateTime CreatedAt, DateTime? UpdatedAt, Guid? TenantId);
 
 public sealed record FournisseurStatsDto(
     int TotalFournisseurs, int ActiveFournisseurs,
@@ -59,6 +59,7 @@ public static class FournisseurMapping
             fournisseur.IsDeleted,
             fournisseur.IsBlocked,
             fournisseur.CreatedAt,
-            fournisseur.UpdatedAt
+            fournisseur.UpdatedAt,
+            fournisseur.TenantId
         );
 }
