@@ -17,6 +17,7 @@ public class BonRetourService : IBonRetourService
     private readonly IClientCacheRepository _clientCacheRepository;
     private readonly IBonNumeroRepository _bonNumeroRepository;
     private readonly IJournalStockRepository _journalStockRepository;
+    private readonly ITenantContext _tenantContext;
 
 
     public BonRetourService(
@@ -26,7 +27,8 @@ public class BonRetourService : IBonRetourService
         IArticleCacheRepository articleCacheRepository,
         IClientCacheRepository clientCacheRepository,
         IBonNumeroRepository bonNumeroRepository,
-        IJournalStockRepository journalStockRepository)
+        IJournalStockRepository journalStockRepository,
+        ITenantContext tenantContext)
     {
         _repo = repo;
         _bonSortieRepo = bonSortieRepo;
@@ -35,6 +37,7 @@ public class BonRetourService : IBonRetourService
         _clientCacheRepository = clientCacheRepository;
         _bonNumeroRepository = bonNumeroRepository;
         _journalStockRepository = journalStockRepository;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -61,7 +64,7 @@ public class BonRetourService : IBonRetourService
         {
             // 4. Generate document number and create BonRetour header
             string numero = await _bonNumeroRepository.GetNextDocumentNumberAsync("BON_RETOUR");
-            BonRetour bon = BonRetour.Create(numero, dto.SourceId, dto.SourceType, dto.Motif, dto.Observation);
+            BonRetour bon = BonRetour.Create(numero, dto.SourceId, dto.SourceType, dto.Motif, dto.Observation, _tenantContext.TenantId);
 
             // 5. Validate and add each ligne
             foreach (LigneRequestDto ligneDto in dto.Lignes)
