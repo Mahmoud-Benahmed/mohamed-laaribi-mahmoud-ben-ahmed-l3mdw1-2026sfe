@@ -7,7 +7,8 @@ public sealed record InvoiceEventDto(
     decimal PaidAmount,
     decimal RemainingAmount,
     string Status,
-    Guid ClientId
+    Guid ClientId,
+    Guid? TenantId
 );
 
 public sealed record InvoicePaidEvent(
