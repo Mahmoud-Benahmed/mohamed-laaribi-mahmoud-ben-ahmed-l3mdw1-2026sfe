@@ -79,6 +79,7 @@ namespace ERP.ClientService.Application.DTOs
         bool IsActive,
         bool IsDeleted,
         DateTime CreatedAt,
-        DateTime? UpdatedAt
+        DateTime? UpdatedAt,
+        Guid? TenantId
     );
 }
