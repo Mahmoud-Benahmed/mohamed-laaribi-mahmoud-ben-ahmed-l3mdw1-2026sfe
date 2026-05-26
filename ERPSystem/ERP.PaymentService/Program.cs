@@ -75,6 +75,8 @@ builder.Services.AddHealthChecks()
 // =========================
 // REPOSITORIES
 // =========================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRefundRequestRepository, RefundRequestRepository>();
 builder.Services.AddScoped<IInvoiceCacheRepository, InvoiceCacheRepository>();
@@ -98,7 +100,6 @@ builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 // =========================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpContextAccessor();
 
 // ====================================
 // BUILD
