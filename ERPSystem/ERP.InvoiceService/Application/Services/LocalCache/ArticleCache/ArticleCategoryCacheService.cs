@@ -179,5 +179,5 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
         TVA: c.TVA,
         IsDeleted: c.IsDeleted,
         CreatedAt: c.CreatedAt,
-        UpdatedAt: c.UpdatedAt);
+        UpdatedAt: c.UpdatedAt, TenantId: c.TenantId);
 }
