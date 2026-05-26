@@ -26,7 +26,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
             GroupId = "gateway-tenant-lifecycle-consumer",
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true
         };
@@ -216,6 +216,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             break;
                         }
                 }
+                _consumer.Commit(result);
             }
             catch (ConsumeException ex)
             {
