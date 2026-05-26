@@ -32,6 +32,16 @@ public class TenantRepository : ITenantRepository
        return (tenants, total);
     }
 
+    public async Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default)
+    {
+        var tenants = await _context.Tenants
+                             .AsNoTracking()
+                             .Where(t=> t.IsActive)
+                             .OrderByDescending(t => t.CreatedAt)
+                             .ToListAsync(ct);
+        return tenants;
+    }
+
     public async Task<(List<Tenant> Items, int TotalCount)> GetDeletedAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var query = _context.Tenants
