@@ -8,6 +8,7 @@ public record UpdateTenantRequestDto(
     [Required][EmailAddress][MaxLength(200)] string Email,
     [Required][MaxLength(20)] string Phone,
     [Required][MaxLength(100)] string SubdomainSlug,
+    [MaxLength(100)] string? Address,
     [MaxLength(500)] string? LogoUrl,
     [MaxLength(7)] string? PrimaryColor,
     [MaxLength(7)] string? SecondaryColor,
