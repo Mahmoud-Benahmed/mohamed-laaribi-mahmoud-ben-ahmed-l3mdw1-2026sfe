@@ -5,6 +5,7 @@ namespace ERP.FournisseurService.Domain;
 public sealed class Fournisseur
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Address { get; private set; } = default!;
     public string Phone { get; private set; } = default!;
@@ -21,13 +22,14 @@ public sealed class Fournisseur
     // ---------------- CREATE ----------------
     public static Fournisseur Create(
         string name, string address, string phone,
-        string taxNumber, string rib, string? email = null)
+        string taxNumber, string rib, string? email = null, Guid? tenantId = null)
     {
         ValidateArgs(name, address, phone, taxNumber, rib, email);
 
         return new Fournisseur
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             Name = name.Trim(),
             Address = address.Trim(),
             Phone = phone.Trim(),
