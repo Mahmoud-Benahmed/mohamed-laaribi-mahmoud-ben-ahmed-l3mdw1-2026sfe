@@ -8,8 +8,8 @@ public interface ITenantCache
     Task<TenantCacheEntry?> GetAsync(Guid tenantId);
     Task SetAsync(TenantCacheEntry tenant);
     Task RemoveAsync(string slug);
+    Task FlushAsync(RedisKey[] keys);
 }
-
 public class RedisTenantCache : ITenantCache
 {
     private readonly IDatabase _db;
@@ -67,5 +67,10 @@ public class RedisTenantCache : ITenantCache
 
         if (entry != null)
             await _db.KeyDeleteAsync($"tenant:id:{entry.TenantId}");
+    }
+    public async Task FlushAsync(RedisKey[] keys)
+    {
+        if (keys.Length > 0)
+            await _db.KeyDeleteAsync(keys);
     }
 }
