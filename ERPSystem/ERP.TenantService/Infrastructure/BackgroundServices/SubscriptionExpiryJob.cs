@@ -1,4 +1,4 @@
-﻿using ERP.TenantService.Application.Events;
+﻿using ERP.TenantService.Application.DTOs.Events;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Infrastructure.Messaging;
 
