@@ -69,8 +69,8 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(t => t.Name)
             .IsRequired()
-            .HasMaxLength(150);
-
+            .HasMaxLength(150); 
+        
         builder.Property(t => t.Email)
             .IsRequired()
             .HasMaxLength(200);
@@ -86,6 +86,10 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.HasIndex(t => t.Slug)
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
+        
+        builder.Property(t => t.Address)
+            .IsRequired()
+            .HasMaxLength(150);
 
         builder.Property(t => t.LogoUrl)
             .HasMaxLength(500);
