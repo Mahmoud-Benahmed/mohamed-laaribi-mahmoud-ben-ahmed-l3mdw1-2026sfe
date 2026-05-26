@@ -123,7 +123,7 @@ export class AuthService {
     this.loadProfileFromStorage()
   );
   readonly userProfile$ = this._userProfile$.asObservable();
-  
+
   private _loggingOut = false;
 
   private _onLogout$ = new Subject<void>();
@@ -132,6 +132,7 @@ export class AuthService {
 
 
   private readonly baseUrl = `${environment.apiUrl}${environment.routes.auth}`;
+  private readonly loginUrl = `${environment.apiUrl}/login`;
 
   constructor(private http: HttpClient,   private router: Router) {}
 
@@ -365,7 +366,7 @@ export class AuthService {
   // LOGIN
   // =========================
   login(request: LoginRequestDto): Observable<AuthResponseDto> {
-    return this.http.post<AuthResponseDto>(`${this.baseUrl}/login`, request).pipe(
+    return this.http.post<AuthResponseDto>(`${this.loginUrl}`, request).pipe(
       tap(response => this.storeTokens(response))
     );
   }
