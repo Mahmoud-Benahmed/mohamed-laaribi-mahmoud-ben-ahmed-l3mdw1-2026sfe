@@ -15,19 +15,22 @@ public class BonEntreService : IBonEntreService
     private readonly IJournalStockRepository _journalStockRepository;
     private readonly IFournisseurCacheRepository _fournisseurCacheRepository;
     private readonly IArticleCacheRepository _articleCacheRepository;
+    private readonly ITenantContext _tenantContext;
 
     public BonEntreService(
         IBonEntreRepository repo,
         IArticleCacheRepository articleCacheRepository,
         IBonNumeroRepository bonNumberRepository,
         IJournalStockRepository journalStockRepository,
-        IFournisseurCacheRepository fornisseurCacheRepo)
+        IFournisseurCacheRepository fornisseurCacheRepo,
+        ITenantContext tenantContext)
     {
         _repo = repo;
         _fournisseurCacheRepository = fornisseurCacheRepo;
         _bonNumberRepo = bonNumberRepository;
         _journalStockRepository = journalStockRepository;
         _articleCacheRepository = articleCacheRepository;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -55,7 +58,7 @@ public class BonEntreService : IBonEntreService
         try
         {
             string numero = await _bonNumberRepo.GetNextDocumentNumberAsync("BON_ENTRE");
-            BonEntre bon = BonEntre.Create(numero, dto.FournisseurId, dto.Observation);
+            BonEntre bon = BonEntre.Create(numero, dto.FournisseurId, dto.Observation, _tenantContext.TenantId);
 
             foreach (LigneRequestDto l in dto.Lignes)
                 bon.AddLigne(l.ArticleId, l.Quantity, l.Price);
