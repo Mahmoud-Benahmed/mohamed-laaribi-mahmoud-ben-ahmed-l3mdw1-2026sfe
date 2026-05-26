@@ -1,10 +1,10 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Application.Services.LocalCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ArticleCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ClientCache;
-using ERP.InvoiceService.Infrastructure.BackgroundServices;
 using ERP.InvoiceService.Infrastructure.Messaging;
 using ERP.InvoiceService.Infrastructure.Messaging.Events;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.Article;
@@ -13,6 +13,7 @@ using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.Payment;
 using ERP.InvoiceService.Infrastructure.Persistence;
+using ERP.InvoiceService.Infrastructure.Persistence.Repositories;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache.ArticleCache;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache.ClientCache;
@@ -97,6 +98,9 @@ builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 // =========================
 // SERVICES
 // =========================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddScoped<ITenantCacheRepository, TenantCacheRepository>();
 builder.Services.AddScoped<IInvoiceNumberGenerator, InvoiceNumberGenerator>();
 builder.Services.AddScoped<IInvoicesService, InvoicesService>();
 
