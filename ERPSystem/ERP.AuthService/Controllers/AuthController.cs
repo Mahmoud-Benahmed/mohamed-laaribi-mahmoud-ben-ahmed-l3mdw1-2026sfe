@@ -249,7 +249,7 @@ namespace ERP.AuthService.Controllers
         }
 
 
-        [HttpPost("login")]
+        [HttpPost("/login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
             AuthResponseDto result = await _authService.LoginAsync(request);
