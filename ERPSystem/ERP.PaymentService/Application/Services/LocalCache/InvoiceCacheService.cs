@@ -134,6 +134,7 @@ public class InvoiceCacheService : IInvoiceCacheService
         PaidAmount: cache.PaidAmount,
         RemainingAmount: cache.TotalTTC - cache.PaidAmount,
         Status: cache.Status.ToString(),
-        ClientId: cache.ClientId
+        ClientId: cache.ClientId,
+        TenantId: cache.TenantId
     );
 }
