@@ -1,4 +1,5 @@
-﻿using ERP.PaymentService.Domain;
+﻿using ERP.PaymentService.Application.Services;
+using ERP.PaymentService.Domain;
 using ERP.PaymentService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -6,8 +7,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class PaymentDbContext : DbContext
 {
-    public PaymentDbContext(DbContextOptions<PaymentDbContext> options)
-    : base(options) { }
+    private readonly Guid? _tenantId;
+    public PaymentDbContext(DbContextOptions<PaymentDbContext> options, ITenantContext? tenantContext = null)
+    : base(options) 
+    { 
+        _tenantId = tenantContext?.TenantId;
+    }
 
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<PaymentInvoice> PaymentsInvoices => Set<PaymentInvoice>();
@@ -15,10 +20,20 @@ public class PaymentDbContext : DbContext
     public DbSet<PaymentSequence> PaymentSequences=> Set<PaymentSequence>();
     public DbSet<RefundRequest> Refunds=> Set<RefundRequest>();
 
-    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-
-    protected override void OnModelCreating(ModelBuilder m) =>
-            m.ApplyConfigurationsFromAssembly(typeof(PaymentDbContext).Assembly);
+    protected override void OnModelCreating(ModelBuilder m)
+    {
+        m.ApplyConfigurationsFromAssembly(typeof(PaymentDbContext).Assembly);
+        m.Entity<Payment>()
+            .HasQueryFilter(p => p.TenantId == _tenantId);
+        m.Entity<PaymentInvoice>()
+            .HasQueryFilter(pi => pi.TenantId == _tenantId);
+        m.Entity<PaymentSequence>()
+            .HasQueryFilter(p => p.TenantId == _tenantId);
+        m.Entity<RefundRequest>()
+            .HasQueryFilter(p => p.TenantId == _tenantId);
+        m.Entity<InvoiceCache>()
+            .HasQueryFilter(i => i.TenantId == _tenantId);
+    }
 }
 
 internal class PaymentConfiguration : IEntityTypeConfiguration<Payment>
@@ -63,7 +78,7 @@ internal class PaymentConfiguration : IEntityTypeConfiguration<Payment>
                .IsRequired(false);
 
         builder.HasIndex(p => p.ClientId);
-        builder.HasIndex(p => p.Number).IsUnique();
+        builder.HasIndex(p => new {p.TenantId, p.Number}).IsUnique();
 
         builder.Navigation(p => p.Allocations)
                .HasField("_allocations")
@@ -93,7 +108,7 @@ internal class PaymentInvoiceConfiguration : IEntityTypeConfiguration<PaymentInv
         builder.HasIndex(pi => pi.PaymentId);
 
         // one allocation per invoice per payment
-        builder.HasIndex(pi => new { pi.PaymentId, pi.InvoiceId })
+        builder.HasIndex(pi => new { pi.PaymentId, pi.InvoiceId, pi.TenantId })
                .IsUnique();
     }
 }
@@ -135,18 +150,6 @@ internal class InvoiceCacheConfiguration : IEntityTypeConfiguration<InvoiceCache
     }
 }
 
-internal class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
-{
-    public void Configure(EntityTypeBuilder<OutboxMessage> builder)
-    {
-        builder.ToTable("OutboxMessages");
-        builder.HasKey(o => o.Id);
-
-        // Only fetch unprocessed messages in the worker
-        builder.HasIndex(o => o.ProcessedAt);
-    }
-}
-// EF Core configuration
 internal class PaymentSequenceConfiguration : IEntityTypeConfiguration<PaymentSequence>
 {
     public void Configure(EntityTypeBuilder<PaymentSequence> builder)
@@ -160,7 +163,7 @@ internal class PaymentSequenceConfiguration : IEntityTypeConfiguration<PaymentSe
         builder.Property(s => s.UpdatedAt).IsRequired();
 
         // one sequence row per year — no duplicates
-        builder.HasIndex(s => s.Year).IsUnique();
+        builder.HasIndex(s => new { s.Year, s.TenantId }).IsUnique();
     }
 }
 
@@ -173,7 +176,7 @@ internal class RefundRequestConfiguration : IEntityTypeConfiguration<RefundReque
 
         builder.Property(e => e.ClientId).IsRequired();
         builder.Property(e => e.InvoiceId).IsRequired();
-        builder.HasIndex(e => e.InvoiceId).IsUnique();
+        builder.HasIndex(e => new { e.InvoiceId, e.TenantId }).IsUnique();
 
         builder.Property(e => e.Status)
                .HasConversion<string>()
