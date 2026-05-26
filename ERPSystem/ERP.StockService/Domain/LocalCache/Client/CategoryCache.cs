@@ -1,10 +1,13 @@
-﻿namespace ERP.StockService.Domain.LocalCache.Client;
+﻿using ERP.StockService.Application.DTOs;
+
+namespace ERP.StockService.Domain.LocalCache.Client;
 
 public sealed class CategoryCache
 {
 
     // ── Identity ──────────────────────────────────────────────────────────────
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Code { get; private set; } = default!;
 
@@ -27,34 +30,23 @@ public sealed class CategoryCache
     private CategoryCache() { }
 
     // ── Factory ───────────────────────────────────────────────────────────────
-    public static CategoryCache Create(
-        Guid id,
-        string name,
-        string code,
-        int delaiRetour,
-        int duePaymentPeriod,          // <-- was the broken `int )` — fixed
-        DateTime createdAt,
-        bool useBulkPricing = false,
-        decimal? discountRate = null,
-        decimal? creditLimitMultiplier = null,
-        bool isActive = true,
-        bool isDeleted = false,
-        DateTime? updatedAt = null)
+    public static CategoryCache Create(ClientCategoryResponseDto dto)
     {
         return new CategoryCache
         {
-            Id = id,
-            Name = name.Trim(),
-            Code = code.Trim().ToUpperInvariant(),
-            DelaiRetour = delaiRetour,
-            UseBulkPricing = useBulkPricing,
-            DiscountRate = discountRate,
-            CreditLimitMultiplier = creditLimitMultiplier,
-            DuePaymentPeriod = duePaymentPeriod,               // <-- add this
-            IsDeleted = isDeleted,
-            IsActive = isActive,
-            CreatedAt = createdAt,
-            UpdatedAt = updatedAt
+            Id = dto.Id,
+            TenantId= dto.TenantId,
+            Name = dto.Name.Trim(),
+            Code = dto.Code.Trim().ToUpperInvariant(),
+            DelaiRetour = dto.DelaiRetour,
+            UseBulkPricing = dto.UseBulkPricing,
+            DiscountRate = dto.DiscountRate,
+            CreditLimitMultiplier = dto.CreditLimitMultiplier,
+            DuePaymentPeriod = dto.DuePaymentPeriod,
+            IsDeleted = dto.IsDeleted,
+            IsActive = dto.IsActive,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
         };
     }
 
