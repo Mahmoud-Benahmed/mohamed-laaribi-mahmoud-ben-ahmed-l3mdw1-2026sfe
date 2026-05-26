@@ -5,7 +5,8 @@ using System.Net.Http.Json;
 
 public interface ITenantDirectoryClient
 {
-    Task<TenantCacheEntry?> ResolveAsync(string slug);
+    Task<TenantCacheEntry?> ResolveAsync(Guid tenantId);
+    Task<List<TenantCacheEntry>> GetAllActiveAsync(CancellationToken ct = default);
 }
 
 public class TenantDirectoryClient : ITenantDirectoryClient
@@ -21,9 +22,9 @@ public class TenantDirectoryClient : ITenantDirectoryClient
         _logger = logger;
     }
 
-    public async Task<TenantCacheEntry?> ResolveAsync(string slug)
+    public async Task<TenantCacheEntry?> ResolveAsync(Guid tenantId)
     {
-        var response = await _httpClient.GetAsync($"/tenants/slug/{slug}");
+        var response = await _httpClient.GetAsync($"/tenants/{tenantId}");
 
         return response.StatusCode switch
         {
@@ -36,5 +37,19 @@ public class TenantDirectoryClient : ITenantDirectoryClient
             _ => throw new HttpRequestException(
                 $"TenantService returned {response.StatusCode}")
         };
+    }
+
+    public async Task<List<TenantCacheEntry>> GetAllActiveAsync(CancellationToken ct = default)
+    {
+        var response = await _httpClient.GetAsync("/tenants/active", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Failed to fetch active tenants: {Status}", response.StatusCode);
+            return [];
+        }
+
+        return await response.Content
+            .ReadFromJsonAsync<List<TenantCacheEntry>>(cancellationToken: ct) ?? [];
     }
 }
