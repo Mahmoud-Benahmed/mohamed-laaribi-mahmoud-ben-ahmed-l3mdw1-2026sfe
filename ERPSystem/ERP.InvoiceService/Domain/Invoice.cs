@@ -7,6 +7,7 @@ namespace InvoiceService.Domain
         // ────────────────────────────────────────────────────────────────────────
 
         public Guid Id { get; private set; }
+        public Guid? TenantId { get; private set; }
         public string InvoiceNumber { get; private set; }
         public TaxCalculationMode TaxCalculationMode { get; private set; }
         public DateTime InvoiceDate { get; private set; }
@@ -41,7 +42,9 @@ namespace InvoiceService.Domain
             Guid clientId,
             string clientFullName,
             string clientAddress,
-            string? additionalNotes = null)
+            string? additionalNotes = null,
+            Guid? tenantId = null
+            )
         {
             Id = Guid.NewGuid();
             InvoiceNumber = invoiceNumber;
@@ -53,6 +56,7 @@ namespace InvoiceService.Domain
             ClientFullName = clientFullName;
             ClientAddress = clientAddress;
             AdditionalNotes = additionalNotes;
+            TenantId = tenantId;
             Status = InvoiceStatus.DRAFT;
             IsDeleted = false;
             CreatedAt = DateTime.UtcNow;
@@ -60,7 +64,7 @@ namespace InvoiceService.Domain
         }
 
         // In Invoice.cs
-        public Invoice CreatePenaltyInvoice(string invoiceNumber, decimal penaltyRate = 0.02m)
+        public Invoice CreatePenaltyInvoice(string invoiceNumber, decimal penaltyRate = 0.02m, Guid? tenantId = null)
         {
             if (Status != InvoiceStatus.UNPAID)
                 throw new InvoiceDomainException("Penalty invoices can only be created for UNPAID invoices.");
@@ -76,7 +80,8 @@ namespace InvoiceService.Domain
                 ClientId,
                 ClientFullName,
                 ClientAddress,
-                $"Penalty invoice for overdue invoice {InvoiceNumber}");
+                $"Penalty invoice for overdue invoice {InvoiceNumber}",
+                tenantId);
 
             penalty.AddItem(new InvoiceItem(
                 penalty.Id,
