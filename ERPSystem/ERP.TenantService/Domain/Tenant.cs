@@ -7,6 +7,7 @@ public class Tenant
     public string Email { get; private set; }
     public string Phone { get; private set; }
     public string Slug { get; private set; }
+    public string Address { get; private set; }
     public string? LogoUrl { get; private set; }
     public string? PrimaryColor { get; private set; }
     public string? SecondaryColor { get; private set; }
@@ -25,6 +26,7 @@ public class Tenant
         string email,
         string phone,
         string subdomainSlug,
+        string address,
         string? logoUrl = null,
         string? primaryColor = null,
         string? secondaryColor = null,
@@ -33,6 +35,17 @@ public class Tenant
         string timezone = "Africa/Tunisia"
     )
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.", nameof(name));
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.", nameof(email));
+        if (string.IsNullOrWhiteSpace(phone))
+            throw new ArgumentException("Phone is required.", nameof(phone));
+        if (string.IsNullOrWhiteSpace(subdomainSlug))
+            throw new ArgumentException("Subdomain slug is required.", nameof(subdomainSlug));
+        if (string.IsNullOrWhiteSpace(address))
+            throw new ArgumentException("Address is required.", nameof(address));
+
         return new Tenant
         {
             Id = Guid.NewGuid(),
@@ -40,6 +53,7 @@ public class Tenant
             Email = email,
             Phone = phone,
             Slug = subdomainSlug.ToLower(),
+            Address = address,
             LogoUrl = logoUrl,
             PrimaryColor = primaryColor,
             SecondaryColor = secondaryColor,
@@ -57,17 +71,29 @@ public class Tenant
         string email,
         string phone,
         string subdomainSlug,
-        string? logoUrl,
-        string? primaryColor,
-        string? secondaryColor,
-        string currency,
-        string locale,
-        string timezone)
+        string address,
+        string? logoUrl= null,
+        string? primaryColor= null,
+        string? secondaryColor= null,
+        string currency= "TND",
+        string locale= "fr-TN",
+        string timezone= "Africa/Tunisia")
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.", nameof(name));
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.", nameof(email));
+        if (string.IsNullOrWhiteSpace(phone))
+            throw new ArgumentException("Phone is required.", nameof(phone));
+        if (string.IsNullOrWhiteSpace(subdomainSlug))
+            throw new ArgumentException("Subdomain slug is required.", nameof(subdomainSlug));
+        if (string.IsNullOrWhiteSpace(address))
+            throw new ArgumentException("Address is required.", nameof(address));
         Name = name;
         Email = email;
         Phone = phone;
         Slug = subdomainSlug;
+        Address = address;
         LogoUrl = logoUrl;
         PrimaryColor = primaryColor;
         SecondaryColor = secondaryColor;
@@ -84,7 +110,6 @@ public class Tenant
     {
         if (Subscription is not null)
             throw new InvalidOperationException("Unable to delete tenant: It has an active subscription.");
-        IsActive = false;
         IsDeleted = true;
     }
     public void Restore() => IsDeleted = false;
