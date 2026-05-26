@@ -1,11 +1,13 @@
 using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.Tenant;
 using ERP.TenantService.Application.DTOs.TenantSubscription;
+using ERP.TenantService.Domain;
 
 namespace ERP.TenantService.Application.Interfaces;
 
 public interface ITenantService
 {
+    Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default);
     Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
     Task<PagedResultDto<TenantResponseDto>> GetDeletedAsync(int page, int pageSize, CancellationToken ct = default);
     Task<TenantResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
