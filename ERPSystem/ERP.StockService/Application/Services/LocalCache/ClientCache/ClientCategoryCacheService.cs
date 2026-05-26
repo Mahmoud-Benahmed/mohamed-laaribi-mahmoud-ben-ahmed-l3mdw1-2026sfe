@@ -150,20 +150,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
 
             // Create new category master data
-            CategoryCache category = CategoryCache.Create(
-                    id: dto.Id,
-                    name: dto.Name,
-                    code: dto.Code,
-                    delaiRetour: dto.DelaiRetour,
-                    duePaymentPeriod: dto.DuePaymentPeriod,
-                    discountRate: dto.DiscountRate,
-                    creditLimitMultiplier: dto.CreditLimitMultiplier,
-                    useBulkPricing: dto.UseBulkPricing,
-                    isActive: dto.IsActive,
-                    createdAt: dto.CreatedAt,
-                    updatedAt: dto.UpdatedAt,
-                    isDeleted: dto.IsDeleted
-                );
+            CategoryCache category = CategoryCache.Create(dto);
 
             await _repository.AddCategoryAsync(category);
             await _repository.SaveChangesAsync();
@@ -429,7 +416,8 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             IsActive: category.IsActive,
             IsDeleted: category.IsDeleted,
             CreatedAt: category.CreatedAt,
-            UpdatedAt: category.UpdatedAt
+            UpdatedAt: category.UpdatedAt,
+            TenantId: category.TenantId
             );
     }
 }
