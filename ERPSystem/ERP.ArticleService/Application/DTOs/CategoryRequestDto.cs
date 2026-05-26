@@ -14,12 +14,12 @@ namespace ERP.ArticleService.Application.DTOs
 
     public record CategoryResponseDto(
         Guid Id,
-        Guid? TenantId,
         string Name,
         int TVA,
         bool IsDeleted,
         DateTime CreatedAt,
-        DateTime? UpdatedAt
+        DateTime? UpdatedAt,
+        Guid? TenantId
     );
 
     public sealed record CategoryStatsDto(
