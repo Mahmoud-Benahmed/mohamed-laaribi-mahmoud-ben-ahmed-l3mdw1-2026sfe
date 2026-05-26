@@ -1,5 +1,6 @@
 ﻿namespace ERP.AuthService.Application.Services;
 
+
 public interface ITenantContext
 {
     Guid? TenantId { get; }
@@ -18,27 +19,27 @@ public class TenantContext : ITenantContext
     {
         get
         {
-            var ctx = _httpContextAccessor.HttpContext;
-            if (ctx == null) return null;
+            // 1. Header first (forwarded by gateway)
+            var header = _httpContextAccessor.HttpContext?
+                .Request.Headers["X-Tenant-Id"].FirstOrDefault();
 
-            // Try header first (forwarded by gateway)
-            var header = ctx.Request.Headers["X-Tenant-Id"].FirstOrDefault();
-            if (Guid.TryParse(header, out var fromHeader))
+            var value = header?.Split(',').FirstOrDefault()?.Trim();
+
+            if (Guid.TryParse(value, out var fromHeader))
                 return fromHeader;
 
-            // Fallback to JWT claim
-            var claim = ctx.User?.FindFirst("tenantId")?.Value;
+            // 2. Fallback to JWT claim (direct calls / dev)
+            var claim = _httpContextAccessor.HttpContext?  // ✅ via HttpContext
+                .User?.FindFirst("tenantId")?.Value;
+
             if (Guid.TryParse(claim, out var fromClaim))
                 return fromClaim;
 
             return null;
         }
     }
-    public string? Slug
-    {
-        get
-        {
-            return _httpContextAccessor.HttpContext?.Items["tenantSlug"]?.ToString();
-        }
-    }
+
+    public string? Slug =>
+        _httpContextAccessor.HttpContext?
+            .Request.Headers["X-Tenant-Slug"].FirstOrDefault();
 }
