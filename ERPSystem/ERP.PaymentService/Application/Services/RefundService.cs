@@ -9,13 +9,16 @@ public class RefundService : IRefundService
 {
     private readonly IRefundRequestRepository _refundRepo;
     private readonly IPaymentInvoiceRepository _allocationRepo;
+    private readonly ITenantContext _tenantContext;
 
     public RefundService(
         IRefundRequestRepository refundRepo,
-        IPaymentInvoiceRepository allocationRepo)
+        IPaymentInvoiceRepository allocationRepo,
+        ITenantContext tenantContext)
     {
         _refundRepo = refundRepo;
         _allocationRepo = allocationRepo;
+        _tenantContext = tenantContext;
     }
 
 
@@ -32,7 +35,7 @@ public class RefundService : IRefundService
         if (allocations == null || !allocations.Any())
             throw new InvalidOperationException("No refundable allocations found.");
 
-        var refund = new RefundRequest(clientId, invoiceId);
+        var refund = new RefundRequest(clientId, invoiceId, null, _tenantContext.TenantId);
 
         foreach (var alloc in allocations)
         {
