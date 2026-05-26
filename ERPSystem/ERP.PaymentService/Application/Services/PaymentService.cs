@@ -14,28 +14,28 @@ public class PaymentService : IPaymentService
     private readonly IPaymentRepository _paymentRepository;
     private readonly IPaymentInvoiceRepository _paymentInvoiceRepo;
 
-    private readonly IRefundService _refundService;
     private readonly IInvoiceCacheRepository _invoiceCacheRepository;
     private readonly IPaymentNumberGenerator _numberGenerator;
     private readonly ILogger<PaymentService> _logger;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
     public PaymentService(
         IPaymentInvoiceRepository paymentInvoiceRepo,
-        IRefundService refundService, 
         IPaymentRepository paymentRepository,
         IInvoiceCacheRepository invoiceCacheRepository,
         IPaymentNumberGenerator numberGenerator,
         ILogger<PaymentService> logger,
-        IEventPublisher eventPublisher)
+        IEventPublisher eventPublisher,
+        ITenantContext tenantContext)
     {
-        _refundService = refundService;
         _numberGenerator = numberGenerator;
         _paymentRepository = paymentRepository;
         _invoiceCacheRepository = invoiceCacheRepository;
         _logger = logger;
         _eventPublisher = eventPublisher;
         _paymentInvoiceRepo = paymentInvoiceRepo;
+        _tenantContext = tenantContext;
     }
 
     public async Task<PaymentStatsDto> GetStatsAsync()
@@ -134,7 +134,8 @@ public class PaymentService : IPaymentService
             method: dto.Method,
             paymentDate: dto.PaymentDate,
             externalReference: dto.ExternalReference,
-            notes: dto.Notes
+            notes: dto.Notes,
+            tenantId: _tenantContext.TenantId
         );
 
         foreach (var allocation in dto.Allocations)
