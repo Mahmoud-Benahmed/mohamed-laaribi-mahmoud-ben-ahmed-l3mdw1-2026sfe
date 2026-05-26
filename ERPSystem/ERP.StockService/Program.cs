@@ -81,6 +81,8 @@ builder.Services.AddHealthChecks()
 // =========================
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IBonEntreRepository, BonEntreRepository>();
 builder.Services.AddScoped<IBonSortieRepository, BonSortieRepository>();
 builder.Services.AddScoped<IBonRetourRepository, BonRetourRepository>();
