@@ -101,21 +101,7 @@ public class ClientCacheService : IClientCacheService
 
 
             // Create new client with all parameters
-            Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(
-                id: dto.Id,
-                name: dto.Name,
-                email: dto.Email,
-                address: dto.Address,
-                phone: dto.Phone,
-                taxNumber: dto.TaxNumber,
-                creditLimit: dto.CreditLimit,
-                delaiRetour: dto.DelaiRetour,
-                duePaymentPeriod: dto.DuePaymentPeriod,
-                isBlocked: dto.IsBlocked,
-                isDeleted: dto.IsDeleted,
-                createdAt: dto.CreatedAt,
-                updatedAt: dto.UpdatedAt
-            );
+            Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(dto);
 
             await _clientCacheRepository.AddAsync(clientCache);
 
@@ -272,20 +258,7 @@ public class ClientCacheService : IClientCacheService
             if (category == null)
             {
                 // Create new category if it doesn't exist
-                category = CategoryCache.Create(
-                    id: categoryDto.Id,
-                    name: categoryDto.Name,
-                    code: categoryDto.Code,
-                    delaiRetour: categoryDto.DelaiRetour,
-                    duePaymentPeriod: categoryDto.DuePaymentPeriod,
-                    discountRate: categoryDto.DiscountRate,
-                    creditLimitMultiplier: categoryDto.CreditLimitMultiplier,
-                    useBulkPricing: categoryDto.UseBulkPricing,
-                    isActive: categoryDto.IsActive,
-                    createdAt: categoryDto.CreatedAt,
-                    updatedAt: categoryDto.UpdatedAt,
-                    isDeleted: categoryDto.IsDeleted
-                );
+                category = CategoryCache.Create(categoryDto);
                 await _clientCategoryRepository.AddCategoryAsync(category);
             }
 
@@ -318,20 +291,7 @@ public class ClientCacheService : IClientCacheService
             CategoryCache? category = await _clientCategoryRepository.GetByIdAsync(categoryId);
             if (category == null && categoryDto != null)
             {
-                category = CategoryCache.Create(
-                    id: categoryDto.Id,
-                    name: categoryDto.Name,
-                    code: categoryDto.Code,
-                    delaiRetour: categoryDto.DelaiRetour,
-                    duePaymentPeriod: categoryDto.DuePaymentPeriod,
-                    discountRate: categoryDto.DiscountRate,
-                    creditLimitMultiplier: categoryDto.CreditLimitMultiplier,
-                    useBulkPricing: categoryDto.UseBulkPricing,
-                    isActive: categoryDto.IsActive,
-                    createdAt: categoryDto.CreatedAt,
-                    updatedAt: categoryDto.UpdatedAt,
-                    isDeleted: categoryDto.IsDeleted
-                );
+                category = CategoryCache.Create(categoryDto);
                 await _clientCategoryRepository.AddCategoryAsync(category);
             }
 
@@ -357,7 +317,8 @@ public class ClientCacheService : IClientCacheService
                 IsActive: assignment.Category.IsActive,
                 IsDeleted: assignment.Category.IsDeleted,
                 CreatedAt: assignment.Category.CreatedAt,
-                UpdatedAt: assignment.Category.UpdatedAt
+                UpdatedAt: assignment.Category.UpdatedAt,
+                TenantId: assignment.Category.TenantId
             ))
             .ToList();
 
@@ -375,7 +336,8 @@ public class ClientCacheService : IClientCacheService
             IsDeleted: client.IsDeleted,
             CreatedAt: client.CreatedAt,
             UpdatedAt: client.UpdatedAt,
-            Categories: categoryDtos
+            Categories: categoryDtos,
+            TenantId: client.TenantId
         );
     }
 }
