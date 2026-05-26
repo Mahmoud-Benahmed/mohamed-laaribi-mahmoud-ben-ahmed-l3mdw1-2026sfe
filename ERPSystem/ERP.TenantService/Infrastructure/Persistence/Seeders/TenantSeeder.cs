@@ -34,7 +34,8 @@ public static class TenantSeeder
                 secondaryColor: "#1E40AF",
                 currency: "TND",
                 locale: "fr-TN",
-                timezone: "Africa/Tunis"
+                timezone: "Africa/Tunis",
+                address: "123 Acme Street, Tunis, Tunisia"
             ));
 
         if (!existingSlugs.Contains("xyz"))
@@ -48,7 +49,8 @@ public static class TenantSeeder
                 secondaryColor: "#5B21B6",
                 currency: "EUR",
                 locale: "fr-FR",
-                timezone: "Europe/Paris"
+                timezone: "Europe/Paris",
+                address: "456 XYZ Avenue, Paris, France"
             ));
 
         if (!existingSlugs.Contains("bard"))
@@ -62,7 +64,8 @@ public static class TenantSeeder
                 secondaryColor: "#047857",
                 currency: "USD",
                 locale: "en-US",
-                timezone: "America/New_York"
+                timezone: "America/New_York",
+                address: "789 Bard Boulevard, New York, USA"
             ));
 
         if (tenants.Any())
