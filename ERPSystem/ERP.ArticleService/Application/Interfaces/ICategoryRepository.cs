@@ -18,7 +18,6 @@ namespace ERP.ArticleService.Application.Interfaces
         Task<List<Category>> GetHigherThanTVAAsync(decimal tva);
         Task<List<Category>> GetBelowTVAAsync(decimal tva);
 
-
         void Remove(Category category);
         Task SaveChangesAsync();
 
