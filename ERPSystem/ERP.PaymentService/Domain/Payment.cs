@@ -3,6 +3,7 @@ using ERP.PaymentService.Domain;
 public class Payment
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Number { get; private set; }
     public Guid ClientId { get; private set; }
     public decimal TotalAmount { get; private set; }
@@ -25,12 +26,14 @@ public class Payment
         string number, Guid clientId, decimal totalAmount,
         PaymentMethod method, DateTime paymentDate,
         string? externalReference = null,
-        string? notes = null)
+        string? notes = null,
+        Guid? tenantId= null)
     {
         Id = Guid.NewGuid();
         Number = number;
         ClientId = clientId;
         TotalAmount = Math.Round(totalAmount, 2, MidpointRounding.AwayFromZero); // ← round on creation
+        TenantId = tenantId;
         Method = method;
         PaymentDate = paymentDate;
         ExternalReference = externalReference;
