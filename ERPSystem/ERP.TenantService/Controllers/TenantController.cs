@@ -3,6 +3,7 @@ using ERP.TenantService.Application.DTOs.TenantSubscription;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Properties;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography.Pkcs;
 
 namespace ERP.TenantService.Controllers;
 
@@ -14,6 +15,11 @@ public class TenantController : ControllerBase
     public TenantController(ITenantService tenantService)
     {
         _tenantService = tenantService;
+    }
+    [HttpGet(ApiRoutes.Tenants.GetAllActive)]
+    public async Task<IActionResult> GetAllActive(CancellationToken ct = default)
+    {
+        return Ok(await _tenantService.GetAllActiveAsync(ct));
     }
 
     [HttpGet(ApiRoutes.Tenants.GetAll)]
