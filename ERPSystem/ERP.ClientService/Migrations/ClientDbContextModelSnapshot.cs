@@ -17,7 +17,7 @@ namespace ERP.ClientService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -61,6 +61,9 @@ namespace ERP.ClientService.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -69,11 +72,14 @@ namespace ERP.ClientService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("IsActive")
+                        .HasFilter("[IsActive] = 0");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("IsActive");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -126,16 +132,22 @@ namespace ERP.ClientService.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("IsBlocked")
+                        .HasFilter("[IsBlocked] = 1");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("IsBlocked");
 
                     b.ToTable("Clients", (string)null);
                 });
@@ -151,7 +163,7 @@ namespace ERP.ClientService.Migrations
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("AssignedById")
+                    b.Property<Guid?>("AssignedById")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ClientId", "CategoryId");
