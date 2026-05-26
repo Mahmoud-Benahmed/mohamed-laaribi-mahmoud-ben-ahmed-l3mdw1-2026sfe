@@ -7,6 +7,7 @@ public static class ApiRoutes
         private const string Base = "tenants";
 
         public const string GetAll = Base;
+        public const string GetAllActive = Base + "/active";
         public const string GetDeleted = Base + "/deleted";
         public const string GetById = Base + "/{id:guid}";
         public const string GetBySlug = Base + "/slug/{slug}";
