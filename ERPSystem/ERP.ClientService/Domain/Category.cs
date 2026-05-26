@@ -4,6 +4,7 @@ public sealed class Category
 {
     // ── Identity ──────────────────────────────────────────────────────────────
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; init; }
     public string Name { get; private set; } = default!;
     public string Code { get; private set; } = default!;
 
@@ -36,28 +37,31 @@ public sealed class Category
         string name,
         string code,
         int delaiRetour,
-        int duePaymentPeriod,          // <-- was the broken `int )` — fixed
+        int duePaymentPeriod,
         bool useBulkPricing = false,
         decimal? discountRate = null,
-        decimal? creditLimitMultiplier = null)
+        decimal? creditLimitMultiplier = null,
+        Guid? tenantId= null
+        )
     {
         ValidateName(name);
         ValidateCode(code);
         ValidateDelaiRetour(delaiRetour);
         ValidateDiscountRate(discountRate);
         ValidateCreditLimitMultiplier(creditLimitMultiplier);
-        ValidateDuePaymentPeriod(duePaymentPeriod);            // <-- add this
+        ValidateDuePaymentPeriod(duePaymentPeriod);
 
         return new Category
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             Name = name.Trim(),
             Code = code.Trim().ToUpperInvariant(),
             DelaiRetour = delaiRetour,
             UseBulkPricing = useBulkPricing,
             DiscountRate = discountRate,
             CreditLimitMultiplier = creditLimitMultiplier,
-            DuePaymentPeriod = duePaymentPeriod,               // <-- add this
+            DuePaymentPeriod = duePaymentPeriod,
             CreatedAt = DateTime.UtcNow,
         };
     }
