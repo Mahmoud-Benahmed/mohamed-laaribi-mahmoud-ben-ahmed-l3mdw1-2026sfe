@@ -14,7 +14,7 @@ public sealed class BonRetour : PieceStock
     // ---------------- CREATE ----------------
     public static BonRetour Create(
         string numero, Guid sourceId, RetourSourceType sourceType,
-        string motif, string? observation = null)
+        string motif, string? observation = null, Guid? tenantId = null)
     {
         if (string.IsNullOrWhiteSpace(numero))
             throw new ArgumentException("Numero is required.");
@@ -28,6 +28,7 @@ public sealed class BonRetour : PieceStock
         return new BonRetour
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             Numero = numero.Trim(),
             SourceId = sourceId,
             SourceType = sourceType,
@@ -66,8 +67,12 @@ public sealed class BonRetour : PieceStock
         if (price < 0)
             throw new ArgumentException("Price cannot be negative.");
 
-        if (_lignes.Any(l => l.ArticleId == articleId))
-            throw new InvalidOperationException("Article already exists in lignes.");
+        var existing = _lignes.FirstOrDefault(l => l.ArticleId == articleId);
+        if (existing is not null)
+        {
+            existing.Update(existing.Quantity + qty, existing.Price);
+            return existing;
+        }
 
         LigneRetour ligne = LigneRetour.Create(Id, articleId, qty, price);
         _lignes.Add(ligne);
@@ -75,6 +80,27 @@ public sealed class BonRetour : PieceStock
         return ligne;
     }
 
+    public void RemoveLigne(Guid ligneId)
+    {
+        if (_lignes.Count == 1)
+            throw new InvalidOperationException("Cannot remove the last ligne.");
+
+        LigneRetour ligne = _lignes.FirstOrDefault(l => l.Id == ligneId)
+            ?? throw new InvalidOperationException("Ligne not found.");
+
+        _lignes.Remove(ligne);
+    }
+
+    public void UpdateLigne(Guid ligneId, decimal qty, decimal price, string? remarque = null)
+    {
+        if (qty <= 0) throw new ArgumentException("Quantity must be > 0.");
+        if (price < 0) throw new ArgumentException("Price cannot be negative.");
+
+        LigneRetour ligne = _lignes.FirstOrDefault(l => l.Id == ligneId)
+            ?? throw new InvalidOperationException("Ligne not found.");
+
+        ligne.Update(qty, price, remarque);
+    }
 
     // ---------------- VALIDATE ----------------
     public override void ValidateLignes()
