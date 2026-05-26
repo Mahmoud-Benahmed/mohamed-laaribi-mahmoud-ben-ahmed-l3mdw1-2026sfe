@@ -1,18 +1,39 @@
-﻿using ERP.ClientService.Domain;
+﻿using ERP.ClientService.Application.Services;
+using ERP.ClientService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ERP.ClientService.Infrastructure.Persistence;
 
-public sealed class ClientDbContext(DbContextOptions<ClientDbContext> options)
-    : DbContext(options)
+public class ClientDbContext: DbContext
 {
+    private readonly Guid? _tenantId;
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<ClientCategory> ClientCategories => Set<ClientCategory>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    public ClientDbContext(
+        DbContextOptions<ClientDbContext> options,
+        ITenantContext? tenantContext = null)
+        : base(options)
+    {
+        _tenantId = tenantContext?.TenantId;
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ClientDbContext).Assembly);
+
+        modelBuilder.Entity<Client>()
+            .HasQueryFilter(c =>
+                !c.IsDeleted &&
+                (_tenantId == null || c.TenantId == _tenantId));
+
+        modelBuilder.Entity<Category>()
+            .HasQueryFilter(c =>
+                !c.IsDeleted &&
+                (_tenantId == null || c.TenantId == _tenantId));
+    }
 }
 
 internal sealed class ClientConfiguration : IEntityTypeConfiguration<Client>
@@ -34,13 +55,12 @@ internal sealed class ClientConfiguration : IEntityTypeConfiguration<Client>
         b.Property(c => c.IsDeleted).IsRequired();
         b.Property(c => c.CreatedAt).IsRequired();
 
-        b.HasIndex(c => c.Email)
-         .IsUnique()
+        b.HasIndex(a => a.TenantId);
+
+        b.HasIndex(c => new { c.TenantId, c.Email }).IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
-        b.HasIndex(c => c.IsBlocked);
-
-        b.HasQueryFilter(c => !c.IsDeleted);
+        b.HasIndex(c => c.IsBlocked).HasFilter("[IsBlocked] = 1");
     }
 }
 
@@ -62,13 +82,12 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         b.Property(c => c.IsDeleted).IsRequired();
         b.Property(c => c.CreatedAt).IsRequired();
 
-        b.HasIndex(c => c.Code)
-         .IsUnique()
+        b.HasIndex(a => a.TenantId);
+
+        b.HasIndex(c => new { c.TenantId, c.Code }).IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
-        b.HasIndex(c => c.IsActive);
-
-        b.HasQueryFilter(c => !c.IsDeleted);
+        b.HasIndex(c => c.IsActive).HasFilter("[IsActive] = 0");
     }
 }
 
@@ -80,7 +99,7 @@ internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<Cli
 
         b.HasKey(cc => new { cc.ClientId, cc.CategoryId });
 
-        b.Property(cc => cc.AssignedById).IsRequired();
+        b.Property(cc => cc.AssignedById).IsRequired(false);
         b.Property(cc => cc.AssignedAt).IsRequired();
 
         b.HasOne(cc => cc.Client)
@@ -94,7 +113,5 @@ internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<Cli
          .HasForeignKey(cc => cc.CategoryId)
          .IsRequired()
          .OnDelete(DeleteBehavior.Restrict);
-
-        b.HasQueryFilter(cc => !cc.Category!.IsDeleted);
     }
 }
