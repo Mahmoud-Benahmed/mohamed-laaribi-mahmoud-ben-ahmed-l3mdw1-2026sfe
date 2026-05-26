@@ -3,6 +3,7 @@
 public class Client
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string Address { get; private set; } = default!;
@@ -27,7 +28,9 @@ public class Client
         decimal? creditLimit = null,  // ← Made nullable with default
         string? phone = null, string? taxNumber = null,
         int? delaiRetour = null,
-        int? duePaymentPeriod = null)
+        int? duePaymentPeriod = null,
+        Guid? tenantId = null
+        )
     {
         ValidateName(name);
         ValidateEmail(email);
@@ -39,6 +42,7 @@ public class Client
         return new Client
         {
             Id = Guid.NewGuid(),
+            TenantId= tenantId,
             Name = name.Trim(),
             Email = email.Trim().ToLowerInvariant(),
             Address = address.Trim(),
