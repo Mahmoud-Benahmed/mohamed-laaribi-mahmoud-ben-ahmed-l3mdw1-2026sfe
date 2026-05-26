@@ -1,6 +1,7 @@
 ﻿using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Domain.Logger;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Properties;
 using Microsoft.AspNetCore.Identity;
@@ -257,5 +258,20 @@ public class TenantProvisioningService : ITenantProvisioningService
             .Ascending(x => x.Email);
 
         await users.Indexes.CreateOneAsync(new CreateIndexModel<AuthUser>(index));
+    }
+
+
+    public async Task DeleteAllByTenantIdAsync(Guid tenantId)
+    {
+        await _db.Collection<Privilege>("Privileges")
+            .DeleteManyAsync(p => p.TenantId == tenantId);
+        await _db.Collection<RefreshToken>("RefreshTokens")
+            .DeleteManyAsync(p => p.TenantId == tenantId);
+        await _db.Collection<AuthUser>("Users")
+            .DeleteManyAsync(u => u.TenantId == tenantId);
+        await _db.Collection<Role>("Roles")
+            .DeleteManyAsync(r => r.TenantId == tenantId);
+        await _db.Collection<AuditLog>("AuditLogs")
+            .DeleteManyAsync(u => u.TenantId == tenantId);
     }
 }
