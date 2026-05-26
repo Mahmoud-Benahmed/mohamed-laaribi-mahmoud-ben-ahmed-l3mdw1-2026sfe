@@ -10,11 +10,13 @@ public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
-    public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher)
+    public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher, ITenantContext tenantContext)
     {
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -31,7 +33,8 @@ public class CategoryService : ICategoryService
 
         Category category = Category.Create(
             request.Name, request.Code, request.DelaiRetour, request.DuePaymentPeriod,
-            request.UseBulkPricing, request.DiscountRate, request.CreditLimitMultiplier);
+            request.UseBulkPricing, request.DiscountRate, request.CreditLimitMultiplier,
+            _tenantContext.TenantId);
 
         await _categoryRepository.AddAsync(category);
         await _categoryRepository.SaveChangesAsync();
@@ -217,7 +220,8 @@ public class CategoryService : ICategoryService
             IsActive: category.IsActive,
             IsDeleted: category.IsDeleted,
             CreatedAt: category.CreatedAt,
-            UpdatedAt: category.UpdatedAt
+            UpdatedAt: category.UpdatedAt,
+            TenantId: category.TenantId
         );
     }
 }
