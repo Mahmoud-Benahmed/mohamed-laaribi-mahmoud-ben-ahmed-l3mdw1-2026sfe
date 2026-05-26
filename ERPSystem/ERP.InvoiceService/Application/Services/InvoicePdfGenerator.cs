@@ -1,4 +1,7 @@
-﻿using InvoiceService.Application.DTOs;
+﻿using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
+using ERP.InvoiceService.Domain.LocalCache.Tenant;
+using InvoiceService.Application.DTOs;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -7,14 +10,31 @@ namespace InvoiceService.Services;
 
 public class InvoicePdfGenerator : IInvoicePdfGenerator
 {
-    private const string CurrencySymbol = "TND";
-    private const string CompanyName = "YOUR COMPANY";
-    private const string CompanyAddress = "123 Business Ave, City, Country";
-    private const string CompanyEmail = "contact@company.com";
-    private const string CompanyPhone = "+216 71 123 456";
+    private readonly ITenantCacheRepository _tenantCacheRepo;
+    private readonly ITenantContext _tenantContext;
 
-    public byte[] GenerateInvoicePdf(InvoiceDto invoice)
+    public InvoicePdfGenerator(ITenantCacheRepository tenantCacheRepo, ITenantContext tenantContext)
     {
+        _tenantCacheRepo = tenantCacheRepo;
+        _tenantContext = tenantContext;
+    }
+
+    private string CurrencySymbol = "TND";
+    private string CompanyName = "COMPANY";
+    private string CompanyAddress = "123 Business Ave, City, Country";
+    private string CompanyEmail = "contact@company.com";
+    private string CompanyPhone = "+000 123 456 789";
+
+    public async Task<byte[]> GenerateInvoicePdf(InvoiceDto invoice)
+    {
+        TenantCache tenant= await _tenantCacheRepo.GetByIdAsync(_tenantContext.TenantId) ?? throw new InvalidOperationException("Unable to retrieve invoice information");
+
+        CurrencySymbol = tenant.Currency    ?? CurrencySymbol;
+        CompanyName = tenant.Name           ?? CompanyName;
+        CompanyAddress = tenant.Address     ?? CompanyAddress;
+        CompanyEmail = tenant.Email         ?? CompanyEmail;
+        CompanyPhone = tenant.Phone         ?? CompanyPhone;
+
         QuestPDF.Settings.License = LicenseType.Community;
 
         Color statusColor = invoice.Status switch
@@ -248,5 +268,5 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
 
 public interface IInvoicePdfGenerator
 {
-    byte[] GenerateInvoicePdf(InvoiceDto invoice);
+    Task<byte[]> GenerateInvoicePdf(InvoiceDto invoice);
 }
