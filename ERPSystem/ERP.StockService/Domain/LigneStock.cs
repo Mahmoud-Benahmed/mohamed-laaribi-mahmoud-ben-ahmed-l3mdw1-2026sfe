@@ -2,6 +2,7 @@
 public abstract class LigneStock
 {
     public Guid Id { get; protected set; }
+    public Guid? TenantId { get; protected set; }
     public Guid ArticleId { get; protected set; }
     public decimal Quantity { get; protected set; }
     public decimal Price { get; protected set; }
