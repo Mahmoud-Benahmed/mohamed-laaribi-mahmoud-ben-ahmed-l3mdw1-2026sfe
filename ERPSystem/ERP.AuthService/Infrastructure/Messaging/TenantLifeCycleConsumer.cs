@@ -34,7 +34,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
 
-        _consumer.Subscribe(new[] { TenantTopics.TenantCreated });
+        _consumer.Subscribe(new[] { TenantTopics.TenantCreated, TenantTopics.TenantDeleted });
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -52,25 +52,14 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                 if (result?.Message?.Value == null)
                     continue;
 
-                var evt = JsonSerializer.Deserialize<TenantCreatedEvent>(
-                    result.Message.Value,
-                    _jsonOptions);
-
-                if (evt == null)
-                    continue;
-
                 using var scope = _scopeFactory.CreateScope();
-                var services = scope.ServiceProvider;
 
-
-                var provisioner = services.GetRequiredService<ITenantProvisioningService>();
-
-                await provisioner.ProvisionAsync(evt.TenantId, evt.Slug);
-
-
-                _logger.LogInformation(
-                    "Tenant provisioned: {TenantId} / {Slug}",
-                    evt.TenantId, evt.Slug);
+                await (result.Topic switch
+                {
+                    TenantTopics.TenantCreated => HandleTenantCreated(result.Message.Value, scope),
+                    TenantTopics.TenantDeleted => HandleTenantDeleted(result.Message.Value, scope),
+                    _ => Task.CompletedTask
+                });
 
                 _consumer.Commit(result);
             }
@@ -83,6 +72,33 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                 _logger.LogError(ex, "Error processing tenant.created");
             }
         }
+    }
+
+
+    private async Task HandleTenantCreated(string payload, IServiceScope scope)
+    {
+        var evt = JsonSerializer.Deserialize<TenantCreatedEvent>(payload, _jsonOptions);
+        if (evt is null) return;
+
+        var provisioner = scope.ServiceProvider.GetRequiredService<ITenantProvisioningService>();
+        await provisioner.ProvisionAsync(evt.TenantId, evt.Slug);
+
+        _logger.LogInformation(
+            "Tenant provisioned: {TenantId} / {Slug}",
+            evt.TenantId, evt.Slug);
+    }
+
+    private async Task HandleTenantDeleted(string payload, IServiceScope scope)
+    {
+        var evt = JsonSerializer.Deserialize<TenantDeletedEvent>(payload, _jsonOptions);
+        if (evt is null) return;
+
+        var provisioner = scope.ServiceProvider.GetRequiredService<ITenantProvisioningService>();
+        await provisioner.DeleteAllByTenantIdAsync(evt.TenantId);
+
+        _logger.LogInformation(
+            "Tenant deleted: {TenantId}",
+            evt.TenantId);
     }
 
     public override void Dispose()
