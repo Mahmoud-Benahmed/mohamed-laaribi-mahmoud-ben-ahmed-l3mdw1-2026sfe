@@ -15,13 +15,16 @@ public class BonSortieService : IBonSortieService
     private readonly IClientCacheRepository _clientCacheRepository;
     private readonly IBonNumeroRepository _bonNumeroRepository;
     private readonly IJournalStockRepository _journalStockRepository;
+    private readonly ITenantContext _tenantContext;
 
     public BonSortieService(IBonSortieRepository repo,
         IArticleCacheRepository articleCacheRepository,
         IClientCacheRepository clientCacheRepository,
         IBonNumeroRepository bonNumeroRepository,
-        IJournalStockRepository journalStockRepository)
+        IJournalStockRepository journalStockRepository,
+        ITenantContext tenantContext)
     {
+        _tenantContext = tenantContext;
         _repo = repo;
         _articleCacheRepository = articleCacheRepository;
         _clientCacheRepository = clientCacheRepository;
@@ -54,7 +57,7 @@ public class BonSortieService : IBonSortieService
         try
         {
             string numero = await _bonNumeroRepository.GetNextDocumentNumberAsync("BON_SORTIE");
-            BonSortie bon = BonSortie.Create(numero, dto.ClientId, dto.Observation);
+            BonSortie bon = BonSortie.Create(numero, dto.ClientId, dto.Observation, _tenantContext.TenantId);
 
             Dictionary<Guid, ArticleCache> articleDictionary = articles.ToDictionary(a => a.Id, a => a);
 
