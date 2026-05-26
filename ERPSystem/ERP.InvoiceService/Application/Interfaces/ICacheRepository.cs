@@ -1,5 +1,6 @@
 ﻿using ERP.InvoiceService.Domain.LocalCache.Article;
 using ERP.InvoiceService.Domain.LocalCache.Client;
+using ERP.InvoiceService.Domain.LocalCache.Tenant;
 
 namespace ERP.InvoiceService.Application.Interfaces;
 
@@ -73,4 +74,14 @@ public interface IClientCategoryCacheRepository
     // Save changes
     Task SaveChangesAsync();
     Task DeleteAsync(Domain.LocalCache.Client.CategoryCache category);
+}
+
+public interface ITenantCacheRepository
+{
+    Task<TenantCache?> GetByIdAsync(Guid? id);
+    Task<TenantCache?> GetBySlugAsync(string slug);
+    Task<List<TenantCache>> GetAllAsync();
+    Task AddAsync(TenantCache tenant);
+    Task SaveChangesAsync();
+    Task DeleteAsync(TenantCache tenant);
 }
