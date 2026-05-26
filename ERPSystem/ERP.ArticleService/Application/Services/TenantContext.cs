@@ -1,5 +1,6 @@
 ﻿namespace ERP.ArticleService.Application.Services;
 
+
 public interface ITenantContext
 {
     Guid? TenantId { get; }
@@ -18,24 +19,27 @@ public class TenantContext : ITenantContext
     {
         get
         {
+            // 1. Header first (forwarded by gateway)
             var header = _httpContextAccessor.HttpContext?
                 .Request.Headers["X-Tenant-Id"].FirstOrDefault();
 
-            // ✅ handle comma-separated duplicates
             var value = header?.Split(',').FirstOrDefault()?.Trim();
+            
+            if (Guid.TryParse(value, out var fromHeader))
+                return fromHeader;
 
-            if (Guid.TryParse(value, out var tenantId))
-                return tenantId;
+            // 2. Fallback to JWT claim (direct calls / dev)
+            var claim = _httpContextAccessor.HttpContext?  // ✅ via HttpContext
+                .User?.FindFirst("tenantId")?.Value;
+
+            if (Guid.TryParse(claim, out var fromClaim))
+                return fromClaim;
 
             return null;
         }
     }
-    public string? Slug
-    {
-        get
-        {
-            return _httpContextAccessor.HttpContext?
-                .Request.Headers["X-Tenant-Slug"].FirstOrDefault();
-        }
-    }
+
+    public string? Slug =>
+        _httpContextAccessor.HttpContext?
+            .Request.Headers["X-Tenant-Slug"].FirstOrDefault();
 }
