@@ -44,6 +44,14 @@ public sealed class TenantResolutionMiddleware
     }
     public async Task InvokeAsync(HttpContext context)
     {
+        _logger.LogDebug("=== TenantResolution ===");
+        _logger.LogDebug("Path: {Path}", context.Request.Path);
+        _logger.LogDebug("IsAuthenticated: {Auth}", context.User?.Identity?.IsAuthenticated);
+        _logger.LogDebug("Claims: {Claims}",
+            string.Join(", ", context.User?.Claims.Select(c => $"{c.Type}={c.Value}") ?? []));
+        _logger.LogDebug("X-Tenant-Id header: {Header}",
+            context.Request.Headers["X-Tenant-Id"].FirstOrDefault());
+
         var path = context.Request.Path;
 
         // 1. Always skip excluded paths first
@@ -97,6 +105,17 @@ public sealed class TenantResolutionMiddleware
 
                 var cache = context.RequestServices.GetRequiredService<ITenantCache>();
                 tenant = await cache.GetAsync(parsedTenantId);
+
+                // ✅ Cache miss — fallback to directory client and re-populate
+                if (tenant is null)
+                {
+                    var directory = context.RequestServices
+                        .GetRequiredService<ITenantDirectoryClient>();
+
+                    tenant = await directory.ResolveAsync(parsedTenantId);
+                    if (tenant is not null)
+                        await cache.SetAsync(tenant);
+                }
             }
         }
 
@@ -151,6 +170,8 @@ public sealed class TenantResolutionMiddleware
         context.Items["tenantSlug"] = tenant.Slug;
         context.Request.Headers.Remove("X-Tenant-Slug");
         context.Request.Headers["X-Tenant-Slug"] = tenant.Slug;
+        context.Request.Headers.Remove("X-Tenant-Id");
+        context.Request.Headers["X-Tenant-Id"] = tenant.TenantId.ToString();
     }
 
     private static bool IsTenantRequired(HttpContext context)
