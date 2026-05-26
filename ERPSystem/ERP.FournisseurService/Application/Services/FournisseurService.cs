@@ -10,11 +10,13 @@ public class FournisseurService : IFournisseurService
 {
     private readonly IFournisseurRepository _repo;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
-    public FournisseurService(IFournisseurRepository repo, IEventPublisher eventPublisher)
+    public FournisseurService(IFournisseurRepository repo, IEventPublisher eventPublisher, ITenantContext tenantContext)
     {
         _repo = repo;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -24,7 +26,7 @@ public class FournisseurService : IFournisseurService
     {
         Fournisseur f = Fournisseur.Create(
             dto.Name, dto.Address, dto.Phone,
-            dto.TaxNumber, dto.RIB, dto.Email);
+            dto.TaxNumber, dto.RIB, dto.Email, _tenantContext.TenantId);
         await _repo.AddAsync(f);
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
