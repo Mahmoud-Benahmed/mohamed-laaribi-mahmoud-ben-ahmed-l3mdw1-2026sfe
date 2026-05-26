@@ -5,6 +5,7 @@ namespace ERP.StockService.Domain.LocalCache.Fournisseur;
 public sealed class FournisseurCache
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Address { get; private set; } = default!;
     public string Phone { get; private set; } = default!;
@@ -23,6 +24,7 @@ public sealed class FournisseurCache
     public FournisseurCache(FournisseurResponseDto dto)
     {
         Id = dto.Id;
+        TenantId = dto.TenantId;
         Name = dto.Name ?? throw new ArgumentNullException(nameof(dto.Name));
         Address = dto.Address ?? throw new ArgumentNullException(nameof(dto.Address));
         Phone = dto.Phone ?? throw new ArgumentNullException(nameof(dto.Phone));
@@ -41,6 +43,7 @@ public sealed class FournisseurCache
         return new FournisseurCache
         {
             Id = Guid.NewGuid(),
+            TenantId = dto.TenantId,
             Name = dto.Name.Trim(),
             Address = dto.Address.Trim(),
             Phone = dto.Phone.Trim(),
