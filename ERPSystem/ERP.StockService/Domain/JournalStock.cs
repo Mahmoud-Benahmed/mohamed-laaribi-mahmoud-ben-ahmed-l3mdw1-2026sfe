@@ -3,6 +3,7 @@
     public sealed class JournalStock
     {
         public Guid Id { get; private set; }
+        public Guid? TenantId { get; private set; }
 
         // references
         public Guid ArticleId { get; private set; }
@@ -38,7 +39,8 @@
             StockMovementType movementType,
             string sourceService,
             string sourceOperation = "CreateBonEntre",
-            Guid? performedBy = null)
+            Guid? performedBy = null,
+            Guid? tenantId= null)
         {
             decimal stockAfter = stockBefore + quantity;
 
