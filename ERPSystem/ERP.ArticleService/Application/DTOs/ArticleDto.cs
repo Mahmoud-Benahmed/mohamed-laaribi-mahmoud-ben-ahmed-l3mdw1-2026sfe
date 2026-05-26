@@ -60,7 +60,6 @@ namespace ERP.ArticleService.Application.DTOs
 
     public record ArticleResponseDto(
         Guid Id,
-        Guid? TenantId,
         CategoryResponseDto Category,
         string CodeRef,
         string BarCode,
@@ -70,6 +69,7 @@ namespace ERP.ArticleService.Application.DTOs
         int TVA,
         bool IsDeleted,
         DateTime CreatedAt,
-        DateTime? UpdatedAt
+        DateTime? UpdatedAt,
+        Guid? TenantId
         );
 }
