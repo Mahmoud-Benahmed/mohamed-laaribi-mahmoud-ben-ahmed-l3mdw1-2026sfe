@@ -11,14 +11,17 @@ public class ClientService : IClientService
     private readonly IClientRepository _clientRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
     public ClientService(IClientRepository clientRepository,
                         ICategoryRepository categoryRepository,
-                        IEventPublisher eventPublisher)
+                        IEventPublisher eventPublisher,
+                        ITenantContext tenantContext)
     {
         _clientRepository = clientRepository;
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -38,7 +41,8 @@ public class ClientService : IClientService
             taxNumber: request.TaxNumber,
             creditLimit: request.CreditLimit,
             delaiRetour: request.DelaiRetour,
-            duePaymentPeriod: request.DuePaymentPeriod);   // ← named args prevent future positional bugs
+            duePaymentPeriod: request.DuePaymentPeriod,
+            tenantId: _tenantContext.TenantId);
 
         await _clientRepository.AddAsync(client);
         await _clientRepository.SaveChangesAsync();
