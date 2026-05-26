@@ -1,4 +1,5 @@
 using ERP.Gateway.Cache;
+using ERP.Gateway.Infrastructure.BackgroundServices;
 using ERP.Gateway.Infrastructure.Messaging;
 using ERP.Gateway.Middleware;
 using ERP.Gateway.Properties;
@@ -45,7 +46,7 @@ builder.Services.AddHttpClient<ITenantDirectoryClient, TenantDirectoryClient>(
     {
         client.BaseAddress = new Uri(GetClusterAddress("tenantCluster", "tenantDestination"));
 
-        client.Timeout = TimeSpan.FromSeconds(5);
+        client.Timeout = TimeSpan.FromSeconds(30);
     });
 
 builder.Services.AddAuthentication(options =>
@@ -125,7 +126,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddHostedService<KafkaTopicInitializer>();
-builder.Services.AddHostedService<TenantLifecycleConsumer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>(); 
+builder.Services.AddHostedService<TenantCacheWarmupService>();
 
 //////////////////////////////////////////////////
 // Authorization
