@@ -96,5 +96,6 @@ public sealed record ClientResponseDto(
     bool IsDeleted,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    List<CategoryResponseDto> Categories
+    List<CategoryResponseDto> Categories,
+    Guid? TenantId
 );
