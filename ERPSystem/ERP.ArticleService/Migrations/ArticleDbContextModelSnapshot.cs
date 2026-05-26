@@ -74,15 +74,17 @@ namespace ERP.ArticleService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarCode")
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "BarCode")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0 AND [BarCode] IS NOT NULL");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("TenantId", "CodeRef")
                         .IsUnique()
-                        .HasFilter("[TenantId] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Articles", (string)null);
                 });
@@ -111,6 +113,8 @@ namespace ERP.ArticleService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.HasIndex("TenantId", "Prefix")
                         .IsUnique()
@@ -149,6 +153,8 @@ namespace ERP.ArticleService.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.HasIndex("TenantId", "Name")
                         .IsUnique()
