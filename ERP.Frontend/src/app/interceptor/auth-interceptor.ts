@@ -24,7 +24,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   // ── Never attach token or intercept errors for auth infrastructure calls
   const isPublicCall = req.url.includes('/auth/refresh')
                     || req.url.includes('/auth/revoke')
-                    || req.url.includes('/auth/login');
+                    || req.url.includes('/login');
 
   const token = !isPublicCall ? auth.getAccessToken() : null;
   const authReq = token
