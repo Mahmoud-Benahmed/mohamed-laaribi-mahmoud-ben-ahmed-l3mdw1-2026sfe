@@ -19,6 +19,7 @@ public static class ClientMappings
             IsDeleted: client.IsDeleted,
             CreatedAt: client.CreatedAt,
             UpdatedAt: client.UpdatedAt,
+            TenantId: client.TenantId,
             Categories: (client.ClientCategories ?? new List<ClientCategory>())
                                     .Where(cc => cc.Category != null && cc.Category.IsActive)
                                     .Select(cc => new CategoryResponseDto(
@@ -33,7 +34,8 @@ public static class ClientMappings
                                         IsDeleted: cc.Category?.IsDeleted ?? false,
                                         IsActive: cc.Category?.IsActive ?? false,
                                         CreatedAt: cc.Category?.CreatedAt ?? DateTime.MinValue,
-                                        UpdatedAt: cc.Category?.UpdatedAt ?? DateTime.MinValue)
+                                        UpdatedAt: cc.Category?.UpdatedAt ?? DateTime.MinValue,
+                                        TenantId: cc.Category?.TenantId)
                                     ).ToList()
         );
 }
