@@ -3,6 +3,7 @@
 public class InvoiceCache
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string InvoiceNumber { get; private set; } = default!;
     public decimal TotalTTC { get; private set; }
     public Guid ClientId { get; private set; }
@@ -16,6 +17,7 @@ public class InvoiceCache
     public static InvoiceCache From(InvoiceEventDto e) => new()
     {
         Id = e.Id,
+        TenantId = e.TenantId,
         ClientId = e.ClientId,
         TotalTTC = Math.Round(e.TotalTTC, 2),  // ← round on creation
         InvoiceNumber = e.InvoiceNumber,
