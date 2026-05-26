@@ -17,7 +17,8 @@ public sealed record ClientResponseDto(
     bool IsDeleted,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    List<ClientCategoryResponseDto> Categories
+    List<ClientCategoryResponseDto> Categories,
+    Guid? TenantId
 );
 
 public sealed record ClientCategoryResponseDto(
@@ -32,7 +33,8 @@ public sealed record ClientCategoryResponseDto(
     bool IsActive,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
 );
 
 
@@ -43,7 +45,8 @@ public record ArticleCategoryResponseDto(
     decimal TVA,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
 );
 
 public record ArticleResponseDto(
@@ -57,7 +60,8 @@ public record ArticleResponseDto(
     decimal TVA,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
     );
 
 
@@ -65,7 +69,7 @@ public sealed record FournisseurResponseDto(
 Guid Id, string Name, string Address, string Phone,
 string? Email, string TaxNumber, string RIB,
 bool IsDeleted, bool IsBlocked,
-DateTime CreatedAt, DateTime? UpdatedAt);
+DateTime CreatedAt, DateTime? UpdatedAt, Guid? TenantId);
 
 public sealed record InvoiceEventDto(
     Guid Id,
