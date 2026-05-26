@@ -41,15 +41,21 @@ builder.Services.AddHealthChecks()
 // =========================
 // DEPENDENCY INJECTION
 // =========================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 
-builder.Services.AddScoped<CategorySeeder>();
 builder.Services.AddScoped<ClientSeeder>();
+builder.Services.AddScoped<CategorySeeder>();
+
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 // =========================
 // CONTROLLERS & API
@@ -96,10 +102,7 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     ClientDbContext db = scope.ServiceProvider.GetRequiredService<ClientDbContext>();
-    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-
     await db.Database.MigrateAsync();
-    await seeder.SeedAsync();
 }
 
 // =========================
