@@ -2,15 +2,17 @@
 public class  PaymentInvoice
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public Guid PaymentId { get; private set; }
     public Guid InvoiceId { get; private set; }   // plain value, no FK to InvoiceService
     public decimal AmountAllocated { get; private set; }
 
     public decimal RefundedAmount { get; private set; }
 
-    public PaymentInvoice(Guid paymentId, Guid invoiceId, decimal amountAllocated)
+    public PaymentInvoice(Guid paymentId, Guid invoiceId, decimal amountAllocated, Guid? tenantId= null)
     {
         Id = Guid.NewGuid();
+        TenantId = tenantId;
         PaymentId = paymentId;
         InvoiceId = invoiceId;
         AmountAllocated = Math.Round(amountAllocated, 2, MidpointRounding.AwayFromZero);
