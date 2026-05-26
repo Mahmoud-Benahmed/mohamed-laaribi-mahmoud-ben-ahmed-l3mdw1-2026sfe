@@ -1,4 +1,5 @@
-﻿using ERP.StockService.Domain;
+﻿using ERP.StockService.Application.Services;
+using ERP.StockService.Domain;
 using ERP.StockService.Domain.LocalCache.Article;
 using ERP.StockService.Domain.LocalCache.Client;
 using ERP.StockService.Domain.LocalCache.Fournisseur;
@@ -7,8 +8,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ERP.StockService.Infrastructure.Persistence;
 
-public sealed class StockDbContext(DbContextOptions<StockDbContext> options) : DbContext(options)
+public class StockDbContext : DbContext
 {
+    private readonly Guid? _tenantId;
+
+    public StockDbContext(DbContextOptions<StockDbContext> options, ITenantContext? tenantContext = null)
+        : base(options)
+    {
+        _tenantId = tenantContext?.TenantId;
+    }
+
     public DbSet<BonEntre> BonEntres => Set<BonEntre>();
     public DbSet<BonSortie> BonSorties => Set<BonSortie>();
     public DbSet<BonRetour> BonRetours => Set<BonRetour>();
@@ -29,12 +38,27 @@ public sealed class StockDbContext(DbContextOptions<StockDbContext> options) : D
     => Set<ClientCategoryCache>();
     public DbSet<FournisseurCache> FournisseurCaches => Set<FournisseurCache>();
 
-    protected override void OnModelCreating(ModelBuilder m) =>
+    protected override void OnModelCreating(ModelBuilder m)
+    {
         m.ApplyConfigurationsFromAssembly(typeof(StockDbContext).Assembly);
+
+        m.Entity<BonNumber>().HasQueryFilter(b              => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<BonEntre>().HasQueryFilter(b               => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<BonSortie>().HasQueryFilter(b              => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<BonRetour>().HasQueryFilter(b              => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<LigneEntre>().HasQueryFilter(b             => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<LigneSortie>().HasQueryFilter(b            => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<LigneRetour>().HasQueryFilter(b            => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<JournalStock>().HasQueryFilter(b           => (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<ArticleCache>().HasQueryFilter(b           => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<ArticleCategoryCache>().HasQueryFilter(b   => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<ClientCache>().HasQueryFilter(b            => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
+        m.Entity<FournisseurCache>().HasQueryFilter(b       => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
+    }
 }
 
 // ── BonNumber ─────────────────────────────────────────────────────────────────
-internal sealed class DocumentNumberSequenceConfiguration : IEntityTypeConfiguration<BonNumber>
+internal class DocumentNumberSequenceConfiguration : IEntityTypeConfiguration<BonNumber>
 {
     public void Configure(EntityTypeBuilder<BonNumber> b)
     {
@@ -49,7 +73,7 @@ internal sealed class DocumentNumberSequenceConfiguration : IEntityTypeConfigura
 }
 
 // ── BonEntre ──────────────────────────────────────────────────────────────────
-internal sealed class BonEntreConfiguration : IEntityTypeConfiguration<BonEntre>
+internal class BonEntreConfiguration : IEntityTypeConfiguration<BonEntre>
 {
     public void Configure(EntityTypeBuilder<BonEntre> b)
     {
@@ -59,7 +83,7 @@ internal sealed class BonEntreConfiguration : IEntityTypeConfiguration<BonEntre>
         b.Property(x => x.Observation).HasMaxLength(1000);
         b.Property(x => x.CreatedAt).IsRequired();
         b.Property(x => x.UpdatedAt).IsConcurrencyToken(false).ValueGeneratedNever();
-        b.HasIndex(x => x.Numero).IsUnique().HasDatabaseName("IX_BonEntres_Numero");
+        b.HasIndex(x => new {x.Numero, x.TenantId }).IsUnique().HasDatabaseName("IX_BonEntres_Numero");
         b.HasMany(x => x.Lignes)
          .WithOne(l => l.BonEntre)
          .HasForeignKey(l => l.BonEntreId)
@@ -71,7 +95,7 @@ internal sealed class BonEntreConfiguration : IEntityTypeConfiguration<BonEntre>
 }
 
 // ── LigneEntre ────────────────────────────────────────────────────────────────
-internal sealed class LigneEntreConfiguration : IEntityTypeConfiguration<LigneEntre>
+internal class LigneEntreConfiguration : IEntityTypeConfiguration<LigneEntre>
 {
     public void Configure(EntityTypeBuilder<LigneEntre> b)
     {
@@ -85,7 +109,7 @@ internal sealed class LigneEntreConfiguration : IEntityTypeConfiguration<LigneEn
 }
 
 // ── BonSortie ─────────────────────────────────────────────────────────────────
-internal sealed class BonSortieConfiguration : IEntityTypeConfiguration<BonSortie>
+internal class BonSortieConfiguration : IEntityTypeConfiguration<BonSortie>
 {
     public void Configure(EntityTypeBuilder<BonSortie> b)
     {
@@ -95,7 +119,7 @@ internal sealed class BonSortieConfiguration : IEntityTypeConfiguration<BonSorti
         b.Property(x => x.Observation).HasMaxLength(1000);
         b.Property(x => x.CreatedAt).IsRequired();
         b.Property(x => x.UpdatedAt).IsConcurrencyToken(false).ValueGeneratedNever();
-        b.HasIndex(x => x.Numero).IsUnique().HasDatabaseName("IX_BonSorties_Numero");
+        b.HasIndex(x => new {x.Numero, x.TenantId }).IsUnique().HasDatabaseName("IX_BonSorties_Numero");
         b.HasMany(x => x.Lignes)
          .WithOne(l => l.BonSortie)
          .HasForeignKey(l => l.BonSortieId)
@@ -107,7 +131,7 @@ internal sealed class BonSortieConfiguration : IEntityTypeConfiguration<BonSorti
 }
 
 // ── LigneSortie ───────────────────────────────────────────────────────────────
-internal sealed class LigneSortieConfiguration : IEntityTypeConfiguration<LigneSortie>
+internal class LigneSortieConfiguration : IEntityTypeConfiguration<LigneSortie>
 {
     public void Configure(EntityTypeBuilder<LigneSortie> b)
     {
@@ -121,7 +145,7 @@ internal sealed class LigneSortieConfiguration : IEntityTypeConfiguration<LigneS
 }
 
 // ── BonRetour ─────────────────────────────────────────────────────────────────
-internal sealed class BonRetourConfiguration : IEntityTypeConfiguration<BonRetour>
+internal class BonRetourConfiguration : IEntityTypeConfiguration<BonRetour>
 {
     public void Configure(EntityTypeBuilder<BonRetour> b)
     {
@@ -133,7 +157,7 @@ internal sealed class BonRetourConfiguration : IEntityTypeConfiguration<BonRetou
         b.Property(x => x.CreatedAt).IsRequired();
         b.Property(x => x.UpdatedAt).IsConcurrencyToken(false).ValueGeneratedNever();
         b.Property(x => x.SourceType).IsRequired().HasConversion<string>().HasMaxLength(20);
-        b.HasIndex(x => x.Numero).IsUnique().HasDatabaseName("IX_BonRetours_Numero");
+        b.HasIndex(x => new {x.Numero, x.TenantId }).IsUnique().HasDatabaseName("IX_BonRetours_Numero");
         b.HasMany(x => x.Lignes)
          .WithOne(l => l.BonRetour)
          .HasForeignKey(l => l.BonRetourId)
@@ -145,7 +169,7 @@ internal sealed class BonRetourConfiguration : IEntityTypeConfiguration<BonRetou
 }
 
 // ── LigneRetour ───────────────────────────────────────────────────────────────
-internal sealed class LigneRetourConfiguration : IEntityTypeConfiguration<LigneRetour>
+internal class LigneRetourConfiguration : IEntityTypeConfiguration<LigneRetour>
 {
     public void Configure(EntityTypeBuilder<LigneRetour> b)
     {
@@ -160,7 +184,7 @@ internal sealed class LigneRetourConfiguration : IEntityTypeConfiguration<LigneR
 }
 
 // ── JournalStock ──────────────────────────────────────────────────────────────
-internal sealed class JournalStockConfiguration : IEntityTypeConfiguration<JournalStock>
+internal class JournalStockConfiguration : IEntityTypeConfiguration<JournalStock>
 {
     public void Configure(EntityTypeBuilder<JournalStock> b)
     {
@@ -179,7 +203,7 @@ internal sealed class JournalStockConfiguration : IEntityTypeConfiguration<Journ
 }
 
 // ── CategoryCache ─────────────────────────────────────────────────────────────
-internal sealed class ArtCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Article.ArticleCategoryCache>
+internal class ArtCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Article.ArticleCategoryCache>
 {
     public void Configure(EntityTypeBuilder<Domain.LocalCache.Article.ArticleCategoryCache> b)
     {
@@ -192,13 +216,12 @@ internal sealed class ArtCategoryCacheConfiguration : IEntityTypeConfiguration<D
         b.Property(c => c.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
         b.Property(c => c.UpdatedAt).IsRequired(false);
 
-        b.HasIndex(c => c.Name).IsUnique();
-        b.HasQueryFilter(c => !c.IsDeleted);
+        b.HasIndex(c => new { c.Name, c.TenantId }).IsUnique();
     }
 }
 
 // ── ArticleCache ──────────────────────────────────────────────────────────────
-internal sealed class ArticleCacheConfiguration : IEntityTypeConfiguration<ArticleCache>
+internal class ArticleCacheConfiguration : IEntityTypeConfiguration<ArticleCache>
 {
     public void Configure(EntityTypeBuilder<ArticleCache> b)
     {
@@ -222,21 +245,20 @@ internal sealed class ArticleCacheConfiguration : IEntityTypeConfiguration<Artic
          .OnDelete(DeleteBehavior.Restrict);
 
         // Unique on active rows only
-        b.HasIndex(a => a.CodeRef)
+        b.HasIndex(a => new { a.CodeRef, a.TenantId })
          .IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
-        b.HasIndex(a => a.BarCode)
+        b.HasIndex(a => new { a.BarCode, a.TenantId })
          .IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
         b.HasIndex(a => a.IsDeleted);
         b.HasIndex(a => a.CategoryId);
-        b.HasQueryFilter(a => !a.IsDeleted);
     }
 }
 
-internal sealed class ClientCacheConfiguration : IEntityTypeConfiguration<ClientCache>
+internal class ClientCacheConfiguration : IEntityTypeConfiguration<ClientCache>
 {
     public void Configure(EntityTypeBuilder<ClientCache> b)
     {
@@ -255,16 +277,15 @@ internal sealed class ClientCacheConfiguration : IEntityTypeConfiguration<Client
         b.Property(c => c.IsDeleted).IsRequired();
         b.Property(c => c.CreatedAt).IsRequired();
 
-        b.HasIndex(c => c.Email)
+        b.HasIndex(c => new { c.Email, c.TenantId })
          .IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
         b.HasIndex(c => c.IsBlocked);
-        b.HasQueryFilter(c => !c.IsDeleted);
     }
 }
 
-internal sealed class CltCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.CategoryCache>
+internal class CltCategoryCacheConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.CategoryCache>
 {
     public void Configure(EntityTypeBuilder<Domain.LocalCache.Client.CategoryCache> b)
     {
@@ -282,16 +303,15 @@ internal sealed class CltCategoryCacheConfiguration : IEntityTypeConfiguration<D
         b.Property(c => c.IsDeleted).IsRequired();
         b.Property(c => c.CreatedAt).IsRequired();
 
-        b.HasIndex(c => c.Code)
+        b.HasIndex(c => new { c.Code, c.TenantId })
          .IsUnique()
          .HasFilter("[IsDeleted] = 0");
 
-        b.HasIndex(c => c.IsActive);
-        b.HasQueryFilter(c => !c.IsDeleted);
+        b.HasIndex(c => new { c.IsActive, c.TenantId });
     }
 }
 
-internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.ClientCategoryCache>
+internal class ClientCategoryConfiguration : IEntityTypeConfiguration<Domain.LocalCache.Client.ClientCategoryCache>
 {
     public void Configure(EntityTypeBuilder<Domain.LocalCache.Client.ClientCategoryCache> b)
     {
@@ -313,7 +333,7 @@ internal sealed class ClientCategoryConfiguration : IEntityTypeConfiguration<Dom
          .OnDelete(DeleteBehavior.Restrict);
     }
 }
-internal sealed class FournisseurCacheConfiguration : IEntityTypeConfiguration<FournisseurCache>
+internal class FournisseurCacheConfiguration : IEntityTypeConfiguration<FournisseurCache>
 {
     public void Configure(EntityTypeBuilder<FournisseurCache> entity)
     {
@@ -321,15 +341,15 @@ internal sealed class FournisseurCacheConfiguration : IEntityTypeConfiguration<F
         entity.HasKey(e => e.Id);
 
         // Indexes
-        entity.HasIndex(e => e.Name)
+        entity.HasIndex(e => new { e.Name, e.TenantId })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
-        entity.HasIndex(e => e.TaxNumber)
+        entity.HasIndex(e => new { e.TaxNumber, e.TenantId })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
-        entity.HasIndex(e => e.Email)
+        entity.HasIndex(e => new { e.Email, e.TenantId })
             .HasFilter("[Email] IS NOT NULL AND [IsDeleted] = 0");
-        entity.HasIndex(e => e.Phone);
+        entity.HasIndex(e => new { e.Phone, e.TenantId });
 
         // Property configurations
         entity.Property(e => e.Name)
@@ -352,17 +372,15 @@ internal sealed class FournisseurCacheConfiguration : IEntityTypeConfiguration<F
         entity.Property(e => e.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
-
-        entity.HasQueryFilter(c => !c.IsDeleted);
     }
 }
 
-internal sealed class InvoiceBonSortieMappingConfiguration : IEntityTypeConfiguration<InvoiceBonSortieMapping>
+internal class InvoiceBonSortieMappingConfiguration : IEntityTypeConfiguration<InvoiceBonSortieMapping>
 {
     public void Configure(EntityTypeBuilder<InvoiceBonSortieMapping> entity)
     {
         entity.HasKey(e => e.Id);
-        entity.HasIndex(e => e.InvoiceId).IsUnique();
-        entity.HasIndex(e => e.BonSortieId);
+        entity.HasIndex(e => new { e.InvoiceId, e.TenantId }).IsUnique();
+        entity.HasIndex(e => new { e.BonSortieId, e.TenantId });
     }
 }
