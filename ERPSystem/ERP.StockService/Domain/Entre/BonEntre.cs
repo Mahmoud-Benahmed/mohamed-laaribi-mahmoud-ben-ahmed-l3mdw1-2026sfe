@@ -9,7 +9,7 @@ public sealed class BonEntre : PieceStock
 
     private BonEntre() { }
 
-    public static BonEntre Create(string numero, Guid fournisseurId, string? observation = null)
+    public static BonEntre Create(string numero, Guid fournisseurId, string? observation = null, Guid? tenantId = null)
     {
         if (string.IsNullOrWhiteSpace(numero))
             throw new ArgumentException("Numero is required.");
@@ -20,6 +20,7 @@ public sealed class BonEntre : PieceStock
         return new BonEntre
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             Numero = numero.Trim(),
             FournisseurId = fournisseurId,
             Observation = observation?.Trim(),
@@ -43,8 +44,13 @@ public sealed class BonEntre : PieceStock
         if (price < 0)
             throw new ArgumentException("Price cannot be negative.");
 
-        if (_lignes.Any(l => l.ArticleId == articleId))
-            qty++;
+        var existing = _lignes.FirstOrDefault(l => l.ArticleId == articleId);
+        if (existing is not null)
+        {
+            existing.Update(existing.Quantity + qty, existing.Price);
+            return existing;
+        }
+        ;
 
         LigneEntre ligne = LigneEntre.Create(Id, articleId, qty, price);
         _lignes.Add(ligne);
