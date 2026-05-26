@@ -328,7 +328,8 @@ public class FournisseurCacheService : IFournisseurCacheService
             IsDeleted: fournisseur.IsDeleted,
             IsBlocked: fournisseur.IsBlocked,
             CreatedAt: fournisseur.CreatedAt,
-            UpdatedAt: fournisseur.UpdatedAt
+            UpdatedAt: fournisseur.UpdatedAt,
+            TenantId: fournisseur.TenantId
         );
     }
 }
