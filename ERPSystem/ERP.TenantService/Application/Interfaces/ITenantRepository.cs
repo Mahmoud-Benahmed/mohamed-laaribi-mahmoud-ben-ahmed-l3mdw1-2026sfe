@@ -6,6 +6,7 @@ namespace ERP.TenantService.Application.Interfaces;
 public interface ITenantRepository
 {
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+    Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default);
     Task<(List<Tenant> Items, int TotalCount)> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
     Task<(List<Tenant> Items, int TotalCount)> GetDeletedAsync(int page, int pageSize, CancellationToken ct = default);
     Task<int> CountAsync(CancellationToken ct = default);
