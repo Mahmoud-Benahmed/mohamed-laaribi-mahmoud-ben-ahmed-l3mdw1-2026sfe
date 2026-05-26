@@ -1,4 +1,5 @@
 ﻿using ERP.PaymentService.Application.Interfaces;
+using ERP.PaymentService.Application.Services;
 using ERP.PaymentService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -8,10 +9,12 @@ namespace ERP.PaymentService.Infrastructure.Persistence;
 public class PaymentNumberGenerator : IPaymentNumberGenerator
 {
     private readonly PaymentDbContext _context;
+    public readonly ITenantContext _tenantContext;
 
-    public PaymentNumberGenerator(PaymentDbContext context)
+    public PaymentNumberGenerator(PaymentDbContext context, ITenantContext tenantContext)
     {
         _context = context;
+        _tenantContext = tenantContext;
     }
 
     public async Task<string> GenerateNextPaymentNumberAsync()
@@ -24,18 +27,16 @@ public class PaymentNumberGenerator : IPaymentNumberGenerator
         try
         {
             PaymentSequence? sequence = await _context.PaymentSequences
-                .FirstOrDefaultAsync(s => s.Year == currentYear);
+                .FirstOrDefaultAsync(s => s.TenantId == _tenantContext.TenantId);
 
             if (sequence is null)
             {
-                sequence = new PaymentSequence(currentYear);
+                sequence = new PaymentSequence(currentYear, _tenantContext.TenantId);
                 _context.PaymentSequences.Add(sequence);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                // reload with lock to get latest value
-                // prevents two concurrent requests getting the same number
                 await _context.Entry(sequence).ReloadAsync();
             }
 
@@ -50,7 +51,6 @@ public class PaymentNumberGenerator : IPaymentNumberGenerator
         catch (DbUpdateConcurrencyException)
         {
             await transaction.RollbackAsync();
-            // retry once on concurrency conflict
             return await GenerateNextPaymentNumberAsync();
         }
         catch
