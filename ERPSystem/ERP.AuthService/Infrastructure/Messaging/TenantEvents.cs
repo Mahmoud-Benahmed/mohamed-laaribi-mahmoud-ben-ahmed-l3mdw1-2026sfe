@@ -4,3 +4,7 @@ public record TenantCreatedEvent(
     string Slug,
     bool IsActive
     );
+public record TenantDeletedEvent(
+    Guid TenantId,
+    string Slug
+    );
