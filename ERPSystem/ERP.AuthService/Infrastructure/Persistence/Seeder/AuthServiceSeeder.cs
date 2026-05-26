@@ -1,4 +1,11 @@
-﻿using ERP.AuthService.Application.Interfaces.Repositories;
+﻿/////////////////////////////////////////////////////////////
+/// THIS FILE IS NOT USED 
+/// AND LEFT FOR REFERENCE PURPOSES TO 
+/// IMPLEMENT BETTER SEEDERS BASED ON IT 
+/// SO ❌ DON'T DELETE IT
+/////////////////////////////////////////////////////////////
+
+using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Infrastructure.Persistence;
