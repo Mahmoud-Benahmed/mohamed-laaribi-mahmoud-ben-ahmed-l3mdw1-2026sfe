@@ -20,6 +20,8 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
         private readonly IEventPublisher _eventPublisher;
         private readonly IStockServiceHttpClient _stockClient;
         private readonly ILogger<InvoicesService> _logger;
+        private readonly ITenantContext _tenantContext;
+
 
         public InvoicesService(
             ILogger<InvoicesService> logger,
@@ -28,7 +30,8 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
             IInvoiceNumberGenerator invoiceNumberGenerator,
             IClientCacheRepository clientCacheRepository,
             IArticleCacheRepository articleCacheRepository,
-            IEventPublisher eventPublisher)
+            IEventPublisher eventPublisher,
+            ITenantContext tenantContext)
         {
             _logger = logger;
             _stockClient = stockClient;
@@ -37,6 +40,7 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
             _invoiceRepository = invoiceRepository;
             _invoiceNumberGenerator = invoiceNumberGenerator;
             _articleCacheRepository = articleCacheRepository;
+            _tenantContext = tenantContext;
         }
 
         public async Task<InvoiceDto> GetByIdAsync(Guid id)
@@ -92,7 +96,7 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
             decimal discountRate = GetClientDiscountRate(client);
 
 
-            string invoiceNumber = await _invoiceNumberGenerator.GenerateNextInvoiceNumberAsync();
+            string invoiceNumber = await _invoiceNumberGenerator.GenerateNextInvoiceNumberAsync(_tenantContext.TenantId);
 
             // ──── CREATE INVOICE ────
             Invoice invoice = new Invoice(
@@ -104,7 +108,8 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
                 client.Id,
                 client.Name,
                 client.Address,
-                dto.AdditionalNotes);
+                dto.AdditionalNotes,
+                _tenantContext.TenantId);
 
 
             // Load all articles once (single database call)
