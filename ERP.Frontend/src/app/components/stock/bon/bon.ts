@@ -1018,6 +1018,7 @@ export class BonsComponent implements OnInit {
     if (this.articleDropdownOpen) {
       this.loadArticlesForDropdown(1, false);
     }
+    console.log(this.articles);
   }
 
   getArticleMaxQty(articleId: string): number {
