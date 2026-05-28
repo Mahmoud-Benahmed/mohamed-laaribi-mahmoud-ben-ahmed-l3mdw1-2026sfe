@@ -12,6 +12,8 @@
 
 <div class="login-topbar">
 
+  <button class="btn-back" routerLink="/">{{ 'COMMON.BACK' | translate }}</button>
+
   <!-- Language toggle -->
   <div class="lang-toggle">
     <button class="lang-btn" [class.lang-btn--active]="userSettings.isEn"
@@ -77,7 +79,6 @@
             type="text"
             placeholder="{{ 'LOGIN.LOGIN_PLACEHOLDER' | translate }}"
             required
-            [pattern]="loginPattern"
             formControlName="login"
             autocomplete="username"
             [class.form__input--error]="loginForm.get('login')?.invalid && loginForm.get('login')?.touched"
@@ -126,7 +127,6 @@
         } @else {
           {{ 'LOGIN.SIGN_IN' | translate }}
         }
-
       </button>
 
     </form>
