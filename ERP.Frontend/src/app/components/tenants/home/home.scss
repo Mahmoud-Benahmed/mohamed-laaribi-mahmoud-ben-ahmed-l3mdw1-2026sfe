@@ -1,0 +1,967 @@
+@use 'shared' as *;
+
+// ── 3-col form row (used in create view) ─────────
+.form__row--3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+// ── 4-col form row (items inline form) ───────────
+.form__row--4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: $bp-sm) {
+    grid-template-columns: 1fr;
+  }
+
+  .form__field--span2 {
+    grid-column: span 2;
+
+    @media (max-width: $bp-sm) {
+      grid-column: span 1;
+    }
+  }
+}
+
+// ── Tab count badge ───────────────────────────────
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: $red-bg;
+  border: 1px solid $red-border;
+  color: $red;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+// ── Autocomplete ──────────────────────────────────
+.autocomplete-wrap {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: $bg-card;
+  border: 1px solid $border-hi;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  overflow: hidden;
+  animation: fadeIn 0.15s ease;
+}
+
+.autocomplete-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover { background: $bg-card-hi; }
+  & + & { border-top: 1px solid $border; }
+
+  &__name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $text-hi;
+  }
+
+  &__sub {
+    font-size: 0.75rem;
+    color: $text-lo;
+  }
+}
+
+// ── Inline item form ──────────────────────────────
+.inline-item-form {
+  background: $bg-card-hi;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  animation: fadeIn 0.2s ease;
+
+  @media (max-width: $bp-sm) { padding: 1rem; }
+}
+
+// ── Calc preview inside item form ─────────────────
+.calc-preview {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  height: 100%;
+  padding-top: 0.5rem;
+
+  span {
+    font-size: 0.82rem;
+    color: $text-mid;
+
+    strong {
+      color: $text-hi;
+      font-weight: 600;
+    }
+  }
+}
+
+// ── Empty items state ─────────────────────────────
+.empty-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  color: $text-lo;
+  text-align: center;
+
+  mat-icon {
+    font-size: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    opacity: 0.4;
+  }
+
+  p {
+    font-size: 0.88rem;
+    margin: 0;
+
+    strong { color: $text-mid; }
+  }
+}
+
+// ── Action bar (view mode) ────────────────────────
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  @media (max-width: $bp-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__btns {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+
+    @media (max-width: $bp-sm) {
+      width: 100%;
+      .btn-warning, .btn-success, .btn-secondary, .btn-danger, .btn-primary {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+// ── Large badge (view mode) ───────────────────────
+.badge--lg {
+  font-size: 0.82rem;
+  padding: 5px 14px;
+  letter-spacing: 0.06em;
+}
+
+// ── Detail view two-column layout ─────────────────
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (max-width: $bp-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Full-width detail item ────────────────────────
+.detail-item--full {
+  grid-column: 1 / -1;
+}
+
+// ── Large total value ─────────────────────────────
+.detail-value--large {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $text-hi;
+  letter-spacing: -0.03em;
+}
+
+// ── Table totals footer row ───────────────────────
+.totals-row {
+  background: $bg-card-hi;
+  border-top: 2px solid $border-hi;
+
+  .totals-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: $text-mid;
+    padding: 0.85rem 1.25rem;
+  }
+
+  .totals-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $text-hi;
+    white-space: nowrap;
+  }
+}
+
+// ── Header actions ────────────────────────────────
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stats-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid $border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &--muted {
+      opacity: 0.6;
+    }
+  }
+
+  &__count {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-hi;
+    background: $bg-card-hi;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    min-width: 40px;
+    text-align: center;
+  }
+}
+
+.form__divider {
+  text-align: center;
+  margin: 0.5rem 0;
+  position: relative;
+
+  span {
+    background: $bg-card;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    color: $text-lo;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: $border;
+    z-index: 0;
+  }
+
+  span {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.combobox-wrap {
+  position: relative;
+}
+
+.combobox-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: $bg-card;
+  border: 1px solid $border-hi;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.combobox-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover {
+    background: $bg-card-hi;
+  }
+
+  &--selected {
+    background: $blue-bg;
+    border-left: 3px solid $blue;
+  }
+
+  &__name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $text-hi;
+  }
+
+  &__sub {
+    font-size: 0.75rem;
+    color: $text-lo;
+  }
+}
+
+.tabs-header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid $border;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: $text-mid;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &--active {
+    color: $blue;
+    border-bottom: 2px solid $blue;
+    margin-bottom: -1px;
+  }
+
+  &:hover:not(.tab-btn--active) {
+    color: $text-hi;
+  }
+}
+
+.tab-content {
+  animation: fadeIn 0.2s ease;
+}
+
+.discount-banner {
+  background: $green-bg;
+  border: 1px solid $green-border;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $green-border;
+
+    mat-icon {
+      color: $green;
+    }
+
+    strong {
+      color: $green;
+    }
+
+    .discount-amount {
+      margin-left: auto;
+      font-weight: 700;
+      color: $green;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__details {
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      font-size: 0.85rem;
+
+      &.discount {
+        color: $green;
+        font-weight: 500;
+      }
+
+      &.final {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid $green-border;
+      }
+    }
+  }
+}
+
+.credit-warning {
+  background: $red-bg;
+  border: 1px solid $red-border;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  mat-icon {
+    color: $red;
+    flex-shrink: 0;
+  }
+
+  .warning-content {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      color: $red;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: $text-mid;
+    }
+  }
+}
+
+.totals-row {
+  .totals-label-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .original-total {
+      text-decoration: line-through;
+      color: $text-lo;
+    }
+  }
+}
+
+.discount-row {
+  background: $green-bg;
+
+  .discount-label,
+  .discount-amount {
+    color: $green;
+    font-weight: 600;
+  }
+}
+
+.final-totals {
+  background: $bg-card-hi;
+  border-top: 2px solid $border-hi;
+
+  .final-label,
+  .final-value {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
+
+.client-info-card {
+  background: $bg-card-hi;
+  border: 1px solid $border;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+
+  .client-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid $border;
+
+    mat-icon {
+      color: $blue;
+    }
+  }
+
+  .client-info-body {
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      font-size: 0.85rem;
+
+      span:first-child {
+        color: $text-mid;
+      }
+
+      strong {
+        color: $text-hi;
+
+        &.text-warning {
+          color: $amber;
+        }
+
+        &.text-success {
+          color: $green;
+        }
+      }
+    }
+  }
+}
+
+// Invoices.scss - Stock validation styling
+
+// Form group enhancements
+.form-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text-mid);
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-hi);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &.is-invalid {
+      border-color: #e05252;
+      padding-right: 2.5rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23e05252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1rem;
+
+      &:focus {
+        border-color: #e05252;
+        box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.1);
+      }
+    }
+  }
+
+  // Invalid feedback styling
+  .invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: #e05252;
+    animation: fadeInUp 0.2s ease;
+  }
+
+  // Form text (helper text)
+  .form-text {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--text-mid);
+
+    &.text-muted {
+      opacity: 0.7;
+    }
+
+    &.text-warning {
+      color: #f5a623;
+    }
+
+    &.text-danger {
+      color: #e05252;
+    }
+  }
+}
+
+// Stock info badge
+.stock-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--primary);
+
+  mat-icon {
+    font-size: 0.875rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  &.low-stock {
+    background-color: rgba(245, 166, 35, 0.1);
+    color: #f5a623;
+  }
+
+  &.out-of-stock {
+    background-color: rgba(224, 82, 82, 0.1);
+    color: #e05252;
+  }
+}
+
+// Stock warning alert
+.stock-warning-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(245, 166, 35, 0.1);
+  border-left: 3px solid #f5a623;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #f5a623;
+  animation: slideInRight 0.3s ease;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .warning-text {
+    flex: 1;
+  }
+
+  .close-warning {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Stock error alert
+.stock-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(224, 82, 82, 0.1);
+  border-left: 3px solid #e05252;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #e05252;
+  animation: slideInRight 0.3s ease;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .error-text {
+    flex: 1;
+  }
+}
+
+// Stock availability indicator
+.stock-availability {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-surface);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+
+  .stock-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-mid);
+  }
+
+  .stock-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-hi);
+
+    &.in-stock {
+      color: #3ecf8e;
+    }
+
+    &.low-stock {
+      color: #f5a623;
+    }
+
+    &.out-of-stock {
+      color: #e05252;
+    }
+  }
+}
+
+// Quantity input with stock indicator
+.quantity-wrapper {
+  position: relative;
+
+  .quantity-input {
+    padding-right: 4rem;
+  }
+
+  .stock-indicator {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    background-color: var(--bg-surface);
+    color: var(--text-mid);
+
+    &.warning {
+      color: #f5a623;
+    }
+
+    &.danger {
+      color: #e05252;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .form-group {
+    margin-bottom: 1rem;
+
+    .form-control {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .stock-warning-alert,
+  .stock-error-alert {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .stock-availability {
+    padding: 0.375rem 0.625rem;
+  }
+}
+
+// Dark mode specific adjustments
+[data-theme="dark"],
+.dark-theme {
+  .form-group {
+    .form-control {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+
+      &.is-invalid {
+        border-color: #e05252;
+      }
+    }
+  }
+
+  .stock-info {
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+
+  .stock-warning-alert {
+    background-color: rgba(245, 166, 35, 0.15);
+  }
+
+  .stock-error-alert {
+    background-color: rgba(224, 82, 82, 0.15);
+  }
+
+  .stock-availability {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+// Stock validation styles
+.stock-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.75rem;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--primary);
+  }
+
+  strong {
+    font-weight: 600;
+
+    &.stock-normal {
+      color: #3ecf8e;
+    }
+
+    &.stock-low {
+      color: #f5a623;
+    }
+
+    &.stock-critical {
+      color: #f5a623;
+    }
+
+    &.stock-out {
+      color: #e05252;
+    }
+  }
+}
+
+.stock-warning-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  animation: fadeInUp 0.2s ease;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &.stock-warning--low {
+    background-color: rgba(245, 166, 35, 0.1);
+    color: #f5a623;
+    border-left: 3px solid #f5a623;
+  }
+
+  &.stock-warning--critical {
+    background-color: rgba(245, 166, 35, 0.15);
+    color: #f5a623;
+    border-left: 3px solid #f5a623;
+  }
+
+  &.stock-warning--out {
+    background-color: rgba(224, 82, 82, 0.1);
+    color: #e05252;
+    border-left: 3px solid #e05252;
+  }
+}
+
+.form__error--stock {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #e05252;
+
+  mat-icon {
+    font-size: 0.875rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

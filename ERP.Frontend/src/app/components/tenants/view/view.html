@@ -1,0 +1,233 @@
+<div class="page">
+  <ng-container *ngIf="selectedTenant">
+
+    <!-- ── Alerts ─────────────────────────────────── -->
+    <div *ngFor="let e of errors" class="alert alert--error">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">error_outline</mat-icon>
+      {{ e }}
+      <button class="alert__close" (click)="dismissError()">
+        <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="successMessage" class="alert alert--success">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">check_circle_outline</mat-icon>
+      {{ successMessage }}
+    </div>
+
+    <!-- ── Page Header ─────────────────────────────── -->
+    <div class="page-header">
+      <div class="start">
+        <div class="breadcrumb-title">
+          <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }} › {{ selectedTenant.name }}</p>
+          <h1 class="page-title">{{ 'TENANTS.TITLE_DETAILS' | translate }}: {{ selectedTenant.name }}</h1>
+        </div>
+      </div>
+      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+    </div>
+
+    <!-- ── Action Bar ─────────────────────────────── -->
+    <div class="action-bar">
+      <div class="action-bar__btns">
+        <button class="btn-primary"
+                *ngIf="!selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                [matTooltip]="'COMMON.EDIT' | translate"
+                (click)="updateTenant(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
+          {{ 'COMMON.EDIT' | translate }}
+        </button>
+
+        <button class="btn-secondary"
+                *ngIf="selectedTenant.isActive && !selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                (click)="suspend(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">pause_circle</mat-icon>
+          {{ 'TENANTS.ACTIONS.SUSPEND' | translate }}
+        </button>
+
+        <button class="btn-success"
+                *ngIf="!selectedTenant.isActive && !selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                (click)="activate(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">play_circle</mat-icon>
+          {{ 'TENANTS.ACTIONS.ACTIVATE' | translate }}
+        </button>
+
+        <button class="btn-danger"
+                *ngIf="!selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT)"
+                (click)="delete(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+          {{ 'COMMON.DELETE' | translate }}
+        </button>
+
+        <button class="btn-success"
+                *ngIf="selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT)"
+                (click)="restore(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">restore</mat-icon>
+          {{ 'COMMON.RESTORE' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Detail Columns ─────────────────────────── -->
+    <div class="detail-columns">
+
+      <!-- Tenant Info Panel -->
+      <div class="panel">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>business</mat-icon></div>
+            <div><h2 class="panel__title">{{ 'TENANTS.DETAILS.TENANT_INFO' | translate }}</h2></div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="detail-grid">
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.NAME' | translate }}</span>
+              <span class="detail-value detail-value--large">{{ selectedTenant.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.SUBDOMAIN' | translate }}</span>
+              <span class="detail-value detail-value--mono">{{ selectedTenant.subdomainSlug }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.STATUS' | translate }}</span>
+              <span class="badge" [ngClass]="statusClass(selectedTenant)">
+                {{ getStatusLabel(selectedTenant) | translate }}
+              </span>
+            </div>
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.EMAIL' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.email }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.PHONE' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.phone }}</span>
+            </div>
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.ADDRESS' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.address }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.CURRENCY' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.currency }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.TIMEZONE' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.timezone }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.LOCALE' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.locale }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.CREATED' | translate }}</span>
+              <span class="detail-value date-cell">{{ selectedTenant.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription Panel -->
+      <div class="panel" *ngIf="selectedTenant.subscription">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>card_subscription</mat-icon></div>
+            <div><h2 class="panel__title">{{ 'TENANTS.DETAILS.SUBSCRIPTION_INFO' | translate }}</h2></div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="detail-grid">
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.PLAN_NAME' | translate }}</span>
+              <span class="detail-value detail-value--large">{{ selectedTenant.subscription.plan?.name || 'N/A' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedTenant.subscription.plan">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.PLAN_CODE' | translate }}</span>
+              <span class="detail-value detail-value--mono">{{ selectedTenant.subscription.plan.code }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.START_DATE' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.subscription.startDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.END_DATE' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.subscription.endDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedTenant.subscription?.plan?.monthlyPrice">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MONTHLY_PRICE' | translate }}</span>
+              <span class="detail-value detail-value--large text-green">{{ (selectedTenant.subscription?.plan?.monthlyPrice | number:'1.2-2') }} TND</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedTenant.subscription?.plan?.yearlyPrice">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.YEARLY_PRICE' | translate }}</span>
+              <span class="detail-value detail-value--large text-green">{{ (selectedTenant.subscription?.plan?.yearlyPrice | number:'1.2-2') }} TND</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.PERIOD' | translate }}</span>
+              <span class="badge badge--blue">{{ selectedTenant.subscription.period }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedTenant.subscription.plan?.maxUsers">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_USERS' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.subscription.plan?.maxUsers }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedTenant.subscription.plan?.maxStorageMb">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_STORAGE' | translate }}</span>
+              <span class="detail-value">{{ (selectedTenant.subscription.plan?.maxUsers ?? 0 / 1024) | number:'1.2-2' }} GB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Details Panel -->
+      <div class="panel" *ngIf="subscriptionPlan">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>local_offer</mat-icon></div>
+            <div><h2 class="panel__title">{{ 'TENANTS.DETAILS.PLAN_DETAILS' | translate }}</h2></div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="detail-grid">
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.PLAN_NAME' | translate }}</span>
+              <span class="detail-value detail-value--large">{{ subscriptionPlan.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.CODE' | translate }}</span>
+              <span class="detail-value detail-value--mono">{{ subscriptionPlan.code }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.STATUS' | translate }}</span>
+              <span class="badge" [ngClass]="{'badge--green': subscriptionPlan.isActive, 'badge--grey': !subscriptionPlan.isActive}">
+                {{ subscriptionPlan.isActive ? ('TENANTS.STATUS.ACTIVE' | translate) : ('TENANTS.STATUS.SUSPENDED' | translate) }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MONTHLY_PRICE' | translate }}</span>
+              <span class="detail-value text-green">{{ subscriptionPlan.monthlyPrice | number:'1.2-2' }} TND</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.YEARLY_PRICE' | translate }}</span>
+              <span class="detail-value text-green">{{ subscriptionPlan.yearlyPrice | number:'1.2-2' }} TND</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_USERS' | translate }}</span>
+              <span class="detail-value">{{ subscriptionPlan.maxUsers }} {{ 'TENANTS.DETAILS.USERS' | translate }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_STORAGE' | translate }}</span>
+              <span class="detail-value">{{ (subscriptionPlan.maxStorageMb / 1024) | number:'1.2-2' }} GB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+  <!-- Empty state if no tenant -->
+  <ng-container *ngIf="!selectedTenant && !loading">
+    <div style="padding: 40px; text-align: center; color: var(--text-md);">
+      <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px;">business</mat-icon>
+      <p>{{ 'TENANTS.ERRORS.LOAD_FAILED' | translate }}</p>
+    </div>
+  </ng-container>
+</div>

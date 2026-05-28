@@ -1,0 +1,385 @@
+<!-- ══════════════════════════════════════════════
+     TENANTS PAGE  –  5 views: list | deleted | stats | create | edit
+     ══════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- ── Alerts ─────────────────────────────────── -->
+  <div *ngFor="let e of errors" class="alert alert--error">
+    <mat-icon style="font-size:16px;width:16px;height:16px;">error_outline</mat-icon>
+    {{ e }}
+    <button class="alert__close" (click)="dismissError()">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+    </button>
+  </div>
+  <div *ngIf="successMessage" class="alert alert--success">
+    <mat-icon style="font-size:16px;width:16px;height:16px;">check_circle_outline</mat-icon>
+    {{ successMessage }}
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       LIST VIEW  &  DELETED LIST VIEW
+       ══════════════════════════════════════════════ -->
+  <ng-container *ngIf="isList() || isDeletedList() || isSuspended()">
+
+    <div class="page-header">
+      <div>
+        <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }}</p>
+        <h1 class="page-title">{{ 'TENANTS.TITLE_LIST' | translate }}</h1>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid" *ngIf="isList()">
+
+      <div class="stat-card stat-card--gray"
+          [class.stat-card--current]="statusFilter === 'ALL'"
+          [class.stat-card--disabled]="stats.total === 0"
+          (click)="setStatusFilter('ALL')">
+        <div class="stat-card__body">
+          <div>
+            <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL' | translate }}</p>
+            <p class="stat-card__value">{{ stats.total }}</p>
+          </div>
+          <div class="stat-card__icon stat-card__icon--gray"><mat-icon>business</mat-icon></div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--green"
+          [class.stat-card--current]="statusFilter === 'ACTIVE'"
+          [class.stat-card--disabled]="stats.active === 0"
+          (click)="setStatusFilter('ACTIVE')">
+        <div class="stat-card__body">
+          <div>
+            <p class="stat-card__label">{{ 'TENANTS.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__value">{{ stats.active }}</p>
+          </div>
+          <div class="stat-card__icon stat-card__icon--green"><mat-icon>check_circle</mat-icon></div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--amber"
+          [class.stat-card--current]="statusFilter === 'SUSPENDED'"
+          [class.stat-card--disabled]="stats.suspended === 0"
+          (click)="setStatusFilter('SUSPENDED')">
+        <div class="stat-card__body">
+          <div>
+            <p class="stat-card__label">{{ 'TENANTS.STATS.SUSPENDED' | translate }}</p>
+            <p class="stat-card__value">{{ stats.suspended }}</p>
+          </div>
+          <div class="stat-card__icon stat-card__icon--amber"><mat-icon>pause_circle</mat-icon></div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--blue"
+          [class.stat-card--current]="statusFilter === 'DELETED'"
+          [class.stat-card--disabled]="stats.deleted === 0"
+          (click)="setStatusFilter('DELETED')">
+        <div class="stat-card__body">
+          <div>
+            <p class="stat-card__label">{{ 'TENANTS.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__value">{{ stats.deleted }}</p>
+          </div>
+          <div class="stat-card__icon stat-card__icon--blue"><mat-icon>archive</mat-icon></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Type Tabs -->
+    <div class="type-tabs">
+
+      <button class="type-tab" [class.type-tab--active]="isList()"
+              (click)="viewMode.set('list'); load()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>
+        </svg>
+        {{ 'TENANTS.TABS.ACTIVE' | translate }}
+      </button>
+
+      <button class="type-tab" [class.type-tab--active]="isDeletedList()"
+              *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT) && stats.deleted >= 1"
+              (click)="viewMode.set('list-deleted'); loadDeletedTenants()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
+        </svg>
+        {{ 'TENANTS.TABS.DELETED' | translate }}
+        <span *ngIf="stats.deleted > 0" class="tab-count">{{ stats.deleted }}</span>
+      </button>
+
+      <button class="type-tab" [class.type-tab--active]="isSuspended()"
+              (click)="viewMode.set('list-suspended'); loadSuspendedTenants()"
+              *ngIf="stats.suspended > 0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6"  y1="20" x2="6"  y2="14"/>
+        </svg>
+        {{ 'TENANTS.TABS.SUSPENDED' | translate }}
+      </button>
+
+      <button class="type-tab" [class.type-tab--active]="isStats()"
+              (click)="openStats()" *ngIf="stats.total > 0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6"  y1="20" x2="6"  y2="14"/>
+        </svg>
+        {{ 'TENANTS.TABS.ANALYTICS' | translate }}
+      </button>
+
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" type="text" [placeholder]="'TENANTS.SEARCH_PLACEHOLDER' | translate"
+               [(ngModel)]="searchQuery" />
+      </div>
+      <button
+        *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.CREATE_TENANT) && isList()"
+        class="btn-add"
+        routerLink="/admin/tenants/create">
+        {{ 'COMMON.ADD'| translate }} {{ 'NAV.TENANTS'| translate }}
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-scroll-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="th--sortable" (click)="sortBy('name')">
+                {{ 'TENANTS.TABLE.NAME' | translate }}
+                <span class="sort-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'name' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </th>
+              <th>{{ 'TENANTS.TABLE.EMAIL' | translate }}</th>
+              <th>{{ 'TENANTS.TABLE.PLAN' | translate }}</th>
+              <th class="th--sortable text-center" (click)="sortBy('createdAt')">
+                {{ 'TENANTS.TABLE.SUBSCRIPTION_DATE' | translate }}
+                <span class="sort-icon">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'createdAt' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'createdAt' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </th>
+              <th class="text-center">{{ 'TENANTS.TABLE.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="sortedData.length === 0">
+              <td colspan="5" class="td--empty">{{ 'COMMON.NO_RESULTS' | translate }}</td>
+            </tr>
+            <tr class="table__row" *ngFor="let tenant of sortedData; trackBy: trackById">
+              <td class="td--name">{{ tenant.name }}</td>
+              <td>{{ tenant.email }}</td>
+              <td class="td--plan">{{ getPlanName(tenant) }}</td>
+              <td class="date-cell">{{ tenant.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="td--actions">
+                <button class="icon-btn icon-btn--view" [matTooltip]="'TENANTS.ACTIONS.VIEW' | translate"
+                      [routerLink]="['/tenants', tenant.id]">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">visibility</mat-icon>
+                </button>
+                <button class="icon-btn icon-btn--edit" [matTooltip]="'TENANTS.ACTIONS.EDIT' | translate"
+                        [routerLink]="['/tenants', tenant.id]">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
+                </button>
+                <button class="icon-btn icon-btn--pause" [matTooltip]="'TENANTS.ACTIONS.SUSPEND' | translate"
+                        *ngIf="tenant.isActive && !tenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                        (click)="suspend(tenant)">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">pause_circle</mat-icon>
+                </button>
+                <button class="icon-btn icon-btn--play" [matTooltip]="'TENANTS.ACTIONS.ACTIVATE' | translate"
+                        *ngIf="!tenant.isActive && !tenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                        (click)="activate(tenant)">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">play_circle</mat-icon>
+                </button>
+                <button class="icon-btn icon-btn--delete" [matTooltip]="'TENANTS.ACTIONS.DELETE' | translate"
+                        *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT) && !tenant.isDeleted"
+                        (click)="delete(tenant)">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+                </button>
+                <button class="icon-btn icon-btn--reactivate" [matTooltip]="'TENANTS.ACTIONS.RESTORE' | translate"
+                        *ngIf="isDeletedList() && tenant.isDeleted"
+                        (click)="restore(tenant)">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">restore</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [pageNumber]="currentPage"
+        [totalPages]="totalPages"
+        [pageSize]="currentSize"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════
+       STATS VIEW
+       ══════════════════════════════════════════════ -->
+  <ng-container *ngIf="isStats()">
+
+    <div class="page-header">
+      <div>
+        <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB_ANALYTICS' | translate }}</p>
+        <h1 class="page-title">{{ 'TENANTS.TITLE_ANALYTICS' | translate }}</h1>
+      </div>
+      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+    </div>
+
+    <div class="stats-loading" *ngIf="statsLoading">
+      <mat-icon class="spin">autorenew</mat-icon>
+      <p>{{ 'TENANTS.STATS.LOADING' | translate }}</p>
+    </div>
+
+    <ng-container *ngIf="!statsLoading && tenantAnalytics">
+
+      <div class="stats-grid stats-grid--kpi">
+
+        <div class="stat-card stat-card--gray">
+          <div class="stat-card__body">
+            <div>
+              <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL' | translate }}</p>
+              <p class="stat-card__value">{{ tenantAnalytics.totalTenants }}</p>
+            </div>
+            <div class="stat-card__icon stat-card__icon--gray"><mat-icon>business</mat-icon></div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--green">
+          <div class="stat-card__body">
+            <div>
+              <p class="stat-card__label">{{ 'TENANTS.STATS.ACTIVE' | translate }}</p>
+              <p class="stat-card__value">{{ tenantAnalytics.activeTenants }}</p>
+              <p class="stat-card__sub">{{ (tenantAnalytics.activeTenants / tenantAnalytics.totalTenants * 100 | number:'1.0-0') }}%</p>
+            </div>
+            <div class="stat-card__icon stat-card__icon--green"><mat-icon>check_circle</mat-icon></div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--amber">
+          <div class="stat-card__body">
+            <div>
+              <p class="stat-card__label">{{ 'TENANTS.STATS.SUSPENDED' | translate }}</p>
+              <p class="stat-card__value">{{ tenantAnalytics.suspendedTenants }}</p>
+              <p class="stat-card__sub">{{ (tenantAnalytics.suspendedTenants / tenantAnalytics.totalTenants * 100 | number:'1.0-0') }}%</p>
+            </div>
+            <div class="stat-card__icon stat-card__icon--amber"><mat-icon>pause_circle</mat-icon></div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--blue">
+          <div class="stat-card__body">
+            <div>
+              <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL_MRR' | translate }}</p>
+              <p class="stat-card__value">{{ tenantAnalytics.totalMRR | number:'1.2-2' }} TND</p>
+              <p class="stat-card__sub">ARR: {{ tenantAnalytics.totalARR | number:'1.2-2' }} TND</p>
+            </div>
+            <div class="stat-card__icon stat-card__icon--blue"><mat-icon>payments</mat-icon></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="detail-columns">
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title-wrap">
+              <div class="panel__icon"><mat-icon>donut_large</mat-icon></div>
+              <div>
+                <h2 class="panel__title">{{ 'TENANTS.STATS.STATUS_BREAKDOWN' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'TENANTS.STATS.ALL_TENANTS_BY_STATUS' | translate }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="panel__body">
+            <div class="stats-breakdown">
+              <div class="stats-breakdown__row">
+                <span class="badge badge--green">{{ 'TENANTS.STATUS.ACTIVE' | translate }}</span>
+                <span class="stats-breakdown__count">{{ tenantAnalytics.activeTenants }}</span>
+              </div>
+              <div class="stats-breakdown__row">
+                <span class="badge badge--amber">{{ 'TENANTS.STATUS.SUSPENDED' | translate }}</span>
+                <span class="stats-breakdown__count">{{ tenantAnalytics.suspendedTenants }}</span>
+              </div>
+              <div class="stats-breakdown__row stats-breakdown__row--muted">
+                <span class="badge badge--grey">{{ 'TENANTS.STATUS.DELETED' | translate }}</span>
+                <span class="stats-breakdown__count">{{ tenantAnalytics.deletedTenants }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__header">
+            <div class="panel__title-wrap">
+              <div class="panel__icon"><mat-icon>leaderboard</mat-icon></div>
+              <div>
+                <h2 class="panel__title">{{ 'TENANTS.STATS.TOP_PLANS' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'TENANTS.STATS.BY_REVENUE' | translate }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="panel__body" style="padding:0">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>{{ 'TENANTS.TABLE.RANK' | translate }}</th>
+                  <th>{{ 'TENANTS.TABLE.PLAN' | translate }}</th>
+                  <th class="text-center">{{ 'TENANTS.TABLE.TENANTS' | translate }}</th>
+                  <th class="text-center">{{ 'TENANTS.TABLE.REVENUE' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="tenantAnalytics.topPlansByRevenue.length === 0">
+                  <td colspan="4" class="td--empty">{{ 'TENANTS.STATS.NO_DATA' | translate }}</td>
+                </tr>
+                <tr class="table__row" *ngFor="let plan of tenantAnalytics.topPlansByRevenue; let i = index">
+                  <td class="td--rank">{{ i + 1 }}</td>
+                  <td class="td--name">{{ plan.planName }}</td>
+                  <td class="text-center">{{ plan.tenantCount }}</td>
+                  <td class="td--price text-center">{{ plan.revenue | number:'1.2-2' }} TND</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>bar_chart</mat-icon></div>
+            <div>
+              <h2 class="panel__title">{{ 'TENANTS.STATS.REVENUE_BY_PLAN' | translate }}</h2>
+              <p class="panel__subtitle">{{ 'TENANTS.STATS.ANNUAL_PROJECTION' | translate }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <canvas #revenueChart style="height: 400px; width: 100%;"></canvas>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </ng-container>
+
+</div>
