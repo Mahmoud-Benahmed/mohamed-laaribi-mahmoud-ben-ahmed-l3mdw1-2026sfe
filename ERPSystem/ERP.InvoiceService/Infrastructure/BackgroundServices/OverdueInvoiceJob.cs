@@ -7,7 +7,7 @@ public sealed class OverdueInvoiceJob : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OverdueInvoiceJob> _logger;
-    private static readonly TimeSpan Interval = TimeSpan.FromHours(24);
+    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(1);
 
     public OverdueInvoiceJob(
         IServiceScopeFactory scopeFactory,
@@ -86,6 +86,7 @@ public sealed class OverdueInvoiceJob : BackgroundService
         {
             try
             {
+                _logger.LogInformation("Checking for UNPAID invoices...");
                 await ProcessOverdueInvoicesAsync(stoppingToken);
             }
             catch (Exception ex)
