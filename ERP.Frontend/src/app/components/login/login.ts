@@ -2,7 +2,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +16,7 @@ import { environment } from '../../environment';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { map, Subscription, switchMap, tap } from 'rxjs';
+import { RegexPatterns } from '../../interfaces/RegexPatterns';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,8 @@ import { map, Subscription, switchMap, tap } from 'rxjs';
     MatProgressSpinnerModule,
     MatDialogModule,
     TranslatePipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterLink
 ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -41,7 +43,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   readonly year: number = new Date().getFullYear();
   userProfile: AuthUserGetResponseDto | null = null;
 
-  readonly loginPattern = /^[a-z0-9_]+$/;
   showPassword = false;
   isLoading = false;
   errorMessage: string | null = null;
@@ -58,7 +59,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.loginForm = this.fb.group({
-      login:       ['', [Validators.required, Validators.pattern(this.loginPattern)]],
+      login:       ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
       password:    ['', [Validators.required, Validators.minLength(8)]],
     });
   }
