@@ -43,7 +43,7 @@ public class TenantProvisioningService : ITenantProvisioningService
         await EnsureIndexesAsync();
 
         // 1. CONTROLES
-        var controles = await SeedControlesAsync();
+        var controles = await SeedControlesAsync(tenantId);
 
         // 2. ROLES
         var roles = await SeedRolesAsync(tenantId);
@@ -58,7 +58,7 @@ public class TenantProvisioningService : ITenantProvisioningService
     // =====================================================
     // CONTROLES
     // =====================================================
-    private async Task<Dictionary<string, Controle>> SeedControlesAsync()
+    private async Task<Dictionary<string, Controle>> SeedControlesAsync(Guid tenantId)
     {
         Dictionary<string, Controle> result = new(StringComparer.OrdinalIgnoreCase);
 
@@ -66,19 +66,24 @@ public class TenantProvisioningService : ITenantProvisioningService
             .GroupBy(d => d.Code, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First());
 
+        // Load all existing controles for THIS tenant in one query
+        var existingForTenant = await _db.Collection<Controle>("Controles")
+            .Find(Builders<Controle>.Filter.Eq(c => c.TenantId, tenantId))
+            .ToListAsync();
+
+        var existingByLibelle = existingForTenant
+            .ToDictionary(c => c.Libelle, c => c, StringComparer.OrdinalIgnoreCase);
+
         foreach (var def in distinctDefs)
         {
-            var existing = await _controles.GetByLibelleAsync(def.Code);
-
-            if (existing != null)
+            if (existingByLibelle.TryGetValue(def.Code, out var existing))
             {
                 result[def.Code] = existing;
                 continue;
             }
 
-            var created = new Controle(def.Category, def.Code, def.Description);
+            var created = new Controle(def.Category, def.Code, def.Description, tenantId);
             await _controles.AddAsync(created);
-
             result[def.Code] = created;
         }
 
