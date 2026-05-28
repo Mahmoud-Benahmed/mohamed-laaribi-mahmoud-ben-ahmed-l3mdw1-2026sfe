@@ -38,17 +38,18 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return proceedWithChecks();
   }
 
-  // ── Token expired client-side — attempt silent refresh before giving up
+  // ── No refresh token — send to plans (public landing page)
   const refreshToken = auth.getRefreshToken();
   if (!refreshToken) {
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree(['/plans']); // ← was '/login', now goes to plans
   }
 
+  // ── Token expired — attempt silent refresh
   return auth.refresh({ refreshToken }).pipe(
-    map(() => proceedWithChecks()),        // refresh succeeded — run normal checks
+    map(() => proceedWithChecks()),
     catchError(() => {
-      auth.logout();                       // refresh failed — clean up and redirect
-      return of(router.createUrlTree(['/login']));
+      auth.logout();
+      return of(router.createUrlTree(['/plans'])); // ← was '/login', now goes to plans
     })
   );
 };

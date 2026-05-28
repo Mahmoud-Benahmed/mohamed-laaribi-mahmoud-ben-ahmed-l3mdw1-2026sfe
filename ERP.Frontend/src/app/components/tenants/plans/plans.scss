@@ -1,0 +1,476 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+// ─── Shared var bridges (same tokens UserSettingsService sets on body) ──
+// These already flip between dark/light automatically — use them directly
+// instead of duplicating theme logic with :host-context()
+$bg-page:        var(--bg-page);
+$bg-card:        var(--bg-card);
+$bg-card-hi:     var(--bg-card-hi);
+$border:         var(--border);
+$border-hi:      var(--border-hi);
+$text-hi:        var(--text-hi);
+$text-mid:       var(--text-mid);
+$text-lo:        var(--text-lo);
+
+$font-sans: 'DM Sans', sans-serif;
+$blue:      #4e7cff;
+
+// ─── Host shell ────────────────────────────────────────────────────
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+// ─── Page Shell ────────────────────────────────────────────────────
+
+.plans-page {
+  min-height: 100vh;
+  // Use the shared --bg-page var — it already flips dark↔light
+  background: $bg-page;
+  font-family: $font-sans;
+  color: $text-hi;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 5.5rem 1.5rem 8rem;
+}
+
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    900px circle at 50% 28%,
+    rgba(120,120,180,0.05) 0%,
+    transparent 70%
+  );
+}
+
+// ─── Top Bar ───────────────────────────────────────────────────────
+
+.plans-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.85rem 1.75rem;
+  background: transparent;
+}
+
+.lang-toggle { display: flex; gap: 0.3rem; }
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.27rem 0.58rem;
+  cursor: pointer;
+  color: $text-lo;
+  font-size: 0.77rem;
+  font-weight: 500;
+  font-family: $font-sans;
+
+  &--active {
+    background: $bg-card-hi;
+    border-color: $border;
+    color: $text-hi;
+  }
+
+  &:hover:not(.lang-btn--active) { color: $text-mid; }
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 6px;
+  cursor: pointer;
+  color: $text-mid;
+
+  &:hover {
+    background: $bg-card-hi;
+    color: $text-hi;
+  }
+}
+
+.btn-signin-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid $border;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  font-family: $font-sans;
+  font-size: 0.82rem;
+  color: $text-mid;
+
+  span { color: $text-hi; font-weight: 600; }
+  &:hover { border-color: $border-hi; color: $text-hi; }
+}
+
+// ─── Container ─────────────────────────────────────────────────────
+
+.plans-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 980px;
+}
+
+// ─── Header ────────────────────────────────────────────────────────
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 2rem;
+
+  .logo-icon-wrap {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: $bg-card;
+    border: 1px solid $border;
+    display: flex; align-items: center; justify-content: center;
+    img { border-radius: 6px; }
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $text-hi;
+  }
+}
+
+.plans-header h1 {
+  font-family: $font-sans;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  margin: 0 0 0.6rem;
+  color: $text-hi;
+}
+
+.header-sub {
+  color: $text-mid;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin: 0 0 1.75rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// ─── Billing Toggle ────────────────────────────────────────────────
+
+.billing-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.toggle-option {
+  position: relative;
+  padding: 0.38rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: $text-mid;
+  font-family: $font-sans;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: capitalize;
+
+  // Active uses --text-hi as bg and --bg-page as text
+  // so it auto-inverts: dark bg on light theme, light bg on dark theme
+  &--active {
+    background: $text-hi;
+    color: $bg-page;
+    font-weight: 600;
+  }
+
+  &:hover:not(.toggle-option--active) { color: $text-hi; }
+}
+
+// ─── Error ─────────────────────────────────────────────────────────
+
+.plans-error {
+  background: rgba(239,68,68,0.07);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  color: #f08080;
+  font-size: 0.9rem;
+  text-align: center;
+  p { margin: 0; }
+}
+
+// ─── Grid ──────────────────────────────────────────────────────────
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+  align-items: stretch;
+}
+
+// ─── Plan Card ─────────────────────────────────────────────────────
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid $border;
+  background: $bg-card;
+  // No overflow:hidden — clips border-trail animation
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    border-color: $border-hi;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.12);
+  }
+
+  // PRO card — same border as others, border-trail provides the glow
+  &--highlighted {
+    border-color: $border;
+  }
+
+  // Selected — lift only, zero blue border/ring
+  &--selected {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  }
+}
+
+
+//Card Header plan name + price
+.card-header {
+  position: relative;
+  z-index: 1;
+  background: $bg-card-hi;       
+  border-bottom: 1px solid $border;
+  border-radius: 12px 12px 0 0;
+  padding: 1rem;
+
+  &--highlighted {
+    background: $bg-card-hi;
+  }
+}
+// Badges top-right absolute
+.card-badges-abs {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 10;
+}
+// ★ Popular badge
+.badge-popular {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  background: $bg-card;    
+  border: 1px solid $border;
+  border-radius: 6px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: $text-hi;
+}
+// % off badge
+.badge-discount {
+  display: inline-flex;
+  align-items: center;
+  background: $blue;
+  color: #fff;
+  border: 1px solid $blue;
+  border-radius: 6px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.card-plan-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: $text-hi;
+  margin-bottom: 0.2rem;
+  padding-right: 5rem;
+}
+.card-plan-info {
+  font-size: 0.83rem;
+  color: $text-mid;
+  margin: 0 0 0.5rem;
+}
+.card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+.price-amount {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: $text-hi;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.price-period {
+  font-size: 0.82rem;
+  color: $text-mid;
+}
+// Features section
+.card-features {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 1rem;
+  font-size: 0.875rem;
+  color: $text-mid;
+  background: transparent;
+  &--highlighted {
+    background: transparent;
+  }
+}
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+.feature-check {
+  color: $text-hi;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+//Card Footer
+.card-footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid $border;
+  border-radius: 0 0 12px 12px;
+  padding: 0.75rem;
+  background: transparent;
+
+  &--highlighted {
+    background: $bg-card-hi;
+  }
+}
+.plan-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.68rem 1rem;
+  border-radius: 8px;
+  font-family: $font-sans;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s, opacity 0.2s;
+  //Outline non-PRO, unselected)
+  &--outline {
+    background: transparent;
+    border: 1px solid $border;
+    color: $text-hi;
+    &:hover {
+      background: $bg-card-hi;
+      border-color: $border-hi;
+    }
+  }
+  //Solid PRO, unselected
+  &--default {
+    background: $text-hi;
+    border: 1px solid $text-hi;
+    color: $bg-page;
+
+    &:hover { opacity: 0.88; }
+  }
+  //Selected state plannning to be purchased
+  &--selected {
+    background: $blue;
+    border: 1px solid $blue;
+    color: #fff;
+    &:hover {
+      background: lighten(#4e7cff, 10%);
+      box-shadow: 0 4px 16px rgba(78,124,255,0.35);
+    }
+  }
+}
+//Proceed button
+.plans-action {
+  text-align: center;
+  padding-top: 0.5rem;
+}
+.btn-proceed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: $blue;
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 2.5rem;
+  font-size: 0.925rem;
+  font-weight: 700;
+  font-family: $font-sans;
+  border-radius: 6px;
+  cursor: pointer;
+
+  svg { flex-shrink: 0; transition: transform 0.15s; }
+  &:hover:not(:disabled) {
+    background: lighten(#4e7cff, 10%);
+    box-shadow: 0 4px 16px rgba(78,124,255,0.3);
+    svg { transform: translateX(3px); }
+  }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+//Responsive
+@media (max-width: 1024px) {
+  .plans-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .plans-page { padding: 5rem 1rem 4rem; }
+  .plans-grid { grid-template-columns: 1fr; }
+  .plans-header h1 { font-size: 1.75rem; }
+  .plans-topbar { padding: 0.75rem 1rem; }
+  .btn-proceed { width: 100%; justify-content: center; }
+}

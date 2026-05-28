@@ -7,8 +7,6 @@ import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
 import { ModalComponent } from "../components/modal/modal";
 import { AuthResponseDto } from "../interfaces/AuthDto";
 
-// Remove: import { routes } from "../app.routes";
-
 let serverDownDialogOpen = false;
 let refreshInProgress$: Observable<AuthResponseDto> | null = null;
 
@@ -27,8 +25,13 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
                     || req.url.includes('/login');
 
   const token = !isPublicCall ? auth.getAccessToken() : null;
+
+  const tenantSlug = auth.getTenantSlug();
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+  if (tenantSlug) headers['X-Tenant'] = tenantSlug;
+
   const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    ? req.clone({ setHeaders: headers })
     : req;
 
   if (isPublicCall) {
@@ -38,8 +41,8 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
 
-      // ── Server unreachable ─────────────────────────────────────────────
-      if (error.status === 0) {  // ← was missing
+      // Server unreachable 
+      if (error.status === 0) {
         if (!serverDownDialogOpen) {
           serverDownDialogOpen = true;
           dialog.open(ModalComponent, {
@@ -60,11 +63,20 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // ── Rate limit ─────────────────────────────────────────────────────
+      // Rate limit for login and create tenants 
       if (error.status === 429) {
         const retryAfter = error.headers.get('Retry-After');
-        const content = error.error?.content
-          ?? `Too many requests. Please wait ${retryAfter ?? 60} seconds before retrying.`;
+
+        let content = error.error?.content;
+        if (!content) {
+          if (req.url.includes('/tenants')) {
+            content = 'Too many registration attempts. Please wait 10 minutes before retrying.';
+          } else if (req.url.includes('/auth/login')) {
+            content = `Too many login attempts. Please wait ${retryAfter ?? 60} seconds before retrying.`;
+          } else {
+            content = `Too many requests. Please wait ${retryAfter ? retryAfter + ' seconds' : 'a few minutes'} before retrying.`;
+          }
+        }
 
         dialog.open(ModalComponent, {
           width: '400px',
@@ -77,7 +89,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
             iconColor: 'warn'
           }
         }).afterClosed().subscribe(() => {
-            router.navigate(['/home']);
+          router.navigate(['/home']);
         });
         return throwError(() => error);
       }
@@ -166,15 +178,16 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
+      // ── Not found ──────────────────────────────────────────────────────
       if (error.status === 404) {
         const isCacheEndpoint = req.url.includes('/cache/');
         if (!isCacheEndpoint) {
           router.navigate(['/home']);
         }
-        return throwError(() => error); // always propagate so catchError works
+        return throwError(() => error);
       }
 
-      // ── Gateway / service unavailable ─────────────────────────────────────
+      // ── Gateway / service unavailable ──────────────────────────────────
       if (error.status === 503 || error.status === 502 || error.status === 504) {
         if (!serverDownDialogOpen) {
           serverDownDialogOpen = true;
@@ -195,6 +208,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         }
         return throwError(() => error);
       }
+
       return throwError(() => error);
     })
   );

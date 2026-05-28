@@ -31,15 +31,22 @@ import { PaymentComponent } from './components/payments/payments';
 import { ViewPaymentComponent } from './components/payments/view/view';
 import { RefundsComponent } from './components/payments/refund/refund';
 import { RefundViewComponent } from './components/payments/refund/view/view';
+import { PlansComponent } from './components/tenants/plans/plans';
+import { OnboardingComponent } from './components/tenants/onboarding/onboarding';
 
-// helper function to pick multiple privileges from a category
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
 }
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+
+  // ── Public routes (no guard) ─────────────────────────────────────────────
+  { path: 'plans',       component: PlansComponent },
+  { path: 'onboarding',  component: OnboardingComponent },
+  { path: 'login',       component: LoginComponent },
   { path: 'must-change-password', component: MustChangePasswordComponent, canActivate: [authGuard] },
+
+  // ── Authenticated shell ──────────────────────────────────────────────────
   {
     path: '', component: ShellComponent, canActivate: [authGuard],
     children: [
@@ -58,7 +65,6 @@ export const routes: Routes = [
       { path: 'users/roles', component: RoleComponent, data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) } },
       { path: 'users/:authUserId', component: ProfileComponent, data: { privileges: pickPrivileges('USERS', ['VIEW_USERS','UPDATE_USER']) } },
 
-
       { path: 'articles/categories', component: ArticleCategoriesComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES','CREATE_ARTICLE','UPDATE_ARTICLE']) } },
       { path: 'articles/:id', component: ArticleComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES']) } },
       { path: 'articles', component: ArticleComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES','CREATE_ARTICLE','UPDATE_ARTICLE','DELETE_ARTICLE']) } },
@@ -67,7 +73,6 @@ export const routes: Routes = [
       { path: 'clients/categories/:id', component: ClientCategoriesComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS']) } },
       { path: 'clients/:id', component: ClientsComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS','UPDATE_CLIENT','DELETE_CLIENT']) } },
       { path: 'clients', component: ClientsComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS','CREATE_CLIENT','UPDATE_CLIENT','DELETE_CLIENT']) } },
-
 
       { path: 'invoices/edit/:id', component: EditInvoiceComponent, data: { privileges: pickPrivileges('INVOICES', ['UPDATE_DRAFT_INVOICE']) } },
       { path: 'invoices/create', component: CreateInvoiceComponent, data: { privileges: pickPrivileges('INVOICES', ['CREATE_INVOICE']) } },
@@ -83,8 +88,11 @@ export const routes: Routes = [
       { path: 'payments/:id', component: ViewPaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS']) } },
       { path: 'payments', component: PaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'RECORD_PAYMENT', 'CANCEL_PAYMENT']) } },
 
+      // Default shell child → home
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
-  { path: '**', redirectTo: 'home' }
+
+  // ── Root redirect & fallback ─────────────────────────────────────────────
+  { path: '**', redirectTo: 'plans' },
 ];

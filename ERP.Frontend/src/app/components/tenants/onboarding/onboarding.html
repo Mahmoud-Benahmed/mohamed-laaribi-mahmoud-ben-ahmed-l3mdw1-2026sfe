@@ -1,0 +1,189 @@
+<div class="onboarding-page">
+  <div class="onboarding-container">
+    <!--Success State-->
+    <div class="success-state" *ngIf="success">
+      <div class="success-icon-wrap">
+        <div class="success-check">🚀</div>
+      </div>
+      <h2>{{ 'ONBOARDING.SUCCESS_TITLE' | translate }}</h2>
+      <p>{{ 'ONBOARDING.SUCCESS_BODY' | translate }}</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <p class="progress-label">{{ 'ONBOARDING.SUCCESS_LABEL' | translate }}</p>
+    </div>
+    <!--Form-->
+    <ng-container *ngIf="!success">
+      <!--Topbar lang toggle-->
+      <div class="onboarding-topbar">
+        <div class="lang-toggle">
+          <button class="lang-btn" [class.lang-btn--active]="userSettings.isEn"
+                  (click)="userSettings.toggleLanguage()" type="button" title="English">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
+              <mask id="mask-en-o"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
+              <g mask="url(#mask-en-o)">
+                <path fill="#0052b4" d="M512 0v512H0l16-34l-16-34V336l64-80l-64-80V68L68 0h108l80 64l80-64h108l34 16z"/>
+                <path fill="#eee" d="m0 0l8 22l-8 23v23l108 108H0v32l32 48l-32 48v32h108L0 444v68L512 0l-23 8l-22-8h-23L336 108V0h-32l-48 32l-48-32h-32v108L68 0z"/>
+                <path fill="#d80027" d="m208 304l96-96V0h-96v208H0v96zm128-128L512 0h-45L336 131Zm-160 0L0 0v45l131 131z"/>
+              </g>
+            </svg>
+            <span class="lang-label">EN</span>
+          </button>
+          <button class="lang-btn" [class.lang-btn--active]="!userSettings.isEn"
+                  (click)="userSettings.toggleLanguage()" type="button" title="Français">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
+              <mask id="mask-fr-o"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
+              <g mask="url(#mask-fr-o)">
+                <path fill="#eee" d="M167 0h178l25.9 252.3L345 512H167l-29.8-253.4z"/>
+                <path fill="#0052b4" d="M0 0h167v512H0z"/>
+                <path fill="#d80027" d="M345 0h167v512H345z"/>
+              </g>
+            </svg>
+            <span class="lang-label">FR</span>
+          </button>
+        </div>
+      </div>
+      <!--Header-->
+      <div class="onboarding-header">
+        <div class="logo-row">
+          <div class="logo">
+            <span class="logo-icon">
+              <img src="favicon.ico" alt="ERPSuite" height="28" width="28">
+            </span>
+            <span class="logo-text">ERPSuite</span>
+          </div>
+          <div class="plan-chip" *ngIf="planName">
+            {{ 'ONBOARDING.PLAN_LABEL' | translate : { name: planName } }}
+          </div>
+        </div>
+        <h1>{{ 'ONBOARDING.TITLE' | translate }}</h1>
+        <p>{{ 'ONBOARDING.SUBTITLE' | translate }}</p>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-body">
+          <!--Section: Company-->
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="field full-width">
+                <label>{{ 'ONBOARDING.COMPANY_NAME' | translate }}</label>
+                <input formControlName="name" type="text"
+                       [placeholder]="'ONBOARDING.COMPANY_NAME_PLACEHOLDER' | translate" />
+                <span class="field-error" *ngIf="form.get('name')?.touched && form.get('name')?.errors">
+                  <ng-container *ngIf="form.get('name')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('name')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('name')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+              </div>
+              <div class="field">
+                <label>{{ 'ONBOARDING.BUSINESS_EMAIL' | translate }}</label>
+                <input formControlName="email" type="email"
+                       [placeholder]="'ONBOARDING.BUSINESS_EMAIL_PLACEHOLDER' | translate" />
+                <span class="field-error" *ngIf="form.get('email')?.touched && form.get('email')?.errors">
+                  <ng-container *ngIf="form.get('email')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('email')?.errors?.['email']">{{ 'VALIDATION.INVALID_EMAIL' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('email')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('email')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+              </div>
+              <div class="field">
+                <label>{{ 'ONBOARDING.PHONE' | translate }}</label>
+                <input formControlName="phone" type="tel"
+                       [placeholder]="'ONBOARDING.PHONE_PLACEHOLDER' | translate" />
+                <span class="field-error" *ngIf="form.get('phone')?.touched && form.get('phone')?.errors">
+                  <ng-container *ngIf="form.get('phone')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('phone')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_PHONE' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('phone')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('phone')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+              </div>
+              <div class="field full-width">
+                <label>{{ 'ONBOARDING.SUBDOMAIN' | translate }}</label>
+                <div class="slug-input">
+                  <input formControlName="subdomainSlug" type="text"
+                         [placeholder]="'ONBOARDING.SUBDOMAIN_PLACEHOLDER' | translate" />
+                  <span class="slug-suffix">{{ 'ONBOARDING.SUBDOMAIN_SUFFIX' | translate }}</span>
+                </div>
+                <span class="field-hint">{{ 'ONBOARDING.SUBDOMAIN_HINT' | translate }}</span>
+                <span class="field-error" *ngIf="form.get('subdomainSlug')?.touched && form.get('subdomainSlug')?.errors">
+                  <ng-container *ngIf="form.get('subdomainSlug')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('subdomainSlug')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_SLUG' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('subdomainSlug')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('subdomainSlug')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+              </div>
+              <div class="field full-width">
+                <label>{{ 'ONBOARDING.LOGO_URL' | translate }}</label>
+                <input formControlName="logoUrl" type="text"
+                       [placeholder]="'ONBOARDING.LOGO_URL_PLACEHOLDER' | translate" />
+                <span class="field-error" *ngIf="form.get('logoUrl')?.touched && form.get('logoUrl')?.errors">
+                  <ng-container *ngIf="form.get('logoUrl')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_URL' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('logoUrl')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('logoUrl')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!--Section Branding-->
+          <div class="form-section">
+            <div class="section-label">{{ 'ONBOARDING.SECTION_BRANDING' | translate }}</div>
+            <div class="form-grid">
+              <div class="field">
+                <label>{{ 'ONBOARDING.PRIMARY_COLOR' | translate }}</label>
+                <div class="color-input-wrap">
+                  <input formControlName="primaryColor" type="color" class="color-swatch" />
+                  <input formControlName="primaryColor" type="text" class="color-text"
+                         placeholder="#4e7cff" maxlength="7" />
+                </div>
+                <span class="field-error" *ngIf="form.get('primaryColor')?.touched && form.get('primaryColor')?.errors">
+                  <ng-container *ngIf="form.get('primaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('primaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                </span>
+              </div>
+              <div class="field">
+                <label>{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
+                <div class="color-input-wrap">
+                  <input formControlName="secondaryColor" type="color" class="color-swatch" />
+                  <input formControlName="secondaryColor" type="text" class="color-text"
+                         placeholder="#a0b4ff" maxlength="7" />
+                </div>
+                <span class="field-error" *ngIf="form.get('secondaryColor')?.touched && form.get('secondaryColor')?.errors">
+                  <ng-container *ngIf="form.get('secondaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('secondaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!--Section Regional-->
+          <div class="form-section">
+            <div class="section-label">{{ 'ONBOARDING.SECTION_REGIONAL' | translate }}</div>
+            <div class="form-grid">
+              <div class="field">
+                <label>{{ 'ONBOARDING.CURRENCY' | translate }}</label>
+                <select formControlName="currency">
+                  <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>{{ 'ONBOARDING.LOCALE' | translate }}</label>
+                <select formControlName="locale">
+                  <option *ngFor="let l of locales" [value]="l">{{ l }}</option>
+                </select>
+              </div>
+              <div class="field full-width">
+                <label>{{ 'ONBOARDING.TIMEZONE' | translate }}</label>
+                <select formControlName="timezone">
+                  <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!--error-->
+          <div class="error-msg" *ngIf="error">{{ error }}</div>
+          <!--Actions-->
+          <div class="form-actions">
+            <a routerLink="/plans" class="btn-back">
+              {{ 'ONBOARDING.BACK_TO_PLANS' | translate }}
+            </a>
+            <button type="submit" class="btn-submit" [disabled]="form.invalid || loading">
+              <span *ngIf="!loading">{{ 'ONBOARDING.CREATE_WORKSPACE' | translate }}</span>
+              <span *ngIf="loading" class="spinner-inline"></span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </ng-container>
+  </div>
+</div>
