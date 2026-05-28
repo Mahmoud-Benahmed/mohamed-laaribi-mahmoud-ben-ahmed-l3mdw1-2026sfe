@@ -31,14 +31,18 @@ import { PaymentComponent } from './components/payments/payments';
 import { ViewPaymentComponent } from './components/payments/view/view';
 import { RefundsComponent } from './components/payments/refund/refund';
 import { RefundViewComponent } from './components/payments/refund/view/view';
-import { PlansComponent } from './components/tenants/plans/plans';
-import { OnboardingComponent } from './components/tenants/onboarding/onboarding';
+import { PlansComponent } from './components/plans/plans';
+import { OnboardingComponent } from './components/onboarding/onboarding';
+import { TenantsComponent } from './components/tenants/home/home';
+import { ViewTenantComponent } from './components/tenants/view/view';
 
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
 }
 
 export const routes: Routes = [
+
+  { path: '', component: PlansComponent },
 
   // ── Public routes (no guard) ─────────────────────────────────────────────
   { path: 'plans',       component: PlansComponent },
@@ -87,6 +91,21 @@ export const routes: Routes = [
       { path: 'payments/refunds', component: RefundsComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', "'MANAGE_PAYMENTS'"]) } },
       { path: 'payments/:id', component: ViewPaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS']) } },
       { path: 'payments', component: PaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'RECORD_PAYMENT', 'CANCEL_PAYMENT']) } },
+
+      { path: 'tenants/:id', component: ViewTenantComponent, data: { privileges: pickPrivileges('INVOICES', ['VIEW_TENANTS', 'MANAGE_SUBSCRIPTIONS','VIEW_BILLING'])} },
+
+      { path: 'tenants', component: TenantsComponent, data: {
+            privileges: pickPrivileges('TENANTS',
+                ['VIEW_TENANTS',
+                  'CREATE_TENANT',
+                  'UPDATE_TENANT',
+                  'DELETE_TENANT',
+                  'RESTORE_TENANT',
+                  'MANAGE_SUBSCRIPTIONS',
+                  'VIEW_BILLING'
+                ])
+            }
+      },
 
       // Default shell child → home
       { path: '', redirectTo: 'home', pathMatch: 'full' },
