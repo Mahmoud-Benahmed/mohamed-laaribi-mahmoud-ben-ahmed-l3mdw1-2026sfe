@@ -18,13 +18,14 @@ namespace ERP.AuthService.Infrastructure.Persistence
             await context.Collection<Controle>(CollectionNames.Controles).Indexes.CreateManyAsync([
                 new CreateIndexModel<Controle>(
                     Builders<Controle>.IndexKeys
+                        .Ascending(x => x.TenantId)
                         .Ascending(x => x.Libelle),
                     new CreateIndexOptions
                     {
                         Unique = true,
                         Background = true,
                         Collation = caseInsensitiveCollation,
-                        Name = "UX_Controle_Libelle"
+                        Name = "UX_Controle_TenantId_Libelle"
                     }),
 
                 new CreateIndexModel<Controle>(
