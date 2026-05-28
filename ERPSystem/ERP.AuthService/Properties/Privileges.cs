@@ -110,6 +110,7 @@ public static class TenantPrivileges
     public const string CREATE_TENANT = "CREATE_TENANT";
     public const string UPDATE_TENANT = "UPDATE_TENANT";
     public const string DELETE_TENANT = "DELETE_TENANT";
+    public const string RESTORE_TENANT = "RESTORE_TENANT";
     public const string SUSPEND_TENANT = "SUSPEND_TENANT";
     public const string ACTIVATE_TENANT = "ACTIVATE_TENANT";
 
