@@ -26,7 +26,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         var config = new ConsumerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
-            GroupId = "fournisseur-tenant-consumer-v1",
+            GroupId = $"fournisseur-service-tenant-consumer-v1",
             AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false
         };
@@ -53,11 +53,10 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
                 using var scope = _scopeFactory.CreateScope();
 
-                await (result.Topic switch
+                if(result.Topic == TenantTopics.TenantDeleted)
                 {
-                    TenantTopics.TenantDeleted => HandleTenantDeleted(result.Message.Value, scope),
-                    _ => Task.CompletedTask
-                });
+                    await HandleTenantDeleted(result.Message.Value, scope);
+                }
 
                 _consumer.Commit(result);
             }
