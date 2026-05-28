@@ -27,7 +27,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         var config = new ConsumerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
-            GroupId = "article-tenant-consumer-v1",
+            GroupId = $"article-service-tenant-consumer-v1",
             AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false
         };
