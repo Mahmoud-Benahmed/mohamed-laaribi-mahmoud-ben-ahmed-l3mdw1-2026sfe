@@ -16,13 +16,15 @@ import { HttpError } from '../../../interfaces/HttpError';
 import { ArticleCategoryResponseDto, CategoryService } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 type ViewMode = 'list' | 'list-deleted' | 'create' | 'edit' | 'view';
 
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, RouterLink, RouterLinkActive, PaginationComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, RouterLink, RouterLinkActive, PaginationComponent, TranslatePipe, MatTooltipModule],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
@@ -48,7 +50,6 @@ export class ArticleComponent implements OnInit {
   successMessage: string | null = null;
   searchQuery = '';
 
-  readonly barCodePattern = /^\d{8,13}$/;
   readonly PRIVILEGES = PRIVILEGES;
   articleForm: FormGroup;
 
@@ -84,7 +85,7 @@ export class ArticleComponent implements OnInit {
       prix:       [null, [Validators.required, Validators.min(0.01)]],
       categoryId: ['', Validators.required],
       unit:       ['', Validators.required],
-      barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13)]],
+      barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13), Validators.pattern(RegexPatterns.barCode)]],
       tva:        [null, [Validators.min(0.01), Validators.max(100)]],
     });
   }
