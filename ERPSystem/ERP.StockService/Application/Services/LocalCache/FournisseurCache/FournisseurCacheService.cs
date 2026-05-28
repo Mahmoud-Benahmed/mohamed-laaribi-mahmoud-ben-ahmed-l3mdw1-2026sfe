@@ -134,7 +134,6 @@ public class FournisseurCacheService : IFournisseurCacheService
             {
                 _logger.LogInformation("Fournisseur {FournisseurId} already exists. Updating.", dto.Id);
                 existing.ApplyUpdate(dto);
-                await _repository.UpdateAsync(existing);
                 await _repository.SaveChangesAsync();
                 return;
             }
@@ -147,7 +146,6 @@ public class FournisseurCacheService : IFournisseurCacheService
                     "Name '{Name}' already exists (ID {ExistingId}). Applying update to existing record.",
                     dto.Name, existingByName.Id);
                 existingByName.ApplyUpdate(dto);
-                await _repository.UpdateAsync(existingByName);
                 await _repository.SaveChangesAsync();
                 return;
             }
@@ -162,7 +160,6 @@ public class FournisseurCacheService : IFournisseurCacheService
                         "Email '{Email}' already exists (ID {ExistingId}). Applying update to existing record.",
                         dto.Email, existingByEmail.Id);
                     existingByEmail.ApplyUpdate(dto);
-                    await _repository.UpdateAsync(existingByEmail);
                     await _repository.SaveChangesAsync();
                     return;
                 }
