@@ -387,6 +387,10 @@ getTenantSlug(): string | null {
   // LOGIN
   // =========================
   login(request: LoginRequestDto): Observable<AuthResponseDto> {
+    // remove last session's leftovers to prevent access for non logged in user
+    this.clearSession();
+    this.clearUserProfile();
+
     return this.http.post<AuthResponseDto>(`${this.loginUrl}`, request).pipe(
       tap(response => this.storeTokens(response))
     );
