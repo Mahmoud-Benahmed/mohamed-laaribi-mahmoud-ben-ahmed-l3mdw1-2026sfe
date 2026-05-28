@@ -78,9 +78,10 @@ export class TenantsComponent implements OnInit, OnDestroy {
   isSuspended   = computed(() => this.viewMode() === 'list-suspended');  // ← ADD
 
   // ── Tenant list state ──────────────────────────────────────────────────────
+  loading: boolean= false;
   tenants: TenantResponseDto[] = [];
   deletedTenants: TenantResponseDto[] = [];
-suspendedTenants: TenantResponseDto[] = [];
+  suspendedTenants: TenantResponseDto[] = [];
   totalCount = 0;
   currentPage = 1;
   currentSize = 10;
@@ -138,28 +139,7 @@ suspendedTenants: TenantResponseDto[] = [];
   ) {}
 
   ngOnInit(): void {
-    forkJoin({
-      tenants: this.tenantService.getAllTenants(this.currentPage, this.currentSize),
-      plans: this.planService.getAllPlans(1, 100).pipe(catchError(() => of({ items: [] }))),
-    }).subscribe({
-      next: ({ tenants, plans }) => {
-        this.tenants = tenants.items.filter(t => !t.isDeleted);
-        this.totalCount = tenants.totalCount ?? 0;
-        this.subscriptionPlans = plans.items || [];
-        this.stats = {
-          total: tenants.totalCount ?? 0,
-          active: this.tenants.filter(t => t.isActive).length,
-          suspended: this.tenants.filter(t => !t.isActive && !t.isDeleted).length,
-          deleted: tenants.items.filter(t => t.isDeleted).length,
-        };
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.tenants = [];
-        this.cdr.markForCheck();
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
-      }
-    });
+    this.reload();
   }
 
   ngAfterViewInit(): void {
@@ -173,19 +153,53 @@ suspendedTenants: TenantResponseDto[] = [];
 
   // ── Load data ──────────────────────────────────────────────────────────────
   reload(): void {
-    forkJoin({
-      plans: this.planService.getAllPlans(1, 100).pipe(catchError(() => of({ items: [] }))),
-    }).subscribe({
-      next: ({ plans }) => {
-        this.subscriptionPlans = plans.items || [];
-        this.cdr.markForCheck();
-        this.loadCurrentView();
-      },
-      error: () => {
-        this.cdr.markForCheck();
-        this.loadCurrentView();
-      }
-    });
+    this.loading = true;
+
+    // Load active tenants (for list display)
+    this.tenantService.getAllTenants(this.currentPage, this.currentSize)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(err => {
+          this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+          return of({ items: [], totalCount: 0 });
+        })
+      )
+      .subscribe(activeResult => {
+        // Load deleted tenants count (for stats only, not for display)
+        this.tenantService.getDeletedTenants(1, 100) // use page 1, size large enough to count all
+          .pipe(
+            takeUntilDestroyed(this.destroyRef),
+            catchError(() => of({ items: [], totalCount: 0 }))
+          )
+          .subscribe(deletedResult => {
+            // Load subscription plans
+            this.planService.getAllPlans(1, 100)
+              .pipe(
+                takeUntilDestroyed(this.destroyRef),
+                catchError(() => of({ items: [] }))
+              )
+              .subscribe(plansResult => {
+                const allActive = activeResult.items.filter(t => !t.isDeleted);
+                const deletedCount = deletedResult.totalCount;
+
+                // Update stats BEFORE filtering displayed list
+                this.stats = {
+                  total: activeResult.totalCount + deletedCount,
+                  active: allActive.filter(t => t.isActive).length,
+                  suspended: allActive.filter(t => !t.isActive).length,
+                  deleted: deletedCount,
+                };
+
+                // Set the displayed tenant list (all non-deleted tenants, both active and suspended)
+                this.tenants = allActive;
+                this.totalCount = activeResult.totalCount ?? 0;
+                this.subscriptionPlans = plansResult.items || [];
+                this.viewMode.set('list');
+                this.loading = false;
+                this.cdr.markForCheck();
+              });
+          });
+      });
   }
 
   loadDeletedTenants(): void {
@@ -338,7 +352,7 @@ suspendedTenants: TenantResponseDto[] = [];
       this.tenantService.deleteTenant(tenant.id).subscribe({
         next: () => {
           this.flash('success', this.translate.instant('TENANTS.SUCCESS.DELETED'));
-          this.reload();
+          this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
         },
         error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.DELETE_FAILED')),
       });
@@ -349,6 +363,7 @@ suspendedTenants: TenantResponseDto[] = [];
     this.tenantService.restoreTenant(tenant.id).subscribe({
       next: () => {
         this.flash('success', this.translate.instant('TENANTS.SUCCESS.RESTORED'));
+        this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
         this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
       },
       error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.RESTORE_FAILED')),
@@ -373,7 +388,8 @@ suspendedTenants: TenantResponseDto[] = [];
       this.tenantService.suspendTenant(tenant.id).subscribe({
         next: () => {
           this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUSPENDED'));
-          this.reload();
+          this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
+          this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
         },
         error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.SUSPEND_FAILED')),
       });
@@ -384,7 +400,7 @@ suspendedTenants: TenantResponseDto[] = [];
     this.tenantService.activateTenant(tenant.id).subscribe({
       next: () => {
         this.flash('success', this.translate.instant('TENANTS.SUCCESS.ACTIVATED'));
-        this.reload();
+        this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
       },
       error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.ACTIVATE_FAILED')),
     });
@@ -405,7 +421,8 @@ suspendedTenants: TenantResponseDto[] = [];
   }
 
   getPlanName(tenant: TenantResponseDto): string {
-    return tenant.subscription?.plan?.name || this.translate.instant('TENANTS.NO_PLAN');
+    return tenant.subscription?.plan?.name
+      || this.translate.instant('TENANTS.NO_PLAN');
   }
 
   trackById(_: number, item: { id: string }) { return item.id; }

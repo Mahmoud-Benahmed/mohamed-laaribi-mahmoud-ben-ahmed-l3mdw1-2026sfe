@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
-import { TenantResponseDto, SubscriptionPlanDto } from '../../../interfaces/TenantDto';
+import { TenantResponseDto, SubscriptionPlanDto, AssignSubscriptionRequestDto, SubscriptionPeriod } from '../../../interfaces/TenantDto';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -50,6 +50,13 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
   tenantIdFromRoute: string | null = null;
   subscriptionPlan: SubscriptionPlanDto | null = null;
   loading = false;
+
+
+  subscriptionForm!: FormGroup;
+  isValidating = false;
+  subscriptionPlans: SubscriptionPlanDto[] = [];
+  readonly SubscriptionPeriod = SubscriptionPeriod;
+
 
   readonly PRIVILEGES = PRIVILEGES;
 
@@ -213,6 +220,91 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
     });
   }
 
+  // subscription
+    assignSubscription(): void {
+      if (this.subscriptionForm.invalid) {
+        this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+        return;
+      }
+
+      if (!this.selectedTenant) {
+        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+        return;
+      }
+
+      this.isValidating = true;
+
+      const formValue = this.subscriptionForm.value;
+      const startDate = new Date().toISOString().split('T')[0];
+
+      const assignDto: AssignSubscriptionRequestDto = {
+        subscriptionPlanId: formValue.subscriptionPlanId,
+        startDate,
+        period: formValue.period,
+      };
+
+      this.tenantService.assignSubscription(this.selectedTenant.id, assignDto)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_ASSIGNED'));
+            this.subscriptionForm.markAsPristine();
+
+            setTimeout(() => {
+              this.isValidating = false;
+              this.reload();
+            }, 2000);
+          },
+          error: (err) => {
+            const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.ASSIGN_SUBSCRIPTION_FAILED');
+            this.flash('error', errorMsg);
+            this.isValidating = false;
+            this.cdr.markForCheck();
+          }
+        });
+    }
+
+    removeSubscription(): void {
+      if (!this.selectedTenant) return;
+
+      const dialogRef = this.dialog.open(ModalComponent, {
+        width: '420px',
+        data: {
+          icon: 'delete',
+          iconColor: 'warn',
+          title: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_TITLE'),
+          message: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_CONFIRM', { name: this.selectedTenant.name }),
+          confirmText: this.translate.instant('TENANTS.DIALOG.REMOVE_CONFIRM'),
+          cancelText: this.translate.instant('COMMON.CANCEL'),
+          showCancel: true,
+        },
+      });
+
+      dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(confirmed => {
+        if (!confirmed) return;
+
+        this.isValidating = true;
+
+        this.tenantService.removeSubscription(this.selectedTenant!.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_REMOVED'));
+              setTimeout(() => {
+                this.isValidating = false;
+                this.reload();
+              }, 2000);
+            },
+            error: (err) => {
+              const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.REMOVE_SUBSCRIPTION_FAILED');
+              this.flash('error', errorMsg);
+              this.isValidating = false;
+              this.cdr.markForCheck();
+            }
+          });
+      });
+    }
+
   statusClass(tenant: TenantResponseDto): Record<string, boolean> {
     return {
       'badge--green': tenant.isActive && !tenant.isDeleted,
@@ -224,6 +316,13 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
   getStatusLabel(tenant: TenantResponseDto): string {
     if (tenant.isDeleted) return 'TENANTS.STATUS.DELETED';
     return tenant.isActive ? 'TENANTS.STATUS.ACTIVE' : 'TENANTS.STATUS.SUSPENDED';
+  }
+
+  getPlanPrice(planId: string, period: SubscriptionPeriod): string {
+    const plan = this.subscriptionPlans.find(p => p.id === planId);
+    if (!plan) return '—';
+    const price = period === SubscriptionPeriod.MONTH ? plan.monthlyPrice : plan.yearlyPrice;
+    return `${price.toFixed(2)} ${this.selectedTenant?.currency}`;
   }
 
   flash(type: 'success' | 'error', msg: string): void {

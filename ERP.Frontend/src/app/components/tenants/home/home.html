@@ -143,7 +143,7 @@
       <button
         *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.CREATE_TENANT) && isList()"
         class="btn-add"
-        routerLink="/admin/tenants/create">
+        routerLink="/tenants/create">
         {{ 'COMMON.ADD'| translate }} {{ 'NAV.TENANTS'| translate }}
       </button>
     </div>
@@ -184,11 +184,11 @@
               <td class="date-cell">{{ tenant.createdAt | date:'dd/MM/yyyy' }}</td>
               <td class="td--actions">
                 <button class="icon-btn icon-btn--view" [matTooltip]="'TENANTS.ACTIONS.VIEW' | translate"
-                      [routerLink]="['/tenants', tenant.id]">
+                      [routerLink]="['/tenants', tenant.id]" *ngIf="!isDeletedList()">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">visibility</mat-icon>
                 </button>
                 <button class="icon-btn icon-btn--edit" [matTooltip]="'TENANTS.ACTIONS.EDIT' | translate"
-                        [routerLink]="['/tenants', tenant.id]">
+                      [routerLink]="['/tenants/edit', tenant.id]">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
                 </button>
                 <button class="icon-btn icon-btn--pause" [matTooltip]="'TENANTS.ACTIONS.SUSPEND' | translate"

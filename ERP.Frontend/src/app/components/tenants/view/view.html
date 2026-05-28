@@ -31,7 +31,7 @@
         <button class="btn-primary"
                 *ngIf="!selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
                 [matTooltip]="'COMMON.EDIT' | translate"
-                (click)="updateTenant(selectedTenant)">
+                [routerLink]="['/tenants/edit', selectedTenant.id]">
           <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
           {{ 'COMMON.EDIT' | translate }}
         </button>
@@ -129,7 +129,7 @@
       <div class="panel" *ngIf="selectedTenant.subscription">
         <div class="panel__header">
           <div class="panel__title-wrap">
-            <div class="panel__icon"><mat-icon>card_subscription</mat-icon></div>
+            <div class="panel__icon"><mat-icon>bookmark_check</mat-icon></div>
             <div><h2 class="panel__title">{{ 'TENANTS.DETAILS.SUBSCRIPTION_INFO' | translate }}</h2></div>
           </div>
         </div>
@@ -161,7 +161,7 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">{{ 'TENANTS.DETAILS.PERIOD' | translate }}</span>
-              <span class="badge badge--blue">{{ selectedTenant.subscription.period }}</span>
+              <span class="badge badge--blue">{{ ('TENANTS.PERIODS.'+selectedTenant.subscription.period) | translate }}</span>
             </div>
             <div class="detail-item" *ngIf="selectedTenant.subscription.plan?.maxUsers">
               <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_USERS' | translate }}</span>
@@ -219,6 +219,123 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- ── Manage Subscription Panel (same as edit component) ── -->
+    <div class="panel">
+      <div class="panel__header">
+        <div class="panel__title-wrap">
+          <div class="panel__icon"><mat-icon>card_membership</mat-icon></div>
+          <div>
+            <h2 class="panel__title">{{ 'TENANTS.FORM.SUBSCRIPTION' | translate }}</h2>
+            <p class="panel__subtitle">{{ 'TENANTS.FORM.MANAGE_SUBSCRIPTION' | translate }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel__body">
+
+        <!-- Current subscription summary (optional but helpful) -->
+        <div class="subscription-info-card" *ngIf="selectedTenant.subscription?.plan">
+          <div class="subscription-info-header">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ 'TENANTS.FORM.CURRENT_SUBSCRIPTION' | translate }}</span>
+          </div>
+          <div class="subscription-info-body">
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.PLAN_NAME' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.plan?.name }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.START_DATE' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.startDate | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.END_DATE' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.endDate | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.PERIOD' | translate }}</span>
+              <span class="badge badge--blue">{{ ('TENANTS.PERIODS.'+selectedTenant.subscription?.period) | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="!selectedTenant.subscription?.plan">
+          <mat-icon>assignment_ind</mat-icon>
+          <p>{{ 'TENANTS.FORM.NO_SUBSCRIPTION' | translate }}</p>
+        </div>
+
+        <!-- Subscription form (same as in edit component) -->
+        <form [formGroup]="subscriptionForm" class="form" *ngIf="subscriptionPlans.length > 0">
+
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.SELECT_PLAN' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="subscriptionPlanId"
+                      [class.form__input--error]="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+                <option *ngFor="let plan of subscriptionPlans" [value]="plan.id">
+                  {{ plan.name }} ({{ plan.code }})
+                </option>
+              </select>
+              <span class="form__error" *ngIf="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.BILLING_PERIOD' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="period"
+                      [class.form__input--error]="subscriptionForm.get('period')?.invalid && subscriptionForm.get('period')?.touched">
+                <option [value]="SubscriptionPeriod.MONTH">{{ 'TENANTS.PERIODS.MONTH' | translate }}</option>
+                <option [value]="SubscriptionPeriod.YEAR">{{ 'TENANTS.PERIODS.YEAR' | translate }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Plan details preview -->
+          <div class="plan-details" *ngIf="subscriptionForm.get('subscriptionPlanId')?.value">
+            <div class="plan-detail-row">
+              <span>{{ 'TENANTS.DETAILS.MONTHLY_PRICE' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.MONTH) }}</strong>
+            </div>
+            <div class="plan-detail-row">
+              <span>{{ 'TENANTS.DETAILS.YEARLY_PRICE' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.YEAR) }}</strong>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="form__actions">
+            <button type="button"
+                    class="btn-danger"
+                    *ngIf="selectedTenant.subscription?.plan"
+                    [disabled]="isValidating"
+                    (click)="removeSubscription()">
+              <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+              {{ 'TENANTS.FORM.REMOVE_SUBSCRIPTION' | translate }}
+            </button>
+            <button type="button"
+                    class="btn-success"
+                    [disabled]="subscriptionForm.invalid || isValidating"
+                    (click)="assignSubscription()">
+              <span *ngIf="!isValidating">
+                {{ selectedTenant.subscription?.plan ? ('TENANTS.FORM.UPDATE_SUBSCRIPTION' | translate) : ('TENANTS.FORM.ASSIGN_SUBSCRIPTION' | translate) }}
+              </span>
+              <span *ngIf="isValidating">{{ 'COMMON.PROCESSING' | translate }}...</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
 
   </ng-container>

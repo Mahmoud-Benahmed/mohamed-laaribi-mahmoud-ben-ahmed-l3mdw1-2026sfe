@@ -482,3 +482,141 @@
 .text-green {
   color: $green;
 }
+
+.subscription-info-card {
+  background: $bg-card-hi;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+
+  .subscription-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem;
+    background: rgba($blue, 0.08);
+    border-bottom: 1px solid $border;
+    color: $blue;
+    font-weight: 600;
+    font-size: 0.85rem;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: $green;
+    }
+  }
+
+  .subscription-info-body {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+
+      span:first-child {
+        color: $text-mid;
+        font-weight: 500;
+      }
+
+      strong, .badge {
+        font-weight: 600;
+        color: $text-hi;
+      }
+
+      .badge {
+        background: $blue-bg;
+        border-color: $blue-border;
+        color: $blue;
+      }
+    }
+  }
+}
+
+// ========================
+// Plan Details Preview
+// ========================
+.plan-details {
+  background: $bg-card-hi;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin: 0.5rem 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  .plan-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+
+    span {
+      color: $text-mid;
+      font-weight: 500;
+    }
+
+    strong {
+      color: $blue;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// ========================
+// Empty State (for no subscription)
+// ========================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: $bg-card-hi;
+  border-radius: 12px;
+  border: 1px dashed $border;
+  margin-bottom: 1.5rem;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $text-lo;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: $text-mid;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+// ========================
+// Form actions inside panel (override for button widths)
+// ========================
+.panel__body {
+  .form__actions {
+    @media (max-width: $bp-sm) {
+      flex-direction: column;
+      .btn-danger, .btn-success {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

@@ -35,6 +35,7 @@ import { PlansComponent } from './components/plans/plans';
 import { OnboardingComponent } from './components/onboarding/onboarding';
 import { TenantsComponent } from './components/tenants/home/home';
 import { ViewTenantComponent } from './components/tenants/view/view';
+import { EditTenantComponent } from './components/tenants/edit/edit';
 
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
@@ -92,7 +93,8 @@ export const routes: Routes = [
       { path: 'payments/:id', component: ViewPaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS']) } },
       { path: 'payments', component: PaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'RECORD_PAYMENT', 'CANCEL_PAYMENT']) } },
 
-      { path: 'tenants/:id', component: ViewTenantComponent, data: { privileges: pickPrivileges('INVOICES', ['VIEW_TENANTS', 'MANAGE_SUBSCRIPTIONS','VIEW_BILLING'])} },
+      { path: 'tenants/:id', component: ViewTenantComponent, data: { privileges: pickPrivileges('TENANTS', ['VIEW_TENANTS', 'MANAGE_SUBSCRIPTIONS','VIEW_BILLING'])} },
+      { path: 'tenants/edit/:id', component: EditTenantComponent, data: { privileges: pickPrivileges('TENANTS', ['UPDATE_TENANT', 'MANAGE_SUBSCRIPTIONS'])} },
 
       { path: 'tenants', component: TenantsComponent, data: {
             privileges: pickPrivileges('TENANTS',
