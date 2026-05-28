@@ -15,7 +15,7 @@ public class TenantDbContext : DbContext
         mb.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
 }
 
-public sealed class SubscriptionPlanConfiguration : IEntityTypeConfiguration<SubscriptionPlan>
+public class SubscriptionPlanConfiguration : IEntityTypeConfiguration<SubscriptionPlan>
 {
     public void Configure(EntityTypeBuilder<SubscriptionPlan> builder)
     {
@@ -56,7 +56,7 @@ public sealed class SubscriptionPlanConfiguration : IEntityTypeConfiguration<Sub
     }
 }
 
-public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
+public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 {
     public void Configure(EntityTypeBuilder<Tenant> builder)
     {
@@ -133,7 +133,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
     }
 }
 
-public sealed class TenantSubscriptionConfiguration : IEntityTypeConfiguration<TenantSubscription>
+public class TenantSubscriptionConfiguration : IEntityTypeConfiguration<TenantSubscription>
 {
     public void Configure(EntityTypeBuilder<TenantSubscription> builder)
     {
