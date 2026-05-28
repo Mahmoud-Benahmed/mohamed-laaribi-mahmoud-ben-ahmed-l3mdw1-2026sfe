@@ -22,6 +22,7 @@ import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { InvoiceService } from '../../../services/invoice.service';
 import { MatTooltip } from "@angular/material/tooltip";
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 type ViewMode = 'list' | 'list-deleted' | 'list-blocked' | 'create' | 'edit' | 'view';
 
@@ -85,11 +86,6 @@ export class ClientsComponent implements OnInit {
   readonly PRIVILEGES = PRIVILEGES;
   clientForm: FormGroup;
 
-  readonly namePattern    = /^[\p{L}0-9\s,.'\-]+$/u;
-  readonly addressPattern = /^[\p{L}0-9\s,.'\-]+$/u;
-  readonly taxNumberPattern= /^[A-Za-z0-9]+$/;
-  readonly phonePattern= /^\+?\d{8,15}$/;
-
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -107,11 +103,11 @@ export class ClientsComponent implements OnInit {
     private invoiceService: InvoiceService,
   ) {
     this.clientForm = this.fb.group({
-      name:             ['', [Validators.required, Validators.pattern(this.namePattern), Validators.minLength(2), Validators.maxLength(200)]],
+      name:             ['', [Validators.required, Validators.pattern(RegexPatterns.alpha), Validators.minLength(2), Validators.maxLength(200)]],
       email:            ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
-      address:          ['', [Validators.required, Validators.pattern(this.addressPattern), Validators.minLength(5), Validators.maxLength(500)]],
-      phone:            ['', [Validators.maxLength(20), Validators.pattern(this.phonePattern)]],
-      taxNumber:        ['', [Validators.maxLength(50), Validators.pattern(this.taxNumberPattern)]],
+      address:          ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(5), Validators.maxLength(500)]],
+      phone:            ['', [Validators.maxLength(20), Validators.pattern(RegexPatterns.phone)]],
+      taxNumber:        ['', [Validators.maxLength(50), Validators.pattern(RegexPatterns.alphaNumeric)]],
       creditLimit:      [null, this.optionalMin(1000)],
       duePaymentPeriod: [null, this.optionalRange(7, 180)],  // backend: Range(7, 180)
       delaiRetour:      [null, this.optionalRange(7, 270)],

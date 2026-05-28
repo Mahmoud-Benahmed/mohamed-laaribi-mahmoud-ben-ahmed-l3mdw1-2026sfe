@@ -389,7 +389,6 @@
               <mat-icon>person</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="name" [placeholder]="'CLIENTS.FORM.NAME_PLACEHOLDER' | translate"
-              [pattern]="namePattern"
             [class.form__input--error]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched"/>
             <span class="field__error" *ngIf="clientForm.get('name') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -424,7 +423,6 @@
             <mat-icon>location_on</mat-icon>
           </div>
           <input class="form__input" type="text" formControlName="address" [placeholder]="'CLIENTS.FORM.ADDRESS_PLACEHOLDER' | translate"
-                  [pattern]="addressPattern"
                   [class.form__input--error]="clientForm.get('address')?.invalid && clientForm.get('address')?.touched"/>
             <span class="field__error" *ngIf="clientForm.get('address') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -442,8 +440,7 @@
               <mat-icon>phone</mat-icon>
             </div>
             <input class="form__input" type="text"
-                  [pattern]="phonePattern"
-                  formControlName="phone" [placeholder]="'CLIENTS.FORM.PHONE_PLACEHOLDER' | translate" [pattern]="phonePattern" />
+                  formControlName="phone" [placeholder]="'CLIENTS.FORM.PHONE_PLACEHOLDER' | translate" />
             <span class="field__error" *ngIf="clientForm.get('phone') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.PHONE_INVALID' | translate }}</span>
@@ -458,7 +455,6 @@
               <mat-icon>receipt_long</mat-icon>
             </div>
             <input class="form__input" type="text"
-                  [pattern]="taxNumberPattern"
                   formControlName="taxNumber" [placeholder]="'CLIENTS.FORM.TAX_NUMBER_PLACEHOLDER' | translate"/>
             <span class="field__error" *ngIf="clientForm.get('taxNumber') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
