@@ -1,4 +1,5 @@
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Repositories;
 using ERP.TenantService.Domain;
 using ERP.TenantService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
