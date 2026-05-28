@@ -10,6 +10,7 @@ using ERP.StockService.Application.Services.LocalCache.Fournisseur;
 using ERP.StockService.Application.Services.LocalCache.InvoiceCache;
 using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Article;
 using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Category;
+using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.TenantEvent;
 using ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using ERP.StockService.Infrastructure.Messaging.Events.FournisseurEvents;
@@ -126,6 +127,9 @@ builder.Services.AddScoped<IInvoiceEventHandler, InvoiceEventHandler>();
 builder.Services.AddHostedService<InvoiceEventConsumer>();
 
 builder.Services.AddScoped<IInvoiceBonSortieMappingRepository, InvoiceBonSortieMappingRepository>();
+
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 // =========================
 // CONTROLLERS & API
 // =========================
