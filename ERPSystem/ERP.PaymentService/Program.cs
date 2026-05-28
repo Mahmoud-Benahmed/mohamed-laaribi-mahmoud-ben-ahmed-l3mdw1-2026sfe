@@ -7,6 +7,7 @@ using ERP.PaymentService.Application.Services.LocalCache;
 using ERP.PaymentService.Infrastructure.Messaging;
 using ERP.PaymentService.Infrastructure.Messaging.Events;
 using ERP.PaymentService.Infrastructure.Messaging.Events.Invoice;
+using ERP.PaymentService.Infrastructure.Messaging.TenantEvent;
 using ERP.PaymentService.Infrastructure.Persistence;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -92,8 +93,10 @@ builder.Services.AddScoped<IPaymentNumberGenerator, PaymentNumberGenerator>();
 builder.Services.AddScoped<IInvoiceEventHandler, InvoiceEventHandler>();
 builder.Services.AddHostedService<InvoiceEventConsumer>();
 
-
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
+
 
 // =========================
 // SWAGGER
