@@ -395,8 +395,8 @@
               type="number"
               formControlName="tva"
               [placeholder]="'ARTICLES.FORM.TVA_PLACEHOLDER' | translate"
-              step="0.01"
-              min="0.01"
+              step="1"
+              min="0"
               max="100"
               [class.form__input--error]="articleForm.get('tva')?.invalid && articleForm.get('tva')?.touched"
             />
