@@ -28,8 +28,8 @@ public sealed class ArticleEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Article"] ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Article not configured"),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"stock-service-article-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
         };
 
@@ -87,20 +87,6 @@ public sealed class ArticleEventConsumer : BackgroundService
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
-                        IArticleCategoryCacheService categoryCacheService = scope.ServiceProvider.GetRequiredService<IArticleCategoryCacheService>();
-
-                        // Check if category exists (using async properly)
-                        bool categoryExists = await categoryCacheService.ExistsAsync(dto.Category.Name) || await categoryCacheService.GetByIdAsync(dto.Category.Id) != null;
-
-                        if (!categoryExists)
-                        {
-                            _logger.LogWarning("Category {CategoryId} ({CategoryName}) not found in cache for article {ArticleId}. " +
-                                                "Creating category first.",
-                                                dto.Category.Id, dto.Category.Name, dto.Id);
-
-                            await categoryCacheService.SyncCreatedAsync(dto.Category);
-                        }
-
                         IArticleEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleEventHandler>();
 
                         switch (result.Topic)
@@ -114,7 +100,7 @@ public sealed class ArticleEventConsumer : BackgroundService
                             case ArticleTopics.Deleted:
                                 await handler.HandleDeletedAsync(dto);
                                 break;
-                            case ArticleTopics.Restored:
+                            case ArticleTopics.Restored: 
                                 await handler.HandleRestoredAsync(dto);
                                 break;
                         }
@@ -127,7 +113,7 @@ public sealed class ArticleEventConsumer : BackgroundService
                 catch (ConsumeException ex)
                 {
                     _logger.LogWarning("Topic not available: {Error}. Waiting...", ex.Error.Reason);
-                    await Task.Delay(10000, stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
                 catch (OperationCanceledException)
                 {
