@@ -73,6 +73,7 @@
     "SELECT": "Select an element from the dropdown"
   },
   "VALIDATION": {
+    "INVALID_FORMAT": "Only lowercase letters, numbers and hyphens are allowed",
     "ARTICLE_CATEGORIES_EMPTY": "Each article belongs to a category, currently you have no categories found, once you create categories you will be allowed to create articles.",
     "CLIENT_CATEGORIES_EMPTY": "Each client belongs to a category, currently you have no categories found, once you create categories you will be allowed to create clients.",
     "PHONE_INVALID": "Phone must be 8–15 digits, optionally starting with +.",
@@ -1360,8 +1361,8 @@
     "SIGN_IN": "Sign in",
     "TITLE": "Choose your plan",
     "SUBTITLE": "Start your journey. Scale as you grow. No hidden fees.",
-    "MONTHLY": "Monthly",
-    "YEARLY": "Yearly",
+    "MONTH": "Monthly",
+    "YEAR": "Yearly",
     "SAVE_BADGE": "{{percent}}% off",
     "SAVE_YEARLY": "Save up to {{percent}}%",
     "MOST_POPULAR": "Most Popular",
@@ -1455,6 +1456,19 @@
       "ACTIONS": "Actions"
     },
     "DETAILS": {
+      "USERS": "Users",
+      "SUBSCRIPTION_INFO": "Subscription Information",
+      "PLAN_CODE": "Plan Code",
+      "CODE": "Code",
+      "MAX_USERS": "Max Users",
+      "MAX_STORAGE": "Max Storage",
+      "PLAN_DETAILS": "Plan Details",
+      "PLAN_NAME": "Plan",
+      "START_DATE": "Start date",
+      "END_DATE": "End date",
+      "PERIOD": "Billing period",
+      "MONTHLY_PRICE": "Monthly price",
+      "YEARLY_PRICE": "Yearly price",
       "NAME": "Tenant Name",
       "EMAIL": "Email",
       "PHONE": "Phone",
@@ -1469,7 +1483,7 @@
       "CREATED_AT": "Creation Date",
       "STATUS": "Status",
       "SUBSCRIPTION": "Current Subscription",
-      "REMOVE_SUBSCRIPTION": "Remove Subscription",
+      "REMOVE_SUBSCRIPTION": "Cancel Subscription",
       "NO_SUBSCRIPTION": "No active subscription",
       "SELECT_PLAN": "Select a plan",
       "ASSIGN": "Assign",
@@ -1477,6 +1491,18 @@
       "CREATED":"Creation date"
     },
     "FORM": {
+      "TENANT_DETAILS": "Tenant details",
+      "EDIT_TENANT_INFO": "Edit the tenant's general information",
+      "SUBDOMAIN_HINT": "Used to access the tenant portal (only lowercase letters, numbers and hyphens)",
+      "SUBSCRIPTION": "Subscription",
+      "MANAGE_SUBSCRIPTION": "Manage the tenant's subscription plan",
+      "CURRENT_SUBSCRIPTION": "Current subscription",
+      "NO_SUBSCRIPTION": "No subscription assigned",
+      "SELECT_PLAN": "Subscription plan",
+      "BILLING_PERIOD": "Billing period",
+      "REMOVE_SUBSCRIPTION": "Cancel subscription",
+      "UPDATE_SUBSCRIPTION": "Update subscription",
+      "ASSIGN_SUBSCRIPTION": "Assign subscription",
       "NAME_PLACEHOLDER": "e.g. Acme Corporation",
       "EMAIL_PLACEHOLDER": "contact@acme.com",
       "PHONE_PLACEHOLDER": "+216 XX XXX XXX",
@@ -1530,12 +1556,18 @@
       "RESTORE": "Restore"
     },
     "SUCCESS": {
+      "UPDATED": "Tenant updated successfully",
+      "SUBSCRIPTION_ASSIGNED": "Subscription assigned successfully",
+      "SUBSCRIPTION_REMOVED": "Subscription removed successfully",
       "ACTIVATED": "Activated successfully",
       "DELETED": "Tenant deleted successfully",
       "RESTORED": "Tenant restored successfully",
       "SUSPENDED": "Tenant suspended successfully"
     },
     "ERRORS": {
+      "UPDATE_FAILED": "Failed to update tenant",
+      "ASSIGN_SUBSCRIPTION_FAILED": "Failed to assign subscription",
+      "REMOVE_SUBSCRIPTION_FAILED": "Failed to remove subscription",
       "LOAD_FAILED": "Failed to load tenants",
       "LOAD_ANALYTICS_FAILED": "Failed to load analytics",
       "DELETE_FAILED": "Failed to delete tenant",
@@ -1544,6 +1576,9 @@
       "ACTIVATE_FAILED": "Failed to activate tenant"
     },
     "DIALOG": {
+      "REMOVE_SUBSCRIPTION_CONFIRM": "Are you sure you want to cancel the current subscription? This action cannot be undone.",
+      "REMOVE_SUBSCRIPTION_TITLE": "Cancel subscription",
+      "REMOVE_CONFIRM": "Cancel",
       "ACTIVATE_CONFIRM":"Confirm",
       "ACTIVATE_TENANT_TITLE":"Reactivate tenant ?",
       "ACTIVATE_TENANT_MESSAGE":"Are you sureyou want to activate tenant \"{{name}}\" ?",
@@ -1553,6 +1588,20 @@
       "SUSPEND_TENANT_TITLE": "Suspend Tenant",
       "SUSPEND_TENANT_MESSAGE": "Are you sure you want to suspend tenant \"{{name}}\"? They will not be able to access the system until reactivated.",
       "SUSPEND_CONFIRM": "Suspend"
+    },
+    "CURRENCIES": {
+      "TND": "Tunisian Dinar",
+      "EUR": "Euro",
+      "USD": "US Dollar"
+    },
+    "LOCALES": {
+      "EN": "English",
+      "FR": "French",
+      "AR": "Arabic"
+    },
+    "PERIODS": {
+      "MONTH": "Monthly",
+      "YEAR": "Yearly"
     }
   },
   "DIALOG": {

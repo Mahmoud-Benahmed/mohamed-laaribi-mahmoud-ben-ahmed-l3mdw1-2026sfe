@@ -22,8 +22,8 @@
     "AUDIT_LOG": "Journal d'audit"
   },
   "COMMON": {
-    "MONTHLY": "Mensuel",
-    "YEARLY":"Annuel",
+    "MONTH": "Mensuel",
+    "YEAR":"Annuel",
     "MARK_COMPLETED": "Valider",
     "LOAD_MORE": "Charger plus",
     "LEAVE": "Quitter",
@@ -73,8 +73,9 @@
     "SELECT": "Veuillez sélectionner un élément de la liste"
   },
   "VALIDATION": {
-  "ARTICLE_CATEGORIES_EMPTY": "Chaque article appartient à une catégorie. Actuellement, vous n'avez aucune catégorie. Une fois que vous aurez créé des catégories, vous pourrez créer des articles.",
-  "CLIENT_CATEGORIES_EMPTY": "Chaque client appartient à une catégorie. Actuellement, vous n'avez aucune catégorie. Une fois que vous aurez créé des catégories, vous pourrez créer des clients.",
+    "INVALID_FORMAT": "Seules les lettres minuscules, les chiffres et les tirets sont autorisés",
+    "ARTICLE_CATEGORIES_EMPTY": "Chaque article appartient à une catégorie. Actuellement, vous n'avez aucune catégorie. Une fois que vous aurez créé des catégories, vous pourrez créer des articles.",
+    "CLIENT_CATEGORIES_EMPTY": "Chaque client appartient à une catégorie. Actuellement, vous n'avez aucune catégorie. Une fois que vous aurez créé des catégories, vous pourrez créer des clients.",
     "PHONE_MAX": "Le téléphone ne peut pas dépasser 20 caractères.",
     "TAX_NUMBER_INVALID": "Le numéro fiscal ne peut contenir que des lettres et des chiffres.",
     "TAX_NUMBER_MAX": "Le numéro fiscal ne peut pas dépasser 50 caractères.",
@@ -1438,6 +1439,19 @@
       "ACTIONS": "Actions"
     },
     "DETAILS": {
+      "USERS": "Utilisateurs",
+      "SUBSCRIPTION_INFO": "Informations d'abonnement",
+      "PLAN_CODE": "Code du plan",
+      "CODE": "Code",
+      "MAX_USERS": "Nombre max d'utilisateurs",
+      "MAX_STORAGE": "Stockage max",
+      "PLAN_DETAILS": "Détails du plan",
+      "PLAN_NAME": "Plan",
+      "START_DATE": "Date de début",
+      "END_DATE": "Date de fin",
+      "PERIOD": "Période de facturation",
+      "MONTHLY_PRICE": "Prix mensuel",
+      "YEARLY_PRICE": "Prix annuel",
       "NAME": "Nom du tenant",
       "EMAIL": "Email",
       "PHONE": "Téléphone",
@@ -1452,7 +1466,7 @@
       "CREATED_AT": "Date de création",
       "STATUS": "Statut",
       "SUBSCRIPTION": "Abonnement actuel",
-      "REMOVE_SUBSCRIPTION": "Supprimer l'abonnement",
+      "REMOVE_SUBSCRIPTION": "Annuler l'abonnement",
       "NO_SUBSCRIPTION": "Aucun abonnement actif",
       "SELECT_PLAN": "Sélectionnez un plan",
       "ASSIGN": "Attribuer",
@@ -1460,6 +1474,18 @@
       "CREATED":"Date de création"
     },
     "FORM": {
+      "TENANT_DETAILS": "Informations du client",
+      "EDIT_TENANT_INFO": "Modifier les informations générales du client",
+      "SUBDOMAIN_HINT": "Utilisé pour accéder au portail client (lettres minuscules, chiffres et tirets uniquement)",
+      "SUBSCRIPTION": "Abonnement",
+      "MANAGE_SUBSCRIPTION": "Gérer la formule d’abonnement du client",
+      "CURRENT_SUBSCRIPTION": "Abonnement actuel",
+      "NO_SUBSCRIPTION": "Aucun abonnement attribué",
+      "SELECT_PLAN": "Formule d’abonnement",
+      "BILLING_PERIOD": "Période de facturation",
+      "REMOVE_SUBSCRIPTION": "Annuler l'abonnement",
+      "UPDATE_SUBSCRIPTION": "Mettre à jour l’abonnement",
+      "ASSIGN_SUBSCRIPTION": "Attribuer un abonnement",
       "NAME_PLACEHOLDER": "ex. Acme Corporation",
       "EMAIL_PLACEHOLDER": "contact@acme.com",
       "PHONE_PLACEHOLDER": "+216 XX XXX XXX",
@@ -1516,7 +1542,10 @@
       "ACTIVATED": "Activé avec succès",
       "DELETED": "Tenant supprimé avec succès",
       "RESTORED": "Tenant restauré avec succès",
-      "SUSPENDED": "Tenant suspendu avec succès"
+      "SUSPENDED": "Tenant suspendu avec succès",
+      "UPDATED": "Client mis à jour avec succès",
+      "SUBSCRIPTION_ASSIGNED": "Abonnement attribué avec succès",
+      "SUBSCRIPTION_REMOVED": "Abonnement supprimé avec succès"
     },
     "ERRORS": {
       "LOAD_FAILED": "Échec du chargement des tenants",
@@ -1524,9 +1553,15 @@
       "DELETE_FAILED": "Échec de la suppression du tenant",
       "RESTORE_FAILED": "Échec de la restauration du tenant",
       "SUSPEND_FAILED": "Échec de la suspension du tenant",
-      "ACTIVATE_FAILED": "Échec de l'activation du tenant"
+      "ACTIVATE_FAILED": "Échec de l'activation du tenant",
+      "UPDATE_FAILED": "Échec de la mise à jour du client",
+      "ASSIGN_SUBSCRIPTION_FAILED": "Échec de l’attribution de l’abonnement",
+      "REMOVE_SUBSCRIPTION_FAILED": "Échec de la suppression de l’abonnement"
     },
     "DIALOG": {
+      "REMOVE_SUBSCRIPTION_TITLE": "Annulation d'abonnement",
+      "REMOVE_CONFIRM": "Annuler",
+      "REMOVE_SUBSCRIPTION_CONFIRM": "Voulez-vous vraiment annuler l’abonnement actuel ? Cette action est irréversible.",
       "ACTIVATE_CONFIRM":"Confirmer",
       "ACTIVATE_TENANT_TITLE":"Réactiver le tenant ?",
       "ACTIVATE_TENANT_MESSAGE":"Êtes-vous sûr de vouloir activer le tenant \"{{name}}\" ?",
@@ -1536,6 +1571,20 @@
       "SUSPEND_TENANT_TITLE": "Suspendre le tenant",
       "SUSPEND_TENANT_MESSAGE": "Êtes-vous sûr de vouloir suspendre le tenant \"{{name}}\" ? Il ne pourra plus accéder au système jusqu'à sa réactivation.",
       "SUSPEND_CONFIRM": "Suspendre"
+    },
+        "CURRENCIES": {
+      "TND": "Dinar Tunisien",
+      "EUR": "Euro",
+      "USD": "Dollar US"
+    },
+    "LOCALES": {
+      "EN": "Anglais",
+      "FR": "Français",
+      "AR": "Arabe"
+    },
+    "PERIODS": {
+      "MONTH": "Mensuel",
+      "YEAR": "Annuel"
     }
   },
   "DIALOG": {
