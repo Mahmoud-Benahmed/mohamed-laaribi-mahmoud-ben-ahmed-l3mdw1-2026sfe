@@ -1,6 +1,7 @@
 using ERP.TenantService.Application.DTOs.Tenant;
 using ERP.TenantService.Application.DTOs.TenantSubscription;
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Properties;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.Pkcs;
