@@ -1,6 +1,8 @@
 using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.SubscriptionPlan;
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Repositories;
+using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Domain;
 
 namespace ERP.TenantService.Application.Services;
