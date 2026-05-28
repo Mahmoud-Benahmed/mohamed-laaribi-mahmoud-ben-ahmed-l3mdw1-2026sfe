@@ -79,15 +79,6 @@ public sealed class ArticleCacheService : IArticleCacheService
 
             // CRITICAL: Ensure the category exists locally and get the local Category ID
             ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-            if (localCategory == null)
-            {
-                _logger.LogWarning("Category {CategoryName} not found, creating it first", dto.Category.Name);
-                await _categoryCacheService.SyncCreatedAsync(dto.Category);
-                Task.Delay(1000).Wait(); // Small delay to ensure the category is created before we try to fetch it again
-                localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-            }
-
             if (localCategory == null)
             {
                 throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
@@ -109,12 +100,12 @@ public sealed class ArticleCacheService : IArticleCacheService
             if (existing is not null)
             {
                 _logger.LogWarning("Article {Id} already exists, updating", dto.Id);
-                existing.ApplyUpdate(localDto);  // Use localDto with corrected CategoryId
+                existing.ApplyUpdate(localDto);
             }
             else
             {
                 _logger.LogInformation("Adding new article {Id} to cache", dto.Id);
-                Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(localDto);  // Use localDto
+                Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(localDto);
                 await _repo.AddAsync(article);
             }
 
@@ -141,13 +132,6 @@ public sealed class ArticleCacheService : IArticleCacheService
 
         // CRITICAL: Ensure the category exists locally and get the local Category ID
         ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-        if (localCategory == null)
-        {
-            _logger.LogWarning("Category {CategoryName} not found in update, creating it first", dto.Category.Name);
-            await _categoryCacheService.SyncCreatedAsync(dto.Category);
-            localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-        }
 
         if (localCategory == null)
         {
