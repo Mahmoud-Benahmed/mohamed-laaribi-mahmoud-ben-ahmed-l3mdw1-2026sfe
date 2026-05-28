@@ -26,8 +26,8 @@ public sealed class FournisseurEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Fournisseur"] ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Article not configured"),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"stock-service-fournisseur-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true  // Add this
         };
