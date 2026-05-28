@@ -26,9 +26,8 @@ public sealed class ClientEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Client"]
-                ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Client not configured."),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"invoice-service-client-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true
         };
