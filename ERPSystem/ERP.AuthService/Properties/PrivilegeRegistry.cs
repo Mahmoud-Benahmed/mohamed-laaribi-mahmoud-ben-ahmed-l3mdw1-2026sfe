@@ -98,6 +98,7 @@ public static class PrivilegeRegistry
         new(TenantPrivileges.CREATE_TENANT, "TENANT", "Create tenant"),
         new(TenantPrivileges.UPDATE_TENANT, "TENANT", "Update tenant"),
         new(TenantPrivileges.DELETE_TENANT, "TENANT", "Delete tenant"),
+        new(TenantPrivileges.RESTORE_TENANT, "TENANT", "Restore tenant"),
         new(TenantPrivileges.SUSPEND_TENANT, "TENANT", "Suspend tenant"),
         new(TenantPrivileges.ACTIVATE_TENANT, "TENANT", "Activate tenant"),
 
