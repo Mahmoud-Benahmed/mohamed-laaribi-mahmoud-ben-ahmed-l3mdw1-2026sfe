@@ -52,21 +52,10 @@ public class ClientCacheService : IClientCacheService
     {
         return await _clientCacheRepository.ExistsAsync(id);
     }
-
     public async Task SyncCreatedAsync(ClientResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
-
-        if (string.IsNullOrWhiteSpace(dto.Name))
-        {
-            _logger.LogWarning("Client event has null or empty Name. Id: {ClientId}", dto.Id);
-            return;
-        }
-
         try
         {
-            // Check if client already exists
             Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id);
             if (existing != null)
             {
@@ -84,28 +73,26 @@ public class ClientCacheService : IClientCacheService
                 _logger.LogWarning(
                     "Client name '{ClientName}' already exists with different ID. Existing: {ExistingId}, New: {NewId}. Updating existing client.",
                     dto.Name, existingByName.Id, dto.Id);
-
-                await SyncUpdatedAsync(dto);
-                return;
+                existing = existingByName;
             }
-
-            if (existingByEmail != null)
+            else if (existingByEmail != null)
             {
                 _logger.LogWarning(
                     "Client email '{ClientEmail}' already exists with different ID. Existing: {ExistingId}, New: {NewId}. Updating existing client.",
                     dto.Email, existingByEmail.Id, dto.Id);
+                existing = existingByEmail;
+            }
 
+            if (existing != null)
+            {
                 await SyncUpdatedAsync(dto);
                 return;
             }
 
-
-            // Create new client with all parameters
+            // Create new client
             Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(dto);
-
             await _clientCacheRepository.AddAsync(clientCache);
 
-            // Handle categories if any
             if (dto.Categories != null && dto.Categories.Any())
             {
                 await AssignCategoriesToClientAsync(clientCache.Id, dto.Categories);
@@ -135,15 +122,10 @@ public class ClientCacheService : IClientCacheService
 
         try
         {
-            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id) ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
-            if (existing == null)
-            {
-                _logger.LogWarning("Client {ClientId} not found for update. Creating instead.", dto.Id);
-                await SyncCreatedAsync(dto);
-                return;
-            }
+            Domain.LocalCache.Client.ClientCache? existing =
+                await _clientCacheRepository.GetByIdAsync(dto.Id)
+                ?? throw new KeyNotFoundException($"ClientCache not found with Id `{dto.Id}`");
 
-            // Update client basic info
             existing.Update(
                 name: dto.Name,
                 email: dto.Email,
@@ -157,12 +139,10 @@ public class ClientCacheService : IClientCacheService
                 isDeleted: dto.IsDeleted,
                 createdAt: dto.CreatedAt,
                 updatedAt: dto.UpdatedAt
-
             );
 
             await _clientCacheRepository.UpdateAsync(existing);
 
-            // Update categories if needed
             if (dto.Categories != null)
             {
                 await UpdateClientCategoriesAsync(existing.Id, dto.Categories);
