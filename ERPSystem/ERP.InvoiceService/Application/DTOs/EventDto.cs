@@ -77,7 +77,8 @@ public sealed record InvoiceEventDto(
     decimal TotalTTC,
     string Status,
     Guid ClientId,
-    List<InvoiceItemEventDto> Items  // ← add this
+    List<InvoiceItemEventDto> Items,
+    Guid? TenantId
 );
 
 public record InvoiceItemEventDto(

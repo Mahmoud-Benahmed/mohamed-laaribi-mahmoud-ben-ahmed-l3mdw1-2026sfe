@@ -21,7 +21,8 @@ public static class InvoiceMapping
         IsDeleted: invoice.IsDeleted,
         CreatedAt: invoice.CreatedAt,
         UpdatedAt: invoice.UpdatedAt,
-        Items: invoice.Items.Select(i => i.ToDto()).ToList()
+        Items: invoice.Items.Select(i => i.ToDto()).ToList(),
+        TenantId: invoice.TenantId
     );
 
     public static InvoiceItemDto ToDto(this InvoiceItem item) => new(

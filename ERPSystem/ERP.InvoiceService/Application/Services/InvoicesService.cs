@@ -321,12 +321,13 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
                 TotalTTC: invoice.TotalTTC,
                 Status: invoice.Status.ToString(),
                 ClientId: invoice.ClientId,
-                    Items: invoice.Items.Select(i => new InvoiceItemEventDto(
-                       ArticleId: i.ArticleId,
-                       Quantity: i.Quantity,
-                       UniPriceHT: i.UniPriceHT,
-                       TaxRate: i.TaxRate
-                   )).ToList()
+                TenantId: invoice.TenantId,
+                Items: invoice.Items.Select(i => new InvoiceItemEventDto(
+                    ArticleId: i.ArticleId,
+                    Quantity: i.Quantity,
+                    UniPriceHT: i.UniPriceHT,
+                    TaxRate: i.TaxRate
+                )).ToList()
             );
             await _eventPublisher.PublishAsync(InvoiceTopics.Created, payload);
 
@@ -375,12 +376,13 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
                 TotalTTC: invoice.TotalTTC,
                 Status: invoice.Status.ToString(),
                 ClientId: invoice.ClientId,
-                    Items: invoice.Items.Select(i => new InvoiceItemEventDto(
-                       ArticleId: i.ArticleId,
-                       Quantity: i.Quantity,
-                       UniPriceHT: i.UniPriceHT,
-                       TaxRate: i.TaxRate
-                   )).ToList()
+                TenantId: invoice.TenantId,
+                Items: invoice.Items.Select(i => new InvoiceItemEventDto(
+                    ArticleId: i.ArticleId,
+                    Quantity: i.Quantity,
+                    UniPriceHT: i.UniPriceHT,
+                    TaxRate: i.TaxRate
+                )).ToList()
             );
             await _eventPublisher.PublishAsync(InvoiceTopics.Cancelled, payload);
 
