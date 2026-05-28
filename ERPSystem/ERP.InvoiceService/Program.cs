@@ -12,6 +12,7 @@ using ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.ArticleCa
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.Payment;
+using ERP.InvoiceService.Infrastructure.Messaging.Events.TenantEvent;
 using ERP.InvoiceService.Infrastructure.Persistence;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -133,7 +134,9 @@ builder.Services.AddHostedService<PaymentEventConsumer>();
 
 
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 builder.Services.AddScoped<IInvoicePdfGenerator, InvoicePdfGenerator>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 builder.Services.AddHostedService<OverdueInvoiceJob>();
 
@@ -180,6 +183,10 @@ using (IServiceScope scope = app.Services.CreateScope())
         ClientCategoryTopics.Deleted, ClientCategoryTopics.Restored,
 
         PaymentTopics.Cancelled, PaymentTopics.InvoicePaid,
+
+        TenantTopics.TenantCreated,
+        TenantTopics.TenantUpdated,
+        TenantTopics.TenantDeleted
     };
 
     int maxRetries = 30;
