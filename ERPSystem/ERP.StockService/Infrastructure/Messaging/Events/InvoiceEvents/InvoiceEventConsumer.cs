@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.InvoiceEvents;
@@ -63,7 +64,22 @@ public sealed class InvoiceEventConsumer : BackgroundService
                         continue;
                     }
 
+                    if (!dto.TenantId.HasValue)
+                    {
+                        _logger.LogError(
+                            "Missing TenantId for article event {ArticleId}",
+                            dto.Id);
+
+                        return;
+                    }
+
                     using IServiceScope scope = _scopeFactory.CreateScope();
+                    var tenantContext =
+                        scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+
+
                     IInvoiceEventHandler handler = scope.ServiceProvider.GetRequiredService<IInvoiceEventHandler>();
 
                     switch (result.Topic)

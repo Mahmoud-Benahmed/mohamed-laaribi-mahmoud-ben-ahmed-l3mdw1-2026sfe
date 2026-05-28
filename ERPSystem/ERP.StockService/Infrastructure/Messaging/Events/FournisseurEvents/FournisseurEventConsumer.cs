@@ -79,6 +79,14 @@ public sealed class FournisseurEventConsumer : BackgroundService
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        if (!dto.TenantId.HasValue)
+                        {
+                            _logger.LogError(
+                                "Missing TenantId for article event {ArticleId}",
+                                dto.Id);
+
+                            return;
+                        }
                         IFournisseurEventHandler handler = scope.ServiceProvider.GetRequiredService<IFournisseurEventHandler>();
 
                         switch (result.Topic)

@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using ERP.PaymentService.Application.DTO;
 using ERP.PaymentService.Application.Interfaces.LocalCache;
+using ERP.PaymentService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.PaymentService.Infrastructure.Messaging.Events.Invoice;
@@ -78,7 +79,27 @@ public sealed class InvoiceEventConsumer : BackgroundService
                         continue;
                     }
 
+                    if (dto is null)
+                    {
+                        _logger.LogWarning("Null payload on {Topic}, skipping.", result.Topic);
+                        _consumer.Commit(result);
+                        continue;
+                    }
+
+                    if (!dto.TenantId.HasValue)
+                    {
+                        _logger.LogError(
+                            "Missing TenantId for article event {ArticleId}",
+                            dto.Id);
+
+                        return;
+                    }
+
                     using IServiceScope scope = _scopeFactory.CreateScope();
+                    var tenantContext =
+                        scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
 
                     // ✅ fix 3: removed unused IInvoiceCacheService resolution
                     IInvoiceEventHandler handler = scope.ServiceProvider

@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Category;
@@ -72,8 +73,23 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
                         continue;
                     }
 
+                    _logger.LogWarning($"Payload recived: {dto}");
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        if (!dto.TenantId.HasValue)
+                        {
+                            _logger.LogError(
+                                "Missing TenantId for article event {ArticleId}",
+                                dto.Id);
+
+                            return;
+                        }
+
+                        var tenantContext =
+                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
+
                         IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
 
                         switch (result.Topic)
