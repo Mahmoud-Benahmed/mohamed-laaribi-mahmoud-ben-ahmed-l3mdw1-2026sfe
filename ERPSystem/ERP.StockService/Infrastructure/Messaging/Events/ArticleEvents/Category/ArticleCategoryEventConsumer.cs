@@ -27,9 +27,8 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                             ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:ArticleCategory"]
-                            ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Category not configured"),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"stock-service-article-category-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true,
             SocketTimeoutMs = 60000,
