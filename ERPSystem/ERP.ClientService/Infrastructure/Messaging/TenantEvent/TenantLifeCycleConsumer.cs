@@ -26,14 +26,14 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         var config = new ConsumerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
-            GroupId = "client-tenant-consumer-v1",
+            GroupId = $"client-service-tenant-consumer-v1",
             AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
 
-        _consumer.Subscribe([TenantTopics.TenantCreated, TenantTopics.TenantDeleted]);
+        _consumer.Subscribe([TenantTopics.TenantDeleted]);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,11 +53,10 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
                 using var scope = _scopeFactory.CreateScope();
 
-                await (result.Topic switch
+                if (result.Topic == TenantTopics.TenantDeleted)
                 {
-                    TenantTopics.TenantDeleted => HandleTenantDeleted(result.Message.Value, scope),
-                    _ => Task.CompletedTask
-                });
+                    await HandleTenantDeleted(result.Message.Value, scope);
+                }
 
                 _consumer.Commit(result);
             }
