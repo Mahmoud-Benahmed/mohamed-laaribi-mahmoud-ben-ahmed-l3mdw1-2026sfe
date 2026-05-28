@@ -1,5 +1,6 @@
 ﻿using ERP.TenantService.Application.DTOs.Events;
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Repositories;
 using ERP.TenantService.Infrastructure.Messaging;
 
 public class SubscriptionExpiryJob : BackgroundService
@@ -89,7 +90,3 @@ public enum DelayUnit
     Hour,
     Day
 }
-
-// Day => 1
-// Hours => 6
-// Minute => 5
