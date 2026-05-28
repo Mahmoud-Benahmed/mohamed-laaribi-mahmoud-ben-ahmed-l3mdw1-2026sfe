@@ -27,9 +27,8 @@ public sealed class ClientEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Client"]
-                ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Client not configured"),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"stock-service-client-category-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true  // Add this
         };
@@ -81,9 +80,6 @@ public sealed class ClientEventConsumer : BackgroundService
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
-                        // FIXED: Use IClientCacheService instead of IArticleCacheService
-                        IClientCacheService clientCacheService = scope.ServiceProvider.GetRequiredService<IClientCacheService>();
-
                         IClientEventHandler handler = scope.ServiceProvider.GetRequiredService<IClientEventHandler>();
 
                         switch (result.Topic)
