@@ -104,6 +104,17 @@ export const PRIVILEGES = {
     VIEW_REPORTS: "VIEW_REPORTS",
     EXPORT_REPORTS: "EXPORT_REPORTS",
   },
+  TENANTS:{
+    VIEW_TENANTS: "VIEW_TENANTS",
+    CREATE_TENANT: "CREATE_TENANT",
+    UPDATE_TENANT: "UPDATE_TENANT",
+    DELETE_TENANT: "DELETE_TENANT",
+    RESTORE_TENANT: "RESTORE_TENANT",
+    SUSPEND_TENANT: "SUSPEND_TENANT",
+    ACTIVATE_TENANT: "ACTIVATE_TENANT",
+    MANAGE_SUBSCRIPTIONS: "MANAGE_SUBSCRIPTIONS",
+    VIEW_BILLING: "VIEW_BILLING"
+  }
 };
 
 @Injectable({
@@ -238,7 +249,10 @@ getTenantSlug(): string | null {
     return Array.isArray(payload.privilege) ? payload.privilege : [payload.privilege];
   }
 
-  hasPrivilege(privilege: string): boolean { return this.Privileges.includes(privilege); }
+  hasPrivilege(...privileges: string[]): boolean {
+    if (!privileges || privileges.length === 0) return false;
+    return privileges.some(privilege => this.Privileges.includes(privilege));
+  }
 
   storeMustChangePassword(value: boolean): void {
     localStorage.setItem('mustChangePassword', String(value));
