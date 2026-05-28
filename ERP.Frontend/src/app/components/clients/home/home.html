@@ -106,7 +106,10 @@
         />
       </div>
       <button class="btn-add" (click)="openCreate()"
-              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()">
+              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()"
+              [disabled]="categories.length < 1"
+              [matTooltip]="categories.length < 1 ? ('VALIDATION.CLIENT_CATEGORIES_EMPTY' | translate): ''"
+          >
         + {{ 'CLIENTS.ADD_BUTTON' | translate }}
       </button>
     </div>
