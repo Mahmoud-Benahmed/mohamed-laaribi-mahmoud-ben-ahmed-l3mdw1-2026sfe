@@ -128,30 +128,40 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
         try
         {
-            // Check if category already exists
+            // Check if category already exists by ID
             CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
-            CategoryCache? existingByCode = await _repository.GetByCodeAsync(dto.Code);
-            if (existing != null && existingByCode != null)
+            if (existing != null)
             {
                 _logger.LogInformation("Category {CategoryName} already exists, updating instead", existing.Name);
                 await SyncUpdatedAsync(dto);
                 return;
             }
 
-            if (existing == null && existingByCode != null)
+            // Check if code exists (different ID)
+            CategoryCache? existingByCode = await _repository.GetByCodeAsync(dto.Code);
+            if (existingByCode != null)
             {
-                _logger.LogInformation($"Deleting existing Category with Code {dto.Code} Due to ID mismatch.");
-                await _repository.DeleteCategoryAsync(existingByCode.Id);
-                _logger.LogInformation($"Existing Category with Code {dto.Code} has been deleted.");
-                _logger.LogInformation($"Creating new Category with Code:{dto.Code} and Id:{dto.Id}");
-
-
+                _logger.LogWarning("Category code '{Code}' already exists (ID {ExistingId}). Updating existing record.",
+                    dto.Code, existingByCode.Id);
+                existingByCode.Update(
+                    name: dto.Name,
+                    code: dto.Code,
+                    delaiRetour: dto.DelaiRetour,
+                    duePaymentPeriod: dto.DuePaymentPeriod,
+                    discountRate: dto.DiscountRate,
+                    creditLimitMultiplier: dto.CreditLimitMultiplier,
+                    useBulkPricing: dto.UseBulkPricing,
+                    isActive: dto.IsActive,
+                    isDeleted: dto.IsDeleted,
+                    createdAt: dto.CreatedAt,
+                    updatedAt: dto.UpdatedAt
+                );
+                await _repository.SaveChangesAsync();
+                return;
             }
 
-
-            // Create new category master data
+            // Fresh insert
             CategoryCache category = CategoryCache.Create(dto);
-
             await _repository.AddCategoryAsync(category);
             await _repository.SaveChangesAsync();
 
@@ -212,7 +222,6 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
                 updatedAt: dto.UpdatedAt
             );
 
-            await _repository.UpdateCategoryAsync(existing);
             await _repository.SaveChangesAsync();
 
             _logger.LogInformation("Category {CategoryName} (Code: {Code}) updated", dto.Name, dto.Code);
