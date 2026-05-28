@@ -105,7 +105,9 @@
         (ngModelChange)="applyFilter()"
         />
       </div>
-      <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE) && isList()">
+      <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE) && isList()"
+          [disabled]="categories.length < 1"
+          [matTooltip]="categories.length < 1 ? ('VALIDATION.ARTICLE_CATEGORIES_EMPTY' | translate): ''">
         + {{ 'ARTICLES.ADD_BUTTON' | translate }}
       </button>
     </div>
@@ -416,7 +418,7 @@
               type="text"
               formControlName="barCode"
               [placeholder]="'ARTICLES.FORM.BARCODE_PLACEHOLDER' | translate"
-              [pattern]="barCodePattern"
+              maxlength="13"
               [class.form__input--error]="articleForm.get('barCode')?.invalid && articleForm.get('barCode')?.touched"
             />
             <span class="field__error" *ngIf="articleForm.get('barCode') as ctrl">
@@ -426,6 +428,7 @@
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.BARCODE_INVALID' | translate }}</span>
               </ng-container>
             </span>
+            <span *ngIf="articleForm.get('barCode')?.value > 0">{{`${articleForm.get('barCode')?.value.length} / ${(articleForm.get('barCode')?.value.length <= 8 ? '8' : '13')}`}}</span>
           </div>
 
           <!-- Category -->
