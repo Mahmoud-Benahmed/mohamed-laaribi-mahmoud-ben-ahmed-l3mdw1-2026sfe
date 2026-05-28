@@ -1,0 +1,310 @@
+<div class="page">
+  <ng-container>
+    <ng-container *ngIf="selectedTenant; else loading">
+      <div class="page-header" id="top">
+        <div>
+          <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }} › {{ selectedTenant.name }}</p>
+          <h1 class="page-title">{{ 'TENANTS.TITLE_EDIT' | translate }}: {{ selectedTenant.name }}</h1>
+        </div>
+        <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      </div>
+    </ng-container>
+    <ng-template #loading>
+      <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }}</p>
+      <h1 class="page-title">{{ 'TENANTS.TITLE_EDIT' | translate }}...</h1>
+    </ng-template>
+
+    <!-- ── Alerts ─────────────────────────────────── -->
+    <div *ngFor="let e of errors" class="alert alert--error">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">error_outline</mat-icon>
+      {{ e }}
+      <button class="alert__close" (click)="dismissError()">
+        <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="successMessage" class="alert alert--success">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">check_circle_outline</mat-icon>
+      {{ successMessage }}
+    </div>
+
+    <!-- ── Tenant Details Panel ─────────────────────── -->
+    <div class="panel">
+      <div class="panel__header">
+        <div class="panel__title-wrap">
+          <div class="panel__icon"><mat-icon>business</mat-icon></div>
+          <div>
+            <h2 class="panel__title">{{ 'TENANTS.FORM.TENANT_DETAILS' | translate }}</h2>
+            <p class="panel__subtitle">{{ 'TENANTS.FORM.EDIT_TENANT_INFO' | translate }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel__body">
+        <form [formGroup]="tenantForm" class="form">
+
+          <!-- Name & Subdomain -->
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.NAME' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="text"
+                     formControlName="name"
+                     [placeholder]="'TENANTS.FORM.NAME_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('name')?.invalid && tenantForm.get('name')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('name')?.invalid && tenantForm.get('name')?.touched">
+                <span *ngIf="tenantForm.get('name')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('name')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 2} }}</span>
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.SUBDOMAIN' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <div class="form__input-group">
+                <input class="form__input"
+                       type="text"
+                       formControlName="subdomainSlug"
+                       [placeholder]="'TENANTS.FORM.SUBDOMAIN_PLACEHOLDER' | translate"
+                       [class.form__input--error]="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched" />
+                <span class="form__addon">.erpsystem.app</span>
+              </div>
+              <span class="form__error" *ngIf="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched">
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 3} }}</span>
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('pattern')">{{ 'VALIDATION.INVALID_FORMAT' | translate }}</span>
+              </span>
+              <small class="form__hint">{{ 'TENANTS.FORM.SUBDOMAIN_HINT' | translate }}</small>
+            </div>
+          </div>
+
+          <!-- Email & Phone -->
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.EMAIL' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="email"
+                     formControlName="email"
+                     [placeholder]="'TENANTS.FORM.EMAIL_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('email')?.invalid && tenantForm.get('email')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('email')?.invalid && tenantForm.get('email')?.touched">
+                <span *ngIf="tenantForm.get('email')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('email')?.hasError('email')">{{ 'VALIDATION.INVALID_EMAIL' | translate }}</span>
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.PHONE' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="tel"
+                     formControlName="phone"
+                     [placeholder]="'TENANTS.FORM.PHONE_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('phone')?.invalid && tenantForm.get('phone')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('phone')?.invalid && tenantForm.get('phone')?.touched">
+                <span *ngIf="tenantForm.get('phone')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('phone')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 8} }}</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="form__field">
+            <label class="form__label">
+              {{ 'TENANTS.FORM.ADDRESS' | translate }}
+              <span class="form__required">*</span>
+            </label>
+            <input class="form__input"
+                   type="text"
+                   formControlName="address"
+                   [placeholder]="'TENANTS.FORM.ADDRESS_PLACEHOLDER' | translate"
+                   [class.form__input--error]="tenantForm.get('address')?.invalid && tenantForm.get('address')?.touched" />
+            <span class="form__error" *ngIf="tenantForm.get('address')?.invalid && tenantForm.get('address')?.touched">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </span>
+          </div>
+
+          <!-- Currency, Locale, Timezone -->
+          <div class="form__row form__row--3">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.CURRENCY' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input" formControlName="currency">
+                <option value="TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
+                <option value="EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
+                <option value="USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
+              </select>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.LOCALE' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input" formControlName="locale">
+                <option value="en">{{ 'TENANTS.LOCALES.EN' | translate }}</option>
+                <option value="fr">{{ 'TENANTS.LOCALES.FR' | translate }}</option>
+                <option value="ar">{{ 'TENANTS.LOCALES.AR' | translate }}</option>
+              </select>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.TIMEZONE' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input" formControlName="timezone">
+                <option value="UTC">UTC</option>
+                <option value="Africa/Tunis">Africa/Tunis (UTC+1)</option>
+                <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+                <option value="Europe/London">Europe/London (UTC)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="form__actions">
+            <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button type="button"
+                    class="btn-primary"
+                    [disabled]="!canSubmit"
+                    [matTooltip]="getSubmitButtonTooltip()"
+                    (click)="updateTenant()">
+              <span *ngIf="!isValidating">{{ 'COMMON.SAVE_CHANGES' | translate }}</span>
+              <span *ngIf="isValidating">{{ 'COMMON.SAVING' | translate }}...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Subscription Panel ───────────────────────── -->
+    <div class="panel" *ngIf="selectedTenant">
+      <div class="panel__header">
+        <div class="panel__title-wrap">
+          <div class="panel__icon"><mat-icon>card_membership</mat-icon></div>
+          <div>
+            <h2 class="panel__title">{{ 'TENANTS.FORM.SUBSCRIPTION' | translate }}</h2>
+            <p class="panel__subtitle">{{ 'TENANTS.FORM.MANAGE_SUBSCRIPTION' | translate }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel__body">
+
+        <!-- Current Subscription Info -->
+        <div class="subscription-info-card" *ngIf="selectedTenant.subscription?.plan">
+          <div class="subscription-info-header">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ 'TENANTS.FORM.CURRENT_SUBSCRIPTION' | translate }}</span>
+          </div>
+          <div class="subscription-info-body">
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.PLAN_NAME' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.plan?.name }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.START_DATE' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.startDate | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.END_DATE' | translate }}</span>
+              <strong>{{ selectedTenant.subscription?.endDate | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="info-row">
+              <span>{{ 'TENANTS.DETAILS.PERIOD' | translate }}</span>
+              <span class="badge badge--blue">{{ ('TENANTS.PERIODS.'+selectedTenant.subscription?.period) | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Subscription -->
+        <div class="empty-state" *ngIf="!selectedTenant.subscription?.plan">
+          <mat-icon>assignment_ind</mat-icon>
+          <p>{{ 'TENANTS.FORM.NO_SUBSCRIPTION' | translate }}</p>
+        </div>
+
+        <!-- Subscription Form -->
+        <form [formGroup]="subscriptionForm" class="form" *ngIf="subscriptionPlans.length > 0">
+
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.SELECT_PLAN' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="subscriptionPlanId"
+                      [class.form__input--error]="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+                <option *ngFor="let plan of subscriptionPlans" [value]="plan.id">
+                  {{ plan.name }} ({{ plan.code }})
+                </option>
+              </select>
+              <span class="form__error" *ngIf="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.BILLING_PERIOD' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="period"
+                      [class.form__input--error]="subscriptionForm.get('period')?.invalid && subscriptionForm.get('period')?.touched">
+                <option [value]="SubscriptionPeriod.MONTH">{{ 'TENANTS.PERIODS.MONTH' | translate }}</option>
+                <option [value]="SubscriptionPeriod.YEAR">{{ 'TENANTS.PERIODS.YEAR' | translate }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Plan Details Preview -->
+          <div class="plan-details" *ngIf="subscriptionForm.get('subscriptionPlanId')?.value">
+            <div class="plan-detail-row">
+              <span>{{ 'TENANTS.DETAILS.MONTHLY_PRICE' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.MONTH) }}</strong>
+            </div>
+            <div class="plan-detail-row">
+              <span>{{ 'TENANTS.DETAILS.YEARLY_PRICE' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.YEAR) }}</strong>
+            </div>
+          </div>
+
+          <!-- Subscription Actions -->
+          <div class="form__actions">
+            <button type="button"
+                    class="btn-danger"
+                    *ngIf="selectedTenant.subscription?.plan"
+                    [disabled]="isValidating"
+                    (click)="removeSubscription()">
+              <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+              {{ 'TENANTS.FORM.REMOVE_SUBSCRIPTION' | translate }}
+            </button>
+            <button type="button"
+                    class="btn-success"
+                    [disabled]="subscriptionForm.invalid || isValidating"
+                    (click)="assignSubscription()">
+              <span *ngIf="!isValidating">
+                {{ selectedTenant.subscription?.plan ? ('TENANTS.FORM.UPDATE_SUBSCRIPTION' | translate) : ('TENANTS.FORM.ASSIGN_SUBSCRIPTION' | translate) }}
+              </span>
+              <span *ngIf="isValidating">{{ 'COMMON.PROCESSING' | translate }}...</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>
