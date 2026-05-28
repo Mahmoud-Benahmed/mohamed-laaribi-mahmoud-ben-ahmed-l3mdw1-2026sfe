@@ -209,6 +209,19 @@
         <mat-icon>home</mat-icon> <span>{{ 'NAV.HOME' | translate }}</span>
       </a>
 
+      <a class="sidebar__item" routerLink="/tenants" routerLinkActive="sidebar__item--active"
+        *ngIf="authService.hasPrivilege(
+                  PRIVILEGES.TENANTS.VIEW_TENANTS,
+                  PRIVILEGES.TENANTS.CREATE_TENANT,
+                  PRIVILEGES.TENANTS.UPDATE_TENANT,
+                  PRIVILEGES.TENANTS.DELETE_TENANT,
+                  PRIVILEGES.TENANTS.RESTORE_TENANT,
+                  PRIVILEGES.TENANTS.ACTIVATE_TENANT,
+                  PRIVILEGES.TENANTS.SUSPEND_TENANT,
+                  PRIVILEGES.TENANTS.MANAGE_SUBSCRIPTIONS
+                )">
+        <mat-icon>business</mat-icon><span>{{ 'NAV.TENANTS' | translate}}</span>
+      </a>
       <!-- Auth & Users -->
       <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
         <button class="sidebar__item sidebar__item--group" (click)="toggleGroup('auth')" type="button"
@@ -358,7 +371,6 @@
         </div>
 
       </div>
-
 
       <!-- Audit Log -->
       <a class="sidebar__item" routerLink="/audit-log" routerLinkActive="sidebar__item--active"
