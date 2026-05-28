@@ -1,5 +1,7 @@
 using Confluent.Kafka;
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Repositories;
+using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Application.Services;
 using ERP.TenantService.Infrastructure.Messaging;
 using ERP.TenantService.Infrastructure.Persistence;
@@ -92,7 +94,6 @@ using (var scope = app.Services.CreateScope())
     if (app.Environment.IsDevelopment())
     {
         await SubscriptionPlanSeeder.SeedAsync(db);
-        await TenantSeeder.SeedAsync(db);
     }
 }
 
