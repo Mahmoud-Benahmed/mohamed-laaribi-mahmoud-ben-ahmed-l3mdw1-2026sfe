@@ -28,9 +28,8 @@ public sealed class ArticleEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Article"]
-        ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Article not configured"),
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = $"invoice-service-article-cache-v1",
+            AutoOffsetReset = AutoOffsetReset.Latest,
             EnableAutoCommit = false,
         };
 
