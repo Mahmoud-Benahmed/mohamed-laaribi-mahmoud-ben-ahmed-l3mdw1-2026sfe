@@ -21,6 +21,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { InvoiceService } from '../../../services/invoice.service';
+import { MatTooltip } from "@angular/material/tooltip";
 
 type ViewMode = 'list' | 'list-deleted' | 'list-blocked' | 'create' | 'edit' | 'view';
 
@@ -33,7 +34,7 @@ type CreditLimitInfo= {
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, PaginationComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, PaginationComponent, TranslatePipe, MatTooltip],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
