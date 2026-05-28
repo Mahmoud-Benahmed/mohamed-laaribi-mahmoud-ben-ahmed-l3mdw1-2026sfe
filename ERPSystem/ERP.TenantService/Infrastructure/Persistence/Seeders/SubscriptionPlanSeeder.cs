@@ -24,7 +24,7 @@ public static class SubscriptionPlanSeeder
                 name: "Starter",
                 code: "STARTER",
                 monthlyPrice: 29.00m,
-                yearlyPrice: DiscountNPercent(20, starterMonthlyPrice*12),
+                yearlyPrice: ApplyDiscount(20, starterMonthlyPrice*12),
                 maxUsers: 5,
                 maxStorageMb: 1024));
         }
@@ -36,7 +36,7 @@ public static class SubscriptionPlanSeeder
                 name: "Pro",
                 code: "PRO",
                 monthlyPrice: 79.00m,
-                yearlyPrice: DiscountNPercent(20, proMonthlyPrice * 12),
+                yearlyPrice: ApplyDiscount(20, proMonthlyPrice * 12),
                 maxUsers: 25,
                 maxStorageMb: 10240));
         }
@@ -48,7 +48,7 @@ public static class SubscriptionPlanSeeder
                 name: "Enterprise",
                 code: "ENTERPRISE",
                 monthlyPrice: entrMonthlyPrice,
-                yearlyPrice: DiscountNPercent(20, entrMonthlyPrice * 12),
+                yearlyPrice: ApplyDiscount(20, entrMonthlyPrice * 12),
                 maxUsers: 200,
                 maxStorageMb: 102400));
         }
@@ -60,7 +60,7 @@ public static class SubscriptionPlanSeeder
         }
     }
 
-    private static decimal DiscountNPercent(int percentageToDiscount, decimal from)
+    private static decimal ApplyDiscount(int percentageToDiscount, decimal from)
     {
         if (percentageToDiscount >= 100) return 0m;
         if (percentageToDiscount <= 0) return from;
