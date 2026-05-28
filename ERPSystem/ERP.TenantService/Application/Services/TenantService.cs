@@ -1,3 +1,4 @@
+
 using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.Events;
 using ERP.TenantService.Application.DTOs.SubscriptionPlan;
@@ -5,9 +6,10 @@ using ERP.TenantService.Application.DTOs.Tenant;
 using ERP.TenantService.Application.DTOs.TenantSubscription;
 using ERP.TenantService.Application.Exceptions;
 using ERP.TenantService.Application.Interfaces;
+using ERP.TenantService.Application.Interfaces.Repositories;
+using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Domain;
 using ERP.TenantService.Infrastructure.Messaging;
-namespace ERP.TenantService.Application.Services;
 
 public class TenantService : ITenantService
 {
@@ -28,9 +30,10 @@ public class TenantService : ITenantService
 		_eventPublisher = eventPublisher;
 	}
 
-	public async Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct= default)
+	public async Task<List<TenantResponseDto>> GetAllActiveAsync(CancellationToken ct= default)
 	{
-		return await _tenantRepository.GetAllActiveAsync(ct);
+		var tenants = await _tenantRepository.GetAllActiveAsync(ct);
+		return tenants.Select(MapToDto).ToList();
 	}
 
 	public async Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default)
@@ -271,7 +274,7 @@ public class TenantService : ITenantService
 		};
 
 		return new TenantSubscriptionResponseDto(
-			tenant.Id, dto.StartDate, endDate, MapPlanToDto(newplan));
+			tenant.Id, dto.StartDate, endDate, tenant.Subscription!.Period,MapPlanToDto(newplan));
 	}
 
 	public async Task RemoveSubscriptionAsync(Guid tenantId, CancellationToken ct = default)
@@ -321,6 +324,7 @@ public class TenantService : ITenantService
 			subscription.TenantId,
 			subscription.StartDate,
 			subscription.EndDate,
+			subscription.Period,
 			plan);
 	}
 
@@ -334,7 +338,8 @@ public class TenantService : ITenantService
 				tenant.Subscription.TenantId,
 				tenant.Subscription.StartDate,
 				tenant.Subscription.EndDate,
-				planDto);
+				tenant.Subscription.Period,
+                planDto);
 		}
 
 		return new TenantResponseDto(
@@ -355,7 +360,7 @@ public class TenantService : ITenantService
 			subDto);
 	}
 
-	private static SubscriptionPlanResponseDto MapPlanToDto(Domain.SubscriptionPlan plan)
+	private static SubscriptionPlanResponseDto MapPlanToDto(SubscriptionPlan plan)
 	{
 		return new SubscriptionPlanResponseDto(
 			plan.Id,
