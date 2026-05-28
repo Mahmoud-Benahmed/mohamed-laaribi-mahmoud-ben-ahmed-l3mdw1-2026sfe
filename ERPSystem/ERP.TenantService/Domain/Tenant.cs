@@ -102,7 +102,13 @@ public class Tenant
         Timezone = timezone;
     }
 
-    public void Activate() => IsActive = true;
+    public void Activate()
+    {
+        if(Subscription is null)
+            throw new InvalidOperationException("Unable to activate tenant: It has no active subscription.");
+
+        IsActive = true;
+    }
 
     public void Suspend() => IsActive = false;
 
@@ -119,8 +125,10 @@ public class Tenant
     {
         if (IsDeleted) 
             throw new InvalidOperationException("Deleted tenant cannot receive a subscription.");
+
         if (Subscription is not null)
             throw new InvalidOperationException("Unable to assign new plan, current tenant has an active subscription.");
+
         Subscription = TenantSubscription.Create(Id, subscriptionPlanId, startDate, period);
     }
     public void RemoveSubscription()

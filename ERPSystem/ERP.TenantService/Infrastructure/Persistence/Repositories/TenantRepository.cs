@@ -17,20 +17,28 @@ public class TenantRepository : ITenantRepository
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
         => await _context.Tenants.AnyAsync(t => t.Id == id, ct);
 
-    public async Task<(List<Tenant> Items, int TotalCount)> GetAllAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<(List<Tenant> Items, int TotalCount)> GetAllAsync(
+        int page,
+        int pageSize,
+        CancellationToken ct = default)
     {
-       var tenants= await _context.Tenants
-                            .AsNoTracking()
-                            .Include(t => t.Subscription)
-                                .ThenInclude(s => s!.Plan)
-                            .AsSplitQuery()
-                            .OrderByDescending(t => t.CreatedAt)
-                            .Skip((page - 1) * pageSize)
-                            .Take(pageSize)
-                            .ToListAsync(ct);
-       var total = await _context.Tenants.CountAsync(ct);
+        page = Math.Max(page, 1);
+        pageSize = Math.Max(pageSize, 1);
 
-       return (tenants, total);
+        var query = _context.Tenants
+            .AsNoTracking()
+            .Include(t => t.Subscription)
+                .ThenInclude(s => s.Plan)
+            .OrderByDescending(t => t.CreatedAt);
+
+        var total = await query.CountAsync(ct);
+
+        var tenants = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return (tenants, total);
     }
 
     public async Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default)

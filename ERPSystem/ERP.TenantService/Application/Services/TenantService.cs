@@ -30,6 +30,7 @@ public class TenantService : ITenantService
 		_eventPublisher = eventPublisher;
 	}
 
+	// For Gateway's Redis cache warmup
 	public async Task<List<TenantResponseDto>> GetAllActiveAsync(CancellationToken ct= default)
 	{
 		var tenants = await _tenantRepository.GetAllActiveAsync(ct);
@@ -89,8 +90,8 @@ public class TenantService : ITenantService
 		var plan = await _planRepository.GetByIdAsync(subscription.SubscriptionPlanId, ct)
 			?? throw new InvalidOperationException("Selected plan not found.");
 
-		tenant.Activate();
 		tenant.AssignSubscription(subscription.SubscriptionPlanId, subscription.StartDate, subscription.Period);
+		tenant.Activate();
 
 		await _tenantRepository.AddAsync(tenant);
 		await _tenantRepository.SaveChangesAsync();
@@ -162,8 +163,6 @@ public class TenantService : ITenantService
 			await _subscriptionRepository.DeleteByTenantIdAsync(tenantId, ct);
 		}
 
-
-		tenant.Suspend();
 		tenant.Delete();
 		
 		// 2. Persist — single save
@@ -199,7 +198,7 @@ public class TenantService : ITenantService
 
 	public async Task ActivateAsync(Guid id, CancellationToken ct = default)
 	{
-		var tenant = await _tenantRepository.GetByIdAsync(id)
+		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id)
 			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
 		tenant.Activate();
@@ -246,10 +245,11 @@ public class TenantService : ITenantService
 
 		var wasInactive = !tenant.IsActive;
 
-		if (wasInactive)
-			tenant.Activate();
 
 		tenant.AssignSubscription(dto.SubscriptionPlanId, dto.StartDate, dto.Period);
+
+		if (wasInactive)
+			tenant.Activate();
 
 		await _tenantRepository.UpdateAsync(tenant);
 		await _tenantRepository.SaveChangesAsync(ct);
@@ -342,23 +342,24 @@ public class TenantService : ITenantService
                 planDto);
 		}
 
-		return new TenantResponseDto(
-			Id:tenant.Id,
-			Name: tenant.Name,
-			Email: tenant.Email,
-			Phone: tenant.Phone,
-			SubdomainSlug: tenant.Slug,
-			LogoUrl: tenant.LogoUrl,
-			PrimaryColor: tenant.PrimaryColor,
-			SecondaryColor:tenant.SecondaryColor,
-			Currency:tenant.Currency,
-			Locale: tenant.Locale,
-			Timezone: tenant.Timezone,
-			IsActive: tenant.IsActive,
-			IsDeleted:tenant.IsDeleted,
-			CreatedAt: tenant.CreatedAt,
-			subDto);
-	}
+        return new TenantResponseDto(
+            Id: tenant.Id,
+            Name: tenant.Name,
+            Email: tenant.Email,
+            Phone: tenant.Phone,
+            SubdomainSlug: tenant.Slug,
+            LogoUrl: tenant.LogoUrl,
+            PrimaryColor: tenant.PrimaryColor,
+            SecondaryColor: tenant.SecondaryColor,
+            Currency: tenant.Currency,
+            Locale: tenant.Locale,
+            Timezone: tenant.Timezone,
+            IsActive: tenant.IsActive,
+            IsDeleted: tenant.IsDeleted,
+            CreatedAt: tenant.CreatedAt,
+            Subscription: subDto
+        );
+    }
 
 	private static SubscriptionPlanResponseDto MapPlanToDto(SubscriptionPlan plan)
 	{
