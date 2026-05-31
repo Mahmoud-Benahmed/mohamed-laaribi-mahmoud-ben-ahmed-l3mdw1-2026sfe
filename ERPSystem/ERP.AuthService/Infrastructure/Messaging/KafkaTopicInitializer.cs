@@ -2,7 +2,7 @@
 
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-
+using ERP.AuthService.Infrastructure.Messaging.Events.TenantEvent;
 
 public sealed class KafkaTopicInitializer : IHostedService
 {
@@ -11,7 +11,7 @@ public sealed class KafkaTopicInitializer : IHostedService
 
     private static readonly string[] Topics =
     [
-        TenantTopics.TenantCreated
+        TenantTopics.TenantCreated, TenantTopics.TenantUpdated, TenantTopics.TenantDeleted,
     ];
 
     public KafkaTopicInitializer(
