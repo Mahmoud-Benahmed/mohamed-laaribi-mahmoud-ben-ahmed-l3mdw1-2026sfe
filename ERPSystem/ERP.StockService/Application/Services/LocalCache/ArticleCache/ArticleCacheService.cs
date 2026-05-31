@@ -78,20 +78,7 @@ public sealed class ArticleCacheService : IArticleCacheService
             _logger.LogInformation("SyncCreatedAsync starting for article {ArticleId}", dto.Id);
 
             // CRITICAL: Ensure the category exists locally and get the local Category ID
-            ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-            if (localCategory == null)
-            {
-                throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
-            }
-
-            // Create a copy of the DTO with the LOCAL Category ID
-            ArticleResponseDto localDto = dto with
-            {
-                Category = dto.Category with
-                {
-                    Id = localCategory.Id
-                }
-            };
+            ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name) ?? throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
 
             Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id) ??
                           await _repo.GetByBarCodeAsync(dto.BarCode) ??
@@ -100,12 +87,12 @@ public sealed class ArticleCacheService : IArticleCacheService
             if (existing is not null)
             {
                 _logger.LogWarning("Article {Id} already exists, updating", dto.Id);
-                existing.ApplyUpdate(localDto);
+                existing.ApplyUpdate(dto);
             }
             else
             {
                 _logger.LogInformation("Adding new article {Id} to cache", dto.Id);
-                Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(localDto);
+                Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(dto);
                 await _repo.AddAsync(article);
             }
 
@@ -131,21 +118,7 @@ public sealed class ArticleCacheService : IArticleCacheService
         _logger.LogInformation("SyncUpdatedAsync starting for article {ArticleId}", dto.Id);
 
         // CRITICAL: Ensure the category exists locally and get the local Category ID
-        ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-        if (localCategory == null)
-        {
-            throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
-        }
-
-        // Create a copy of the DTO with the LOCAL Category ID
-        ArticleResponseDto localDto = dto with
-        {
-            Category = dto.Category with
-            {
-                Id = localCategory.Id
-            }
-        };
+        ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name) ?? throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
 
         Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
         if (existing is null)
@@ -153,7 +126,8 @@ public sealed class ArticleCacheService : IArticleCacheService
             _logger.LogWarning("SyncUpdated: article {Id} not in cache, inserting instead", dto.Id);
             return;
         }
-        existing.ApplyUpdate(localDto);
+        existing.ApplyUpdate(dto);
+
         await _repo.SaveChangesAsync();
         _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
     }
@@ -174,7 +148,7 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task SyncRestoredAsync(ArticleResponseDto dto)
     {
-        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
+        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogError("SyncRestored: article {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
@@ -202,9 +176,7 @@ public sealed class ArticleCacheService : IArticleCacheService
         UpdatedAt: a.UpdatedAt,
         TenantId: a.TenantId);
 
-    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => c is null
-        ? new ArticleCategoryResponseDto(Guid.Empty, string.Empty, 0, false, DateTime.MinValue, null, null)
-        : new ArticleCategoryResponseDto(
+    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => new(
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
