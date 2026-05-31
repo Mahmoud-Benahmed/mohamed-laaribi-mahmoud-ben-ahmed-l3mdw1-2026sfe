@@ -156,7 +156,7 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
 
     public async Task SyncRestoredAsync(ArticleCategoryResponseDto dto)
     {
-        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
+        ArticleCategoryCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogWarning("SyncRestored: article {Id} not in cache, inserting instead", dto.Id);
