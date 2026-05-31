@@ -12,6 +12,8 @@ public sealed class ArticleCategoryCacheRepository : IArticleCategoryCacheReposi
 
     public async Task<ArticleCategoryCache?> GetByIdAsync(Guid id)
         => await _db.ArticleCategoryCaches.FindAsync(id);
+    public async Task<ArticleCategoryCache?> GetByIdDeletedAsync(Guid id)
+    => await _db.ArticleCategoryCaches.IgnoreQueryFilters().FirstOrDefaultAsync(ca=> ca.Id == id);
 
     public async Task<ArticleCategoryCache?> GetByNameAsync(string name)
         => await _db.ArticleCategoryCaches
