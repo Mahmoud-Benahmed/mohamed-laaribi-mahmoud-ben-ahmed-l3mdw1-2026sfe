@@ -140,9 +140,9 @@
                 <span class="form__required">*</span>
               </label>
               <select class="form__input" formControlName="currency">
-                <option value="TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
-                <option value="EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
-                <option value="USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
+                <option [value]="CurrencyEnum.TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
+                <option [value]="CurrencyEnum.EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
+                <option [value]="CurrencyEnum.USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
               </select>
             </div>
 
@@ -152,9 +152,9 @@
                 <span class="form__required">*</span>
               </label>
               <select class="form__input" formControlName="locale">
-                <option value="en">{{ 'TENANTS.LOCALES.EN' | translate }}</option>
-                <option value="fr">{{ 'TENANTS.LOCALES.FR' | translate }}</option>
-                <option value="ar">{{ 'TENANTS.LOCALES.AR' | translate }}</option>
+                <option [value]="LocaleEnum.EN">{{ 'TENANTS.LOCALES.EN' | translate}} - ({{ LocaleEnum.EN }})</option>
+                <option [value]="LocaleEnum.FR">{{ 'TENANTS.LOCALES.FR' | translate}} - ({{ LocaleEnum.FR }})</option>
+                <option [value]="LocaleEnum.AR">{{ 'TENANTS.LOCALES.AR' | translate}} - ({{ LocaleEnum.AR }})</option>
               </select>
             </div>
 
@@ -164,10 +164,10 @@
                 <span class="form__required">*</span>
               </label>
               <select class="form__input" formControlName="timezone">
-                <option value="UTC">UTC</option>
-                <option value="Africa/Tunis">Africa/Tunis (UTC+1)</option>
-                <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
-                <option value="Europe/London">Europe/London (UTC)</option>
+                <option [value]="TimeZoneEnum.UTC">UTC</option>
+                <option [value]="TimeZoneEnum.AFRICA_TUNIS">Africa/Tunis (UTC+1)</option>
+                <option [value]="TimeZoneEnum.EUROPE_PARIS">Europe/Paris (UTC+1)</option>
+                <option [value]="TimeZoneEnum.EUROPE_LONDON">Europe/London (UTC)</option>
               </select>
             </div>
           </div>
