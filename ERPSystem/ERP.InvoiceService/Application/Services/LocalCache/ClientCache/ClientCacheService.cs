@@ -255,7 +255,7 @@ public class ClientCacheService : IClientCacheService
 
         try
         {
-            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id) ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
+            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdDeletedAsync(dto.Id);
             if (existing == null)
             {
                 _logger.LogWarning("Client {ClientId} not found for restore", dto.Id);
