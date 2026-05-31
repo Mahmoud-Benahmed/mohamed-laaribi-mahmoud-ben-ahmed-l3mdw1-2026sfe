@@ -1,6 +1,7 @@
 ﻿using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Domain.Cache;
 using ERP.AuthService.Domain.Logger;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Properties;
@@ -34,9 +35,6 @@ public class TenantProvisioningService : ITenantProvisioningService
 
     public async Task ProvisionAsync(Guid tenantId, string slug)
     {
-        if (tenantId == Guid.Empty)
-            throw new ArgumentException("tenantId is empty");
-
         if (string.IsNullOrWhiteSpace(slug))
             throw new ArgumentException("slug is empty");
 
@@ -258,24 +256,34 @@ public class TenantProvisioningService : ITenantProvisioningService
     {
         var users = _db.Collection<AuthUser>("Users");
 
-        var index = Builders<AuthUser>.IndexKeys
-            .Ascending(x => x.TenantId)
-            .Ascending(x => x.Email);
-
-        await users.Indexes.CreateOneAsync(new CreateIndexModel<AuthUser>(index));
+        await users.Indexes.CreateManyAsync([
+            new CreateIndexModel<AuthUser>(
+                Builders<AuthUser>.IndexKeys.Ascending(u => u.TenantId).Ascending(u => u.Email),
+                new CreateIndexOptions { Unique = true, Name = "idx_tenant_email" }),
+            new CreateIndexModel<AuthUser>(
+                Builders<AuthUser>.IndexKeys.Ascending(u => u.TenantId).Ascending(u => u.Login),
+                new CreateIndexOptions { Unique = true, Name = "idx_tenant_login" }),
+        ]);
     }
 
 
     public async Task DeleteAllByTenantIdAsync(Guid tenantId)
     {
+        await _db.Collection<TenantCache>("TenantsCache")
+     .DeleteManyAsync(t => t.Id == tenantId);
+
         await _db.Collection<Privilege>("Privileges")
             .DeleteManyAsync(p => p.TenantId == tenantId);
+
         await _db.Collection<RefreshToken>("RefreshTokens")
-            .DeleteManyAsync(p => p.TenantId == tenantId);
+            .DeleteManyAsync(r => r.TenantId == tenantId);
+
         await _db.Collection<AuthUser>("Users")
             .DeleteManyAsync(u => u.TenantId == tenantId);
+
         await _db.Collection<Role>("Roles")
             .DeleteManyAsync(r => r.TenantId == tenantId);
+
         await _db.Collection<AuditLog>("AuditLogs")
             .DeleteManyAsync(u => u.TenantId == tenantId);
     }
