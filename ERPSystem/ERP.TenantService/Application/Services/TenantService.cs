@@ -59,7 +59,7 @@ public class TenantService : ITenantService
 
 	public async Task<TenantResponseDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
 	{
-		var tenant = await _tenantRepository.GetBySlugAsync(slug, ct) ?? throw new KeyNotFoundException($"Tenant with slugn {slug} not found.");
+		var tenant = await _tenantRepository.GetBySlugAsync(slug, ct) ?? throw new KeyNotFoundException($"Tenant with slug {slug} not found.");
 		return MapToDto(tenant);
 	}
 
@@ -106,8 +106,11 @@ public class TenantService : ITenantService
 			Address: tenant.Address,
 			Email: tenant.Email,
 			Phone: tenant.Phone,
-			Currency: tenant.Currency
-		));
+			Currency: tenant.Currency,
+			PrimaryColor: tenant.PrimaryColor,
+			SecondaryColor: tenant.SecondaryColor
+
+        ));
 
 		return MapToDto(tenant);
 	}
@@ -146,8 +149,11 @@ public class TenantService : ITenantService
 			Address: tenant.Address,
 			Email: tenant.Email,
 			Phone: tenant.Phone,
-			Currency: tenant.Currency
-		));
+			Currency: tenant.Currency,
+			PrimaryColor: tenant.PrimaryColor,
+            SecondaryColor: tenant.SecondaryColor
+
+        ));
 
 		return MapToDto(tenant);
 	}
@@ -156,6 +162,8 @@ public class TenantService : ITenantService
 	{
 		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId) 
 											?? throw new KeyNotFoundException($"Tenant with id '{tenantId}' not found.");
+		if (tenant.IsActive)
+			throw new InvalidOperationException("Current tenant is active, cannot delete it.");
 
 		if (tenant.Subscription is not null)
 		{
@@ -261,7 +269,7 @@ public class TenantService : ITenantService
 
 		await _eventPublisher.PublishAsync("tenant.subscription.assigned", new SubscriptionChangedEvent(
 			tenantId,
-			OldPlanId: oldPlanId ?? Guid.Empty,
+			OldPlanId: oldPlanId,
 			NewPlanId: newplan.Id,
 			NewMaxUsers: newplan.MaxUsers,
 			NewMaxStorageMb: newplan.MaxStorageMb));
@@ -347,6 +355,7 @@ public class TenantService : ITenantService
             Name: tenant.Name,
             Email: tenant.Email,
             Phone: tenant.Phone,
+			Address: tenant.Address,
             SubdomainSlug: tenant.Slug,
             LogoUrl: tenant.LogoUrl,
             PrimaryColor: tenant.PrimaryColor,
