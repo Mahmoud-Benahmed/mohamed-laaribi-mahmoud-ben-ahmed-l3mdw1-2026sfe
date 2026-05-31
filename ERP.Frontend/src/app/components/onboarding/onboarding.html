@@ -88,7 +88,6 @@
                 <span class="field-error" *ngIf="form.get('phone')?.touched && form.get('phone')?.errors">
                   <ng-container *ngIf="form.get('phone')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('phone')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_PHONE' | translate }}</ng-container>
-                  <ng-container *ngIf="form.get('phone')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: form.get('phone')?.errors?.['maxlength'].requiredLength } }}</ng-container>
                 </span>
               </div>
               <div class="field full-width">
@@ -143,7 +142,7 @@
                   <ng-container *ngIf="form.get('primaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
                 </span>
               </div>
-              
+
               <div class="field">
                 <label>{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
                 <div class="color-input-wrap">
