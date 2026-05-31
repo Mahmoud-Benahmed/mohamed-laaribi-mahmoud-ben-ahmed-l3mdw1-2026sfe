@@ -8,6 +8,7 @@ public interface IArticleCacheRepository
 {
     Task<List<ArticleCache>> GetByIdsAsync(List<Guid> ids);
     Task<ArticleCache?> GetByIdAsync(Guid id);
+    Task<ArticleCache?> GetByIdDeletedAsync(Guid id);
     Task<ArticleCache?> GetByBarCodeAsync(string barCode);
     Task<ArticleCache?> GetByCodeRefAsync(string codeRef);
     Task<List<ArticleCache>> GetAllAsync();
@@ -23,6 +24,7 @@ public interface IArticleCategoryCacheRepository
 {
     Task<bool> ExistsAsync(string name);
     Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByIdAsync(Guid id);
+    Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByIdDeletedAsync(Guid id);
     Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByNameAsync(string name);
     Task<List<Domain.LocalCache.Article.ArticleCategoryCache>> GetAllAsync();
     Task<List<Domain.LocalCache.Article.ArticleCategoryCache>> GetAllActiveAsync();
@@ -36,6 +38,7 @@ public interface IArticleCategoryCacheRepository
 public interface IClientCacheRepository
 {
     Task<ClientCache?> GetByIdAsync(Guid id);
+    Task<ClientCache?> GetByIdDeletedAsync(Guid id);
     Task<ClientCache?> GetByNameAsync(string name);
     Task<ClientCache?> GetByEmailAsync(string email);
     Task<(List<ClientCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null);
@@ -50,6 +53,7 @@ public interface IClientCategoryCacheRepository
     // Read operations - Master data
     Task<Dictionary<Guid, int>> GetClientCountsByCategoryIdsAsync(List<Guid> categoryIds);
     Task<Domain.LocalCache.Client.CategoryCache?> GetByIdAsync(Guid id);
+    Task<Domain.LocalCache.Client.CategoryCache?> GetByIdDeletedAsync(Guid id);
     Task<Domain.LocalCache.Client.CategoryCache?> GetByCodeAsync(string code);
     Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientIdAsync(Guid clientId);
     Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientNameAsync(string clientName);
@@ -79,6 +83,7 @@ public interface IFournisseurCacheRepository
 {
     // Read operations
     Task<FournisseurCache?> GetByIdAsync(Guid id);
+    Task<FournisseurCache?> GetByIdDeletedAsync(Guid id);
     Task<FournisseurCache?> GetByNameAsync(string name);
     Task<FournisseurCache?> GetByTaxNumberAsync(string taxNumber);
     Task<FournisseurCache?> GetByEmailAsync(string email);
