@@ -13,7 +13,8 @@ public sealed class ArticleEventConsumer : BackgroundService
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     public ArticleEventConsumer(
@@ -65,8 +66,7 @@ public sealed class ArticleEventConsumer : BackgroundService
                     }
 
                     // Log deserialized data
-                    _logger.LogInformation("Processing article: Id={Id}, Libelle={Libelle}, CategoryId={CategoryId}, CategoryName={CategoryName}",
-                        dto.Id, dto.Libelle, dto.Category?.Id, dto.Category?.Name);
+                    _logger.LogInformation("Processing article: {dto}", dto);
 
                     // Validate category data
                     if (dto.Category == null)
