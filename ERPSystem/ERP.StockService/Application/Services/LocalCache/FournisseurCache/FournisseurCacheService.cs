@@ -258,7 +258,7 @@ public class FournisseurCacheService : IFournisseurCacheService
 
         try
         {
-            FournisseurCache? existing = await _repository.GetByIdAsync(dto.Id);
+            FournisseurCache? existing = await _repository.GetByIdDeletedAsync(dto.Id);
             if (existing == null)
             {
                 _logger.LogWarning("Fournisseur {FournisseurId} not found for restore", dto.Id);
