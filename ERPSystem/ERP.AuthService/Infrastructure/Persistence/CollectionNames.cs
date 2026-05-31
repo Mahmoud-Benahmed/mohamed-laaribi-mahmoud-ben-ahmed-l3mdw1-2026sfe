@@ -8,4 +8,5 @@ public static class CollectionNames
     public const string Privileges = "Privileges";
     public const string AuditLogs = "AuditLogs";
     public const string RefreshTokens = "RefreshTokens";
+    public const string TenantsCache = "TenantsCache";
 }
