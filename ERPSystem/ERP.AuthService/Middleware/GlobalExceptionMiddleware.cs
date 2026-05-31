@@ -68,7 +68,7 @@ public class GlobalExceptionMiddleware
             await auditLogger.LogAsync(
                 action,
                 success: false,
-                performedBy: performedBy == Guid.Empty ? null : performedBy,
+                performedBy: performedBy,
                 failureReason: exception.Message,
                 ipAddress: context.Connection.RemoteIpAddress?.ToString(),
                 metadata: new()
