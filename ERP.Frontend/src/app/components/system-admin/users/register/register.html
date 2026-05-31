@@ -1,5 +1,4 @@
 <div class="page">
-  <!-- ── PAGE HEADER ── -->
   <div class="page-header">
     <div>
       <p class="breadcrumb">{{ 'USERS.BREADCRUMB' | translate }}</p>
@@ -7,7 +6,6 @@
     </div>
   </div>
 
-  <!-- ===================== ALERTS ===================== -->
   <div class="top">
     <div class="alert alert--error" *ngIf="errors.length > 0">
       <div class="alert__messages">
@@ -16,21 +14,20 @@
     </div>
     <div class="alert alert--success" *ngIf="successMessage">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="20 6 9 17 4 12"/>
+        <polyline points="20 6 9 17 4 12" />
       </svg>
       {{ successMessage }}
       <button class="alert__close" (click)="dismissError()">✕</button>
-    </div>  
+    </div>
   </div>
 
-  <!-- ── FORM CARD ── -->
   <div class="panel">
     <div class="panel__header">
       <div class="panel__title-wrap">
         <div class="panel__icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
         <div class="panel__title-content">
@@ -42,7 +39,7 @@
     </div>
 
     <div class="panel__body">
-      <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="form">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
 
         <!-- Row 1: FullName + Login -->
         <div class="form__row">
@@ -51,20 +48,14 @@
               <label>{{ 'USERS.REGISTER.FULL_NAME' | translate }}</label>
               <mat-icon>badge</mat-icon>
             </div>
-            <input
-              class="form__input"
-              type="text"
-              name="fullname"
+            <input class="form__input" type="text" formControlName="fullName"
               [placeholder]="'USERS.REGISTER.FULL_NAME_PLACEHOLDER' | translate"
-              [(ngModel)]="credentials.fullName"
-              required
-              [pattern]="fullnamePattern"
-              #fullNameInput="ngModel"
-              [class.form__input--error]="fullNameInput.invalid && fullNameInput.touched"/>
-            <span class="form__error" *ngIf="fullNameInput.errors?.['required'] && fullNameInput.touched">
+              [class.form__input--error]="form.get('fullName')?.invalid && form.get('fullName')?.touched"
+              />
+            <span class="form__error" *ngIf="form.get('fullName')?.errors?.['required'] && form.get('fullName')?.touched">
               {{ 'VALIDATION.REQUIRED' | translate }}
             </span>
-            <span class="form__error" *ngIf="fullNameInput.errors?.['pattern'] && fullNameInput.touched">
+            <span class="form__error" *ngIf="form.get('fullName')?.errors?.['pattern'] && form.get('fullName')?.touched" >
               {{ 'VALIDATION.NAME_REQUIRED' | translate }}
             </span>
           </div>
@@ -74,25 +65,16 @@
               <label>{{ 'USERS.REGISTER.LOGIN' | translate }}</label>
               <mat-icon>alternate_email</mat-icon>
             </div>
-            <input
-              class="form__input"
-              type="text"
-              name="login"
+            <input class="form__input" type="text" formControlName="login"
               [placeholder]="'USERS.REGISTER.LOGIN_PLACEHOLDER' | translate"
-              [(ngModel)]="credentials.login"
-              required
-              [pattern]="loginPattern"
-              minlength="5"
-              maxlength="50"
-              #loginInput="ngModel"
-              [class.form__input--error]="loginInput.invalid && loginInput.touched"/>
-            <span class="form__error" *ngIf="loginInput.errors?.['required'] && loginInput.touched">
+              [class.form__input--error]="form.get('login')?.invalid && form.get('login')?.touched" />
+            <span class="form__error" *ngIf="form.get('login')?.errors?.['required'] && form.get('login')?.touched">
               {{ 'VALIDATION.REQUIRED' | translate }}
             </span>
-            <span class="form__error" *ngIf="loginInput.errors?.['pattern'] && loginInput.touched">
+            <span class="form__error" *ngIf="form.get('login')?.errors?.['pattern'] && form.get('login')?.touched">
               {{ 'VALIDATION.INVALID_LOGIN' | translate }}
             </span>
-            <span class="form__error" *ngIf="loginInput.errors?.['minlength'] && loginInput.touched">
+            <span class="form__error" *ngIf="form.get('login')?.errors?.['minlength'] && form.get('login')?.touched">
               {{ 'VALIDATION.MIN_LENGTH' | translate : { min: 5 } }}
             </span>
           </div>
@@ -105,20 +87,13 @@
               <label>{{ 'USERS.REGISTER.EMAIL' | translate }}</label>
               <mat-icon>email</mat-icon>
             </div>
-            <input
-              class="form__input"
-              type="email"
-              name="email"
+            <input class="form__input" type="email" formControlName="email"
               [placeholder]="'USERS.REGISTER.EMAIL_PLACEHOLDER' | translate"
-              [(ngModel)]="credentials.email"
-              required
-              [pattern]="emailPattern"
-              #emailInput="ngModel"
-              [class.form__input--error]="emailInput.invalid && emailInput.touched"/>
-            <span class="form__error" *ngIf="emailInput.errors?.['required'] && emailInput.touched">
+              [class.form__input--error]="form.get('email')?.invalid && form.get('email')?.touched" />
+            <span class="form__error" *ngIf="form.get('email')?.errors?.['required'] && form.get('email')?.touched">
               {{ 'VALIDATION.REQUIRED' | translate }}
             </span>
-            <span class="form__error" *ngIf="emailInput.errors?.['pattern'] && emailInput.touched">
+            <span class="form__error" *ngIf="form.get('email')?.errors?.['email'] && form.get('email')?.touched">
               {{ 'VALIDATION.INVALID_EMAIL' | translate }}
             </span>
           </div>
@@ -128,57 +103,43 @@
               <label>{{ 'USERS.REGISTER.ROLE' | translate }}</label>
               <mat-icon>shield</mat-icon>
             </div>
-            <select
-              class="form__input form__select"
-              name="role"
-              [(ngModel)]="credentials.roleId"
-              required
-              #roleInput="ngModel"
-              (ngModelChange)="credentials.roleId = $event || null"
-              [class.form__input--error]="roleInput.invalid && roleInput.touched">
+            <select class="form__input form__select" formControlName="roleId"
+              [class.form__input--error]="form.get('roleId')?.invalid && form.get('roleId')?.touched">
               <option [ngValue]="null" disabled selected>{{ 'USERS.REGISTER.SELECT_ROLE' | translate }}</option>
               @for (role of roles; track role.id) {
                 <option [value]="role.id">{{ role.libelle }}</option>
               }
             </select>
-            <span class="form__error" *ngIf="roleInput.errors?.['required'] && roleInput.touched">
+            <span class="form__error" *ngIf="form.get('roleId')?.errors?.['required'] && form.get('roleId')?.touched">
               {{ 'VALIDATION.REQUIRED' | translate }}
             </span>
           </div>
         </div>
 
-        <!-- Row 3: Password -->
+        <!-- Password -->
         <div class="form__field">
           <div class="form__label">
             <label>{{ 'USERS.REGISTER.PASSWORD' | translate }}</label>
             <mat-icon>lock</mat-icon>
           </div>
           <div class="form__input-wrap">
-            <input
-              class="form__input"
-              [type]="showPassword ? 'text' : 'password'"
-              name="password"
+            <input class="form__input" [type]="showPassword ? 'text' : 'password'" formControlName="password"
               [placeholder]="'USERS.REGISTER.PASSWORD_PLACEHOLDER' | translate"
-              [(ngModel)]="credentials.password"
-              (ngModelChange)="onPasswordChange()"
-              required
-              #passwordInput="ngModel"
-              [class.form__input--error]="passwordInput.invalid && passwordInput.touched"/>
+              (input)="onPasswordChange()"
+              [class.form__input--error]="form.get('password')?.invalid && form.get('password')?.touched" />
             <button class="form__toggle" type="button" (click)="togglePasswordVisibility()">
               <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
           </div>
         </div>
 
-        <!-- Password meter + generate -->
-        <div class="password-group" *ngIf="credentials.password">
+        <!-- Password meter -->
+        <div class="password-group" *ngIf="form.get('password')?.value">
           <div class="password-meter">
             <div class="password-meter__bars">
-              <div class="bar"
-                *ngFor="let bar of [1,2,3,4]"
+              <div class="bar" *ngFor="let bar of [1,2,3,4]"
                 [class.bar--filled]="getScore() >= bar"
-                [ngClass]="getStrengthClass()">
-              </div>
+                [ngClass]="getStrengthClass()"></div>
             </div>
             <span class="password-meter__label" [ngClass]="getStrengthClass()">
               {{ getStrengthLabel() | translate }}
@@ -186,14 +147,12 @@
           </div>
         </div>
 
-        <div class="password-errors" *ngIf="passwordErrors.length > 0 && credentials.password
-                                          || passwordInput.errors?.['required'] && passwordInput.touched">
-          <span class="form__error"
-                *ngIf="passwordInput.errors?.['required'] && passwordInput.touched">
+        <!-- Password errors -->
+        <div class="password-errors" *ngIf="(passwordErrors.length > 0 && form.get('password')?.value) || (form.get('password')?.errors?.['required'] && form.get('password')?.touched)">
+          <span class="form__error" *ngIf="form.get('password')?.errors?.['required'] && form.get('password')?.touched">
             {{ 'VALIDATION.PASSWORD_REQUIRED' | translate }}
           </span>
-          <span class="form__error"
-                *ngFor="let error of passwordErrors">
+          <span class="form__error" *ngFor="let error of passwordErrors">
             {{ error }}
           </span>
         </div>
@@ -204,8 +163,7 @@
             <mat-icon style="font-size:16px;width:16px;height:16px;margin-right:4px;">auto_fix_high</mat-icon>
             {{ 'USERS.REGISTER.GENERATE_PASSWORD' | translate }}
           </button>
-          <button type="submit" class="btn-add"
-            [disabled]="!registerForm.valid || isLoading || isPasswordInvalid">
+          <button type="submit" class="btn-add" [disabled]="form.invalid || isLoading || isPasswordInvalid">
             @if (isLoading) {
               <mat-progress-spinner diameter="16" mode="indeterminate"></mat-progress-spinner>
               {{ 'USERS.REGISTER.CREATING' | translate }}
