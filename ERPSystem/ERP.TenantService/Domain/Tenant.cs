@@ -9,8 +9,8 @@ public class Tenant
     public string Slug { get; private set; }
     public string Address { get; private set; }
     public string? LogoUrl { get; private set; }
-    public string? PrimaryColor { get; private set; }
-    public string? SecondaryColor { get; private set; }
+    public string PrimaryColor { get; private set; }
+    public string SecondaryColor { get; private set; }
     public string Currency { get; private set; }
     public string Locale { get; private set; }
     public string Timezone { get; private set; }
@@ -55,8 +55,8 @@ public class Tenant
             Slug = subdomainSlug.ToLower(),
             Address = address,
             LogoUrl = logoUrl,
-            PrimaryColor = primaryColor,
-            SecondaryColor = secondaryColor,
+            PrimaryColor = primaryColor ?? "#2828FA",
+            SecondaryColor = secondaryColor ?? "#F2F2F5",
             Currency = currency,
             Locale = locale,
             Timezone = timezone,
