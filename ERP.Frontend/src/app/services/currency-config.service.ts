@@ -18,4 +18,8 @@ export class CurrencyConfigService {
     localStorage.setItem(this.KEY, code);
     localStorage.setItem(this.LOCALE_KEY, locale);
   }
+
+  saveFromBranding(currency: string, locale: string): void {
+    this.save(currency, locale);
+  }
 }
