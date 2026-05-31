@@ -29,7 +29,7 @@
     </div>
 
     <!-- Stat Cards -->
-    <div class="stats-grid" *ngIf="isList()">
+    <div class="stats-grid" *ngIf="isList() || isSuspended()">
 
       <div class="stat-card stat-card--gray"
           [class.stat-card--current]="statusFilter === 'ALL'"
@@ -140,12 +140,6 @@
         <input class="search-input" type="text" [placeholder]="'TENANTS.SEARCH_PLACEHOLDER' | translate"
                [(ngModel)]="searchQuery" />
       </div>
-      <button
-        *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.CREATE_TENANT) && isList()"
-        class="btn-add"
-        routerLink="/tenants/create">
-        {{ 'COMMON.ADD'| translate }} {{ 'NAV.TENANTS'| translate }}
-      </button>
     </div>
 
     <!-- Table -->
