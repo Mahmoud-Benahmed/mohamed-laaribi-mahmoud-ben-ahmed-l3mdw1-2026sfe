@@ -1,4 +1,6 @@
-﻿namespace ERP.AuthService.Application.Interfaces.Services;
+﻿using ERP.AuthService.Infrastructure.Messaging.Events.TenantEvent;
+
+namespace ERP.AuthService.Application.Interfaces.Services;
 
 public interface ITenantProvisioningService
 {
