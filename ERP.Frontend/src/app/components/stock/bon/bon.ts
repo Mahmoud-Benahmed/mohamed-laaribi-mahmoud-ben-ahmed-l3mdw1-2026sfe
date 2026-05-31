@@ -29,6 +29,8 @@ import { ClientResponseDto, ClientsService } from '../../../services/clients/cli
 import { ArticleResponseDto } from '../../../services/articles/articles.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FournisseurResponse } from '../../../services/fournisseur.service';
+import { CurrencyConfigService } from '../../../services/currency-config.service';
+
 
 export type BonType = 'entre' | 'sortie' | 'retour';
 
@@ -150,7 +152,8 @@ export class BonsComponent implements OnInit {
     public clientService: ClientsService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private currencyConfig: CurrencyConfigService
   ) {
     this.headerForm = this.buildHeaderForm();
     this.ligneForm  = this.buildLigneForm();
@@ -319,6 +322,10 @@ export class BonsComponent implements OnInit {
     this.pageNumber.set(1);
     this.reload();
   }
+
+
+  get currencyCode():   string { return this.currencyConfig.code;   }
+  get currencyLocale(): string { return this.currencyConfig.locale; }
 
   reload(): void {
     const list$ = this.bonApi[this.activeBonType].list(this.pageNumber(), this.pageSize());
