@@ -19,6 +19,14 @@ public class ClientCacheRepository : IClientCacheRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
+    public async Task<Domain.LocalCache.Client.ClientCache?> GetByIdDeletedAsync(Guid id)
+    {
+        return await _dbContext.ClientCaches.IgnoreQueryFilters()
+            .Include(c => c.ClientCategories)
+            .ThenInclude(cc => cc.Category)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
     public async Task DeleteAsync(Domain.LocalCache.Client.ClientCache client)
     {
         if (client == null)
