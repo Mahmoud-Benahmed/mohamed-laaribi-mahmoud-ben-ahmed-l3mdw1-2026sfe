@@ -83,7 +83,7 @@ public class Client
             throw new InvalidOperationException(
                 $"Client already has category '{category.Name}'.");
 
-        ClientCategory clientCategory = ClientCategory.Create(Id, category.Id, Guid.Empty, category);
+        ClientCategory clientCategory = ClientCategory.Create(Id, category.Id, assignedById, category);
         ClientCategories.Add(clientCategory);
 
         UpdatedAt = DateTime.UtcNow;
