@@ -12,6 +12,8 @@ public class TenantCache
     public string Email {get; private set;}
     public string Phone {get; private set;}
     public string Currency {get; private set;}
+    public string PrimaryColor { get; private set; }
+    public string SecondaryColor { get; private set; }
 
     private TenantCache() { }
     public static TenantCache Create(TenantCreatedEvent evt)
@@ -25,7 +27,9 @@ public class TenantCache
             Address = evt.Address,
             Email = evt.Email,
             Phone = evt.Phone,
-            Currency = evt.Currency
+            Currency = evt.Currency,
+            PrimaryColor= evt.PrimaryColor,
+            SecondaryColor= evt.SecondaryColor
         };
     }
 
@@ -38,5 +42,7 @@ public class TenantCache
         Email = evt.Email;
         Phone = evt.Phone;
         Currency = evt.Currency;
+        PrimaryColor = evt.PrimaryColor;
+        SecondaryColor = evt.SecondaryColor;
     }
 }
