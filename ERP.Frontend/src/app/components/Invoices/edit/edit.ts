@@ -16,6 +16,7 @@ import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomToggleComponent } from "../../toggle-slider/toggle-slider";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CurrencyConfigService } from '../../../services/currency-config.service';
 
 interface PendingItem {
   _localId: string;
@@ -59,7 +60,7 @@ type CreditLimitInfo= {
     MatTooltipModule,
     MatDialogModule,
     TranslatePipe
-],
+  ],
   templateUrl: './edit.html',
   styleUrl: './edit.scss',
 })
@@ -138,7 +139,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     private fb: FormBuilder,
     private stock: StockService,
     private route: ActivatedRoute,
-    private viewportScroller: ViewportScroller
+    private currencyConfig: CurrencyConfigService,
   ) {}
 
   ngOnInit(): void {
@@ -152,6 +153,9 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     this.reload();
   }
+
+  get currencyCode():   string { return this.currencyConfig.code;   }
+  get currencyLocale(): string { return this.currencyConfig.locale; }
 
   private populateFormFromInvoice(): void {
     if (!this.selectedInvoice) return;
