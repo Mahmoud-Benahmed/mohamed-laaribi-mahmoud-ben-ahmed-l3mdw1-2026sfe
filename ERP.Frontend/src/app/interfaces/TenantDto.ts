@@ -46,6 +46,25 @@ export interface TenantSubscriptionResponseDto {
   plan: SubscriptionPlanDto | null;
 }
 
+export enum LocaleEnum {
+  EN = 'en-US',
+  FR = 'fr-FR',
+  AR = 'ar-TN'
+}
+
+export enum CurrencyEnum {
+  TND = 'TND',
+  EUR = 'EUR',
+  USD = 'USD'
+}
+
+export enum TimeZoneEnum {
+  UTC = 'UTC',
+  AFRICA_TUNIS = 'Africa/Tunis',
+  EUROPE_PARIS = 'Europe/Paris',
+  EUROPE_LONDON = 'Europe/London'
+}
+
 export interface CreateTenantRequestDto {
   name: string;
   email: string;
@@ -55,9 +74,9 @@ export interface CreateTenantRequestDto {
   logoUrl?: string | null;
   primaryColor?: string | null;
   secondaryColor?: string | null;
-  currency?: string;
-  locale?: string;
-  timezone?: string;
+  currency?: CurrencyEnum;
+  locale?: LocaleEnum;
+  timezone?: TimeZoneEnum;
   subscription: AssignSubscriptionRequestDto;
 }
 
