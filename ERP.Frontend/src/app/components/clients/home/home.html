@@ -167,7 +167,7 @@
               <td class="td--name">{{ client.name }}</td>
               <td class="td--email">{{ client.email }}</td>
               <td class="td--price">
-                <span *ngIf="client.creditLimit != null">{{ client.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
+                <span *ngIf="client.creditLimit != null">{{ client.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' }}</span>
                 <span class="td--empty-value" *ngIf="client.creditLimit == null">—</span>
               </td>
               <td class="td--actions">
@@ -273,7 +273,7 @@
         <div class="detail-item">
           <span class="detail-label">{{ 'CLIENTS.DETAILS.CREDIT_LIMIT' | translate }}</span>
           <span class="detail-value">
-            {{ selectedClient.creditLimit != null ? (selectedClient.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale): '—' }}
+            {{ selectedClient.creditLimit != null ? (selectedClient.creditLimit | currency: currencyCode : 'symbol' : '1.2-2'): '—' }}
           </span>
         </div>
         <div class="detail-item" *ngIf="selectedClient.creditLimit != null">
@@ -443,8 +443,7 @@
                   formControlName="phone" [placeholder]="'CLIENTS.FORM.PHONE_PLACEHOLDER' | translate" />
             <span class="field__error" *ngIf="clientForm.get('phone') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.PHONE_INVALID' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.PHONE_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INVALID_PHONE' | translate }}</span>
               </ng-container>
             </span>
           </div>
