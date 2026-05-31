@@ -7,6 +7,7 @@ public record TenantResponseDto(
     string Name,
     string Email,
     string Phone,
+    string Address,
     string SubdomainSlug,
     string? LogoUrl,
     string? PrimaryColor,
@@ -18,4 +19,14 @@ public record TenantResponseDto(
     bool IsDeleted,
     DateTime CreatedAt,
     TenantSubscriptionResponseDto? Subscription
+);
+
+public record TenantBrandingDto(
+    string Name,
+    string? LogoUrl,
+    string? PrimaryColor,
+    string? SecondaryColor,
+    string Currency,
+    string Locale,
+    string Timezone
 );
