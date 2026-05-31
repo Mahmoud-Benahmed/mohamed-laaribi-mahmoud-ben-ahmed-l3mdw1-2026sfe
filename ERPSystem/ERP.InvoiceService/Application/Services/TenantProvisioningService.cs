@@ -36,14 +36,19 @@ public class TenantProvisioningService : ITenantProvisioningService
             .Where(a => a.TenantId == tenantId)
             .ExecuteDeleteAsync();
 
+        await _context.ArticleCaches
+            .IgnoreQueryFilters()
+            .Where(c => c.TenantId == tenantId)
+            .ExecuteDeleteAsync();
+
         await _context.ArticleCategoryCaches
             .IgnoreQueryFilters()
             .Where(c => c.TenantId == tenantId)
             .ExecuteDeleteAsync();
 
-        await _context.ArticleCaches
+        await _context.ClientCategoryAssignments
             .IgnoreQueryFilters()
-            .Where(c => c.TenantId == tenantId)
+            .Where(ca => ca.Client.TenantId == tenantId)
             .ExecuteDeleteAsync();
 
         await _context.ClientCategoryMasterCaches
