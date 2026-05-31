@@ -33,7 +33,8 @@ export interface AuthResponseDto {
   refreshToken: string;
   mustChangePassword: boolean;
   expiresAt: string;
-  tenantSlug: string | null;
+  slug: string | null;
+  tenantId: string | null;
 }
 
 export interface LoginRequestDto {
