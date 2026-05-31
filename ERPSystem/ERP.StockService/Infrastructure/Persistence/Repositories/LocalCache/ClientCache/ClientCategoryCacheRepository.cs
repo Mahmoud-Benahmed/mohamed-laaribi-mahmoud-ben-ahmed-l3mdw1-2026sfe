@@ -36,6 +36,21 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
         }
     }
 
+    public async Task<Domain.LocalCache.Client.CategoryCache?> GetByIdDeletedAsync(Guid id)
+    {
+        try
+        {
+            return await _dbContext.ClientCategoryMasterCaches
+                                    .IgnoreQueryFilters()
+                                    .FirstOrDefaultAsync(cc => cc.Id == id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting client category by ID {CategoryId}", id);
+            throw;
+        }
+    }
+
     public async Task DeleteAsync(CategoryCache category)
     {
         if (category == null)
