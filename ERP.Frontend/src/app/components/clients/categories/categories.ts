@@ -82,6 +82,21 @@ export class ClientCategoriesComponent implements OnInit {
       creditLimitMultiplier: [null, [Validators.min(1), Validators.max(2)]],
       useBulkPricing:        [false],
     });
+
+    this.categoryForm.get('useBulkPricing')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(useBulk => {
+        const discountControl = this.categoryForm.get('discountRate');
+        if (useBulk) {
+          discountControl?.enable();
+          discountControl?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+        } else {
+          discountControl?.setValue(0, {emitEvent: false});
+          discountControl?.disable();
+          discountControl?.clearValidators();
+        }
+        discountControl?.updateValueAndValidity();
+    });
   }
 
   ngOnInit(): void {
@@ -239,7 +254,7 @@ export class ClientCategoriesComponent implements OnInit {
       delaiRetour:           category.delaiRetour,
       duePaymentPeriod:      category.duePaymentPeriod,    // ← added
       useBulkPricing:        category.useBulkPricing,
-      discountRate:          category.discountRate ?? null,
+      discountRate: category.discountRate != null ? category.discountRate * 100 : null,
       creditLimitMultiplier: category.creditLimitMultiplier ?? null,
     });
     this.cdr.markForCheck();
@@ -335,7 +350,7 @@ export class ClientCategoriesComponent implements OnInit {
         delaiRetour:           val.delaiRetour,
         duePaymentPeriod:      val.duePaymentPeriod,          // ← added
         useBulkPricing:        val.useBulkPricing ?? false,
-        discountRate:          val.discountRate ?? null,
+        discountRate:          val.discountRate != null && val.discountRate !== '' ? val.discountRate / 100 : null,
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.update(this.selectedCategory.id, dto).subscribe({
