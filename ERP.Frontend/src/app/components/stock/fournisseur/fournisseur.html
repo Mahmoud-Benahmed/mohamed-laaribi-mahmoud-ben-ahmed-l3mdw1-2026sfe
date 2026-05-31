@@ -334,7 +334,6 @@
               <mat-icon>business</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="name"
-                  [pattern]="namePattern"
                   [placeholder]="'STOCK.FOURNISSEURS.FORM.NAME_PLACEHOLDER' | translate"
                   [class.form__input--error]="fournisseurForm.get('name')?.invalid && fournisseurForm.get('name')?.touched"
                   />
@@ -354,13 +353,12 @@
               <mat-icon>phone</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="phone"
-                  [pattern]="phonePattern"
                   [placeholder]="'STOCK.FOURNISSEURS.FORM.PHONE_PLACEHOLDER' | translate"
                   [class.form__input--error]="fournisseurForm.get('phone')?.invalid && fournisseurForm.get('phone')?.touched"/>
             <span class="field__error" *ngIf="fournisseurForm.get('phone') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.PHONE_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INVALID_PHONE' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -372,8 +370,7 @@
             <mat-icon>location_on</mat-icon>
           </div>
           <input class="form__input" type="text" formControlName="address" [placeholder]="'STOCK.FOURNISSEURS.FORM.ADDRESS_PLACEHOLDER' | translate"
-                [pattern]="addressPattern"
-                [class.form__input--error]="fournisseurForm.get('address')?.invalid && fournisseurForm.get('address')?.touched"/>
+                [class.form__input--error]="fournisseurForm.get('address')?.invalid && fournisseurForm.get('address')?.touched" />
           <span class="field__error" *ngIf="fournisseurForm.get('address') as ctrl">
             <ng-container *ngIf="ctrl.invalid && ctrl.touched">
               <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
@@ -390,7 +387,6 @@
               <mat-icon>receipt_long</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="taxNumber" [placeholder]="'STOCK.FOURNISSEURS.FORM.TAX_NUMBER_PLACEHOLDER' | translate"
-                  [pattern]="taxNumberPattern"
                   [class.form__input--error]="fournisseurForm.get('taxNumber')?.invalid && fournisseurForm.get('taxNumber')?.touched"/>
             <span class="field__error" *ngIf="fournisseurForm.get('taxNumber') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -407,7 +403,6 @@
               <mat-icon>account_balance</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="rib" [placeholder]="'STOCK.FOURNISSEURS.FORM.RIB_PLACEHOLDER' | translate"
-                    [pattern]="ribPattern"
                     [class.form__input--error]="fournisseurForm.get('rib')?.invalid && fournisseurForm.get('rib')?.touched"/>
             <span class="form__info"
                   *ngIf="fournisseurForm.get('rib')?.value?.length > 0"
