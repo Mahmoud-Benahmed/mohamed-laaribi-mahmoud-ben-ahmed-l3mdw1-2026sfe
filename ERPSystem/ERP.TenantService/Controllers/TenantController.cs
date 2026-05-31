@@ -56,6 +56,23 @@ public class TenantController : ControllerBase
         return Ok(tenant);
     }
 
+    [HttpGet(ApiRoutes.Tenants.GetBrandingBySlug)]
+    public async Task<ActionResult<TenantBrandingDto>> GetBranding([FromRoute] string slug)
+    {
+        var tenant = await _tenantService.GetBySlugAsync(slug);
+        if (tenant is null) return NotFound();
+
+        return Ok(new TenantBrandingDto(
+            tenant.Name,
+            tenant.LogoUrl,
+            tenant.PrimaryColor,
+            tenant.SecondaryColor,
+            tenant.Currency,
+            tenant.Locale,
+            tenant.Timezone
+        ));
+    }
+
     [HttpPost(ApiRoutes.Tenants.Create)]
     public async Task<IActionResult> Create([FromBody] CreateTenantRequestDto dto, CancellationToken ct = default)
     {
