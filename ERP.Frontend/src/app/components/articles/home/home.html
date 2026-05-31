@@ -181,7 +181,7 @@
                 <span class="td--category">{{ article.category.name }}</span>
               </td>
               <td class="td--price">
-                {{ article.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}
+                {{ article.prix | currency: currencyCode : 'symbol' : '1.2-2' }}
               </td>
               <td class="td--actions">
                 <button class="icon-btn icon-btn--view" (click)="openView(article)" [title]="'COMMON.VIEW' | translate"
@@ -260,7 +260,7 @@
         <div class="detail-item">
           <span class="detail-label">{{ 'ARTICLES.DETAILS.UNIT_PRICE' | translate }}</span>
           <span class="detail-value">
-            {{ selectedArticle.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}
+            {{ selectedArticle.prix | currency: currencyCode : 'symbol' : '1.2-2' }}
           </span>
         </div>
         <div class="detail-item">
