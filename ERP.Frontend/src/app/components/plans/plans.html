@@ -74,7 +74,7 @@
           [class.toggle-option--active]="billingYearly"
           (click)="billingYearly = true"
           type="button"
-        >{{ 'PLANS.YEARLY' | translate }}</button>
+        >{{ 'PLANS.YEAR' | translate }}</button>
       </div>
     </header>
     <!-- Error -->
@@ -122,7 +122,7 @@
           <div class="card-price">
             <span class="price-amount">TND {{ getPrice(plan) | number:'1.0-0' }}</span>
             <span class="price-period" *ngIf="plan.code !== 'FREE'">
-              /{{ billingYearly ? ('PLANS.YEARLY' | translate | lowercase) : ('PLANS.MONTH' | translate | lowercase) }}
+              /{{ billingYearly ? ('PLANS.YEAR' | translate | lowercase) : ('PLANS.MONTH' | translate | lowercase) }}
             </span>
           </div>
         </div>
