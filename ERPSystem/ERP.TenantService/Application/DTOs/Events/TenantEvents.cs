@@ -8,18 +8,22 @@ public record TenantCreatedEvent(
     string Address,
     string Email,
     string Phone,
-    string Currency
+    string Currency,
+    string PrimaryColor,
+    string SecondaryColor
     );
 public record TenantUpdatedEvent(
-    Guid TenantId, 
+    Guid TenantId,
     string OldSlug, 
     string NewSlug,
-    bool IsActive, 
+    bool IsActive,
     string Name,
     string Address,
     string Email,
     string Phone,
-    string Currency);
+    string Currency,
+    string PrimaryColor,
+    string SecondaryColor);
 
 public record TenantDeletedEvent(
     Guid TenantId, 
@@ -43,7 +47,7 @@ public record TenantActivatedEvent(
 
 
 public record SubscriptionChangedEvent(
-    Guid TenantId, Guid OldPlanId, Guid NewPlanId,
+    Guid TenantId, Guid? OldPlanId, Guid NewPlanId,
     int NewMaxUsers, int NewMaxStorageMb);    // downstream adjusts limits
 
 public record SubscriptionExpiredEvent(
