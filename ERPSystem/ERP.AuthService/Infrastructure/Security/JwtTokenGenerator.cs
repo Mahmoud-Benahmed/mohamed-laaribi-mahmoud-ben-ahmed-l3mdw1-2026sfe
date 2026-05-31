@@ -17,6 +17,7 @@ namespace ERP.AuthService.Infrastructure.Security
         private const string CLAIM_ROLE = "role";
         private const string CLAIM_PRIVILEGE = "privilege";
         private const string CLAIM_TENANT_ID = "tenantId";
+        private const string CLAIM_SLUG = "slug";
 
         public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
         {
@@ -28,7 +29,8 @@ namespace ERP.AuthService.Infrastructure.Security
                 string login,
                 string role,
                 IEnumerable<string> privileges,
-                Guid? tenantId = null)
+                Guid? tenantId = null,
+                string? slug= null)
         {
             SymmetricSecurityKey key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtSettings.Secret));
@@ -50,6 +52,8 @@ namespace ERP.AuthService.Infrastructure.Security
 
             if (tenantId.HasValue)
                 claims.Add(new Claim(CLAIM_TENANT_ID, tenantId.Value.ToString()));
+            if (slug is not null)
+                claims.Add(new Claim(CLAIM_SLUG, slug));
 
             DateTime expires = DateTime.UtcNow
                 .AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
