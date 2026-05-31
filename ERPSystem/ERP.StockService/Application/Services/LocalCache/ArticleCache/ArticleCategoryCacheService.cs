@@ -114,7 +114,7 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
 
     public async Task SyncRestoredAsync(ArticleCategoryResponseDto dto)
     {
-        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
+        ArticleCategoryCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogError("SyncRestored: category {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
