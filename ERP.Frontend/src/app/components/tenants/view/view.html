@@ -163,14 +163,6 @@
               <span class="detail-label">{{ 'TENANTS.DETAILS.PERIOD' | translate }}</span>
               <span class="badge badge--blue">{{ ('TENANTS.PERIODS.'+selectedTenant.subscription.period) | translate }}</span>
             </div>
-            <div class="detail-item" *ngIf="selectedTenant.subscription.plan?.maxUsers">
-              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_USERS' | translate }}</span>
-              <span class="detail-value">{{ selectedTenant.subscription.plan?.maxUsers }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedTenant.subscription.plan?.maxStorageMb">
-              <span class="detail-label">{{ 'TENANTS.DETAILS.MAX_STORAGE' | translate }}</span>
-              <span class="detail-value">{{ (selectedTenant.subscription.plan?.maxUsers ?? 0 / 1024) | number:'1.2-2' }} GB</span>
-            </div>
           </div>
         </div>
       </div>
