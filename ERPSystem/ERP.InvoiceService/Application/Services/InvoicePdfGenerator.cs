@@ -27,7 +27,8 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
 
     public async Task<byte[]> GenerateInvoicePdf(InvoiceDto invoice)
     {
-        TenantCache tenant= await _tenantCacheRepo.GetByIdAsync(_tenantContext.TenantId) ?? throw new InvalidOperationException("Unable to retrieve invoice information");
+        TenantCache tenant = await _tenantCacheRepo.GetByIdAsync(_tenantContext.TenantId)
+            ?? throw new InvalidOperationException($"TenantCache not found for TenantId '{_tenantContext.TenantId}'. Ensure the tenant.created event was consumed.");
 
         CurrencySymbol = tenant.Currency    ?? CurrencySymbol;
         CompanyName = tenant.Name           ?? CompanyName;
@@ -35,7 +36,8 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
         CompanyEmail = tenant.Email         ?? CompanyEmail;
         CompanyPhone = tenant.Phone         ?? CompanyPhone;
 
-        QuestPDF.Settings.License = LicenseType.Community;
+        Color primaryColor = HexToColor(tenant.PrimaryColor, Colors.Blue.Darken2);
+        Color secondaryColor = HexToColor(tenant.SecondaryColor, Colors.Grey.Lighten2);
 
         Color statusColor = invoice.Status switch
         {
@@ -60,7 +62,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                     row.RelativeItem().Column(col =>
                     {
                         col.Item().Text(CompanyName)
-                            .FontSize(22).Bold().FontColor(Colors.Blue.Darken2);
+                            .FontSize(22).Bold().FontColor(primaryColor);
                         col.Item().Text(CompanyAddress).FontSize(9);
                         col.Item().Text($"Tel: {CompanyPhone} | Email: {CompanyEmail}").FontSize(9);
                     });
@@ -68,7 +70,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                     row.ConstantItem(220).AlignRight().Column(col =>
                     {
                         col.Item().Text("INVOICE")
-                            .FontSize(24).Bold().FontColor(Colors.Blue.Darken2);
+                            .FontSize(24).Bold().FontColor(primaryColor);
                         col.Item().Text(invoice.InvoiceNumber)
                             .FontSize(14).SemiBold();
                         col.Item().Background(statusColor).PaddingVertical(5).PaddingHorizontal(10)
@@ -128,13 +130,13 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                         // Header
                         table.Header(header =>
                         {
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Article").Bold();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Qty").Bold().AlignRight();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Unit Price (HT)").Bold().AlignRight();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Discount").Bold().AlignCenter();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Net Price (HT)").Bold().AlignRight();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("TVA").Bold().AlignCenter();
-                            header.Cell().Background(Colors.Grey.Lighten2).Padding(8).Text("Total TTC").Bold().AlignRight();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Article").Bold();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Qty").Bold().AlignRight();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Unit Price (HT)").Bold().AlignRight();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Discount").Bold().AlignCenter();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Net Price (HT)").Bold().AlignRight();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("TVA").Bold().AlignCenter();
+                            header.Cell().Background(secondaryColor).Padding(8).Text("Total TTC").Bold().AlignRight();
                         });
 
                         // Rows
@@ -226,43 +228,60 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                         totals.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
                         totals.Item().Row(r =>
                         {
-                            r.RelativeItem().Text("TOTAL TTC:").Bold().FontSize(12);
+                            r.RelativeItem().Text("TOTAL TTC:").Bold().FontSize(12).
+                                                                        FontColor(primaryColor);
                             r.ConstantItem(110).AlignRight()
-                                .Text($"{invoice.TotalTTC:N2} {CurrencySymbol}").Bold().FontSize(12);
+                                .Text($"{invoice.TotalTTC:N2} {CurrencySymbol}").Bold().FontSize(12)
+                                                                                        .FontColor(primaryColor);
                         });
-                    });
 
-                    // ================= NOTES =================
-                    if (!string.IsNullOrWhiteSpace(invoice.AdditionalNotes))
-                    {
-                        col.Item().PaddingTop(20).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(c =>
+                        // ================= NOTES =================
+                        if (!string.IsNullOrWhiteSpace(invoice.AdditionalNotes))
                         {
-                            c.Item().Text("NOTES").Bold().FontSize(11);
-                            c.Item().Height(5);
-                            c.Item().Text(invoice.AdditionalNotes).FontSize(9);
+                            col.Item().PaddingTop(20).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(c =>
+                            {
+                                c.Item().Text("NOTES").Bold().FontSize(11);
+                                c.Item().Height(5);
+                                c.Item().Text(invoice.AdditionalNotes).FontSize(9);
+                            });
+                        }
+
+                        // ================= PAYMENT TERMS =================
+                        col.Item().PaddingTop(20).Column(c =>
+                        {
+                            c.Item().Text("Payment Terms").Bold().FontSize(10);
+                            c.Item().Text("Please pay within the due date. Bank transfer details available upon request.")
+                                .FontSize(9).FontColor(Colors.Grey.Darken1);
                         });
-                    }
-
-                    // ================= PAYMENT TERMS =================
-                    col.Item().PaddingTop(20).Column(c =>
-                    {
-                        c.Item().Text("Payment Terms").Bold().FontSize(10);
-                        c.Item().Text("Please pay within the due date. Bank transfer details available upon request.")
-                            .FontSize(9).FontColor(Colors.Grey.Darken1);
                     });
-                });
 
-                // ================= FOOTER =================
-                page.Footer().AlignCenter().Text(x =>
-                {
-                    x.Span("Page ").FontSize(9).FontColor(Colors.Grey.Medium);
-                    x.CurrentPageNumber().FontSize(9).FontColor(Colors.Grey.Medium);
-                    x.Span(" - Thank you for your business").FontSize(9).FontColor(Colors.Grey.Medium);
+                    // ================= FOOTER =================
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ").FontSize(9).FontColor(Colors.Grey.Medium);
+                        x.CurrentPageNumber().FontSize(9).FontColor(Colors.Grey.Medium);
+                        x.Span(" - Thank you for your business").FontSize(9).FontColor(Colors.Grey.Medium);
+                    });
                 });
             });
         });
 
         return document.GeneratePdf();
+    }
+
+    private static Color HexToColor(string? hex, Color fallback)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return fallback;
+        hex = hex.TrimStart('#');
+        if (hex.Length != 6) return fallback;
+        try
+        {
+            byte r = Convert.ToByte(hex[0..2], 16);
+            byte g = Convert.ToByte(hex[2..4], 16);
+            byte b = Convert.ToByte(hex[4..6], 16);
+            return Color.FromRGB(r, g, b);
+        }
+        catch { return fallback; }
     }
 }
 
@@ -270,3 +289,4 @@ public interface IInvoicePdfGenerator
 {
     Task<byte[]> GenerateInvoicePdf(InvoiceDto invoice);
 }
+
