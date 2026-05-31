@@ -26,9 +26,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = !isPublicCall ? auth.getAccessToken() : null;
 
-  const tenantSlug = auth.getTenantSlug();
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-  if (tenantSlug) headers['X-Tenant'] = tenantSlug;
 
   const authReq = token
     ? req.clone({ setHeaders: headers })
@@ -41,7 +39,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
 
-      // Server unreachable 
+      // Server unreachable
       if (error.status === 0) {
         if (!serverDownDialogOpen) {
           serverDownDialogOpen = true;
@@ -63,7 +61,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // Rate limit for login and create tenants 
+      // Rate limit for login and create tenants
       if (error.status === 429) {
         const retryAfter = error.headers.get('Retry-After');
 
