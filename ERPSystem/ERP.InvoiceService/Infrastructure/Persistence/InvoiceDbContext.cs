@@ -48,6 +48,8 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
 
             m.Entity<ClientCache>()
                 .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
+            m.Entity<CategoryCache>()
+                .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
 
             m.Entity<InvoiceSequence>()
                 .HasQueryFilter(c => _tenantId == null || c.TenantId == _tenantId);
@@ -180,8 +182,6 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
             b.Property(c => c.UpdatedAt).IsRequired(false);
 
             b.HasIndex(c => c.Name).IsUnique();
-
-            b.HasQueryFilter(c => !c.IsDeleted);
         }
     }
 
@@ -219,7 +219,6 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
 
             b.HasIndex(a => a.IsDeleted);
             b.HasIndex(a => a.CategoryId);
-            b.HasQueryFilter(a => !a.IsDeleted);
         }
     }
 
@@ -247,8 +246,6 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
              .HasFilter("[IsDeleted] = 0");
 
             b.HasIndex(c => c.IsBlocked);
-
-            b.HasQueryFilter(c => !c.IsDeleted);
         }
     }
 
@@ -275,8 +272,6 @@ namespace ERP.InvoiceService.Infrastructure.Persistence
              .HasFilter("[IsDeleted] = 0");
 
             b.HasIndex(c => c.IsActive);
-
-            b.HasQueryFilter(c => !c.IsDeleted);
         }
     }
 
@@ -318,5 +313,7 @@ internal sealed class TenantCacheConfiguration : IEntityTypeConfiguration<Tenant
         b.Property(t => t.Phone).IsRequired().HasMaxLength(20);
         b.Property(t => t.Currency).IsRequired().HasMaxLength(10);
         b.HasIndex(t => t.Slug).IsUnique();
+        b.Property(t => t.PrimaryColor).HasMaxLength(7);
+        b.Property(t => t.SecondaryColor).HasMaxLength(7);
     }
 }
