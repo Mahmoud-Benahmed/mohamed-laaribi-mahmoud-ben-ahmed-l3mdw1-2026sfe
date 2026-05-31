@@ -267,7 +267,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
         try
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+            CategoryCache? existing = await _repository.GetByIdDeletedAsync(dto.Id);
             if (existing == null)
             {
                 _logger.LogWarning("Category {CategoryId} not found for restore", dto.Id);
