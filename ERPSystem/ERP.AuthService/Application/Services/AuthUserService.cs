@@ -5,6 +5,7 @@ using ERP.AuthService.Application.Interfaces;
 using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Domain.Cache;
 using ERP.AuthService.Domain.Logger;
 using ERP.AuthService.Infrastructure.ApiClient;
 using ERP.AuthService.Infrastructure.Security;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 
 
@@ -33,6 +35,8 @@ namespace ERP.AuthService.Application.Services
         private readonly ITenantContext _tenantContext;
         private readonly IRefreshTokenHashingHelper _refreshTokenHelper;
         private readonly ITenantApiClient _tenantApi;
+        private readonly ITenantCacheRepository _tenantRepo;
+
 
         public AuthUserService(
             IAuditLogger auditLogger,
@@ -47,6 +51,7 @@ namespace ERP.AuthService.Application.Services
             ITenantContext tenantContext,
             IRefreshTokenHashingHelper refreshTokenHelper,
             ITenantApiClient tenantApi,
+            ITenantCacheRepository tenantRepo,
             ILogger<AuthUserService> logger
             )
         {
@@ -62,6 +67,7 @@ namespace ERP.AuthService.Application.Services
             _tenantContext = tenantContext;
             _refreshTokenHelper = refreshTokenHelper;
             _tenantApi = tenantApi;
+            _tenantRepo = tenantRepo;
             _logger = logger;
         }
 
@@ -288,7 +294,7 @@ namespace ERP.AuthService.Application.Services
                         AuditAction.Login,
                         success: true,
                         performedBy: user.Id,
-                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId.ToString() },
+                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId?.ToString() ?? "platform-admin" },
                         ipAddress: GetIp(),
                         userAgent: GetUserAgent());
                 return token;
@@ -405,12 +411,22 @@ namespace ERP.AuthService.Application.Services
                 .Select(c => c.Libelle)
                 .ToList();
 
+            TenantCache? tenant = null;
+
+            _logger.LogWarning("User TenantId: {TenantId}", user.TenantId);
+
+            if (user.TenantId.HasValue)
+                tenant = await _tenantRepo.GetByIdAsync(user.TenantId.Value);
+
+            _logger.LogWarning("Resolved tenant Id: {TenantCacheId}", tenant?.Id);
+
             (string? accessToken, DateTime expiresAt) = _jwtGenerator.GenerateAccessToken(
                 user.Id,
                 user.Login,
                 role.Libelle,
                 privilegeNames,
-                user.TenantId
+                user.TenantId,
+                tenant?.Slug
             );
 
             string refreshTokenRaw = _refreshTokenHelper.GenerateRawToken();
@@ -509,7 +525,7 @@ namespace ERP.AuthService.Application.Services
             await _auditLogger.LogAsync(
                 AuditAction.UserActivated,
                 success: true,
-                tenantId: _tenantContext.TenantId ?? Guid.Empty,  // ← was _tenantId
+                tenantId: _tenantContext.TenantId,
                 performedBy: performedById,
                 targetUserId: user.Id,
                 ipAddress: GetIp());
