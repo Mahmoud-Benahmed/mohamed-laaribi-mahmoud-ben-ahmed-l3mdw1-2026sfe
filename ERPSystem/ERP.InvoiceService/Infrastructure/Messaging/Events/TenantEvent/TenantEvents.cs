@@ -8,7 +8,9 @@ public record TenantCreatedEvent(
     string Address,
     string Email,
     string Phone,
-    string Currency
+    string Currency,
+    string PrimaryColor,
+    string SecondaryColor
     );
 public record TenantUpdatedEvent(
     Guid TenantId,
@@ -19,7 +21,9 @@ public record TenantUpdatedEvent(
     string Address,
     string Email,
     string Phone,
-    string Currency);
+    string Currency,
+    string PrimaryColor,
+    string SecondaryColor);
 
 public record TenantDeletedEvent(
     Guid TenantId,
