@@ -162,12 +162,16 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IControleRepository, ControleRepository>();
 builder.Services.AddScoped<IPrivilegeRepository, PrivilegeRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<ITenantCacheRepository, TenantCacheRepository>();
+
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IControleService, ControleService>();
 builder.Services.AddScoped<IPrivilegeService, PrivilegeService>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
+builder.Services.AddScoped<ITenantCacheService, TenantCacheService>();
+
 builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 builder.Services.AddScoped<IAuditLogger, AuditLogger>();
