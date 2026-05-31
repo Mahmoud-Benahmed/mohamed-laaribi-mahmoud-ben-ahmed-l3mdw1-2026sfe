@@ -1,4 +1,5 @@
 ﻿using ERP.AuthService.Domain;
+using ERP.AuthService.Domain.Cache;
 using ERP.AuthService.Domain.Logger;
 using ERP.AuthService.Infrastructure.Configuration;
 using MongoDB.Bson;
@@ -303,6 +304,13 @@ namespace ERP.AuthService.Infrastructure.Persistence
             ]);
 
             #endregion
+
+
+            await context.Collection<TenantCache>(CollectionNames.TenantsCache).Indexes.CreateManyAsync([
+                new CreateIndexModel<TenantCache>(
+                    Builders<TenantCache>.IndexKeys.Ascending(t => t.Slug),
+                    new CreateIndexOptions { Unique = true, Name = "idx_slug" }),
+            ]);
         }
     }
 }
