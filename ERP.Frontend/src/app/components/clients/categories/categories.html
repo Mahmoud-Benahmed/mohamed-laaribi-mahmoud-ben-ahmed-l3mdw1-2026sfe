@@ -421,10 +421,17 @@
               <label>{{ 'CLIENT_CATEGORIES.FORM.DISCOUNT_RATE' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
               <mat-icon>percent</mat-icon>
             </div>
-            <input class="form__input" type="number" formControlName="discountRate"
-              [placeholder]="'CLIENT_CATEGORIES.FORM.DISCOUNT_RATE_PLACEHOLDER' | translate" step="1" min="0" max="100"
-              [class.form__input--error]="categoryForm.get('discountRate')?.invalid && categoryForm.get('discountRate')?.touched"
-              />
+            <input class="form__input"
+                  type="number"
+                  formControlName="discountRate"
+                  [placeholder]="'CLIENT_CATEGORIES.FORM.DISCOUNT_RATE_PLACEHOLDER' | translate"
+                  step="1"
+                  min="0"
+                  max="100"
+                  [class.form__input--error]="categoryForm.get('discountRate')?.invalid && categoryForm.get('discountRate')?.touched"
+                  [class.disabled]="categoryForm.get('useBulkPricing')?.value === false"
+                  />
+
             <span class="field__error" *ngIf="categoryForm.get('discountRate') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['min'] || ctrl.errors?.['max']">{{ 'VALIDATION.DISCOUNT_RATE_INVALID' | translate }}</span>
