@@ -35,6 +35,20 @@ public class FournisseurCacheRepository : IFournisseurCacheRepository
         }
     }
 
+    public async Task<FournisseurCache?> GetByIdDeletedAsync(Guid id)
+    {
+        try
+        {
+            return await _dbContext.FournisseurCaches.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(f => f.Id == id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting fournisseur by ID {FournisseurId}", id);
+            throw;
+        }
+    }
+
     public async Task<FournisseurCache?> GetByNameAsync(string name)
     {
         try
