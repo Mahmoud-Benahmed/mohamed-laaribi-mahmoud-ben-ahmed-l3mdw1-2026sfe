@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { SubscriptionPeriod } from '../../interfaces/TenantDto';
 import { RegexPatterns } from '../../interfaces/RegexPatterns';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-onboarding',
@@ -15,7 +16,9 @@ import { RegexPatterns } from '../../interfaces/RegexPatterns';
   templateUrl: './onboarding.html',
   styleUrl: './onboarding.scss'
 })
-export class OnboardingComponent implements OnInit {
+export class OnboardingComponent implements OnInit , OnDestroy{
+  private redirectTimer?: ReturnType<typeof setTimeout>;
+
   form!: FormGroup;
   planId   = '';
   planName = '';
@@ -29,7 +32,6 @@ export class OnboardingComponent implements OnInit {
   ];
   currencies = ['TND', 'EUR', 'USD', 'GBP', 'MAD', 'DZD'];
   locales    = ['fr-TN', 'en-US', 'fr-FR', 'ar-TN'];
-  readonly addressPattern = /^[\p{L}0-9\s,.'\-]+$/u;
   constructor(
     private fb: FormBuilder,
     private tenantService: TenantService,
@@ -39,11 +41,12 @@ export class OnboardingComponent implements OnInit {
     public  userSettings: UserSettingsService
   ) {}
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       this.planId   = params['planId']   ?? '';
       this.planName = params['planName'] ?? '';
-      this.period   = params['period']   ?? 'MONTH';
+      this.period = (params['period'] as SubscriptionPeriod) ?? SubscriptionPeriod.MONTH;
     });
+
     this.form = this.fb.group({
       // Company
       name:           ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
@@ -66,13 +69,18 @@ export class OnboardingComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+    if (!this.planId) {
+      this.error = this.translate.instant('ERRORS.NO_PLAN_SELECTED');
+      return;
+    }
+
     this.loading = true;
     this.error   = '';
     const payload = {
       ...this.form.value,
       subscription: {
         subscriptionPlanId: this.planId,
-        startDate: new Date().toISOString(),
+        startDate: new Date().toISOString().split('T')[0],
         period: this.period
       }
     };
@@ -80,12 +88,16 @@ export class OnboardingComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.success = true;
-        setTimeout(() => this.router.navigate(['/login']), 2500);
+        this.redirectTimer = setTimeout(() => this.router.navigate(['/login']), 5000);
       },
       error: (err) => {
         this.loading = false;
         this.error = err?.error?.message ?? this.translate.instant('ERRORS.UNKNOWN');
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.redirectTimer);
   }
 }
