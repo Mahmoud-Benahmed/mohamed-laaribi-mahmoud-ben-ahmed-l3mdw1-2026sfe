@@ -11,6 +11,8 @@ import { BehaviorSubject, catchError, Observable, Subject, take, tap, throwError
 
 interface JwtPayload {
   sub: string;
+  tenantId: string;
+  slug: string;
   login: string;
   role: string;
   theme: 'light' | 'dark';
@@ -140,8 +142,6 @@ export class AuthService {
   private _onLogout$ = new Subject<void>();
   readonly onLogout$ = this._onLogout$.asObservable();
 
-
-  private readonly TENANT_SLUG_KEY = 'tenant_slug';  //for multi-tenants support////
   private readonly baseUrl = `${environment.apiUrl}${environment.routes.auth}`;
   private readonly loginUrl = `${environment.apiUrl}/login`;
 
@@ -155,31 +155,20 @@ export class AuthService {
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
     localStorage.setItem('expiresAt', response.expiresAt);
     localStorage.setItem('mustChangePassword', String(response.mustChangePassword));
-    if (response.tenantSlug)
-    localStorage.setItem(this.TENANT_SLUG_KEY, response.tenantSlug);
   }
-
-getTenantSlug(): string | null {
-  return localStorage.getItem(this.TENANT_SLUG_KEY);
-}
-
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
-  }
+    return localStorage.getItem(this.ACCESS_TOKEN_KEY);}
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-  }
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);}
 
   getExpiresAt(): Date | null {
     const value = localStorage.getItem('expiresAt');
-    return value ? new Date(value) : null;
-  }
+    return value ? new Date(value) : null;}
 
   getMustChangePassword(): boolean {
-    return localStorage.getItem('mustChangePassword') === 'true';
-  }
+    return localStorage.getItem('mustChangePassword') === 'true';}
 
 
   clearSession(): void {
@@ -219,6 +208,14 @@ getTenantSlug(): string | null {
       } catch {
           return null;
       }
+  }
+
+  get TenantId(): string | null {
+    return this.JwtPayload?.tenantId ?? null;
+  }
+
+  get Slug(): string | null {
+    return this.JwtPayload?.slug ?? null;
   }
 
   get UserId(): string | null {
