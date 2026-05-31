@@ -20,6 +20,11 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         .Include(a => a.Category)
         .FirstOrDefaultAsync(a => a.Id == id);
 
+    public async Task<Domain.LocalCache.Article.ArticleCache?> GetByIdDeletedAsync(Guid id)
+    => await _db.ArticleCaches.IgnoreQueryFilters()
+        .Include(a => a.Category)
+        .FirstOrDefaultAsync(a => a.Id == id);
+
     public async Task<Domain.LocalCache.Article.ArticleCache?> GetByBarCodeAsync(string barCode)
         => await _db.ArticleCaches
             .Include(a => a.Category)
