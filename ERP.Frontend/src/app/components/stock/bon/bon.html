@@ -869,7 +869,7 @@
                       [class.client-dropdown__item--selected]="ligneForm.get('articleId')?.value === a.id"
                       (click)="selectArticleForLigne(a)">
                     <span class="client-dropdown__name">{{ a.codeRef }} — {{ a.libelle }}</span>
-                    <span class="client-dropdown__email">{{ a.prix | number:'1.2-2' }} €</span>
+                    <span class="client-dropdown__email">{{ a.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale}}</span>
                   </li>
                   <li *ngIf="articlesLoading" class="client-dropdown__loading">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
