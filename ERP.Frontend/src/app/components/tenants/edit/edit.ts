@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
-import { TenantResponseDto, SubscriptionPlanDto, UpdateTenantRequestDto, AssignSubscriptionRequestDto, SubscriptionPeriod } from '../../../interfaces/TenantDto';
+import { TenantResponseDto, SubscriptionPlanDto, UpdateTenantRequestDto, AssignSubscriptionRequestDto, SubscriptionPeriod, LocaleEnum, TimeZoneEnum, CurrencyEnum } from '../../../interfaces/TenantDto';
 import { catchError, forkJoin, of } from 'rxjs';
 import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TenantService } from '../../../services/tenant/tenant.service';
 import { SubscriptionPlanService } from '../../../services/tenant/subscription-plan.service';
 import { ModalComponent } from '../../modal/modal';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 @Component({
   selector: 'app-tenants-edit',
@@ -56,6 +57,10 @@ export class EditTenantComponent implements OnInit, OnDestroy {
   readonly PRIVILEGES = PRIVILEGES;
   readonly SubscriptionPeriod = SubscriptionPeriod;
 
+  readonly LocaleEnum = LocaleEnum;
+  readonly CurrencyEnum = CurrencyEnum;
+  readonly TimeZoneEnum = TimeZoneEnum;
+
   constructor(
     public authService: AuthService,
     private tenantService: TenantService,
@@ -80,19 +85,25 @@ export class EditTenantComponent implements OnInit, OnDestroy {
 
   private buildForms(): void {
     this.tenantForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      subdomainSlug: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-z0-9-]+$/)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.minLength(8)]],
-      address: ['', Validators.required],
-      currency: ['TND', Validators.required],
-      locale: ['en', Validators.required],
-      timezone: ['UTC', Validators.required],
+      // Company
+      name:           ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
+      email:          ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
+      phone:          ['', [Validators.required, Validators.pattern(RegexPatterns.phone)]],
+      subdomainSlug:  ['', [Validators.required, Validators.maxLength(100), Validators.pattern(RegexPatterns.subdomainSlug)]],
+      address:        ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
+      logoUrl:        ['', [Validators.maxLength(500)]],
+      // Branding
+      primaryColor:   ['', [Validators.pattern(RegexPatterns.hexColor)]],
+      secondaryColor: ['', [Validators.pattern(RegexPatterns.hexColor)]],
+      // Regional
+      currency: [CurrencyEnum.TND, Validators.required],
+      locale: [LocaleEnum.FR, Validators.required],
+      timezone: [TimeZoneEnum.AFRICA_TUNIS, Validators.required],
     });
 
     this.subscriptionForm = this.fb.group({
       subscriptionPlanId: ['', Validators.required],
-      period: [SubscriptionPeriod.MONTH, Validators.required],
+      period: [SubscriptionPeriod.MONTH, Validators.required]
     });
   }
 
@@ -125,23 +136,25 @@ export class EditTenantComponent implements OnInit, OnDestroy {
   }
 
   private populateFormFromTenant(tenant: TenantResponseDto): void {
+    console.log(tenant);
+
+    if (tenant.subscription?.plan?.id) {
+      this.subscriptionForm.patchValue({
+        subscriptionPlanId: tenant.subscription.plan.id,
+        period: tenant.subscription.period || SubscriptionPeriod.MONTH
+      });
+    }
     this.tenantForm.patchValue({
       name: tenant.name,
       subdomainSlug: tenant.subdomainSlug,
       email: tenant.email,
       phone: tenant.phone,
       address: tenant.address,
-      currency: tenant.currency || 'TND',
-      locale: tenant.locale || 'en',
-      timezone: tenant.timezone || 'UTC',
+      currency: tenant.currency || CurrencyEnum.TND,
+      locale: this.localeToEnum(tenant.locale),
+      timezone: tenant.timezone || TimeZoneEnum.AFRICA_TUNIS,
     });
 
-    if (tenant.subscription?.plan?.id) {
-      this.subscriptionForm.patchValue({
-        subscriptionPlanId: tenant.subscription.plan.id,
-        period: tenant.subscription.period || SubscriptionPeriod.MONTH,
-      });
-    }
 
     this.tenantForm.markAsPristine();
     this.subscriptionForm.markAsPristine();
@@ -328,5 +341,17 @@ export class EditTenantComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // cleanup
+  }
+
+  private localeToEnum(locale: string | undefined): LocaleEnum {
+    const map: Record<string, LocaleEnum> = {
+      'en': LocaleEnum.EN,
+      'en-US': LocaleEnum.EN,
+      'fr': LocaleEnum.FR,
+      'fr-FR': LocaleEnum.FR,
+      'ar': LocaleEnum.AR,
+      'ar-TN': LocaleEnum.AR,
+    };
+    return map[locale ?? ''] ?? LocaleEnum.FR;
   }
 }
