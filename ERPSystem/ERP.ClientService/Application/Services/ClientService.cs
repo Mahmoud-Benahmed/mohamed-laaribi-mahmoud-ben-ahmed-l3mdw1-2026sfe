@@ -12,16 +12,19 @@ public class ClientService : IClientService
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEventPublisher _eventPublisher;
     private readonly ITenantContext _tenantContext;
+    private readonly ILogger<ClientService> _logger;
 
     public ClientService(IClientRepository clientRepository,
                         ICategoryRepository categoryRepository,
                         IEventPublisher eventPublisher,
-                        ITenantContext tenantContext)
+                        ITenantContext tenantContext,
+                        ILogger<ClientService> logger)
     {
         _clientRepository = clientRepository;
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
         _tenantContext = tenantContext;
+        _logger = logger;
     }
 
     // =========================
@@ -160,10 +163,13 @@ public class ClientService : IClientService
     public async Task<ClientResponseDto> AddCategoryAsync(
         Guid clientId, Guid categoryId, Guid assignedById)
     {
+
+        _logger.LogWarning($"\n\n\nREquesterId: {assignedById}\n\n\n");
+
         Client client = await _clientRepository.GetByIdAsync(clientId) ?? throw new ClientNotFoundException(clientId);
 
         Category category = await _categoryRepository.GetByIdAsync(categoryId) ?? throw new CategoryNotFoundException(categoryId);
-
+        
         client.AddCategory(category, assignedById);
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto dto = client.ToResponseDto();
