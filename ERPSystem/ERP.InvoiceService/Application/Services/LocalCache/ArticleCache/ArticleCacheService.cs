@@ -74,19 +74,6 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task SyncCreatedAsync(ArticleResponseDto dto)
     {
-        // 1. Get existing category (or create it)
-        ArticleCategoryCache? category = await _categoryRepo.GetByIdAsync(dto.Category.Id)
-                       ?? await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-        if (category == null)
-        {
-            await _categoryService.SyncCreatedAsync(dto.Category);
-            category = await _categoryRepo.GetByIdAsync(dto.Category.Id);
-            if (category == null)
-                throw new InvalidOperationException($"Category {dto.Category.Id} could not be created.");
-        }
-
-        // 2. Check if article already exists
         Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id)
                        ?? await _repo.GetByBarCodeAsync(dto.BarCode)
                        ?? await _repo.GetByCodeRefAsync(dto.CodeRef);
@@ -100,7 +87,7 @@ public sealed class ArticleCacheService : IArticleCacheService
         else
         {
             // Create new article using the factory overload
-            Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(dto, category);
+            Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(dto);
             await _repo.AddAsync(article);
         }
 
@@ -141,11 +128,11 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task SyncRestoredAsync(ArticleResponseDto dto)
     {
-        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
+        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogWarning("SyncRestored: article {Id} not in cache, inserting instead", dto.Id);
-            await _repo.AddAsync(Domain.LocalCache.Article.ArticleCache.FromEvent(dto));
+            return;
         }
         else
         {
@@ -172,14 +159,14 @@ public sealed class ArticleCacheService : IArticleCacheService
         UpdatedAt: a.UpdatedAt,
         TenantId: a.TenantId);
 
-    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => c is null
-        ? new ArticleCategoryResponseDto(Guid.Empty, string.Empty, 0, false, DateTime.MinValue, null, null)
-        : new ArticleCategoryResponseDto(
+    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) =>
+        new (
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
             IsDeleted: c.IsDeleted,
             CreatedAt: c.CreatedAt,
             UpdatedAt: c.UpdatedAt,
-            TenantId: c.TenantId);
+            TenantId: c.TenantId
+            );
 }
