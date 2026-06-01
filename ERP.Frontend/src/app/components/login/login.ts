@@ -15,8 +15,9 @@ import { ModalComponent } from '../modal/modal';
 import { environment } from '../../environment';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { map, Subscription, switchMap, tap } from 'rxjs';
+import { map, Subscription, switchMap, take, tap } from 'rxjs';
 import { RegexPatterns } from '../../interfaces/RegexPatterns';
+import { TenantService } from '../../services/tenant/tenant.service';
 
 @Component({
   selector: 'app-login',
@@ -56,7 +57,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     public userSettings: UserSettingsService,
     public translate: TranslateService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private tenantService: TenantService
   ) {
     this.loginForm = this.fb.group({
       login:       ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
@@ -92,16 +94,22 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     const {login, password}= this.loginForm.value;
 
-    this.authService.login({login, password}).pipe(
-      switchMap((response) =>
+    this.authService.login({ login, password }).pipe(
+      switchMap(response =>
         this.authService.getMe().pipe(
           tap(user => {
             this.authService.setUserProfile(user);
             this.userProfile = user;
           }),
-          map(() => response) // keep login response for later use
+          map(() => response)
         )
-      )
+      ),
+      switchMap(response =>
+        this.tenantService.loadTenantSettings(this.authService.TenantId!).pipe(
+          map(() => response)   // keep response flowing for next()
+        )
+      ),
+      take(1)
     ).subscribe({
       next: (response) => {
         this.isLoading = false;
