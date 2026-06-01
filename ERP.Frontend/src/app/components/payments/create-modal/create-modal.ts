@@ -358,7 +358,7 @@ export class CreatePaymentModal implements OnInit{
   createLine(): FormGroup {
     return this.fb.group({
       invoiceId:       ['', Validators.required],
-      allocatedAmount: [0, [Validators.required, Validators.min(0.01)]]
+      allocatedAmount: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
