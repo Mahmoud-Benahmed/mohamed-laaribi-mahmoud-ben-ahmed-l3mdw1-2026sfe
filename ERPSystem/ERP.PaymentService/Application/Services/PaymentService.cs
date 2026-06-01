@@ -146,9 +146,8 @@ public class PaymentService : IPaymentService
 
         await _paymentRepository.AddAsync(payment);
 
-        _logger.LogInformation(
-            "Payment {Number} created. Id: {PaymentId}, TotalAmount: {TotalAmount}, Allocations: {Count}",
-            payment.Number, payment.Id, payment.TotalAmount, payment.Allocations.Count);
+        // ── 1. Apply all cache updates first ─────────────────────────────────────
+        var paidInvoiceEvents = new List<InvoicePaidEvent>();
 
         foreach (var allocation in dto.Allocations)
         {
@@ -158,20 +157,29 @@ public class PaymentService : IPaymentService
 
             if (cache.Status == InvoiceStatus.PAID)
             {
-                await _eventPublisher.PublishAsync(
-                    PaymentTopics.InvoicePaid,
-                    new InvoicePaidEvent(
-                        InvoiceId: cache.Id,
-                        PaymentId: payment.Id,
-                        PaidAmount: Math.Round(cache.PaidAmount, 2),
-                        PaidAt: DateTime.UtcNow
-                    ));
-
-                _logger.LogInformation(
-                    "Invoice {InvoiceId} fully paid via Payment {PaymentId}.",
-                    cache.Id, payment.Id);
+                paidInvoiceEvents.Add(new InvoicePaidEvent(
+                    InvoiceId: cache.Id,
+                    PaymentId: payment.Id,
+                    PaidAmount: Math.Round(cache.PaidAmount, 2),
+                    PaidAt: DateTime.UtcNow,
+                    TenantId: cache.TenantId
+                ));
             }
         }
+
+        // ── 2. Publish after all DB writes succeed ────────────────────────────────
+        foreach (var evt in paidInvoiceEvents)
+        {
+            await _eventPublisher.PublishAsync(PaymentTopics.InvoicePaid, evt);
+
+            _logger.LogInformation(
+                "Invoice {InvoiceId} fully paid via Payment {PaymentId}.",
+                evt.InvoiceId, evt.PaymentId);
+        }
+
+        _logger.LogInformation(
+            "Payment {Number} created. Id: {PaymentId}, TotalAmount: {TotalAmount}, Allocations: {Count}",
+            payment.Number, payment.Id, payment.TotalAmount, payment.Allocations.Count);
 
         return ToDto(payment);
     }
@@ -192,35 +200,52 @@ public class PaymentService : IPaymentService
     {
         var payment = await _paymentRepository.GetByIdAsync(id)
             ?? throw new PaymentNotFoundException(id);
+       
+        _logger.LogInformation(
+            "CancelAsync — PaymentId: {Id}, TenantId: {TenantId}, Allocations: {Count}",
+            id, payment.TenantId, payment.Allocations.Count);
 
         payment.Cancel();
         await _paymentRepository.UpdateAsync(payment);
 
+        // ── 1. Collect events to publish after all DB writes succeed ──────────────
+        var pendingEvents = new List<PaymentCancelledEvent>();
+
         foreach (PaymentInvoice allocation in payment.Allocations)
         {
             var cache = await _invoiceCacheRepository.GetByIdAsync(allocation.InvoiceId);
-            if (cache is not null)
-            {
-                var remaining = Math.Round(
-                    Math.Max(0m, allocation.AmountAllocated - allocation.RefundedAmount),
-                    2,
-                    MidpointRounding.AwayFromZero
-                );
+            if (cache is null) continue;
 
-                cache.ReversePayment(remaining);
+            var remaining = Math.Round(
+                Math.Max(0m, allocation.AmountAllocated - allocation.RefundedAmount),
+                2,
+                MidpointRounding.AwayFromZero
+            );
 
-                await _invoiceCacheRepository.SaveChangesAsync(cache);
+            cache.ReversePayment(remaining);
+            await _invoiceCacheRepository.SaveChangesAsync(cache);
 
-                await _eventPublisher.PublishAsync(PaymentTopics.Cancelled,
-                new PaymentCancelledEvent(
-                    PaymentId: payment.Id,
-                    InvoiceId: allocation.InvoiceId,
-                    ReversedAmount: allocation.AmountAllocated,
-                    CancelledAt: payment.CancelledAt.Value));
-            }
+            pendingEvents.Add(new PaymentCancelledEvent(
+                PaymentId: payment.Id,
+                InvoiceId: allocation.InvoiceId,
+                ReversedAmount: allocation.AmountAllocated,
+                CancelledAt: payment.CancelledAt!.Value,
+                TenantId: payment.TenantId
+            ));
         }
 
+        // ── 2. Persist PaymentInvoice rows BEFORE publishing ─────────────────────
         await _paymentInvoiceRepo.SaveChangesAsync();
+
+        // ── 3. Publish only after all DB writes are committed ────────────────────
+        foreach (var evt in pendingEvents)
+        {
+            await _eventPublisher.PublishAsync(PaymentTopics.Cancelled, evt);
+
+            _logger.LogInformation(
+                "Published PaymentCancelledEvent — PaymentId: {PaymentId}, InvoiceId: {InvoiceId}, ReversedAmount: {Amount}",
+                evt.PaymentId, evt.InvoiceId, evt.ReversedAmount);
+        }
 
         _logger.LogInformation(
             "Payment {PaymentId} cancelled at {CancelledAt}.",

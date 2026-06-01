@@ -86,7 +86,7 @@ public sealed class InvoiceEventHandler : IInvoiceEventHandler
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
-            var refund = new RefundRequest(dto.ClientId, dto.Id);
+            var refund = new RefundRequest(dto.ClientId, dto.Id, $"InvoiceCancellation, Invoice number: {dto.InvoiceNumber}", dto.TenantId);
 
             foreach (var alloc in refundableAllocations)
             {

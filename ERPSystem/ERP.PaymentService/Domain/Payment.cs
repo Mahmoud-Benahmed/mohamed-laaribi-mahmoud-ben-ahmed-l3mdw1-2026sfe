@@ -43,22 +43,22 @@ public class Payment
 
     public void AllocateAmount(decimal amount, InvoiceCache cache)
     {
-        amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero); // ← round input first
+        amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
 
         if (amount <= 0)
             throw new PaymentDomainException("Le montant affecté doit être positif.");
 
         var remaining = GetRemainingAmount();
-        if (amount > remaining + 0.01m)  // ← tolerance for floating-point edge cases
+        if (amount > remaining + 0.01m)
             throw new PaymentDomainException(
                 $"Le montant affecté ({amount:F2}) dépasse le restant du règlement ({remaining:F2}).");
 
         var invoiceRemaining = Math.Round(cache.TotalTTC - cache.PaidAmount, 2, MidpointRounding.AwayFromZero);
-        if (amount > invoiceRemaining + 0.01m)  // ← same tolerance
+        if (amount > invoiceRemaining + 0.01m)
             throw new PaymentDomainException(
                 $"Le montant affecté ({amount:F2}) dépasse le restant de la facture ({invoiceRemaining:F2}).");
 
-        _allocations.Add(new PaymentInvoice(Id, cache.Id, amount));
+        _allocations.Add(new PaymentInvoice(Id, cache.Id, amount, TenantId)); // ← pass TenantId
     }
 
     public void CorrectDetails(

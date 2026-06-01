@@ -29,7 +29,8 @@ public class PaymentInvoiceRepository : IPaymentInvoiceRepository
     public async Task<List<PaymentInvoice>> GetByInvoiceIdAsync(Guid invoiceId)
     {
         return await _context.PaymentsInvoices
-            .Where(pi => pi.InvoiceId == invoiceId)
+            .Where(pi => pi.InvoiceId == invoiceId &&
+                         _context.Payments.Any(p => p.Id == pi.PaymentId && p.Status == PaymentStatus.DONE))
             .ToListAsync();
     }
 
