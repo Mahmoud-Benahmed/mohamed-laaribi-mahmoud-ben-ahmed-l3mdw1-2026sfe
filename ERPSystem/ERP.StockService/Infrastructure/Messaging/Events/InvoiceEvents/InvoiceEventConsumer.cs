@@ -29,7 +29,7 @@ public sealed class InvoiceEventConsumer : BackgroundService
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
             GroupId = $"stock-service-invoice-cache-v1",
-            AutoOffsetReset = AutoOffsetReset.Latest,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true
         };

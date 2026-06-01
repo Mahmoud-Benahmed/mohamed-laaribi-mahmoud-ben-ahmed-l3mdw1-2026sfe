@@ -30,7 +30,7 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
             GroupId = $"stock-service-client-category-cache-v1",
-            AutoOffsetReset = AutoOffsetReset.Latest,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true,
             SocketTimeoutMs = 60000,
