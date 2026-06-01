@@ -10,6 +10,7 @@ using ERP.TenantService.Application.Interfaces.Repositories;
 using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Domain;
 using ERP.TenantService.Infrastructure.Messaging;
+using System.Net;
 
 public class TenantService : ITenantService
 {
@@ -37,7 +38,27 @@ public class TenantService : ITenantService
 		return tenants.Select(MapToDto).ToList();
 	}
 
-	public async Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default)
+	// For Tenant's admin
+	public async Task<GetTenantSettingsDto> GetTenantSettings(Guid tenantId, CancellationToken ct = default)
+	{
+		var tenant = await _tenantRepository.GetByIdAsync(tenantId) ?? throw new TenantNotFoundException(tenantId);
+
+		return new GetTenantSettingsDto(
+				 Name:tenant.Name,
+				 Email:tenant.Email,
+				 Phone:tenant.Phone,
+				 Address:tenant.Address,
+				 Slug:tenant.Slug,
+				 LogoUrl:tenant.LogoUrl,
+				 PrimaryColor:tenant.PrimaryColor,
+				 SecondaryColor:tenant.SecondaryColor,
+				 Currency:tenant.Currency,
+				 Locale:tenant.Locale,
+				 Timezone:tenant.Timezone
+				 );
+	}
+
+    public async Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default)
 	{
 		(page, pageSize) = NormalizePagination(page, pageSize);
 		var (items, totalCount) = await _tenantRepository.GetAllAsync(page, pageSize, ct);
@@ -130,9 +151,9 @@ public class TenantService : ITenantService
 			phone: dto.Phone,
 			subdomainSlug: dto.SubdomainSlug,
 			address: dto.Address ?? tenant.Address,
+			primaryColor: dto.PrimaryColor ?? tenant.PrimaryColor,
+			secondaryColor: dto.SecondaryColor ??  tenant.SecondaryColor,
 			logoUrl: dto.LogoUrl,
-			primaryColor: dto.PrimaryColor,
-			secondaryColor: dto.SecondaryColor,
 			currency: dto.Currency,
 			locale: dto.Locale,
 			timezone: dto.Timezone);

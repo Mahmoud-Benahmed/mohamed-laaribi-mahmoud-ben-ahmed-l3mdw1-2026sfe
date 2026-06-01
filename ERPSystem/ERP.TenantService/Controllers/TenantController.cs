@@ -49,6 +49,13 @@ public class TenantController : ControllerBase
         return Ok(tenant);
     }
 
+    [HttpGet(ApiRoutes.Tenants.GetTenantSettings)]
+    public async Task<IActionResult> GetTenantSettings([FromRoute] Guid id, CancellationToken ct = default)
+    {
+        var tenant = await _tenantService.GetTenantSettings(id, ct);
+        return Ok(tenant);
+    }
+
     [HttpGet(ApiRoutes.Tenants.GetBySlug)]
     public async Task<IActionResult> GetBySlug([FromRoute] string slug, CancellationToken ct = default)
     {

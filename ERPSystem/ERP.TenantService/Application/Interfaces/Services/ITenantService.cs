@@ -7,6 +7,7 @@ namespace ERP.TenantService.Application.Interfaces.Services;
 public interface ITenantService
 {
     Task<PagedResultDto<TenantResponseDto>> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<GetTenantSettingsDto> GetTenantSettings(Guid tenantId, CancellationToken ct = default);
     Task<List<TenantResponseDto>> GetAllActiveAsync(CancellationToken ct = default);
     Task<PagedResultDto<TenantResponseDto>> GetDeletedAsync(int page, int pageSize, CancellationToken ct = default);
     Task<TenantResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default);

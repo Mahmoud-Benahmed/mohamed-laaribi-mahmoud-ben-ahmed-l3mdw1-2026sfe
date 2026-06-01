@@ -72,9 +72,9 @@ public class Tenant
         string phone,
         string subdomainSlug,
         string address,
+        string primaryColor,
+        string secondaryColor,
         string? logoUrl= null,
-        string? primaryColor= null,
-        string? secondaryColor= null,
         string currency= "TND",
         string locale= "fr-TN",
         string timezone= "Africa/Tunisia")
