@@ -29,7 +29,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
             GroupId = $"auth-service-tenant-seeder-v1",
-            AutoOffsetReset = AutoOffsetReset.Latest,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false
         };
 
