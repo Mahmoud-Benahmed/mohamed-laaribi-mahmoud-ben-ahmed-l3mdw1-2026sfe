@@ -27,7 +27,7 @@ public sealed class PaymentEventConsumer : BackgroundService
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
             GroupId = $"invoice-service-payment-cache-v1",
-            AutoOffsetReset = AutoOffsetReset.Latest,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true
         };
