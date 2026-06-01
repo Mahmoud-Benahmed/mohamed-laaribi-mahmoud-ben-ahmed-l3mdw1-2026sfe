@@ -1,0 +1,240 @@
+<div class="page">
+  <ng-container>
+    <ng-container *ngIf="selectedTenant; else loading">
+      <div class="page-header" id="top">
+        <div>
+          <h1 class="page-title">{{ 'COMMON.SYSTEM_SETTINGS' | translate }}</h1>
+        </div>
+        <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      </div>
+    </ng-container>
+    <ng-template #loading>
+      <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }}</p>
+      <h1 class="page-title">{{ 'TENANTS.TITLE_EDIT' | translate }}...</h1>
+    </ng-template>
+
+    <!-- ── Alerts ─────────────────────────────────── -->
+    <div *ngFor="let e of errors" class="alert alert--error">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">error_outline</mat-icon>
+      {{ e }}
+      <button class="alert__close" (click)="dismissError()">
+        <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="successMessage" class="alert alert--success">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">check_circle_outline</mat-icon>
+      {{ successMessage }}
+    </div>
+
+    <!-- ── Tenant Details Panel ─────────────────────── -->
+    <div class="panel">
+      <div class="panel__header">
+        <div class="panel__title-wrap">
+          <div class="panel__icon"><mat-icon>business</mat-icon></div>
+          <div>
+            <h2 class="panel__title">{{ 'TENANTS.FORM.TENANT_DETAILS' | translate }}</h2>
+            <p class="panel__subtitle">{{ 'TENANTS.FORM.EDIT_TENANT_INFO' | translate }}</p>
+          </div>
+        </div>
+        <button (click)="edit()" [class]="isEdit ? 'btn-warning' : 'btn-secondary'">{{ isEdit ? ('COMMON.EDIT' | translate) : ('COMMON.UNDO' | translate)}}</button>
+      </div>
+      <div class="panel__body">
+        <form [formGroup]="tenantForm" class="form">
+
+          <!-- Name & Subdomain -->
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.NAME' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="text"
+										 [class.disabled]="isEdit"
+                     formControlName="name"
+                     [placeholder]="'TENANTS.FORM.NAME_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('name')?.invalid && tenantForm.get('name')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('name')?.invalid && tenantForm.get('name')?.touched">
+                <span *ngIf="tenantForm.get('name')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('name')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 2} }}</span>
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.SUBDOMAIN' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <div class="form__input-group">
+                <input class="form__input"
+											type="text"
+										 	[class.disabled]="isEdit"
+											formControlName="subdomainSlug"
+											[placeholder]="'TENANTS.FORM.SUBDOMAIN_PLACEHOLDER' | translate"
+											[class.form__input--error]="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched" />
+                <span class="form__addon">.erpsystem.app</span>
+              </div>
+              <span class="form__error" *ngIf="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched">
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 3} }}</span>
+                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('pattern')">{{ 'VALIDATION.INVALID_FORMAT' | translate }}</span>
+              </span>
+              <small class="form__hint">{{ 'TENANTS.FORM.SUBDOMAIN_HINT' | translate }}</small>
+            </div>
+          </div>
+
+          <!-- Email & Phone -->
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.EMAIL' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="email"
+										 [class.disabled]="isEdit"
+                     formControlName="email"
+                     [placeholder]="'TENANTS.FORM.EMAIL_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('email')?.invalid && tenantForm.get('email')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('email')?.invalid && tenantForm.get('email')?.touched">
+                <span *ngIf="tenantForm.get('email')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('email')?.hasError('email')">{{ 'VALIDATION.INVALID_EMAIL' | translate }}</span>
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.PHONE' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <input class="form__input"
+                     type="tel"
+										 [class.disabled]="isEdit"
+                     formControlName="phone"
+                     [placeholder]="'TENANTS.FORM.PHONE_PLACEHOLDER' | translate"
+                     [class.form__input--error]="tenantForm.get('phone')?.invalid && tenantForm.get('phone')?.touched" />
+              <span class="form__error" *ngIf="tenantForm.get('phone')?.invalid && tenantForm.get('phone')?.touched">
+                <span *ngIf="tenantForm.get('phone')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
+                <span *ngIf="tenantForm.get('phone')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 8} }}</span>
+              </span>
+            </div>
+          </div>
+
+
+          <div class="form__row form__row--2">
+            <div class="form__field">
+                <label class="form__label">
+                {{ 'TENANTS.FORM.ADDRESS' | translate }}
+                <span class="form__required">*</span>
+                </label>
+                <input class="form__input"
+                    type="text"
+										 [class.disabled]="isEdit"
+                    formControlName="address"
+                    [placeholder]="'TENANTS.FORM.ADDRESS_PLACEHOLDER' | translate"
+                    [class.form__input--error]="tenantForm.get('address')?.invalid && tenantForm.get('address')?.touched" />
+                <span class="form__error" *ngIf="tenantForm.get('address')?.invalid && tenantForm.get('address')?.touched">
+                {{ 'VALIDATION.REQUIRED' | translate }}
+                </span>
+            </div>
+
+            <div class="form__field">
+                <label class="form__label">{{ 'ONBOARDING.LOGO_URL' | translate }}</label>
+                <input formControlName="logoUrl" type="text" class="form__input"
+                        [placeholder]="'ONBOARDING.LOGO_URL_PLACEHOLDER' | translate" />
+                <span class="field-error" *ngIf="tenantForm.get('logoUrl')?.touched && tenantForm.get('logoUrl')?.errors">
+                    <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_URL' | translate }}</ng-container>
+                    <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: tenantForm.get('logoUrl')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                </span>
+            </div>
+					</div>
+
+
+
+            <div class="form__row form__row--2">
+                <div class="form__field">
+                    <label class="form__label">{{ 'ONBOARDING.PRIMARY_COLOR' | translate }}</label>
+                    <div class="color-input-wrap">
+											<input formControlName="primaryColor" type="color" class="color-swatch"   (change)="fillColorTextInput($event)" [class.disabled]="isEdit"/>
+											<input formControlName="primaryColor" type="text"  class="color-text"     (change)="fillColorInput($event)"
+												[class.disabled]="isEdit" placeholder="#a0b4ff" maxlength="7" />
+                    </div>
+                    <span class="field-error" *ngIf="tenantForm.get('primaryColor')?.touched && tenantForm.get('primaryColor')?.errors">
+                        <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                        <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                    </span>
+                </div>
+
+                <div class="form__field">
+                    <label class="form__label">{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
+                    <div class="color-input-wrap">
+                        <input formControlName="secondaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"	[class.disabled]="isEdit" />
+                        <input formControlName="secondaryColor" type="text" class="color-text"    (change)="fillColorInput($event)" 		[class.disabled]="isEdit"
+                                placeholder="#4e7cff" maxlength="7" />
+                    </div>
+                    <span class="field-error" *ngIf="tenantForm.get('secondaryColor')?.touched && tenantForm.get('secondaryColor')?.errors">
+                        <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                        <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                    </span>
+              </div>
+            </div>
+
+            <!-- Currency, Locale, Timezone -->
+            <div class="form__row form__row--3">
+                <div class="form__field">
+                    <label class="form__label">
+                        {{ 'TENANTS.FORM.CURRENCY' | translate }}
+                        <span class="form__required">*</span>
+                    </label>
+                    <select class="form__input" formControlName="currency" [class.disabled]="isEdit">
+                        <option [value]="CurrencyEnum.TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
+                        <option [value]="CurrencyEnum.EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
+                        <option [value]="CurrencyEnum.USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
+                    </select>
+                </div>
+
+                <div class="form__field">
+                    <label class="form__label">
+                        {{ 'TENANTS.FORM.LOCALE' | translate }}
+                        <span class="form__required">*</span>
+                    </label>
+                    <select class="form__input" formControlName="locale" [class.disabled]="isEdit">
+                        <option [value]="LocaleEnum.EN">{{ 'TENANTS.LOCALES.EN' | translate}} - ({{ LocaleEnum.EN }})</option>
+                        <option [value]="LocaleEnum.FR">{{ 'TENANTS.LOCALES.FR' | translate}} - ({{ LocaleEnum.FR }})</option>
+                        <option [value]="LocaleEnum.AR">{{ 'TENANTS.LOCALES.AR' | translate}} - ({{ LocaleEnum.AR }})</option>
+                    </select>
+                </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'TENANTS.FORM.TIMEZONE' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input" formControlName="timezone" [class.disabled]="isEdit">
+                <option [value]="TimeZoneEnum.UTC">UTC</option>
+                <option [value]="TimeZoneEnum.AFRICA_TUNIS">Africa/Tunis (UTC+1)</option>
+                <option [value]="TimeZoneEnum.EUROPE_PARIS">Europe/Paris (UTC+1)</option>
+                <option [value]="TimeZoneEnum.EUROPE_LONDON">Europe/London (UTC)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="form__actions">
+            <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button type="button"
+                    class="btn-primary"
+                    [disabled]="!canSubmit || isEdit"
+										[class.disabled]="!canSubmit || isEdit"
+                    [matTooltip]="getSubmitButtonTooltip()"
+                    (click)="updateTenant()">
+              <span *ngIf="!isValidating">{{ 'COMMON.SAVE_CHANGES' | translate }}</span>
+              <span *ngIf="isValidating">{{ 'COMMON.SAVING' | translate }}...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </ng-container>
+</div>
