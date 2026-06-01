@@ -30,7 +30,7 @@ import { ArticleResponseDto } from '../../../services/articles/articles.service'
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FournisseurResponse } from '../../../services/fournisseur.service';
 import { CurrencyConfigService } from '../../../services/currency-config.service';
-
+import { take } from 'rxjs';
 
 export type BonType = 'entre' | 'sortie' | 'retour';
 
@@ -145,6 +145,9 @@ export class BonsComponent implements OnInit {
   hasMoreArticles = true;
   selectedArticleLabel = '';
   private articleSearchSubject$ = new Subject<string>();
+
+  private fournisseurCache = new Map<string, string>();
+  fournisseurNames = signal<Map<string, string>>(new Map());
 
   constructor(
     private stock: StockService,
@@ -329,6 +332,7 @@ export class BonsComponent implements OnInit {
 
   reload(): void {
     const list$ = this.bonApi[this.activeBonType].list(this.pageNumber(), this.pageSize());
+
     const articles$ = this.activeBonType === 'sortie'
       ? forkJoin({
           arts: this.stock.getArticlesPaged(1, 20),
@@ -356,6 +360,13 @@ export class BonsComponent implements OnInit {
         next: ({ list, articles, fournisseurs, sourceBons }) => {
           this.dataSource.data = list.items;
           this.totalCount = list.totalCount;
+
+          if (this.activeBonType === 'entre') {
+            const ids = list.items
+              .map(b => (b as BonEntreResponse).fournisseurId)
+              .filter((id): id is string => !!id);
+            if (ids.length) this.prefetchFournisseurs(ids);
+          }
 
           this.masterArticles = articles.arts.items.filter(a => !a.isDeleted);
           if (articles.stock) {
@@ -1144,6 +1155,42 @@ export class BonsComponent implements OnInit {
     this.fournisseurSearchSubject$.next(query);
   }
 
+  private prefetchFournisseurs(ids: string[]): void {
+    const unique = [...new Set(ids)];
+
+    forkJoin(
+      unique.map(id => this.stock.getFournisseurById(id).pipe(
+        map(f => ({ id, name: f.name })),
+        catchError(() => of({ id, name: '—' }))
+      ))
+    ).pipe(take(1))
+    .subscribe(results => {
+      results.forEach(r => this.fournisseurCache.set(r.id, r.name));
+      this.fournisseurNames.set(new Map(this.fournisseurCache));
+    });
+  }
+
+  getFournisseurName(id: string): string {
+    if (this.fournisseurCache.has(id)) {
+      return this.fournisseurCache.get(id)!;
+    }
+
+    // Fetch only if not cached
+    this.stock.getFournisseurById(id)
+      .pipe(take(1))
+      .subscribe({
+        next: (fournisseur) => {
+          this.fournisseurCache.set(id, fournisseur.name);
+          this.fournisseurNames.set(new Map(this.fournisseurCache)); // trigger signal update
+        },
+        error: () => {
+          this.fournisseurCache.set(id, '—'); // fallback so it doesn't retry on every render
+        }
+      });
+
+    return '…'; // placeholder while loading
+  }
+
   private restoreFournisseurLabel(): void {
     const id = this.headerForm.get('fournisseurId')?.value;
     if (!id) return;
@@ -1240,5 +1287,10 @@ export class BonsComponent implements OnInit {
       default:
         return 1;
     }
+  }
+
+
+  getClientName(id: string): string {
+    return this.clients.find(c => c.id === id)?.name ?? id;
   }
 }

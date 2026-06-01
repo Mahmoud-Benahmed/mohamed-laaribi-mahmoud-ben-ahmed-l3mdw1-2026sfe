@@ -328,11 +328,13 @@
         </div>
         <div class="detail-item" *ngIf="activeBonType === 'entre'">
           <span class="detail-label">{{ 'STOCK.BONS.DETAILS.FOURNISSEUR' | translate }}</span>
-          <span class="role-badge role-badge--clickable" [routerLink]="['/stock/fournisseurs', asEntre(selectedBon).fournisseurId]">{{ asEntre(selectedBon).fournisseurId }}</span>
+          <span class="role-badge">{{ fournisseurNames().get(asEntre(selectedBon).fournisseurId) ?? '…' }}</span>
         </div>
         <div class="detail-item" *ngIf="activeBonType === 'sortie'">
           <span class="detail-label">{{ 'STOCK.BONS.DETAILS.CLIENT' | translate }}</span>
-          <span class="role-badge role-badge--clickable" [routerLink]="['/clients', asSortie(selectedBon).clientId]">{{ asSortie(selectedBon).clientId }}</span>
+          <span class="role-badge">
+            {{ getClientName(asSortie(selectedBon).clientId) }}
+          </span>
         </div>
         <ng-container *ngIf="activeBonType === 'retour'">
           <div class="detail-item">
