@@ -168,7 +168,12 @@ builder.Services.AddAuthorization(options =>
     // ── Composite policies
     Add("ASSIGN_SUBSCRIPTION_OR_BUY",
         TenantPrivileges.MANAGE_SUBSCRIPTIONS,
-        Privileges.Users.BUY_SUBSCRIPTION);
+        Privileges.Users.BUY_SUBSCRIPTION); ;
+
+    Add("EDIT_TENANT_SETTINGS", 
+        Privileges.Users.EDIT_TENANT_SETTINGS, 
+        TenantPrivileges.UPDATE_TENANT
+    );
 
     Add(Privileges.Users.MANAGE_USERS,
         Privileges.Users.VIEW_USERS,

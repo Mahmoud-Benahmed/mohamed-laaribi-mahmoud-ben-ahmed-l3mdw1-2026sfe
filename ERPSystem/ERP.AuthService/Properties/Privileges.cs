@@ -20,6 +20,7 @@ public static class Privileges
         public const string UPDATE_CONTROLE = "UPDATE_CONTROLE";
         public const string DELETE_CONTROLE = "DELETE_CONTROLE";
         public const string BUY_SUBSCRIPTION = "BUY_SUBSCRIPTION";
+        public const string EDIT_TENANT_SETTINGS = "EDIT_TENANT_SETTINGS";
     }
 
     public static class Audit

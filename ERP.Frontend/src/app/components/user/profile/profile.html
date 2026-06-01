@@ -62,7 +62,13 @@
                   <mat-icon>lock_reset</mat-icon>
                   {{ 'USERS.PROFILE.CHANGE_PASSWORD' | translate }}
                 </a>
-
+                <a mat-stroked-button
+                        class="settings-btn"
+                        *ngIf="isSystemAdmin"
+                        routerLink="/system-settings">
+                  <mat-icon>settings</mat-icon>
+                  {{ 'USERS.PROFILE.SYSTEM_SETTINGS' | translate }}
+                </a>
               </div>
           </div>
         </div>

@@ -36,6 +36,7 @@ import { OnboardingComponent } from './components/onboarding/onboarding';
 import { TenantsComponent } from './components/tenants/home/home';
 import { ViewTenantComponent } from './components/tenants/view/view';
 import { EditTenantComponent } from './components/tenants/edit/edit';
+import { SystemSettingsComponent } from './components/system-admin/system-settings/system-settings';
 
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
@@ -108,6 +109,7 @@ export const routes: Routes = [
                 ])
             }
       },
+      { path: 'system-settings', component: SystemSettingsComponent, data: { privileges: pickPrivileges('USERS', ['EDIT_TENANT_SETTINGS'])} },
 
       // Default shell child → home
       { path: '', redirectTo: 'home', pathMatch: 'full' },

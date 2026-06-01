@@ -1,4 +1,4 @@
-import { PRIVILEGES } from './../../../services/auth/auth.service';
+import { PRIVILEGES, ROLES } from './../../../services/auth/auth.service';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, RouterModule } from '@angular/router';
@@ -20,6 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { HttpError } from '../../../interfaces/HttpError';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 @Component({
   selector: 'app-profile',
@@ -64,15 +65,6 @@ export class ProfileComponent implements OnInit {
   passwordScore    = 0;
   passwordStrength = '';
 
-  // ── Patterns (match backend) ──────────────────────────────────────────────
-  // UpdateProfileDto: [EmailAddress][MaxLength(255)]
-  // UpdateProfileDto: [MaxLength(100)][RegularExpression(RegexPatterns.FullName)]
-  // ChangePasswordRequestDto: MinLength(8) MaxLength(128), must differ from current
-  // AdminChangeProfileRequest: [Required][MinLength(8)][MaxLength(128)]
-
-  readonly fullNamePattern = /^[\p{L}]+(\s[\p{L}]+)*$/u;
-  readonly emailPattern    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   // ── Forms ─────────────────────────────────────────────────────────────────
   editForm!:          FormGroup;
   passwordForm!:      FormGroup;
@@ -92,7 +84,7 @@ export class ProfileComponent implements OnInit {
 
   private buildForms(): void {
     this.editForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(this.fullNamePattern)]],
+      fullName: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(RegexPatterns.alpha)]],
       email:    ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
     });
 
@@ -233,6 +225,8 @@ export class ProfileComponent implements OnInit {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  get isSystemAdmin(): boolean { return this.authService.Role === ROLES.SYSTEM_ADMIN; }
 
   get hasPrivilege(): boolean { return this.authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_USER) && !this.isOwnProfile; }
   get isOwnProfile(): boolean { return this.selectedUserId === this.authService.UserId; }
