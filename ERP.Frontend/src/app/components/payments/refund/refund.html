@@ -175,7 +175,7 @@
                 <span class="role-badge role-badge--clickable"
                       [routerLink]="['/invoices', refund.invoiceId]"
                       style="cursor:pointer">
-                  {{ refund.invoiceId | slice:0:8 }}…
+                    {{ getInvoiceById(refund.invoiceId)?.invoiceNumber ?? '…' }}
                 </span>
               </td>
 
