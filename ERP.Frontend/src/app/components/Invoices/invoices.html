@@ -165,11 +165,11 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'clientFullName' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
                 </span>
               </th>
-              <th class="th--sortable" (click)="sortBy('invoiceDate')">
-                {{ 'INVOICES.TABLE.DATE' | translate }}
+              <th class="th--sortable" (click)="sortBy('invoiceNumber')">
+                {{ 'INVOICES.TABLE.INVOICE_NUMBER' | translate }}
                 <span class="sort-icon">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'invoiceDate' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'invoiceDate' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'invoiceNumber' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'invoiceNumber' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
                 </span>
               </th>
               <th class="th--sortable" (click)="sortBy('dueDate')">
@@ -196,7 +196,7 @@
             </tr>
             <tr class="table__row" *ngFor="let inv of sortedData; trackBy: trackById">
               <td class="td--name">{{ inv.clientFullName }}</td>
-              <td class="date-cell">{{ inv.invoiceDate | date:'dd/MM/yyyy' }}</td>
+              <td class="date-cell">{{ inv.invoiceNumber }}</td>
               <td class="date-cell"
                   [class.text-danger]="isDateOverdue(inv.dueDate)"
                   [matTooltip]="isDateOverdue(inv.dueDate) ? ('INVOICES.OVERDUE_TOOLTIP' | translate) : ''">
