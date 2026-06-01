@@ -15,12 +15,12 @@ public sealed record InvoicePaidEvent(
     Guid InvoiceId,
     Guid PaymentId,
     decimal PaidAmount,
-    DateTime PaidAt
+    DateTime PaidAt, Guid? TenantId
 );
 
 public record PaymentCancelledEvent(
     Guid PaymentId,
     Guid InvoiceId,
     decimal ReversedAmount,
-    DateTime CancelledAt
+    DateTime CancelledAt, Guid? TenantId
 );
