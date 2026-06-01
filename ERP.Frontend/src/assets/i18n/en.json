@@ -22,6 +22,8 @@
     "AUDIT_LOG": "Audit Log"
   },
   "COMMON": {
+    "SYSTEM_SETTINGS":"System settings",
+    "UNDO": "Undo",
     "MONTH": "Monthly",
     "YEAR":"Yearly",
     "MARK_COMPLETED": "Mark as completed",
@@ -769,7 +771,8 @@
       "ACTIONS": "ACTIONS",
       "RANK": "#",
       "INVOICES": "INVOICES",
-      "REVENUE_TTC": "REVENUE TTC"
+      "REVENUE_TTC": "REVENUE TTC",
+      "INVOICE_NUMBER": "INVOICE NUMBER"
     },
     "DETAILS": {
       "INVOICE_INFO": "Invoice Info",
@@ -1266,6 +1269,7 @@
       "CREATING": "Creating…"
     },
     "PROFILE": {
+      "SYSTEM_SETTINGS":"System settings",
       "TITLE": "My Profile",
       "FULL_NAME": "Full name",
       "EMAIL": "Email",
@@ -1316,6 +1320,10 @@
       "EMAIL_EXISTS": "Please choose an email other than {{email}}.",
       "CHECK_FAILED": "Failed to validate user information.",
       "REGISTER_FAILED": "Failed to register user."
+    },
+    "SYSTEM_SETTINGS":{
+      "UPDATED":"Settings updated successfully",
+      "UPDATE_FAILED":"Failed to update settings."
     }
   },
   "HOME": {

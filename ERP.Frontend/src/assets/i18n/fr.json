@@ -22,6 +22,8 @@
     "AUDIT_LOG": "Journal d'audit"
   },
   "COMMON": {
+    "SYSTEM_SETTINGS":"Paramètre système",
+    "UNDO": "Rétablir",
     "MONTH": "Mensuel",
     "YEAR":"Annuel",
     "MARK_COMPLETED": "Valider",
@@ -760,7 +762,8 @@
       "ACTIONS": "ACTIONS",
       "RANK": "#",
       "INVOICES": "FACTURES",
-      "REVENUE_TTC": "CA TTC"
+      "REVENUE_TTC": "CA TTC",
+      "INVOICE_NUMBER": "NUMÉRO FACTURE"
     },
     "DETAILS": {
       "INVOICE_INFO": "Informations facture",
@@ -1249,6 +1252,7 @@
       "CREATING": "Inscription…"
     },
     "PROFILE": {
+      "SYSTEM_SETTINGS":"Paramètre système",
       "TITLE": "Mon profil",
       "FULL_NAME": "Nom complet",
       "EMAIL": "Email",
@@ -1324,6 +1328,10 @@
       "INVOICES": "Factures",
       "AUDIT_LOG": "Journal d'audit",
       "REPORTS": "Rapports"
+    },
+    "SYSTEM_SETTINGS":{
+      "UPDATED":"Paramètres mis à jour avec succès",
+      "UPDATE_FAILED":"Échec de la mise à jour des paramètres."
     }
   },
   "LOGIN": {
