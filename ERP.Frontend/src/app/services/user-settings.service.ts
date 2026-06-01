@@ -8,6 +8,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../environment';
 import { CurrencyConfigService } from './currency-config.service';
 import { catchError, of, tap } from 'rxjs';
+import { TenantService } from './tenant/tenant.service';
 
 // ── Branding DTO ──────────────────────────────────────────────────────────────
 
@@ -29,11 +30,39 @@ export class TenantThemeService {
   private authService    = inject(AuthService);
   private currencyConfig = inject(CurrencyConfigService);
 
+  private _theme    = signal<ThemeType>('light');
+  private _language = signal<LanguageType>('en');
+
+  readonly theme    = this._theme.asReadonly();
+  readonly language = this._language.asReadonly();
+
+  private _primaryColor   = signal<string>('');
+  private _secondaryColor = signal<string>('');
+  private _logoUrl        = signal<string>('');
+
+  readonly primaryColor   = this._primaryColor.asReadonly();
+  readonly secondaryColor = this._secondaryColor.asReadonly();
+  readonly logoUrl        = this._logoUrl.asReadonly();
+
   applyBranding(branding: TenantBrandingDto): void {
     const root = document.documentElement;
-    if (branding.primaryColor)   root.style.setProperty('--tenant-primary',   branding.primaryColor);
-    if (branding.secondaryColor) root.style.setProperty('--tenant-secondary', branding.secondaryColor);
-    if (branding.currency)       this.currencyConfig.saveFromBranding(branding.currency, branding.locale);
+
+    if (branding.primaryColor) {
+      root.style.setProperty('--tenant-primary', branding.primaryColor);
+      root.style.setProperty('--tenant-primary-bg',     `color-mix(in srgb, ${branding.primaryColor} 10%, transparent)`);
+      root.style.setProperty('--tenant-primary-border', `color-mix(in srgb, ${branding.primaryColor} 25%, transparent)`);
+      this._primaryColor.set(branding.primaryColor);
+    }
+
+    if (branding.secondaryColor) {
+      root.style.setProperty('--tenant-secondary', branding.secondaryColor);
+      root.style.setProperty('--tenant-secondary-bg',     `color-mix(in srgb, ${branding.secondaryColor} 10%, transparent)`);
+      root.style.setProperty('--tenant-secondary-border', `color-mix(in srgb, ${branding.secondaryColor} 25%, transparent)`);
+      this._secondaryColor.set(branding.secondaryColor);
+    }
+
+    if (branding.logoUrl)  this._logoUrl.set(branding.logoUrl);
+    if (branding.currency) this.currencyConfig.saveFromBranding(branding.currency, branding.locale);
   }
 
   loadAndApply() {
@@ -57,15 +86,31 @@ export class UserSettingsService {
   private readonly translate     = inject(TranslateService);
   private readonly authService   = inject(AuthService);
   private readonly themeService  = inject(TenantThemeService);
+  private readonly tenantService = inject(TenantService);
 
-  private _theme    = signal<ThemeType>('light');
-  private _language = signal<LanguageType>('en');
   private _pendingSync = false;
+  private  _theme    = signal<ThemeType>('light');
+  private _language = signal<LanguageType>('en');
 
   readonly theme    = this._theme.asReadonly();
   readonly language = this._language.asReadonly();
 
+  // ── Delegate branding signals from TenantThemeService ───────────────────────
+  readonly primaryColor   = this.themeService.primaryColor;
+  readonly secondaryColor = this.themeService.secondaryColor;
+  readonly logoUrl        = this.themeService.logoUrl;
+
+  // ── Convenience boolean getters (matching isDark / isEn pattern) ────────────
+  get isDark():          boolean { return this._theme() === 'dark'; }
+  get isEn():            boolean { return this._language() === 'en'; }
+  get currentTheme():    ThemeType    { return this._theme(); }
+  get currentLanguage(): LanguageType { return this._language(); }
+  get currentPrimary():  string { return this.themeService.primaryColor(); }
+  get currentSecondary():string { return this.themeService.secondaryColor(); }
+  get currentLogoUrl():  string { return this.themeService.logoUrl(); }
+
   private readonly userProfile = toSignal(this.authService.userProfile$, { initialValue: null });
+
 
   constructor() {
     // 1. Apply cached settings immediately (no flicker on reload)
@@ -88,6 +133,12 @@ export class UserSettingsService {
         this.applyThemeToDom(settings.theme);
         this.applyLanguageToDom(settings.language);
         this.cacheSettings();
+
+        this.themeService.loadAndApply().pipe(take(1)).subscribe();
+        const tenantId = this.authService.TenantId;
+        if (tenantId) {
+          this.tenantService.loadTenantSettings(tenantId).pipe(take(1)).subscribe();
+        }
       });
     });
 
@@ -119,11 +170,6 @@ export class UserSettingsService {
     this.cacheSettings();
     this.persistToServer();
   }
-
-  // ── Getters ─────────────────────────────────────────────────────────────────
-
-  get isDark(): boolean { return this._theme() === 'dark'; }
-  get isEn():   boolean { return this._language() === 'en'; }
 
   // ── DOM helpers ─────────────────────────────────────────────────────────────
 

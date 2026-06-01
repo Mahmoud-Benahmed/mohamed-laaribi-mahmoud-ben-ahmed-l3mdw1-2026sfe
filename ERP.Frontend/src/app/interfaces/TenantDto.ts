@@ -46,6 +46,20 @@ export interface TenantSubscriptionResponseDto {
   plan: SubscriptionPlanDto | null;
 }
 
+export interface TenantSettingsDto{
+    name: string,
+    email: string,
+    phone: string,
+    address: string,
+    slug: string,
+    logoUrl?: string | null,
+    primaryColor: string,
+    secondaryColor: string,
+    currency: string,
+    locale: string,
+    timezone: string
+}
+
 export enum LocaleEnum {
   EN = 'en-US',
   FR = 'fr-FR',
@@ -102,8 +116,8 @@ export interface TenantResponseDto {
   subdomainSlug: string;
   address: string;
   logoUrl?: string | null;
-  primaryColor?: string | null;
-  secondaryColor?: string | null;
+  primaryColor: string ;
+  secondaryColor: string;
   currency: string;
   locale: string;
   timezone: string;

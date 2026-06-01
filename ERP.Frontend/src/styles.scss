@@ -50,8 +50,6 @@
   --chip-role-bg:     rgba(124, 77, 255, 0.12);
   --chip-role-border: rgba(124, 77, 255, 0.3);
   --chip-role-color:  #c6b2ff;
-  --tenant-primary-bg:     color-mix(in srgb, var(--tenant-primary) 10%, transparent);
-  --tenant-primary-border: color-mix(in srgb, var(--tenant-primary) 25%, transparent);
 
 }
 
@@ -69,9 +67,7 @@
   --sidebar-border: #e2e6f0;
   --chip-role-bg:     rgba(124, 77, 255, 0.15);
   --chip-role-border: rgba(124, 77, 255, 0.4);
-  --chip-role-color:  #522fb9; // darker purple for readability on white
-  --tenant-primary-bg:     color-mix(in srgb, var(--tenant-primary) 15%, transparent);
-  --tenant-primary-border: color-mix(in srgb, var(--tenant-primary) 30%, transparent);
+  --chip-role-color:  #522fb9;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

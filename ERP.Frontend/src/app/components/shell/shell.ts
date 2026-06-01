@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TenantService } from '../../services/tenant/tenant.service';
 
 @Component({
   selector: 'app-shell',
@@ -40,10 +41,12 @@ export class ShellComponent implements OnInit, OnDestroy {
   readonly PRIVILEGES= PRIVILEGES;
 
 
-  constructor(private router: Router, public authService: AuthService,
+  constructor(private router: Router,
+              public authService: AuthService,
               private cdr: ChangeDetectorRef,
               public userSettings: UserSettingsService,
-              public translate: TranslateService
+              public translate: TranslateService,
+              public tenantService :TenantService
   ) {
   }
 
@@ -85,6 +88,10 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
     if (url.startsWith('/payments')) this.openGroups['payments'] = true;
     window.addEventListener('resize', this.resizeListener);
+
+
+    console.log(`tenantService.logoUrl: ${this.tenantService.logoUrl}`); // null
+    console.log(`tenantService.name: ${this.tenantService.name}`);// null 
   }
 
   private getBreadcrumbs(url: string): { label: string; link?: string }[] {

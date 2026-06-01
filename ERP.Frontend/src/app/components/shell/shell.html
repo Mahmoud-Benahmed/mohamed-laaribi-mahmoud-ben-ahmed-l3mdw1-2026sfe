@@ -7,8 +7,14 @@
       <!-- Logo / close -->
       <div class="sidebar__logo" style="justify-content: space-between;" (click)="closeMobileNav(); $event.stopPropagation()">
         <div style="display:flex; align-items:center; gap:9px;">
-          <div class="sidebar__logo-icon">E</div>
-          <span class="sidebar__logo-text">ERPSuite</span>
+        <div class="sidebar__logo-icon">
+          <img *ngIf="tenantService.logoUrl; else fallback"
+              [src]="tenantService.logoUrl"
+              [alt]="tenantService.name"
+              class="sidebar__logo-img" />
+          <ng-template #fallback>{{ tenantService.name?.charAt(0) ?? 'E' }}</ng-template>
+        </div>
+        <span class="sidebar__logo-text">{{ tenantService.name || 'ERPSuite' }}</span>
         </div>
       </div>
 
@@ -198,8 +204,14 @@
   <!-- ══════════ DESKTOP SIDEBAR ══════════ -->
   <aside class="sidebar">
     <div class="sidebar__logo" (click)="toggleSidebar()">
-      <div class="sidebar__logo-icon">E</div>
-      <span class="sidebar__logo-text">ERPSuite</span>
+      <div class="sidebar__logo-icon">
+        <img *ngIf="tenantService.logoUrl; else fallback"
+            [src]="tenantService.logoUrl"
+            [alt]="tenantService.name"
+            class="sidebar__logo-img" />
+        <ng-template #fallback>{{ tenantService.name?.charAt(0) ?? 'E' }}</ng-template>
+      </div>
+      <span class="sidebar__logo-text">{{ tenantService.name || 'ERPSuite' }}</span>
     </div>
 
     <nav class="sidebar__nav">

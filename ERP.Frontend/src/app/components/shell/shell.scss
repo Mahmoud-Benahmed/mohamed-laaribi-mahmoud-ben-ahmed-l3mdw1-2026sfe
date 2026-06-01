@@ -72,12 +72,16 @@ body, html {
 
   &-icon {
     width: 30px; height: 30px; border-radius: 8px;
-    background: $blue;
+    background: transparent;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Syne', sans-serif;
     font-weight: 800; font-size: 14px; color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 2px 10px $blue-bg;
+
+    &:not(:has(img)) {
+      background: var(--tenant-primary, #4e7cff);
+      box-shadow: 0 2px 10px $blue-bg;
+    }
   }
 
   &-text {
@@ -85,6 +89,13 @@ body, html {
     font-weight: 700; font-size: 15px;
     color: $text-hi; flex: 1; white-space: nowrap;
   }
+}
+
+.sidebar__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
 }
 
 .sidebar__toggle {
