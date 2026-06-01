@@ -19,7 +19,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
         _tenantContext = tenantContext;
     }
 
-    private string CurrencySymbol = "TND";
+    private string CurrencySymbol = "EUR";
     private string CompanyName = "COMPANY";
     private string CompanyAddress = "123 Business Ave, City, Country";
     private string CompanyEmail = "contact@company.com";
