@@ -13,9 +13,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthUserGetResponseDto } from '../../interfaces/AuthDto';
 import { ModalComponent } from '../modal/modal';
 import { environment } from '../../environment';
-import { UserSettingsService } from '../../services/user-settings.service';
+import { TenantThemeService, UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { map, Subscription, switchMap, take, tap } from 'rxjs';
+import { map, of, Subscription, switchMap, take, tap } from 'rxjs';
 import { RegexPatterns } from '../../interfaces/RegexPatterns';
 import { TenantService } from '../../services/tenant/tenant.service';
 
@@ -58,7 +58,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     public userSettings: UserSettingsService,
     public translate: TranslateService,
     private fb: FormBuilder,
-    private tenantService: TenantService
+    private tenantService: TenantService,
+    private themeService: TenantThemeService,
   ) {
     this.loginForm = this.fb.group({
       login:       ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
@@ -104,11 +105,17 @@ export class LoginComponent implements OnInit, OnDestroy {
           map(() => response)
         )
       ),
-      switchMap(response =>
-        this.tenantService.loadTenantSettings(this.authService.TenantId!).pipe(
-          map(() => response)   // keep response flowing for next()
-        )
-      ),
+      switchMap(response => {
+        const tenantId = this.authService.TenantId;
+        const isPlatformAdmin = this.authService.Role === 'SUPER_PLATFORM_ADMIN'
+                            || !tenantId;
+
+        if (isPlatformAdmin) return of(response);
+
+        return this.tenantService.loadTenantSettings(tenantId!).pipe(
+          map(() => response)
+        );
+      }),
       take(1)
     ).subscribe({
       next: (response) => {
@@ -118,6 +125,17 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.router.navigate(['/must-change-password']);
           return;
         }
+
+        const tenantId = this.authService.TenantId;
+        const isPlatformAdmin = !tenantId; // platform admins have no tenantId
+
+        // if (!isPlatformAdmin) {
+        //   const isActive = this.themeService.isActive();
+        //   if (isActive) {
+        //     this.router.navigate(['/subscription-expiry']);
+        //     return;
+        //   }
+        // }
 
         this.router.navigate(['/home']);
       },
