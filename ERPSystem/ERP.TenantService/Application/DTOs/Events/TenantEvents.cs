@@ -14,9 +14,8 @@ public record TenantCreatedEvent(
     );
 public record TenantUpdatedEvent(
     Guid TenantId,
-    string OldSlug, 
-    string NewSlug,
     bool IsActive,
+    string Slug,
     string Name,
     string Address,
     string Email,

@@ -70,13 +70,14 @@ public class TenantController : ControllerBase
         if (tenant is null) return NotFound();
 
         return Ok(new TenantBrandingDto(
-            tenant.Name,
-            tenant.LogoUrl,
-            tenant.PrimaryColor,
-            tenant.SecondaryColor,
-            tenant.Currency,
-            tenant.Locale,
-            tenant.Timezone
+            Name: tenant.Name,
+            LogoUrl: tenant.LogoUrl,
+            PrimaryColor: tenant.PrimaryColor,
+            SecondaryColor: tenant.SecondaryColor,
+            Currency: tenant.Currency,
+            Locale: tenant.Locale,
+            Timezone: tenant.Timezone,
+            IsActive: tenant.IsActive
         ));
     }
 

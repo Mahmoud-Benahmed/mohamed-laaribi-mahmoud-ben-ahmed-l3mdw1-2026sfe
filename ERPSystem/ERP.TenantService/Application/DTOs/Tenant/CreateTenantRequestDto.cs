@@ -8,7 +8,7 @@ public record CreateTenantRequestDto(
     [Required][EmailAddress][MaxLength(200)] string Email,
     [Required][RegularExpression(RegexPatterns.Phone, ErrorMessage = "Phone must contain digits and may start with +.")] string Phone,
     [Required] AssignSubscriptionRequestDto Subscription,
-    [Required][RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")][MaxLength(100)] string SubdomainSlug,
+    [Required][RegularExpression(RegexPatterns.SubdomainSlug, ErrorMessage = "Invalid characters.")][MaxLength(100)] string SubdomainSlug,
     [Required][RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")] string Address,
     [MaxLength(500)] string? LogoUrl,
     [MaxLength(7)] string? PrimaryColor,

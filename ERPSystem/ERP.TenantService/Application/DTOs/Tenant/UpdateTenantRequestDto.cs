@@ -7,7 +7,6 @@ public record UpdateTenantRequestDto(
     [Required][RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")][MaxLength(150)] string Name,
     [Required][EmailAddress][MaxLength(200)] string Email,
     [Required][RegularExpression(RegexPatterns.Phone, ErrorMessage = "Phone must contain digits and may start with +.")] string Phone,
-    [Required][RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")][MaxLength(100)] string SubdomainSlug,
     [RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")] string? Address,
     [MaxLength(500)] string? LogoUrl,
     [MaxLength(7)] string? PrimaryColor,

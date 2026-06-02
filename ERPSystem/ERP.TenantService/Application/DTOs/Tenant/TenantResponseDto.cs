@@ -28,5 +28,6 @@ public record TenantBrandingDto(
     string? SecondaryColor,
     string Currency,
     string Locale,
-    string Timezone
+    string Timezone,
+    bool IsActive
 );

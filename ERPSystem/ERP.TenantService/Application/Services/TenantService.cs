@@ -141,15 +141,10 @@ public class TenantService : ITenantService
 		var tenant = await _tenantRepository.GetByIdAsync(id)
 			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
-		var slugExists = await _tenantRepository.SubdomainSlugExistsAsync(dto.SubdomainSlug, id);
-		if (slugExists)
-			throw new InvalidOperationException($"Subdomain slug '{dto.SubdomainSlug}' is already taken.");
-
 		tenant.Update(
 			name: dto.Name,
 			email: dto.Email,
 			phone: dto.Phone,
-			subdomainSlug: dto.SubdomainSlug,
 			address: dto.Address ?? tenant.Address,
 			primaryColor: dto.PrimaryColor ?? tenant.PrimaryColor,
 			secondaryColor: dto.SecondaryColor ??  tenant.SecondaryColor,
@@ -163,9 +158,8 @@ public class TenantService : ITenantService
 
 		await _eventPublisher.PublishAsync(TenantTopics.TenantUpdated, new TenantUpdatedEvent(
 			TenantId: tenant.Id,
-			OldSlug: tenant.Slug,
-			NewSlug: dto.SubdomainSlug,
 			IsActive: tenant.IsActive,
+			Slug: tenant.Slug,
 			Name: tenant.Name,
 			Address: tenant.Address,
 			Email: tenant.Email,
@@ -288,12 +282,6 @@ public class TenantService : ITenantService
 				TenantTopics.TenantActivated,
 				new TenantActivatedEvent(tenant.Id, tenant.Slug));
 
-		await _eventPublisher.PublishAsync("tenant.subscription.assigned", new SubscriptionChangedEvent(
-			tenantId,
-			OldPlanId: oldPlanId,
-			NewPlanId: newplan.Id,
-			NewMaxUsers: newplan.MaxUsers,
-			NewMaxStorageMb: newplan.MaxStorageMb));
 
 		var endDate= dto.Period switch
 		{
@@ -301,6 +289,13 @@ public class TenantService : ITenantService
 			SubscriptionPeriodEnum.YEAR => dto.StartDate.AddYears(1),
 			_ => throw new NotImplementedException()
 		};
+
+		await _eventPublisher.PublishAsync("tenant.subscription.assigned", new SubscriptionChangedEvent(
+			tenantId,
+			OldPlanId: oldPlanId,
+			NewPlanId: newplan.Id,
+			NewMaxUsers: newplan.MaxUsers,
+			NewMaxStorageMb: newplan.MaxStorageMb));
 
 		return new TenantSubscriptionResponseDto(
 			tenant.Id, dto.StartDate, endDate, tenant.Subscription!.Period,MapPlanToDto(newplan));

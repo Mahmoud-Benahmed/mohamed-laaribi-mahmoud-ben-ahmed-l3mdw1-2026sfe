@@ -70,7 +70,6 @@ public class Tenant
         string name,
         string email,
         string phone,
-        string subdomainSlug,
         string address,
         string primaryColor,
         string secondaryColor,
@@ -85,14 +84,11 @@ public class Tenant
             throw new ArgumentException("Email is required.", nameof(email));
         if (string.IsNullOrWhiteSpace(phone))
             throw new ArgumentException("Phone is required.", nameof(phone));
-        if (string.IsNullOrWhiteSpace(subdomainSlug))
-            throw new ArgumentException("Subdomain slug is required.", nameof(subdomainSlug));
         if (string.IsNullOrWhiteSpace(address))
             throw new ArgumentException("Address is required.", nameof(address));
         Name = name;
         Email = email;
         Phone = phone;
-        Slug = subdomainSlug;
         Address = address;
         LogoUrl = logoUrl;
         PrimaryColor = primaryColor;
