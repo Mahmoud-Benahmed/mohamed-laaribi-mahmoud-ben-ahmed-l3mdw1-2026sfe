@@ -37,6 +37,7 @@ import { TenantsComponent } from './components/tenants/home/home';
 import { ViewTenantComponent } from './components/tenants/view/view';
 import { EditTenantComponent } from './components/tenants/edit/edit';
 import { SystemSettingsComponent } from './components/system-admin/system-settings/system-settings';
+import { SubscriptionExpiryComponent } from './components/tenants/subscription-expiry/subscription-expiry';
 
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
@@ -110,6 +111,11 @@ export const routes: Routes = [
             }
       },
       { path: 'system-settings', component: SystemSettingsComponent, data: { privileges: pickPrivileges('USERS', ['EDIT_TENANT_SETTINGS'])} },
+      {
+        path: 'subscription-expiry',
+        component: SubscriptionExpiryComponent,
+        canActivate: [authGuard] // must be logged in to reach this page
+      },
 
       // Default shell child → home
       { path: '', redirectTo: 'home', pathMatch: 'full' },

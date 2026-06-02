@@ -145,5 +145,22 @@
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
+    <a class="home__quick-card" routerLink="/tenants" routerLinkActive="sidebar__item--active"
+      *ngIf="authService.hasPrivilege(
+                PRIVILEGES.TENANTS.VIEW_TENANTS,
+                PRIVILEGES.TENANTS.CREATE_TENANT,
+                PRIVILEGES.TENANTS.UPDATE_TENANT,
+                PRIVILEGES.TENANTS.DELETE_TENANT,
+                PRIVILEGES.TENANTS.RESTORE_TENANT,
+                PRIVILEGES.TENANTS.ACTIVATE_TENANT,
+                PRIVILEGES.TENANTS.SUSPEND_TENANT,
+                PRIVILEGES.TENANTS.MANAGE_SUBSCRIPTIONS
+              )">
+
+      <div class="home__quick-icon home__quick-icon--green"><mat-icon>history</mat-icon></div>
+      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.TENANTS' | translate }}</span>
+      <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
+  </a>
+
   </div>
 </div>

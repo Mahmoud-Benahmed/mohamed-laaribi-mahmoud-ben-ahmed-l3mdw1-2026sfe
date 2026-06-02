@@ -95,7 +95,12 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
       // ── Forbidden ──────────────────────────────────────────────────────
       if (error.status === 403) {
         const code = error.error?.code;
+
         const isInactive = code === 'AUTH_003';
+        
+        if (code === 'TENANT_INACTIVE') {
+          return throwError(() => error);
+        }
 
         dialog.open(ModalComponent, {
           width: '400px',
