@@ -104,7 +104,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
         _logger.LogInformation(
             "Tenant provisioned: {TenantId} / {Slug}",
-            evt.TenantId, evt.NewSlug);
+            evt.TenantId, evt.Slug);
     }
 
 

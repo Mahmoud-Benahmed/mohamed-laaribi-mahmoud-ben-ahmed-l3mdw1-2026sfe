@@ -50,13 +50,13 @@ public sealed class TenantCacheService : ITenantCacheService
 
     public async Task SyncUpdatedAsync(TenantUpdatedEvent e)
     {
-        _logger.LogInformation("Syncing updated tenant {TenantId} ({Slug})", e.TenantId, e.NewSlug);
+        _logger.LogInformation("Syncing updated tenant {TenantId} ({Slug})", e.TenantId, e.Slug);
 
         TenantCache? existing = await _repo.GetByIdAsync(e.TenantId);
 
         TenantCreatedEvent evt = new(
             TenantId: e.TenantId,
-            Slug: e.NewSlug,
+            Slug: e.Slug,
             IsActive: e.IsActive,
             Name: e.Name,
             Address: e.Address,
