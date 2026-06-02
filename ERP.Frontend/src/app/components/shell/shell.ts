@@ -88,10 +88,6 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
     if (url.startsWith('/payments')) this.openGroups['payments'] = true;
     window.addEventListener('resize', this.resizeListener);
-
-
-    console.log(`tenantService.logoUrl: ${this.tenantService.logoUrl}`); // null
-    console.log(`tenantService.name: ${this.tenantService.name}`);// null 
   }
 
   private getBreadcrumbs(url: string): { label: string; link?: string }[] {

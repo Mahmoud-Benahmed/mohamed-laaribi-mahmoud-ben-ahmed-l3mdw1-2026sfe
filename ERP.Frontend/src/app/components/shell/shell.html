@@ -7,13 +7,20 @@
       <!-- Logo / close -->
       <div class="sidebar__logo" style="justify-content: space-between;" (click)="closeMobileNav(); $event.stopPropagation()">
         <div style="display:flex; align-items:center; gap:9px;">
-        <div class="sidebar__logo-icon">
-          <img *ngIf="tenantService.logoUrl; else fallback"
-              [src]="tenantService.logoUrl"
-              [alt]="tenantService.name"
-              class="sidebar__logo-img" />
-          <ng-template #fallback>{{ tenantService.name?.charAt(0) ?? 'E' }}</ng-template>
-        </div>
+          <div class="sidebar__logo-icon">
+            <ng-container *ngIf="tenantService.settings() as settings; else loading">
+              <img *ngIf="settings.logoUrl; else fallback"
+                  [src]="settings.logoUrl"
+                  [alt]="settings.name"
+                  class="sidebar__logo-img" />
+              <ng-template #fallback>
+                <span>{{ settings.name?.charAt(0)?.toUpperCase() || 'E' }}</span>
+              </ng-template>
+            </ng-container>
+            <ng-template #loading>
+              <span>E</span>
+            </ng-template>
+          </div>
         <span class="sidebar__logo-text">{{ tenantService.name || 'ERPSuite' }}</span>
         </div>
       </div>
@@ -205,11 +212,18 @@
   <aside class="sidebar">
     <div class="sidebar__logo" (click)="toggleSidebar()">
       <div class="sidebar__logo-icon">
-        <img *ngIf="tenantService.logoUrl; else fallback"
-            [src]="tenantService.logoUrl"
-            [alt]="tenantService.name"
-            class="sidebar__logo-img" />
-        <ng-template #fallback>{{ tenantService.name?.charAt(0) ?? 'E' }}</ng-template>
+        <ng-container *ngIf="tenantService.settings() as settings; else loading">
+          <img *ngIf="settings.logoUrl; else fallback"
+              [src]="settings.logoUrl"
+              [alt]="settings.name"
+              class="sidebar__logo-img" />
+          <ng-template #fallback>
+            <span>{{ settings.name?.charAt(0)?.toUpperCase() || 'E' }}</span>
+          </ng-template>
+        </ng-container>
+        <ng-template #loading>
+          <span>E</span>
+        </ng-template>
       </div>
       <span class="sidebar__logo-text">{{ tenantService.name || 'ERPSuite' }}</span>
     </div>

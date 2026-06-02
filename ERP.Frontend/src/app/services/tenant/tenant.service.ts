@@ -37,13 +37,25 @@ export class TenantService {
   get timezone():       string        { return this._settings()?.timezone       ?? ''; }
 
   loadTenantSettings(id: string): Observable<TenantSettingsDto | null> {
-    if (this._settings() !== null) {
-      return of(this._settings());           // already cached → skip the HTTP call
+    if (!id) {
+      console.error('loadTenantSettings: id is null/empty, aborting');
+      return of(null);
     }
+
+    console.log('loadTenantSettings: fetching for id:', id);
+
+    if (this._settings() !== null) {
+      console.log('loadTenantSettings: returning cached settings');
+      return of(this._settings());
+    }
+
     return this.getTenantSettings(id).pipe(
-      tap(dto => this._settings.set(dto)),
+      tap(dto => {
+        console.log('loadTenantSettings: received dto:', dto);
+        this._settings.set(dto);
+      }),
       catchError(err => {
-        console.error('Failed to load tenant settings:', err);
+        console.error('loadTenantSettings: HTTP error:', err.status, err.url);
         return of(null);
       })
     );

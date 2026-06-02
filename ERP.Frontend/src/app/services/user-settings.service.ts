@@ -20,6 +20,7 @@ export interface TenantBrandingDto {
   currency:       string;
   locale:         string;
   timezone:       string;
+  isActive:       boolean;
 }
 
 // ── TenantThemeService ────────────────────────────────────────────────────────
@@ -39,10 +40,12 @@ export class TenantThemeService {
   private _primaryColor   = signal<string>('');
   private _secondaryColor = signal<string>('');
   private _logoUrl        = signal<string>('');
+  private _isActive       = signal<boolean>(false);
 
   readonly primaryColor   = this._primaryColor.asReadonly();
   readonly secondaryColor = this._secondaryColor.asReadonly();
   readonly logoUrl        = this._logoUrl.asReadonly();
+  readonly isActive       = this._isActive.asReadonly();
 
   applyBranding(branding: TenantBrandingDto): void {
     const root = document.documentElement;
@@ -63,6 +66,7 @@ export class TenantThemeService {
 
     if (branding.logoUrl)  this._logoUrl.set(branding.logoUrl);
     if (branding.currency) this.currencyConfig.saveFromBranding(branding.currency, branding.locale);
+    if (branding.isActive) this._isActive.set(branding.isActive ?? false); // ← always set to ensure correct state even if isActive is false
   }
 
   loadAndApply() {
