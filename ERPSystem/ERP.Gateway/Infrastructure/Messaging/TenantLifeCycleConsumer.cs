@@ -95,25 +95,20 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             if (evt == null)
                                 continue;
 
-                            // remove old slug if changed
-                            if (!string.Equals(
-                                    evt.OldSlug,
-                                    evt.NewSlug,
-                                    StringComparison.OrdinalIgnoreCase))
-                            {
-                                await cache.RemoveAsync(evt.OldSlug);
-                            }
+                            TenantCacheEntry? existing = await cache.GetAsync(evt.TenantId);
+                            if (existing != null)
+                                await cache.RemoveAsync(existing.TenantId);
 
                             await cache.SetAsync(new TenantCacheEntry
                             {
                                 TenantId = evt.TenantId,
-                                Slug = evt.NewSlug,
+                                Slug = evt.Slug,
                                 IsActive = evt.IsActive
                             });
 
                             _logger.LogInformation(
                                 "Tenant updated cached: {Slug}",
-                                evt.NewSlug);
+                                evt.Slug);
 
                             break;
                         }
@@ -123,16 +118,21 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             TenantSuspendedEvent? evt =
                                 JsonSerializer.Deserialize<TenantSuspendedEvent>(json, _jsonOptions);
 
+                            Console.WriteLine("\n evt: {0}\n", evt);
                             if (evt == null)
                                 continue;
 
                             TenantCacheEntry? existing =
-                                await cache.GetAsync(evt.Slug);
+                                await cache.GetAsync(evt.TenantId);
+
+                            Console.WriteLine("\n existing: {0}\n", existing);
 
                             if (existing != null)
                             {
                                 existing.IsActive = false;
 
+                                Console.WriteLine("\n existing: {0}\n\n\n\n", existing);
+                                await cache.RemoveAsync(evt.TenantId);
                                 await cache.SetAsync(existing);
                             }
 
@@ -148,16 +148,23 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             TenantActivatedEvent? evt =
                                 JsonSerializer.Deserialize<TenantActivatedEvent>(json, _jsonOptions);
 
+                            _logger.LogError("\n\n\nevt: {evt}", evt);
+
                             if (evt == null)
                                 continue;
 
                             TenantCacheEntry? existing =
-                                await cache.GetAsync(evt.Slug);
+                                await cache.GetAsync(evt.TenantId);
+
+                            Console.WriteLine("\n existing: {0}\n", existing);
 
                             if (existing != null)
                             {
                                 existing.IsActive = true;
 
+                                Console.WriteLine("\n existing: {0}\n\n\n\n", existing);
+
+                                await cache.RemoveAsync(evt.TenantId);
                                 await cache.SetAsync(existing);
                             }
 
@@ -176,7 +183,7 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             if (evt == null)
                                 continue;
 
-                            await cache.RemoveAsync(evt.Slug);
+                            await cache.RemoveAsync(evt.TenantId);
 
                             _logger.LogWarning(
                                 "Tenant removed from cache: {Slug}",

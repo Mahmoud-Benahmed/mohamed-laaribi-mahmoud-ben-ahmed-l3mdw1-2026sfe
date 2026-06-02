@@ -35,6 +35,12 @@ public sealed class TenantResolutionMiddleware
         TenantRoles.SUPER_PLATFORM_ADMIN
     ];
 
+    private static readonly string[] InactiveAllowedPaths =
+    [
+        "/tenants/branding/",
+        "/plans",
+    ];
+
     public TenantResolutionMiddleware(
         RequestDelegate next,
         ILogger<TenantResolutionMiddleware> logger)
@@ -135,22 +141,34 @@ public sealed class TenantResolutionMiddleware
         // 5. Reject inactive tenant
         if (tenant != null && !tenant.IsActive)
         {
-            // Allow tenant SystemAdmin to renew subscription even when inactive
-            if (IsSubscriptionRenewalEndpoint(context.Request)
-                && context.User!.Claims.Any(c => c.Type == "privilege"
-                                             && c.Value == Privileges.Users.BUY_SUBSCRIPTION))
+            // Using composite formatting with {0}, {1}, {2}
+            Console.WriteLine("\n\nIsSubscriptionRenewalEndpoint(context.Request): {0}",
+                IsSubscriptionRenewalEndpoint(context.Request));
+
+            Console.WriteLine("\n\nInactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true): {0}",
+                InactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true));
+
+            Console.WriteLine("\n\ncontext.User!.Claims.Any(c => c.Type == \"privilege\" && c.Value == Privileges.Users.BUY_SUBSCRIPTION): {0}",
+                context.User!.Claims.Any(c => c.Type == "privilege" && c.Value == Privileges.Users.BUY_SUBSCRIPTION));
+
+            Console.WriteLine("\n\n");
+            if (
+                (IsSubscriptionRenewalEndpoint(context.Request) || InactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true))
+                && 
+                context.User!.Claims.Any(c => c.Type == "privilege" && c.Value == Privileges.Users.BUY_SUBSCRIPTION) 
+            )
             {
                 AttachTenant(context, tenant);
                 await _next(context);
                 return;
             }
 
-            context.Response.StatusCode = 403;
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
             await context.Response.WriteAsJsonAsync(new
             {
-                statusCode = 403,
                 code = "TENANT_INACTIVE",
-                message = $"Tenant '{tenant.Slug}' is inactive."
+                message = "Your subscription has expired or been deactivated.",
+                type = "tenant_inactive"  // ← explicit type
             });
             return;
         }

@@ -7,7 +7,7 @@ public interface ITenantCache
     Task<TenantCacheEntry?> GetAsync(string slug);
     Task<TenantCacheEntry?> GetAsync(Guid tenantId);
     Task SetAsync(TenantCacheEntry tenant);
-    Task RemoveAsync(string slug);
+    Task RemoveAsync(Guid TenantId);
     Task FlushAsync(RedisKey[] keys);
 }
 public class RedisTenantCache : ITenantCache
@@ -59,11 +59,11 @@ public class RedisTenantCache : ITenantCache
         await _db.StringSetAsync($"tenant:id:{tenant.TenantId}", json, expiry);
     }
 
-    public async Task RemoveAsync(string slug)
+    public async Task RemoveAsync(Guid TenantId)
     {
-        var entry = await GetAsync(slug);
+        var entry = await GetAsync(TenantId);
 
-        await _db.KeyDeleteAsync($"tenant:slug:{slug}");
+        await _db.KeyDeleteAsync($"tenant:id:{TenantId}");
 
         if (entry != null)
             await _db.KeyDeleteAsync($"tenant:id:{entry.TenantId}");
