@@ -1348,7 +1348,8 @@
       "BONS": "Receipts",
       "INVOICES": "Invoices",
       "AUDIT_LOG": "Audit Log",
-      "REPORTS": "Reports"
+      "REPORTS": "Reports",
+      "TENANTS": "Tenants"
     }
   },
   "LOGIN": {
@@ -1363,6 +1364,7 @@
     "PASSWORD_REQUIRED": "Password required"
   },
   "PLANS": {
+    "SELECT":"Select",
     "ALREADY_HAVE_ACCOUNT": "Already have an account?",
     "SIGN_IN": "Sign in",
     "TITLE": "Choose your plan",
@@ -1609,6 +1611,14 @@
       "MONTH": "Monthly",
       "YEAR": "Yearly"
     }
+  },
+  "SUBSCRIPTION": {
+    "EXPIRY_NOTICE": "Your subscription has expired.",
+    "RENEW_TITLE": "Renew Your Subscription",
+    "RENEW_SUBTITLE": "Choose a plan to reactivate your account and continue using ERPSuite.",
+    "RENEW_WITH": "Renew with {{ name }}",
+    "SELECT_TO_RENEW": "Select a plan to continue",
+    "RENEWED_SUCCESS": "Subscription renewed! Redirecting..."
   },
   "DIALOG": {
     "RATE_LIMIT": "Rate Limit Reached",

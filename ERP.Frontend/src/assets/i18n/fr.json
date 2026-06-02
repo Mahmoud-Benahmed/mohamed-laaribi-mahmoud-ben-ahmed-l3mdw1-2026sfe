@@ -1327,7 +1327,8 @@
       "BONS": "Bons",
       "INVOICES": "Factures",
       "AUDIT_LOG": "Journal d'audit",
-      "REPORTS": "Rapports"
+      "REPORTS": "Rapports",
+      "TENANTS": "Tenants"
     },
     "SYSTEM_SETTINGS":{
       "UPDATED":"Paramètres mis à jour avec succès",
@@ -1346,6 +1347,7 @@
     "PASSWORD_REQUIRED": "Mot de passe requis"
   },
   "PLANS": {
+    "SELECT":"Sélectionner",
     "ALREADY_HAVE_ACCOUNT": "Vous avez déjà un compte ?",
     "SIGN_IN": "Se connecter",
     "TITLE": "Choisissez votre plan",
@@ -1578,7 +1580,7 @@
       "SUSPEND_TENANT_MESSAGE": "Êtes-vous sûr de vouloir suspendre le tenant \"{{name}}\" ? Il ne pourra plus accéder au système jusqu'à sa réactivation.",
       "SUSPEND_CONFIRM": "Suspendre"
     },
-        "CURRENCIES": {
+    "CURRENCIES": {
       "TND": "Dinar Tunisien",
       "EUR": "Euro",
       "USD": "Dollar US"
@@ -1592,6 +1594,14 @@
       "MONTH": "Mensuel",
       "YEAR": "Annuel"
     }
+  },
+  "SUBSCRIPTION": {
+    "EXPIRY_NOTICE": "Votre abonnement a expiré.",
+    "RENEW_TITLE": "Renouveler votre abonnement",
+    "RENEW_SUBTITLE": "Choisissez un plan pour réactiver votre compte et continuer à utiliser ERPSuite.",
+    "RENEW_WITH": "Renouveler avec {{ name }}",
+    "SELECT_TO_RENEW": "Sélectionnez un plan pour continuer",
+    "RENEWED_SUCCESS": "Abonnement renouvelé! Redirection..."
   },
   "DIALOG": {
     "RATE_LIMIT": "Limite de taux atteinte",
