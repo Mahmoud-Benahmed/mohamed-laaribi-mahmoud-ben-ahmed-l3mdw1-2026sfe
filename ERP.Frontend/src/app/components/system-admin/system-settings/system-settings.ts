@@ -199,7 +199,6 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
 
     const updateDto: UpdateTenantRequestDto = {
       name: formValue.name,
-      subdomainSlug: formValue.subdomainSlug,
       email: formValue.email,
       phone: formValue.phone,
       address: formValue.address,

@@ -58,27 +58,6 @@
                 <span *ngIf="tenantForm.get('name')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 2} }}</span>
               </span>
             </div>
-
-            <div class="form__field">
-              <label class="form__label">
-                {{ 'TENANTS.FORM.SUBDOMAIN' | translate }}
-                <span class="form__required">*</span>
-              </label>
-              <div class="form__input-group">
-                <input class="form__input"
-                       type="text"
-                       formControlName="subdomainSlug"
-                       [placeholder]="'TENANTS.FORM.SUBDOMAIN_PLACEHOLDER' | translate"
-                       [class.form__input--error]="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched" />
-                <span class="form__addon">.erpsystem.app</span>
-              </div>
-              <span class="form__error" *ngIf="tenantForm.get('subdomainSlug')?.invalid && tenantForm.get('subdomainSlug')?.touched">
-                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('required')">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 3} }}</span>
-                <span *ngIf="tenantForm.get('subdomainSlug')?.hasError('pattern')">{{ 'VALIDATION.INVALID_FORMAT' | translate }}</span>
-              </span>
-              <small class="form__hint">{{ 'TENANTS.FORM.SUBDOMAIN_HINT' | translate }}</small>
-            </div>
           </div>
 
           <!-- Email & Phone -->
@@ -294,6 +273,7 @@
             <button type="button"
                     class="btn-success"
                     [disabled]="subscriptionForm.invalid || isValidating"
+                    [class.disabled]="subscriptionForm.invalid || isValidating"
                     (click)="assignSubscription()">
               <span *ngIf="!isValidating">
                 {{ selectedTenant.subscription?.plan ? ('TENANTS.FORM.UPDATE_SUBSCRIPTION' | translate) : ('TENANTS.FORM.ASSIGN_SUBSCRIPTION' | translate) }}

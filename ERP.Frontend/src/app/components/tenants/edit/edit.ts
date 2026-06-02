@@ -89,8 +89,7 @@ export class EditTenantComponent implements OnInit, OnDestroy {
       name:           ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       email:          ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
       phone:          ['', [Validators.required, Validators.pattern(RegexPatterns.phone)]],
-      subdomainSlug:  ['', [Validators.required, Validators.maxLength(100), Validators.pattern(RegexPatterns.subdomainSlug)]],
-      address:        ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
+      address:        ['', [ Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       logoUrl:        ['', [Validators.maxLength(500)]],
       // Branding
       primaryColor:   ['', [Validators.pattern(RegexPatterns.hexColor)]],
@@ -146,7 +145,6 @@ export class EditTenantComponent implements OnInit, OnDestroy {
     }
     this.tenantForm.patchValue({
       name: tenant.name,
-      subdomainSlug: tenant.subdomainSlug,
       email: tenant.email,
       phone: tenant.phone,
       address: tenant.address,
@@ -205,7 +203,6 @@ export class EditTenantComponent implements OnInit, OnDestroy {
 
     const updateDto: UpdateTenantRequestDto = {
       name: formValue.name,
-      subdomainSlug: formValue.subdomainSlug,
       email: formValue.email,
       phone: formValue.phone,
       address: formValue.address,

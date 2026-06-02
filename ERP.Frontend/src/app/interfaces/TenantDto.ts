@@ -98,7 +98,6 @@ export interface UpdateTenantRequestDto {
   name: string;
   email: string;
   phone: string;
-  subdomainSlug: string;
   address?: string | null;
   logoUrl?: string | null;
   primaryColor?: string | null;
