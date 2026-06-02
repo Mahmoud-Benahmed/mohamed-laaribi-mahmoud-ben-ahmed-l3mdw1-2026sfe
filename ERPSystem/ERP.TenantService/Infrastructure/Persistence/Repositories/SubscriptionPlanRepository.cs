@@ -30,6 +30,22 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
         return (items, totalCount);
     }
 
+    public async Task<(List<SubscriptionPlan> Items, int TotalCount)> GetActivePlansAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _context.SubscriptionPlans
+            .AsNoTracking()
+            .Where(p=> p.IsActive)
+            .OrderBy(p => p.MonthlyPrice);
+
+        var totalCount = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return (items, totalCount);
+    }
+
     public async Task<SubscriptionPlan?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.SubscriptionPlans.FindAsync(id, ct);

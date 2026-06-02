@@ -17,9 +17,9 @@ public class SubscriptionPlanController : ControllerBase
     }
 
     [HttpGet(ApiRoutes.Plans.GetAll)]
-    public async Task<IActionResult> GetAll(int page, int pageSize, CancellationToken ct = default)
+    public async Task<IActionResult> GetAllActive(int page, int pageSize, CancellationToken ct = default)
     {
-        var plans = await _planService.GetAllAsync(page, pageSize, ct);
+        var plans = await _planService.GetActivePlansAsync(page, pageSize, ct);
         return Ok(plans);
     }
 

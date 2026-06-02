@@ -28,6 +28,16 @@ public class SubscriptionPlanService : ISubscriptionPlanService
             page, pageSize);
     }
 
+    public async Task<PagedResultDto<SubscriptionPlanResponseDto>> GetActivePlansAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        (page, pageSize) = NormalizePagination(page, pageSize);
+        var (items, totalCount) = await _repository.GetActivePlansAsync(page, pageSize, ct);
+        return new PagedResultDto<SubscriptionPlanResponseDto>(
+            items.Select(MapToDto).ToList(),
+            totalCount,
+            page, pageSize);
+    }
+
     public async Task<SubscriptionPlanResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
