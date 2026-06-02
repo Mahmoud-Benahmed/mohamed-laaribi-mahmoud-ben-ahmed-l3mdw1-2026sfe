@@ -35,7 +35,7 @@ public class TenantCache
 
     public void Update(TenantUpdatedEvent evt)
     {
-        Slug = evt.NewSlug;
+        Slug = evt.Slug;
         IsActive = evt.IsActive;
         Name = evt.Name;
         Address = evt.Address;
