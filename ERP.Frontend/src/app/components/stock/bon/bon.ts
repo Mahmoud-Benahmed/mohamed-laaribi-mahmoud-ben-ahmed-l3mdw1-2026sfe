@@ -565,7 +565,7 @@ export class BonsComponent implements OnInit {
     }
   }
 
-  private getArticleLabel(articleId: string): string {
+  getArticleLabel(articleId: string): string {
     const article = this.articles.find(a => a.id === articleId);
     return article ? `${article.codeRef} — ${article.libelle}` : articleId;
   }
@@ -1288,7 +1288,6 @@ export class BonsComponent implements OnInit {
         return 1;
     }
   }
-
 
   getClientName(id: string): string {
     return this.clients.find(c => c.id === id)?.name ?? id;
