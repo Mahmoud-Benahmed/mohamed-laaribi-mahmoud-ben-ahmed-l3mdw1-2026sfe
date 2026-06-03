@@ -129,7 +129,8 @@ public class TenantService : ITenantService
 			Phone: tenant.Phone,
 			Currency: tenant.Currency,
 			PrimaryColor: tenant.PrimaryColor,
-			SecondaryColor: tenant.SecondaryColor
+			SecondaryColor: tenant.SecondaryColor,
+			LogoUrl: tenant.LogoUrl
 
         ));
 
@@ -166,8 +167,8 @@ public class TenantService : ITenantService
 			Phone: tenant.Phone,
 			Currency: tenant.Currency,
 			PrimaryColor: tenant.PrimaryColor,
-            SecondaryColor: tenant.SecondaryColor
-
+            SecondaryColor: tenant.SecondaryColor,
+            LogoUrl: tenant.LogoUrl
         ));
 
 		return MapToDto(tenant);

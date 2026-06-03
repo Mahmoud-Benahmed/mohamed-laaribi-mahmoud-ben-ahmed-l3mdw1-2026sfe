@@ -10,7 +10,8 @@ public record TenantCreatedEvent(
     string Phone,
     string Currency,
     string PrimaryColor,
-    string SecondaryColor
+    string SecondaryColor,
+    string? LogoUrl
     );
 public record TenantUpdatedEvent(
     Guid TenantId,
@@ -22,7 +23,9 @@ public record TenantUpdatedEvent(
     string Phone,
     string Currency,
     string PrimaryColor,
-    string SecondaryColor);
+    string SecondaryColor,
+    string? LogoUrl
+    );
 
 public record TenantDeletedEvent(
     Guid TenantId, 

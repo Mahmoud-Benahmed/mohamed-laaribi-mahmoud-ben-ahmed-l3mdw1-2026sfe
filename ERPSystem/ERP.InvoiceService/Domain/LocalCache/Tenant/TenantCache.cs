@@ -14,6 +14,7 @@ public class TenantCache
     public string Currency {get; private set;}
     public string PrimaryColor { get; private set; }
     public string SecondaryColor { get; private set; }
+    public string? LogoUrl { get; private set; }
 
     private TenantCache() { }
     public static TenantCache Create(TenantCreatedEvent evt)
@@ -29,7 +30,8 @@ public class TenantCache
             Phone = evt.Phone,
             Currency = evt.Currency,
             PrimaryColor= evt.PrimaryColor,
-            SecondaryColor= evt.SecondaryColor
+            SecondaryColor= evt.SecondaryColor,
+            LogoUrl= evt.LogoUrl
         };
     }
 
@@ -44,5 +46,6 @@ public class TenantCache
         Currency = evt.Currency;
         PrimaryColor = evt.PrimaryColor;
         SecondaryColor = evt.SecondaryColor;
+        LogoUrl = evt.LogoUrl;
     }
 }
