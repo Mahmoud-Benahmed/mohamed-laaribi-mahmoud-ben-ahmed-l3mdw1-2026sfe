@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.InvoiceService.Application.DTOs;
+using ERP.InvoiceService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.ArticleCategory;
@@ -74,6 +75,13 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
 
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
+                        var testId = tenantContext.TenantId;
+                        _logger.LogWarning($"After SetTenantId, TenantId = {testId}");
+
                         IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
 
                         switch (result.Topic)

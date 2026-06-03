@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.InvoiceService.Application.DTOs;
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using System.Text.Json;
 
@@ -83,7 +84,13 @@ public sealed class ClientEventConsumer : BackgroundService
 
                     using IServiceScope scope = _scopeFactory.CreateScope();
                     IClientEventHandler handler = scope.ServiceProvider
-                        .GetRequiredService<IClientEventHandler>(); // ← removed unused IClientCacheService
+                        .GetRequiredService<IClientEventHandler>();
+
+
+                    var tenantContext =
+                        scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
 
                     switch (result.Topic)
                     {

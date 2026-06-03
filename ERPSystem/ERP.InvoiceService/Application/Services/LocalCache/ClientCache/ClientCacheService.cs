@@ -56,165 +56,71 @@ public class ClientCacheService : IClientCacheService
 
     public async Task SyncCreatedAsync(ClientResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
 
-        if (string.IsNullOrWhiteSpace(dto.Name))
+        // Check if client already exists
+        Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id);
+        if (existing != null)
         {
-            _logger.LogWarning("Client event has null or empty Name. Id: {ClientId}", dto.Id);
+            _logger.LogInformation("Client {ClientName} (Id: {ClientId}) already exists in cache. Cancelling.",
+                dto.Name, dto.Id);
             return;
         }
 
-        try
+        // Create new client with all parameters
+        Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(dto);
+
+        await _clientCacheRepository.AddAsync(clientCache);
+        await _clientCacheRepository.SaveChangesAsync();
+
+        // Handle categories if any
+        if (dto.Categories != null && dto.Categories.Any())
         {
-            // Check if client already exists
-            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id);
-            if (existing != null)
-            {
-                _logger.LogInformation("Client {ClientName} (Id: {ClientId}) already exists in cache. Updating instead.",
-                    dto.Name, dto.Id);
-                await SyncUpdatedAsync(dto);
-                return;
-            }
-
-            Domain.LocalCache.Client.ClientCache? existingByName = await _clientCacheRepository.GetByNameAsync(dto.Name);
-            Domain.LocalCache.Client.ClientCache? existingByEmail = await _clientCacheRepository.GetByEmailAsync(dto.Email);
-
-            if (existingByName != null)
-            {
-                _logger.LogWarning(
-                    "Client name '{ClientName}' already exists with different ID. Existing: {ExistingId}, New: {NewId}. Updating existing client.",
-                    dto.Name, existingByName.Id, dto.Id);
-
-                await SyncUpdatedAsync(dto);
-                return;
-            }
-
-            if (existingByEmail != null)
-            {
-                _logger.LogWarning(
-                    "Client email '{ClientEmail}' already exists with different ID. Existing: {ExistingId}, New: {NewId}. Updating existing client.",
-                    dto.Email, existingByEmail.Id, dto.Id);
-
-                await SyncUpdatedAsync(dto);
-                return;
-            }
-
-            _logger.LogInformation(
-                "\n\n*> ClientCache created: Id={Id}, Name={Name}, Email={Email}, Address={Address}, Phone={Phone}, TaxNumber={TaxNumber}, CreditLimit={CreditLimit}, DelaiRetour={DelaiRetour}, DuePaymentPeriod={DuePaymentPeriod}, IsBlocked={IsBlocked}, IsDeleted={IsDeleted}, CreatedAt={CreatedAt}, UpdatedAt={UpdatedAt}",
-                dto.Id,
-                dto.Name,
-                dto.Email,
-                dto.Address,
-                dto.Phone,
-                dto.TaxNumber,
-                dto.CreditLimit,
-                dto.DelaiRetour,
-                dto.DuePaymentPeriod,
-                dto.IsBlocked,
-                dto.IsDeleted,
-                dto.CreatedAt,
-                dto.UpdatedAt
-            );
-
-            foreach (ClientCategoryResponseDto category in dto.Categories)
-            {
-                _logger.LogInformation(
-                    "\n*> Category of {ClientName}: Id={Id}, Name={Name}, Code={Code}, DelaiRetour={DelaiRetour}, DuePaymentPeriod={DuePaymentPeriod}, DiscountRate={DiscountRate}, CreditLimitMultiplier={CreditLimitMultiplier}, UseBulkPricing={UseBulkPricing}, IsActive={IsActive}, IsDeleted={IsDeleted}, CreatedAt={CreatedAt}, UpdatedAt={UpdatedAt}",
-                    dto.Name,
-                    category.Id,
-                    category.Name,
-                    category.Code,
-                    category.DelaiRetour,
-                    category.DuePaymentPeriod,
-                    category.DiscountRate,
-                    category.CreditLimitMultiplier,
-                    category.UseBulkPricing,
-                    category.IsActive,
-                    category.IsDeleted,
-                    category.CreatedAt,
-                    category.UpdatedAt
-                );
-            }
-
-            // Create new client with all parameters
-            Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(dto);
-
-            await _clientCacheRepository.AddAsync(clientCache);
+            await AssignCategoriesToClientAsync(clientCache.Id, dto.Categories);
             await _clientCacheRepository.SaveChangesAsync();
-
-            // Handle categories if any
-            if (dto.Categories != null && dto.Categories.Any())
-            {
-                await AssignCategoriesToClientAsync(clientCache.Id, dto.Categories);
-                await _clientCacheRepository.SaveChangesAsync();
-            }
+        }
 
 
-            _logger.LogInformation("Client {ClientName} (Id: {ClientId}) added to cache with {CategoryCount} categories",
+        _logger.LogInformation("Client {ClientName} (Id: {ClientId}) added to cache with {CategoryCount} categories",
                 dto.Name, dto.Id, dto.Categories?.Count() ?? 0);
-        }
-        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate") == true)
-        {
-            _logger.LogWarning(ex, "Duplicate client detected for {ClientName}. This is expected if client already exists.",
-                dto.Name);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing created client {ClientName}", dto.Name);
-            throw;
-        }
     }
 
     public async Task SyncUpdatedAsync(ClientResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
-
-        try
+        Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id) ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
+        if (existing == null)
         {
-            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id) ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
-            if (existing == null)
-            {
-                _logger.LogWarning("Client {ClientId} not found for update. Creating instead.", dto.Id);
-                await SyncCreatedAsync(dto);
-                return;
-            }
-
-            // Update client basic info
-            existing.Update(
-                name: dto.Name,
-                email: dto.Email,
-                address: dto.Address,
-                phone: dto.Phone,
-                taxNumber: dto.TaxNumber,
-                creditLimit: dto.CreditLimit,
-                delaiRetour: dto.DelaiRetour,
-                duePaymentPeriod: dto.DuePaymentPeriod,
-                isBlocked: dto.IsBlocked,
-                isDeleted: dto.IsDeleted,
-                createdAt: dto.CreatedAt,
-                updatedAt: dto.UpdatedAt
-
-            );
-
-            await _clientCacheRepository.UpdateAsync(existing);
-            await _clientCacheRepository.SaveChangesAsync();
-
-            // Update categories if needed
-            if (dto.Categories != null)
-            {
-                await UpdateClientCategoriesAsync(existing.Id, dto.Categories);
-            }
-
-
-            _logger.LogInformation("Client {ClientName} (Id: {ClientId}) updated in cache", existing.Name, existing.Id);
+            _logger.LogWarning("Client {ClientId} not found for update. Cancelling...", dto.Id);
+            return;
         }
-        catch (Exception ex)
+
+        // Update client basic info
+        existing.Update(
+            name: dto.Name,
+            email: dto.Email,
+            address: dto.Address,
+            phone: dto.Phone,
+            taxNumber: dto.TaxNumber,
+            creditLimit: dto.CreditLimit,
+            delaiRetour: dto.DelaiRetour,
+            duePaymentPeriod: dto.DuePaymentPeriod,
+            isBlocked: dto.IsBlocked,
+            isDeleted: dto.IsDeleted,
+            createdAt: dto.CreatedAt,
+            updatedAt: dto.UpdatedAt
+
+        );
+
+        await _clientCacheRepository.UpdateAsync(existing);
+        await _clientCacheRepository.SaveChangesAsync();
+
+        // Update categories if needed
+        if (dto.Categories != null)
         {
-            _logger.LogError(ex, "Error syncing updated client {ClientName}", dto.Name);
-            throw;
+            await UpdateClientCategoriesAsync(existing.Id, dto.Categories);
         }
+
+
+        _logger.LogInformation("Client {ClientName} (Id: {ClientId}) updated in cache", existing.Name, existing.Id);
     }
 
     public async Task SyncDeletedAsync(ClientResponseDto dto)

@@ -74,24 +74,21 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task SyncCreatedAsync(ArticleResponseDto dto)
     {
-        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id)
-                       ?? await _repo.GetByBarCodeAsync(dto.BarCode)
-                       ?? await _repo.GetByCodeRefAsync(dto.CodeRef);
+        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
 
-        if (existing != null)
-        {
-            // Update existing article – use its own method
-            existing.ApplyUpdate(dto);
-            // Ensure the navigation property points to the tracked category
-        }
-        else
+        if (existing == null)
         {
             // Create new article using the factory overload
             Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(dto);
             await _repo.AddAsync(article);
+            await _repo.SaveChangesAsync();
+        }
+        else
+        {
+            _logger.LogWarning(
+                "SyncUpdated: article {Id} existing in cache, create process will be cancelled", dto.Id);
         }
 
-        await _repo.SaveChangesAsync();
     }
 
     public async Task SyncUpdatedAsync(ArticleResponseDto dto)
@@ -100,16 +97,14 @@ public sealed class ArticleCacheService : IArticleCacheService
         if (existing is null)
         {
             _logger.LogWarning(
-                "SyncUpdated: article {Id} not in cache, inserting instead", dto.Id);
-            await _repo.AddAsync(Domain.LocalCache.Article.ArticleCache.FromEvent(dto));
+                "SyncUpdated: article {Id} not existing in cache, update process will be cancelled", dto.Id);
         }
         else
         {
             existing.ApplyUpdate(dto);
+            await _repo.SaveChangesAsync();
+            _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
         }
-
-        await _repo.SaveChangesAsync();
-        _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
     }
 
     public async Task SyncDeletedAsync(ArticleResponseDto dto)

@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.InvoiceService.Application.DTOs;
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using System.Text.Json;
 
@@ -86,6 +87,12 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
                         result.Topic, dto.Id, dto.Name);
 
                     using IServiceScope scope = _scopeFactory.CreateScope();
+
+                    var tenantContext =
+                        scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+
                     IClientCategoryEventHandler handler = scope.ServiceProvider
                         .GetRequiredService<IClientCategoryEventHandler>();
 
