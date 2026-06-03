@@ -59,7 +59,8 @@ type CreditLimitInfo= {
     MatButtonModule,
     MatTooltipModule,
     MatDialogModule,
-    TranslatePipe
+    TranslatePipe,
+    RouterLink
   ],
   templateUrl: './edit.html',
   styleUrl: './edit.scss',
@@ -989,6 +990,11 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     if (!this.hasMoreArticles || this.articlesLoading) return;
     this.articlePage++;
     this.loadArticlesForDropdown(false);  // append mode
+  }
+
+  getArticleLabel(articleId: string): string {
+    const article = this.masterArticles.find(a => a.id === articleId);
+    return article ? `${article.codeRef} — ${article.libelle}` : articleId;
   }
 
 

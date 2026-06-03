@@ -414,10 +414,9 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th>{{ 'INVOICES.DETAILS.BAR_CODE' | translate }}</th>
+                        <th>{{ 'INVOICES.DETAILS.ARTICLE_LABEL' | translate }}</th>
                         <th class="text-center">{{ 'INVOICES.DETAILS.QTY' | translate }}</th>
                         <th class="text-center">{{ 'INVOICES.DETAILS.UNIT_HT' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.TAX' | translate }}</th>
                         <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_HT_COL' | translate }}</th>
                         <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_TTC_COL' | translate }}</th>
                         <th class="text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
@@ -425,10 +424,9 @@
                     </thead>
                     <tbody>
                       <tr class="table__row" *ngFor="let item of pendingItems; trackBy: trackByLocalId">
-                        <td class="td--barCode">{{ item.articleBarCode }}</td>
+                        <td class="td--barCode role-badge--clickable" [routerLink]="['/articles', item.articleId]">{{ getArticleLabel(item.articleId) }}</td>
                         <td class="text-center">{{ item.quantity | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.uniPriceHT | number:'1.2-2' }}</td>
-                        <td class="text-center">{{ item.taxRate | number:'1.0-0' }}%</td>
                         <td class="td--price text-center">{{ item.totalHT | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.totalTTC | number:'1.2-2' }}</td>
                         <td class="td--actions">
@@ -445,7 +443,7 @@
                     </tbody>
                     <tfoot>
                       <tr class="totals-row" *ngIf="!discountInfo.applies || discountInfo.rate === 0">
-                        <td colspan="4" class="totals-label">{{ 'INVOICES.DETAILS.TOTALS' | translate }}</td>
+                        <td colspan="3" class="totals-label">{{ 'INVOICES.DETAILS.TOTALS' | translate }}</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalTTC | number:'1.2-2' }} TND</td>
                         <td></td>
@@ -453,13 +451,13 @@
 
                       <ng-container *ngIf="discountInfo.applies && discountInfo.rate > 0">
                         <tr class="totals-row">
-                          <td colspan="4" class="totals-label">{{ 'INVOICES.FORM.ORIGINAL_TOTAL' | translate }}</td>
+                          <td colspan="3" class="totals-label">{{ 'INVOICES.FORM.ORIGINAL_TOTAL' | translate }}</td>
                           <td class="td--price text-center">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                           <td class="td--price text-center">{{ discountInfo.originalTotal | number:'1.2-2' }} TND</td>
                           <td></td>
                         </tr>
                         <tr class="discount-row">
-                          <td colspan="4" class="totals-label discount-label">
+                          <td colspan="3" class="totals-label discount-label">
                             {{ 'INVOICES.FORM.DISCOUNT_ROW' | translate: { rate: discountInfo.rate } }}
                           </td>
                           <td class="td--price text-center discount-amount">- {{ discountInfo.discountAmountHT | number:'1.2-2' }} TND</td>
@@ -467,7 +465,7 @@
                           <td></td>
                         </tr>
                         <tr class="totals-row final-totals">
-                          <td colspan="4" class="totals-label final-label">
+                          <td colspan="3" class="totals-label final-label">
                             <strong>{{ 'INVOICES.FORM.FINAL_TOTALS' | translate }}</strong>
                           </td>
                           <td class="td--price text-center totals-value final-value">
