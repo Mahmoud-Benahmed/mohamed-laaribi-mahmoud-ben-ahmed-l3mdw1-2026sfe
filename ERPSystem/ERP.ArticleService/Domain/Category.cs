@@ -35,9 +35,6 @@
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Category name is required");
 
-            if (Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase))
-                return;
-
             TVA = tva;
             Name = name.Trim();
             UpdatedAt = DateTime.UtcNow;

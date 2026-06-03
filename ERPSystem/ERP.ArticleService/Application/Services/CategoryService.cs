@@ -103,8 +103,11 @@ public class CategoryService : ICategoryService
 
         Category category = await _categoryRepository.GetByIdAsync(id) ?? throw new CategoryNotFoundException(id);
         category.Update(dto.Name, dto.TVA);
+
         await _categoryRepository.SaveChangesAsync();
+
         CategoryResponseDto res = MapToDto(category);
+
         await _eventPublisher.PublishAsync(CategoryTopics.Updated, res);
         return res;
     }
