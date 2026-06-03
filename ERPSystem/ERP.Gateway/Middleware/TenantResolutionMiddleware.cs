@@ -39,6 +39,8 @@ public sealed class TenantResolutionMiddleware
     [
         "/tenants/branding/",
         "/plans",
+        "/auth/me",
+        "/tenants/admin"
     ];
 
     public TenantResolutionMiddleware(
@@ -141,22 +143,18 @@ public sealed class TenantResolutionMiddleware
         // 5. Reject inactive tenant
         if (tenant != null && !tenant.IsActive)
         {
-            // Using composite formatting with {0}, {1}, {2}
-            Console.WriteLine("\n\nIsSubscriptionRenewalEndpoint(context.Request): {0}",
-                IsSubscriptionRenewalEndpoint(context.Request));
+            path = context.Request.Path;
 
-            Console.WriteLine("\n\nInactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true): {0}",
-                InactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true));
+            // Tier 1: fully public for inactive tenants — no privilege check
+            bool isPublicInactivePath = InactiveAllowedPaths
+                .Any(p => path.Value?.StartsWith(p) == true);
 
-            Console.WriteLine("\n\ncontext.User!.Claims.Any(c => c.Type == \"privilege\" && c.Value == Privileges.Users.BUY_SUBSCRIPTION): {0}",
-                context.User!.Claims.Any(c => c.Type == "privilege" && c.Value == Privileges.Users.BUY_SUBSCRIPTION));
+            // Tier 2: requires BUY_SUBSCRIPTION privilege
+            bool isRenewalAction = IsSubscriptionRenewalEndpoint(context.Request)
+                && context.User!.Claims.Any(c =>
+                    c.Type == "privilege" && c.Value == Privileges.Users.BUY_SUBSCRIPTION);
 
-            Console.WriteLine("\n\n");
-            if (
-                (IsSubscriptionRenewalEndpoint(context.Request) || InactiveAllowedPaths.Any(p => context.Request.Path.Value?.StartsWith(p) == true))
-                && 
-                context.User!.Claims.Any(c => c.Type == "privilege" && c.Value == Privileges.Users.BUY_SUBSCRIPTION) 
-            )
+            if (isPublicInactivePath || isRenewalAction)
             {
                 AttachTenant(context, tenant);
                 await _next(context);
@@ -168,7 +166,7 @@ public sealed class TenantResolutionMiddleware
             {
                 code = "TENANT_INACTIVE",
                 message = "Your subscription has expired or been deactivated.",
-                type = "tenant_inactive"  // ← explicit type
+                type = "tenant_inactive"
             });
             return;
         }
