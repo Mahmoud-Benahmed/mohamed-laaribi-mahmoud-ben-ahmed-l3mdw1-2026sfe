@@ -212,20 +212,20 @@
   <aside class="sidebar">
     <div class="sidebar__logo" (click)="toggleSidebar()">
       <div class="sidebar__logo-icon">
-        <ng-container *ngIf="tenantService.settings() as settings; else loading">
-          <img *ngIf="settings.logoUrl; else fallback"
-              [src]="settings.logoUrl"
-              [alt]="settings.name"
+        <ng-container *ngIf="themeService as settings; else loading">
+          <img *ngIf="settings.currentLogoUrl; else fallback"
+              [src]="settings.currentLogoUrl"
+              [alt]="settings.currentTenantName || 'ERPSuite'"
               class="sidebar__logo-img" />
           <ng-template #fallback>
-            <span>{{ settings.name?.charAt(0)?.toUpperCase() || 'E' }}</span>
+            <span>{{ settings.currentTenantName?.charAt(0)?.toUpperCase() || 'E' }}</span>
           </ng-template>
         </ng-container>
         <ng-template #loading>
           <span>E</span>
         </ng-template>
       </div>
-      <span class="sidebar__logo-text">{{ tenantService.name || 'ERPSuite' }}</span>
+      <span class="sidebar__logo-text">{{ themeService.currentTenantName || 'ERPSuite' }}</span>
     </div>
 
     <nav class="sidebar__nav">

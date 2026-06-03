@@ -46,7 +46,8 @@ export class ShellComponent implements OnInit, OnDestroy {
               private cdr: ChangeDetectorRef,
               public userSettings: UserSettingsService,
               public translate: TranslateService,
-              public tenantService :TenantService
+              public tenantService :TenantService,
+              public themeService: UserSettingsService
   ) {
   }
 
