@@ -41,11 +41,19 @@ export class TenantThemeService {
   private _secondaryColor = signal<string>('');
   private _logoUrl        = signal<string>('');
   private _isActive       = signal<boolean>(false);
+  private _name = signal<string>('');
+  private _currency = signal<string>('');
+  private _locale = signal<string>('');
+  private _timezone = signal<string>('');
 
   readonly primaryColor   = this._primaryColor.asReadonly();
   readonly secondaryColor = this._secondaryColor.asReadonly();
   readonly logoUrl        = this._logoUrl.asReadonly();
   readonly isActive       = this._isActive.asReadonly();
+  readonly name = this._name.asReadonly();
+  readonly currency = this._currency.asReadonly();
+  readonly locale = this._locale.asReadonly();
+  readonly timezone = this._timezone.asReadonly();
 
   applyBranding(branding: TenantBrandingDto): void {
     const root = document.documentElement;
@@ -66,7 +74,12 @@ export class TenantThemeService {
 
     if (branding.logoUrl)  this._logoUrl.set(branding.logoUrl);
     if (branding.currency) this.currencyConfig.saveFromBranding(branding.currency, branding.locale);
-    if (branding.isActive) this._isActive.set(branding.isActive ?? false); // ← always set to ensure correct state even if isActive is false
+    if (branding.name) this._name.set(branding.name);
+    if (branding.currency) this._currency.set(branding.currency);
+    if (branding.locale) this._locale.set(branding.locale);
+    if (branding.timezone) this._timezone.set(branding.timezone);
+
+    if (branding.isActive) this._isActive.set(branding.isActive ?? false);
   }
 
   loadAndApply() {
@@ -112,6 +125,10 @@ export class UserSettingsService {
   get currentPrimary():  string { return this.themeService.primaryColor(); }
   get currentSecondary():string { return this.themeService.secondaryColor(); }
   get currentLogoUrl():  string { return this.themeService.logoUrl(); }
+  get currentTenantName(): string { return this.themeService.name(); }
+  get currentCurrency(): string { return this.themeService.currency(); }
+  get currentLocale(): string { return this.themeService.locale(); }
+  get currentTimezone(): string { return this.themeService.timezone(); }
 
   private readonly userProfile = toSignal(this.authService.userProfile$, { initialValue: null });
 
