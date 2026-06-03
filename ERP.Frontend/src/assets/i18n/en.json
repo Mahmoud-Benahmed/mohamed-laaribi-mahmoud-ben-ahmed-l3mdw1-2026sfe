@@ -801,7 +801,8 @@
       "TOTAL_TTC_COL": "TOTAL TTC",
       "NO_ITEMS": "No items on this invoice.",
       "ITEMS_COUNT": "{{count}} item(s)",
-      "TOTALS": "Totals"
+      "TOTALS": "Totals",
+      "ARTICLE_LABEL": "Article Label"
     },
     "FORM": {
       "TAX_PER_LINE": "Calculate tax per line item (subtotal × tax rate per line)",

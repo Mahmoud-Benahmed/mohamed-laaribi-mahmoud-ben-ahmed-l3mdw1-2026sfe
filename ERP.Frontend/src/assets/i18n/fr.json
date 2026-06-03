@@ -792,7 +792,8 @@
       "TOTAL_TTC_COL": "TOTAL TTC",
       "NO_ITEMS": "Aucun article sur cette facture.",
       "ITEMS_COUNT": "{{count}} article(s)",
-      "TOTALS": "Totaux"
+      "TOTALS": "Totaux",
+      "ARTICLE_LABEL": "Libelle de l'article"
     },
     "FORM": {
       "TAX_PER_LINE": "Calculer la taxe par ligne (sous-total × taux de taxe par ligne)",
