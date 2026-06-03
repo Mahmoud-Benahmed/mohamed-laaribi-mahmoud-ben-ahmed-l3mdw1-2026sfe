@@ -18,6 +18,7 @@ import { StockItem, StockService } from '../../services/stock.service';
 import { PaginationComponent } from '../pagination/pagination';
 import { ModalComponent } from '../modal/modal';
 import { HttpError } from '../../interfaces/HttpError';
+import { ClientResponseDto } from '../../services/clients/clients.service';
 
 type ViewMode = 'list' | 'list-deleted' | 'stats';
 
@@ -73,6 +74,8 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   invoiceStats: InvoiceStatsDto | null = null;
   statsLoading = false;
 
+  clients: ClientResponseDto[] = [];
+
   // ── Filters / sort ─────────────────────────────────────────────────────────
   searchQuery = '';
   statusFilter = 'ALL';
@@ -118,11 +121,13 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       // load articles + invoices + stats in parallel
       forkJoin({
           articles: this.loadArticlesWithStock(),
+          clients: this.stock.getClientsPaged(1, 100).pipe(catchError(() => of({ items: [] }))),
           invoices: this.invoiceService.getAll(this.currentPage, this.currentSize),
           stats: this.invoiceService.getStats()
       }).subscribe({
-          next: ({ invoices, stats }) => {
+          next: ({ invoices, clients, stats }) => {
               this.invoices   = invoices.items.filter(inv=> !inv.isDeleted);
+              this.clients = clients.items;
               this.totalCount = this.invoices.length ?? 0;
               this.stats = {
                 total: stats.totalInvoices,
@@ -347,7 +352,9 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   }
 
   getAddButtonTooltip(): string {
-    return this.articles.length === 0 ? this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND') : '';
+    if(this.articles.length< 1) return this.articles.length === 0 ? this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND') : '';
+    else if(this.clients.length< 1) return this.clients.length === 0 ? this.translate.instant('STOCK.ERRORS.CLIENTS_NOT_FOUND') : '';
+    else return '';
   }
 
   trackById(_: number, item: { id: string }) { return item.id; }

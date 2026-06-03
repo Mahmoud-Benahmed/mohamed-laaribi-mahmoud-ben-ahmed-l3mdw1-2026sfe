@@ -144,7 +144,7 @@
       </div>
       <button
         *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.CREATE_INVOICE) && isList()"
-        [disabled]="articles.length === 0"
+        [disabled]="articles.length < 1 || clients.length < 1"
         [matTooltip]="getAddButtonTooltip()"
         class="btn-add"
         routerLink="/invoices/create">
