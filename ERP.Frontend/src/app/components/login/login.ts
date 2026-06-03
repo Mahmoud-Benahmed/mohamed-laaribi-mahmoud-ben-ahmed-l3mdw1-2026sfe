@@ -126,17 +126,6 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
 
-        const tenantId = this.authService.TenantId;
-        const isPlatformAdmin = !tenantId; // platform admins have no tenantId
-
-        // if (!isPlatformAdmin) {
-        //   const isActive = this.themeService.isActive();
-        //   if (isActive) {
-        //     this.router.navigate(['/subscription-expiry']);
-        //     return;
-        //   }
-        // }
-
         this.router.navigate(['/home']);
       },
       error: (error) => {
