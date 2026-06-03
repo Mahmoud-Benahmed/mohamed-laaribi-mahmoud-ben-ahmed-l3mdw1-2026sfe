@@ -171,6 +171,9 @@ using (IServiceScope scope = app.Services.CreateScope())
         ClientCategoryTopics.Created, ClientCategoryTopics.Updated,
         ClientCategoryTopics.Deleted, ClientCategoryTopics.Restored,
 
+        FournisseurTopics.Created, FournisseurTopics.Updated,
+        FournisseurTopics.Deleted, FournisseurTopics.Restored,
+
         InvoiceTopics.Created, InvoiceTopics.Cancelled,
     };
 
