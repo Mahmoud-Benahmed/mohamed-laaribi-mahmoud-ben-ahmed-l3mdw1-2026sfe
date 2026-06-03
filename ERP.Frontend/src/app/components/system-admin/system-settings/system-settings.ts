@@ -16,6 +16,7 @@ import { TenantService } from '../../../services/tenant/tenant.service';
 import { SubscriptionPlanService } from '../../../services/tenant/subscription-plan.service';
 import { ModalComponent } from '../../modal/modal';
 import { RegexPatterns } from '../../../interfaces/RegexPatterns';
+import { CurrencyConfigService } from '../../../services/currency-config.service';
 
 @Component({
   selector: 'app-settings',
@@ -63,8 +64,8 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   constructor(
     public authService: AuthService,
     private tenantService: TenantService,
-    private planService: SubscriptionPlanService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private currencyConfig: CurrencyConfigService,
   ) {}
 
   ngOnInit(): void {
@@ -230,6 +231,8 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
           };
           this.flash('success', this.translate.instant('USERS.SYSTEM_SETTINGS.UPDATED'));
 
+          this.currencyConfig.save(updated.currency, updated.locale);
+          this.isEdit = false;
           setTimeout(() => {
             this.isValidating = false;
             this.loading= false;
