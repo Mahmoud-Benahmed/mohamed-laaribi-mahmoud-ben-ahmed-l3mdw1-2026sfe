@@ -29,6 +29,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using QuestPDF.Infrastructure;
 
 QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.EnableDebugging = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

@@ -5,6 +5,7 @@ using InvoiceService.Application.DTOs;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Svg;
 
 namespace InvoiceService.Services;
 
@@ -12,11 +13,16 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
 {
     private readonly ITenantCacheRepository _tenantCacheRepo;
     private readonly ITenantContext _tenantContext;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public InvoicePdfGenerator(ITenantCacheRepository tenantCacheRepo, ITenantContext tenantContext)
+    public InvoicePdfGenerator(
+        ITenantCacheRepository tenantCacheRepo,
+        ITenantContext tenantContext,
+        IHttpClientFactory httpClientFactory)
     {
         _tenantCacheRepo = tenantCacheRepo;
         _tenantContext = tenantContext;
+        _httpClientFactory = httpClientFactory;
     }
 
     private string CurrencySymbol = "EUR";
@@ -24,7 +30,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
     private string CompanyAddress = "123 Business Ave, City, Country";
     private string CompanyEmail = "contact@company.com";
     private string CompanyPhone = "+000 123 456 789";
-
+    
     public async Task<byte[]> GenerateInvoicePdf(InvoiceDto invoice)
     {
         TenantCache tenant = await _tenantCacheRepo.GetByIdAsync(_tenantContext.TenantId)
@@ -47,6 +53,21 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
             _ => Colors.Grey.Medium
         };
 
+        byte[]? logoBytes = null;
+        if (!string.IsNullOrWhiteSpace(tenant.LogoUrl))
+        {
+            if (tenant.LogoUrl.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+            {
+                // Convert SVG to PNG
+                logoBytes = await ConvertSvgToPngBytesAsync(tenant.LogoUrl, 150, 80);
+            }
+            else
+            {
+                // Normal image (PNG/JPEG)
+                logoBytes = await DownloadLogoAsync(tenant.LogoUrl);
+            }
+        }
+
         Document document = Document.Create(container =>
         {
             container.Page(page =>
@@ -59,12 +80,32 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                 // ================= HEADER =================
                 page.Header().Row(row =>
                 {
-                    row.RelativeItem().Column(col =>
+                    row.RelativeItem().Column(colLeft =>
                     {
-                        col.Item().Text(CompanyName)
-                            .FontSize(22).Bold().FontColor(primaryColor);
-                        col.Item().Text(CompanyAddress).FontSize(9);
-                        col.Item().Text($"Tel: {CompanyPhone} | Email: {CompanyEmail}").FontSize(9);
+                        if (logoBytes != null)
+                        {
+                            // Row: logo (left) + company details (right)
+                            colLeft.Item().Row(logoRow =>
+                            {
+                                logoRow.ConstantItem(100).Height(80).Image(logoBytes).FitArea();
+                                logoRow.ConstantItem(10);
+                                logoRow.RelativeItem().Column(companyCol =>
+                                {
+                                    companyCol.Item().Text(CompanyName)
+                                        .FontSize(22).Bold().FontColor(primaryColor);
+                                    companyCol.Item().Text(CompanyAddress).FontSize(9);
+                                    companyCol.Item().Text($"Tel: {CompanyPhone} | Email: {CompanyEmail}").FontSize(9);
+                                });
+                            });
+                        }
+                        else
+                        {
+                            // Original layout without logo
+                            colLeft.Item().Text(CompanyName)
+                                .FontSize(22).Bold().FontColor(primaryColor);
+                            colLeft.Item().Text(CompanyAddress).FontSize(9);
+                            colLeft.Item().Text($"Tel: {CompanyPhone} | Email: {CompanyEmail}").FontSize(9);
+                        }
                     });
 
                     row.ConstantItem(220).AlignRight().Column(col =>
@@ -247,20 +288,21 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                         }
 
                         // ================= PAYMENT TERMS =================
-                        col.Item().PaddingTop(20).Column(c =>
+                        col.Item().PaddingTop(20).Column(terms =>
                         {
-                            c.Item().Text("Payment Terms").Bold().FontSize(10);
-                            c.Item().Text("Please pay within the due date. Bank transfer details available upon request.")
+                            terms.Item().Text("Payment Terms").Bold().FontSize(10);
+                            terms.Item().Text("Please pay within the due date. Bank transfer details available upon request.")
                                 .FontSize(9).FontColor(Colors.Grey.Darken1);
                         });
+
                     });
 
                     // ================= FOOTER =================
                     page.Footer().AlignCenter().Text(x =>
                     {
-                        x.Span("Page ").FontSize(9).FontColor(Colors.Grey.Medium);
-                        x.CurrentPageNumber().FontSize(9).FontColor(Colors.Grey.Medium);
-                        x.Span(" - Thank you for your business").FontSize(9).FontColor(Colors.Grey.Medium);
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" - Thank you for your business");
                     });
                 });
             });
@@ -282,6 +324,66 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
             return Color.FromRGB(r, g, b);
         }
         catch { return fallback; }
+    }
+    private async Task<byte[]?> DownloadLogoAsync(string? logoUrl)
+    {
+        if (string.IsNullOrWhiteSpace(logoUrl)) return null;
+        try
+        {
+            using var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+            var response = await client.GetAsync(logoUrl);
+            response.EnsureSuccessStatusCode();
+
+            var contentType = response.Content.Headers.ContentType?.MediaType;
+            if (contentType != null && contentType.Contains("svg", StringComparison.OrdinalIgnoreCase))
+            {
+                // Log warning: "SVG not supported by QuestPDF, skipping logo"
+                return null;
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+    public async Task<byte[]?> ConvertSvgToPngBytesAsync(string svgUrl, int maxWidth = 200, int maxHeight = 200)
+    {
+        byte[]? svgBytes = null;
+        using var httpClient = new HttpClient();
+        try
+        {
+            svgBytes = await httpClient.GetByteArrayAsync(svgUrl);
+        }
+        catch
+        {
+            return null; // download failed
+        }
+
+        if (svgBytes == null) return null;
+
+        try
+        {
+            // Load SVG from bytes (as a string)
+            var svgString = System.Text.Encoding.UTF8.GetString(svgBytes);
+            var svgDocument = SvgDocument.FromSvg<SvgDocument>(svgString);
+
+            // Option 1: Simple scaling by setting width/height (preserves aspect ratio if only one dimension changed)
+            // But better to use Draw() overload that accepts target size:
+            using var bitmap = svgDocument.Draw(maxWidth, maxHeight);  // scales while preserving aspect ratio
+
+            using var pngStream = new MemoryStream();
+            bitmap.Save(pngStream, System.Drawing.Imaging.ImageFormat.Png);
+            return pngStream.ToArray();
+        }
+        catch (Exception ex)
+        {
+            // Log the error (optional)
+            // Console.WriteLine($"SVG conversion failed: {ex.Message}");
+            return null;
+        }
     }
 }
 

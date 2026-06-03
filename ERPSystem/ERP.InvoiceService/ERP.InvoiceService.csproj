@@ -23,6 +23,7 @@
 		<PrivateAssets>all</PrivateAssets>
 	</PackageReference>
     <PackageReference Include="QuestPDF" Version="2026.5.0" />
+    <PackageReference Include="Svg" Version="3.4.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
   </ItemGroup>
 </Project>
