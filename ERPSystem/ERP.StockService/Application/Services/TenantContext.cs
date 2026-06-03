@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace ERP.StockService.Application.Services;
+﻿namespace ERP.StockService.Application.Services;
 
 
 public interface ITenantContext
@@ -12,52 +10,44 @@ public interface ITenantContext
 public class TenantContext : ITenantContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-
-    private Guid? _tenantId;
-
-    public TenantContext(IHttpContextAccessor httpContextAccessor)
+    public TenantContext(IHttpContextAccessor? httpContextAccessor = null)
     {
         _httpContextAccessor = httpContextAccessor;
     }
+
+    private Guid? _manualTenantId;   // backing field for manually set value
 
     public Guid? TenantId
     {
         get
         {
-            // Explicitly assigned value wins first
-            if (_tenantId.HasValue)
-                return _tenantId;
+            // 1. If manually set (e.g., by Kafka consumer), return that
+            if (_manualTenantId.HasValue)
+                return _manualTenantId;
 
-            // HTTP header
-            var header = _httpContextAccessor.HttpContext?
-                .Request.Headers["X-Tenant-Id"]
-                .FirstOrDefault();
+            // 2. Otherwise, try to get from HTTP context (web requests)
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+                return null;
 
+            // Header first
+            var header = httpContext.Request.Headers["X-Tenant-Id"].FirstOrDefault();
             var value = header?.Split(',').FirstOrDefault()?.Trim();
-
             if (Guid.TryParse(value, out var fromHeader))
                 return fromHeader;
 
-            // JWT fallback
-            var claim = _httpContextAccessor.HttpContext?
-                .User?
-                .FindFirst("tenantId")
-                ?.Value;
-
+            // JWT claim fallback
+            var claim = httpContext.User?.FindFirst("tenantId")?.Value;
             if (Guid.TryParse(claim, out var fromClaim))
                 return fromClaim;
 
             return null;
         }
+        private set => _manualTenantId = value;   // allow set via method
     }
+
+    public void SetTenantId(Guid tenantId) => TenantId = tenantId;
 
     public string? Slug =>
-        _httpContextAccessor.HttpContext?
-            .Request.Headers["X-Tenant-Slug"]
-            .FirstOrDefault();
-
-    public void SetTenantId(Guid tenantId)
-    {
-        _tenantId = tenantId;
-    }
+        _httpContextAccessor.HttpContext?.Request.Headers["X-Tenant-Slug"].FirstOrDefault();
 }

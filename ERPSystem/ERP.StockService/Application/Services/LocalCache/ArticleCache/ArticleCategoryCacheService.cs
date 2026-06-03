@@ -68,35 +68,51 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
     // CategoryCacheService.cs
     public async Task SyncCreatedAsync(ArticleCategoryResponseDto dto)
     {
-        ArticleCategoryCache? existing =
-            await _repo.GetByIdAsync(dto.Id) ??
-            await _repo.GetByNameAsync(dto.Name);
+        if (dto == null)
+            throw new ArgumentNullException(nameof(dto));
+
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            _logger.LogWarning("Category event has null or empty Name. Id: {CategoryId}", dto.Id);
+            return;
+        }
+        // Try to find by ID first, then by Name
+        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id) ?? await _repo.GetByNameAsync(dto.Name);
 
         if (existing != null)
         {
+            _logger.LogInformation(
+                existing.Id == dto.Id
+                    ? "Category {Name} (Id: {Id}) found. Updating."
+                    : "Category name '{Name}' found with different ID (Existing: {ExistingId}, New: {NewId}). Updating existing.",
+                dto.Name, dto.Id, existing.Id);
+
             existing.ApplyUpdate(dto);
             await _repo.SaveChangesAsync();
             return;
         }
 
+        // Create new category
+        _logger.LogInformation("Creating new category: {Name} (Id: {Id})", dto.Name, dto.Id);
         await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
         await _repo.SaveChangesAsync();
     }
-
     public async Task SyncUpdatedAsync(ArticleCategoryResponseDto dto)
     {
         ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
         if (existing is null)
         {
-            _logger.LogError("SyncUpdated: category {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
-            return;
+            _logger.LogWarning("SyncUpdated: category {Id} not in cache, inserting instead", dto.Id);
+            await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
+        }
+        else
+        {
+            existing.ApplyUpdate(dto);
         }
 
-        existing.ApplyUpdate(dto);
         await _repo.SaveChangesAsync();
-        _logger.LogInformation("ArticleCategoryCache synced (updated) for {Id} — {Name}", dto.Id, dto.Name);
+        _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Name);
     }
-
 
     public async Task SyncDeletedAsync(ArticleCategoryResponseDto dto)
     {

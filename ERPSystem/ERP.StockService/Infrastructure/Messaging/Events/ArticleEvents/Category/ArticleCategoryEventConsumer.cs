@@ -74,41 +74,39 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
                     }
 
                     _logger.LogWarning($"Payload recived: {dto}");
-                    using (IServiceScope scope = _scopeFactory.CreateScope())
+
+                    if (!dto.TenantId.HasValue)
                     {
-                        if (!dto.TenantId.HasValue)
-                        {
-                            _logger.LogError(
-                                "Missing TenantId for article event {ArticleId}",
-                                dto.Id);
+                        _logger.LogError(
+                            "Missing TenantId for article event {ArticleId}",
+                            dto.Id);
 
-                            return;
-                        }
-
-                        var tenantContext =
-                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
-
-                        tenantContext.SetTenantId(dto.TenantId.Value);
-
-                        IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
-
-                        switch (result.Topic)
-                        {
-                            case ArticleCategoryTopics.Created:
-                                await handler.HandleCreatedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Updated:
-                                await handler.HandleUpdatedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Deleted:
-                                await handler.HandleDeletedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Restored:
-                                await handler.HandleRestoredAsync(dto);
-                                break;
-                        }
+                        return;
                     }
+                    
+                    using var scope = _scopeFactory.CreateScope();
+                    var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
 
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+                    var testId = tenantContext.TenantId;
+
+                    IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
+
+                    switch (result.Topic)
+                    {
+                        case ArticleCategoryTopics.Created:
+                            await handler.HandleCreatedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Updated:
+                            await handler.HandleUpdatedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Deleted:
+                            await handler.HandleDeletedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Restored:
+                            await handler.HandleRestoredAsync(dto);
+                            break;
+                    }
                     _consumer.Commit(result);
                 }
                 catch (ConsumeException ex)

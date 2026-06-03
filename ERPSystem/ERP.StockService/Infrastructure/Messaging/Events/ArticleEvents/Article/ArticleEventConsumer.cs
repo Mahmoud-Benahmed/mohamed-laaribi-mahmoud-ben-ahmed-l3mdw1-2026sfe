@@ -87,40 +87,35 @@ public sealed class ArticleEventConsumer : BackgroundService
 
                     _logger.LogWarning($"Payload recived: {dto}");
 
-                    // Create a new scope for each message
-                    using (IServiceScope scope = _scopeFactory.CreateScope())
+
+                    using var scope = _scopeFactory.CreateScope();
+                    var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+
+                    var testId = tenantContext.TenantId;
+                    _logger.LogWarning($"After SetTenantId, TenantId = {testId}");
+
+
+                    _logger.LogInformation("Processing article: {dto}", dto);
+
+
+                    IArticleEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleEventHandler>();
+
+                    switch (result.Topic)
                     {
-                        if (!dto.TenantId.HasValue)
-                        {
-                            _logger.LogError(
-                                "Missing TenantId for article event {ArticleId}",
-                                dto.Id);
-
-                            return;
-                        }
-
-                        var tenantContext =
-                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
-
-                        tenantContext.SetTenantId(dto.TenantId.Value);
-
-                        IArticleEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleEventHandler>();
-
-                        switch (result.Topic)
-                        {
-                            case ArticleTopics.Created:
-                                await handler.HandleCreatedAsync(dto);
-                                break;
-                            case ArticleTopics.Updated:
-                                await handler.HandleUpdatedAsync(dto);
-                                break;
-                            case ArticleTopics.Deleted:
-                                await handler.HandleDeletedAsync(dto);
-                                break;
-                            case ArticleTopics.Restored: 
-                                await handler.HandleRestoredAsync(dto);
-                                break;
-                        }
+                        case ArticleTopics.Created:
+                            await handler.HandleCreatedAsync(dto);
+                            break;
+                        case ArticleTopics.Updated:
+                            await handler.HandleUpdatedAsync(dto);
+                            break;
+                        case ArticleTopics.Deleted:
+                            await handler.HandleDeletedAsync(dto);
+                            break;
+                        case ArticleTopics.Restored: 
+                            await handler.HandleRestoredAsync(dto);
+                            break;
                     }
 
                     _consumer.Commit(result);

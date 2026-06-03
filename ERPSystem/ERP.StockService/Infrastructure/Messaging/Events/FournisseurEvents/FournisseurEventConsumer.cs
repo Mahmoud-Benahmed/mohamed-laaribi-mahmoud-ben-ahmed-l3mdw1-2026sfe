@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.FournisseurEvents;
@@ -29,7 +30,7 @@ public sealed class FournisseurEventConsumer : BackgroundService
             GroupId = $"stock-service-fournisseur-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            AllowAutoCreateTopics = true  // Add this
+            AllowAutoCreateTopics = true 
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -79,6 +80,11 @@ public sealed class FournisseurEventConsumer : BackgroundService
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        var tenantContext =
+                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
+
                         if (!dto.TenantId.HasValue)
                         {
                             _logger.LogError(
