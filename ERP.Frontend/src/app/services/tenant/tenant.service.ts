@@ -13,6 +13,7 @@ import {
   TenantSettingsDto
 } from '../../interfaces/TenantDto'
 import { AuthService } from '../auth/auth.service';
+import { TenantBrandingDto } from '../user-settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class TenantService {
@@ -42,8 +43,6 @@ export class TenantService {
       return of(null);
     }
 
-    console.log('loadTenantSettings: fetching for id:', id);
-
     if (this._settings() !== null) {
       console.log('loadTenantSettings: returning cached settings');
       return of(this._settings());
@@ -51,7 +50,6 @@ export class TenantService {
 
     return this.getTenantSettings(id).pipe(
       tap(dto => {
-        console.log('loadTenantSettings: received dto:', dto);
         this._settings.set(dto);
       }),
       catchError(err => {
@@ -128,6 +126,12 @@ export class TenantService {
   getTenantSettings(id: string): Observable<TenantSettingsDto> {
     return this.http
       .get<TenantSettingsDto>(`${this.baseUrl}/admin/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getTenantBranding(slug: string): Observable<TenantBrandingDto> {
+    return this.http
+      .get<TenantBrandingDto>(`${this.baseUrl}/branding/${slug}`)
       .pipe(catchError(this.handleError));
   }
 
