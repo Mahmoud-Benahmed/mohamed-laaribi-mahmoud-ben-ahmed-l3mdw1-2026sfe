@@ -74,17 +74,19 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarCode")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CodeRef")
+                    b.HasIndex("TenantId", "BarCode")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsDeleted");
+                    b.HasIndex("TenantId", "CategoryId");
+
+                    b.HasIndex("TenantId", "CodeRef")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("TenantId", "IsDeleted");
 
                     b.ToTable("ArticleCache", (string)null);
                 });
@@ -121,8 +123,9 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("ArticleCategoryCache", (string)null);
                 });
@@ -177,11 +180,11 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsActive");
+                    b.HasIndex("TenantId", "IsActive");
 
                     b.ToTable("ClientCategoryCache", (string)null);
                 });
@@ -242,11 +245,11 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsBlocked");
+                    b.HasIndex("TenantId", "IsBlocked");
 
                     b.ToTable("ClientCache", (string)null);
                 });
@@ -292,6 +295,10 @@ namespace ERP.InvoiceService.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -319,7 +326,7 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("TenantId");
 
-                    b.HasIndex("Slug")
+                    b.HasIndex("TenantId", "Slug")
                         .IsUnique();
 
                     b.ToTable("TenantCaches", (string)null);
