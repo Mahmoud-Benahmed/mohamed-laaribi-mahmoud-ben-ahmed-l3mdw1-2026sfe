@@ -10,11 +10,12 @@ import { TenantThemeService, UserSettingsService } from '../../../services/user-
 import { SubscriptionPeriod, SubscriptionPlanDto } from '../../../interfaces/TenantDto';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-subscription-expiry',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, MatIcon],
   templateUrl: './subscription-expiry.html',
   styleUrl: './subscription-expiry.scss'
 })
@@ -25,9 +26,7 @@ export class SubscriptionExpiryComponent implements OnInit {
   private router         = inject(Router);
   public  userSettings   = inject(UserSettingsService);
   public  translate   = inject(TranslateService);
-  private dialog = inject(MatDialog);
   private themeService = inject(TenantThemeService);
-  private location = inject(Location);
 
   plans: SubscriptionPlanDto[] = [];
   selectedPlan: SubscriptionPlanDto | null = null;
@@ -39,14 +38,16 @@ export class SubscriptionExpiryComponent implements OnInit {
   success = false;
 
   ngOnInit(): void {
-    if(this.themeService.isActive()){
-      this.location.back();
-      return;
-    }
-
-    this.planService.getAllPlans(1, 3).pipe(take(1)).subscribe({
-      next: (res) => this.plans = res.items,
-      error: () => this.error = 'Failed to load plans. Please try again.'
+    this.tenantService.getTenantBranding(this.authService.Slug!).pipe(take(1)).subscribe(settings => {
+      if (settings?.isActive) {
+        this.router.navigate(['/home']);
+        return;
+      }
+      
+      this.planService.getAllPlans(1, 3).pipe(take(1)).subscribe({
+        next: (res) => this.plans = res.items,
+        error: () => this.error = 'Failed to load plans. Please try again.'
+      });
     });
   }
 
@@ -77,7 +78,7 @@ export class SubscriptionExpiryComponent implements OnInit {
         this.success = true;
         // Reload tenant settings so isActive is refreshed
         this.tenantService.invalidateSettings();
-        this.tenantService.loadTenantSettings(tenantId).pipe(take(1)).subscribe(() => {
+        this.themeService.loadAndApply().pipe(take(1)).subscribe(() => {
           setTimeout(() => this.router.navigate(['/home']), 5000);
         });
       },
