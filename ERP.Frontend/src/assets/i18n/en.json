@@ -75,6 +75,8 @@
     "SELECT": "Select an element from the dropdown"
   },
   "VALIDATION": {
+      "INVALID":"Invalid characters.",
+      "INTEGER_ONLY": "Only integer numbers are allowed.",
       "INVALID_FORMAT": "Only lowercase letters, numbers, and hyphens are allowed (no spaces, no uppercase).",
       "ARTICLE_CATEGORIES_EMPTY": "Each article belongs to a category. You have no categories yet. Please create a category before creating articles.",
       "CLIENT_CATEGORIES_EMPTY": "Each client belongs to a category. You have no categories yet. Please create a category before creating clients.",
@@ -85,7 +87,8 @@
       "DELAI_RETOUR_INVALID": "Return period must be between 7 and 270 days.",
       "NAME_MIN": "Name must be at least 2 characters.",
       "NAME_MAX": "Name cannot exceed 200 characters.",
-      "NAME_PATTERN": "Name may contain letters (any language), numbers, spaces, comma, period, apostrophe, backslash, or hyphen.",
+      "ALPHANUMERIC": "Name may contain letters (any language), numbers, spaces, comma, period, apostrophe, backslash, or hyphen.",
+      "ALPHA_ONLY": "Name may contain letters (any language) only.",
       "EMAIL_INVALID": "Please enter a valid email address (e.g., name@example.com).",
       "ADDRESS_MIN": "Address must be at least 5 characters.",
       "ADDRESS_PATTERN": "Address may contain letters (any language), numbers, spaces, comma, period, apostrophe, backslash, or hyphen.",
@@ -331,7 +334,7 @@
       "NAME_PLACEHOLDER": "Enter article name",
       "UNIT_PRICE": "Unit Price",
       "UNIT_PRICE_PLACEHOLDER": "Article price",
-      "TVA": "TVA (%)",
+      "TVA": "TVA",
       "TVA_PLACEHOLDER": "eg. 19",
       "BAR_CODE": "Bar Code",
       "BARCODE_PLACEHOLDER": "8–13 digit barcode",
@@ -397,7 +400,7 @@
       "EDIT_TITLE": "Edit Category",
       "NAME": "Category Name",
       "NAME_PLACEHOLDER": "Enter category name",
-      "TVA": "TVA (%)",
+      "TVA": "TVA",
       "TVA_PLACEHOLDER": "e.g. 19"
     }
   },

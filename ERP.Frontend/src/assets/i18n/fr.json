@@ -75,6 +75,8 @@
     "SELECT": "Veuillez sélectionner un élément de la liste"
   },
   "VALIDATION": {
+      "INVALID":"Caractères invalides.",
+      "INTEGER_ONLY": "Seuls les nombres entiers sont autorisés.",
       "INVALID_FORMAT": "Seules les lettres minuscules, les chiffres et les tirets sont autorisés (pas d'espace, pas de majuscule).",
       "ARTICLE_CATEGORIES_EMPTY": "Chaque article appartient à une catégorie. Vous n'avez aucune catégorie pour le moment. Veuillez créer une catégorie avant de créer des articles.",
       "CLIENT_CATEGORIES_EMPTY": "Chaque client appartient à une catégorie. Vous n'avez aucune catégorie pour le moment. Veuillez créer une catégorie avant de créer des clients.",
@@ -82,7 +84,8 @@
       "TAX_NUMBER_MAX": "Le numéro fiscal ne peut pas dépasser 50 caractères.",
       "NAME_MIN": "Le nom doit contenir au moins 2 caractères.",
       "NAME_MAX": "Le nom ne peut pas dépasser 200 caractères.",
-      "NAME_PATTERN": "Le nom peut contenir des lettres (toute langue), des chiffres, des espaces, virgule, point, apostrophe, antislash ou tiret.",
+      "ALPHANUMERIC": "Le nom peut contenir des lettres (toute langue), des chiffres, des espaces, virgule, point, apostrophe, antislash ou tiret.",
+      "ALPHA_ONLY": "Le nom peut contenir uniquement des lettres (toute langue).",
       "EMAIL_INVALID": "Veuillez saisir une adresse e-mail valide (ex. : nom@exemple.com).",
       "ADDRESS_MIN": "L'adresse doit contenir au moins 5 caractères.",
       "ADDRESS_PATTERN": "L'adresse peut contenir des lettres (toute langue), des chiffres, des espaces, virgule, point, apostrophe, antislash ou tiret.",
@@ -321,7 +324,7 @@
       "NAME_PLACEHOLDER": "Entrez le nom de l'article",
       "UNIT_PRICE": "Prix unitaire",
       "UNIT_PRICE_PLACEHOLDER": "Prix de l'article",
-      "TVA": "TVA (%)",
+      "TVA": "TVA",
       "TVA_PLACEHOLDER": "ex: 19",
       "BAR_CODE": "Code-barres",
       "BARCODE_PLACEHOLDER": "Code-barres à 8–13 chiffres",
@@ -387,7 +390,7 @@
       "EDIT_TITLE": "Modifier la catégorie",
       "NAME": "Nom de la catégorie",
       "NAME_PLACEHOLDER": "Entrez le nom de la catégorie",
-      "TVA": "TVA (%)",
+      "TVA": "TVA",
       "TVA_PLACEHOLDER": "ex: 19"
     }
   },
