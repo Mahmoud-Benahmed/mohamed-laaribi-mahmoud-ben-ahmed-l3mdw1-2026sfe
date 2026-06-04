@@ -29,8 +29,20 @@ public class InvoiceRepository : IInvoiceRepository
     public async Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber)
     {
         return await _context.Invoices
-            .AnyAsync(i => i.AdditionalNotes != null
-                        && i.AdditionalNotes.Contains(originalInvoiceNumber)
+            .AnyAsync(i => i.OriginalInvoiceNumber == originalInvoiceNumber
+                        && !i.IsDeleted);
+    }
+
+    public async Task<bool> PenaltyExistsForPeriodAsync(
+    string originalInvoiceNumber,
+    DateTime asOf,
+    int duePeriod) // ← dynamic, not hardcoded
+    {
+        DateTime periodStart = asOf.AddDays(-duePeriod);
+
+        return await _context.Invoices
+            .AnyAsync(i => i.OriginalInvoiceNumber == originalInvoiceNumber
+                        && i.CreatedAt >= periodStart
                         && !i.IsDeleted);
     }
 

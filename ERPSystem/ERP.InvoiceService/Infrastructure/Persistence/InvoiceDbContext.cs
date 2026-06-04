@@ -127,7 +127,7 @@ internal sealed class InvoiceItemConfiguration : IEntityTypeConfiguration<Invoic
                 .IsRequired();
 
         entity.Property(ii => ii.ArticleBarCode)
-                .IsRequired()
+                .IsRequired(false)
                 .HasMaxLength(100);
 
         entity.Property(ii => ii.UniPriceHT)

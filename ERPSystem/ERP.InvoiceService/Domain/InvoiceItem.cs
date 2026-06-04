@@ -9,7 +9,7 @@ namespace InvoiceService.Domain
         public Guid InvoiceId { get; private set; }
         public Guid ArticleId { get; private set; }
         public string ArticleName { get; private set; }
-        public string ArticleBarCode { get; private set; }
+        public string? ArticleBarCode { get; private set; }
         public decimal Quantity { get; private set; }
         public decimal UniPriceHT { get; private set; }
         public decimal EffectivePriceHT { get; private set; }

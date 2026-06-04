@@ -1,5 +1,7 @@
-﻿using ERP.InvoiceService.Application.Interfaces;
+﻿using ERP.InvoiceService.Application.DTOs;
+using ERP.InvoiceService.Application.Interfaces;
 using ERP.InvoiceService.Domain.LocalCache.Client;
+using ERP.InvoiceService.Infrastructure.Messaging.Events;
 using InvoiceService.Application.Interfaces;
 using InvoiceService.Domain;
 
@@ -33,6 +35,10 @@ public sealed class OverdueInvoiceJob : BackgroundService
         ITenantCacheRepository tenantRepo = scope.ServiceProvider  // ✅ resolve from scope
             .GetRequiredService<ITenantCacheRepository>();
 
+        IEventPublisher _eventPublisher = scope.ServiceProvider  // ✅ resolve from scope
+                    .GetRequiredService<IEventPublisher>();
+
+
         DateTime now = DateTime.UtcNow;
         List<Invoice> overdueInvoices = await invoiceRepo.GetOverdueAsync(now);
 
@@ -57,15 +63,36 @@ public sealed class OverdueInvoiceJob : BackgroundService
                     int duePeriod = client.GetEffectiveDuePaymentPeriod();
                     if (now < invoice.InvoiceDate.AddDays(duePeriod)) continue;
 
-                    bool penaltyExists = await invoiceRepo
-                        .PenaltyExistsForInvoiceAsync(invoice.InvoiceNumber);
-                    if (penaltyExists) continue;
+                    bool penaltyExistsForPeriod = await invoiceRepo
+                        .PenaltyExistsForPeriodAsync(invoice.OriginalInvoiceNumber ?? invoice.InvoiceNumber,
+                                                      DateTime.UtcNow,
+                                                      duePeriod);
+                    if (penaltyExistsForPeriod) continue;
 
                     string penaltyNumber = await numberGenerator
                         .GenerateNextInvoiceNumberAsync(tenantId); // ✅ from invoice, not HTTP context
 
-                    Invoice penaltyInvoice = invoice.CreatePenaltyInvoice(penaltyNumber, tenantId: tenantId);
+                    Invoice penaltyInvoice = invoice.CreatePenaltyInvoice(
+                        invoiceNumber: penaltyNumber, 
+                        duePeriod: duePeriod, 
+                        tenantId: tenantId);
                     await invoiceRepo.AddAsync(penaltyInvoice);
+
+                    InvoiceEventDto payload = new InvoiceEventDto(
+                        Id: penaltyInvoice.Id,
+                        InvoiceNumber: penaltyInvoice.InvoiceNumber,
+                        TotalTTC: penaltyInvoice.TotalTTC,
+                        Status: penaltyInvoice.Status.ToString(),
+                        ClientId: penaltyInvoice.ClientId,
+                        TenantId: penaltyInvoice.TenantId,
+                        Items: penaltyInvoice.Items.Select(i => new InvoiceItemEventDto(
+                            ArticleId: i.ArticleId,
+                            Quantity: i.Quantity,
+                            UniPriceHT: i.UniPriceHT,
+                            TaxRate: i.TaxRate
+                        )).ToList()
+                    );
+                    await _eventPublisher.PublishAsync(InvoiceTopics.Created, payload);
 
                     _logger.LogInformation(
                         "Penalty invoice {PenaltyNumber} created for {InvoiceNumber}",

@@ -376,6 +376,9 @@ namespace ERP.InvoiceService.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("OriginalInvoiceNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -420,7 +423,6 @@ namespace ERP.InvoiceService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ArticleBarCode")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

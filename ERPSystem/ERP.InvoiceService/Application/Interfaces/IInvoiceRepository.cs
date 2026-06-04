@@ -1,4 +1,5 @@
 using InvoiceService.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace InvoiceService.Application.Interfaces;
 
@@ -6,6 +7,9 @@ public interface IInvoiceRepository
 {
     Task<List<Invoice>> GetOverdueAsync(DateTime asOf);
     Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber);
+    Task<bool> PenaltyExistsForPeriodAsync(string originalInvoiceNumber,
+    DateTime asOf,
+    int duePeriod);
 
     // ── Existing queries ─────────────────────────────────────────────────────
     Task<Invoice?> GetByIdAsync(Guid id);

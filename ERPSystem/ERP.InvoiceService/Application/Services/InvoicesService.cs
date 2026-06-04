@@ -313,7 +313,7 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
 
             // Draft invoices are not published when created with InvoiceStatus.DRAFT in CreateAsync (method above),
             // They are considered created once their Status is UNPAID Meaning that the stock will be effected only by the UNPAID invoices not the DRAFT ones,
-            // the draft invoice is peristed in Invoice service as Draft but only sent as UNPAID to StockService so the DRAFT isn't published in CreateAsync,
+            // the draft invoice is peristed in Invoice service as Draft but only sent as UNPAID to StockService & PaymentService so the DRAFT isn't published in CreateAsync,
             // they are published once they are UNPAID so they will be persisted in the StockService for tracking by this statement.
             InvoiceEventDto payload = new InvoiceEventDto(
                 Id: invoice.Id,

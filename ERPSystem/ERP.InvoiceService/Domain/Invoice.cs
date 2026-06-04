@@ -24,6 +24,8 @@ namespace InvoiceService.Domain
         public bool IsDeleted { get; private set; } = false;
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
+        public string? OriginalInvoiceNumber { get; private set; }
+
         private readonly List<InvoiceItem> _items = new();
         public IReadOnlyCollection<InvoiceItem> Items => _items.AsReadOnly();
 
@@ -64,17 +66,25 @@ namespace InvoiceService.Domain
         }
 
         // In Invoice.cs
-        public Invoice CreatePenaltyInvoice(string invoiceNumber, decimal penaltyRate = 0.02m, Guid? tenantId = null)
+        public Invoice CreatePenaltyInvoice(
+            string invoiceNumber,
+            int duePeriod,
+            decimal annualRate = 0.10m,
+            Guid? tenantId = null)
         {
             if (Status != InvoiceStatus.UNPAID)
                 throw new InvoiceDomainException("Penalty invoices can only be created for UNPAID invoices.");
 
-            decimal penaltyAmount = Math.Round(TotalTTC * penaltyRate, 2, MidpointRounding.AwayFromZero);
+            int daysOverdue = Math.Min((int)(DateTime.UtcNow - DueDate).TotalDays, duePeriod);
+
+            decimal penaltyAmount = Math.Round(
+                TotalTTC * (annualRate / 365m) * daysOverdue,
+                2, MidpointRounding.AwayFromZero);
 
             Invoice penalty = new Invoice(
                 invoiceNumber,
                 DateTime.UtcNow,
-                DateTime.UtcNow.AddDays(30),
+                DateTime.UtcNow.AddDays(duePeriod),
                 TaxCalculationMode,
                 0,
                 ClientId,
@@ -82,12 +92,14 @@ namespace InvoiceService.Domain
                 ClientAddress,
                 $"Penalty invoice for overdue invoice {InvoiceNumber}",
                 tenantId);
+            
+            penalty.OriginalInvoiceNumber = InvoiceNumber;
 
             penalty.AddItem(new InvoiceItem(
                 penalty.Id,
                 Guid.Empty,              // no article — penalty line
-                $"Late payment penalty ({penaltyRate * 100}%) on {InvoiceNumber}",
-                null,                    // no barcode
+                $"Late payment penalty ({annualRate * 100}%) on {InvoiceNumber}",
+                "PENALTY",                    // no barcode
                 1,
                 penaltyAmount,
                 0));                     // no tax on penalty
