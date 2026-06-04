@@ -327,6 +327,7 @@
             <ng-container *ngIf="ctrl.invalid && ctrl.touched">
               <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
               <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
               <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
             </ng-container>
           </span>
@@ -389,6 +390,7 @@
             <div class="form__label">
               <label>{{ 'ARTICLES.FORM.TVA' | translate }}</label>
               <mat-icon>percent</mat-icon>
+              <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span>
             </div>
             <input
               class="form__input"
@@ -403,6 +405,7 @@
             <span class="field__error" *ngIf="articleForm.get('tva') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['min'] || ctrl.errors?.['max']">{{ 'VALIDATION.TVA_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INTEGER_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -426,6 +429,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.BARCODE_INVALID' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.BARCODE_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.BARCODE_INVALID' | translate }}</span>
               </ng-container>
             </span>
             <span *ngIf="articleForm.get('barCode')?.value > 0">{{`${articleForm.get('barCode')?.value.length} / ${(articleForm.get('barCode')?.value.length <= 8 ? '8' : '13')}`}}</span>

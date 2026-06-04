@@ -167,8 +167,8 @@
               <td class="td--name">{{ client.name }}</td>
               <td class="td--email">{{ client.email }}</td>
               <td class="td--price">
-                <span *ngIf="client.creditLimit != null">{{ client.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' }}</span>
-                <span class="td--empty-value" *ngIf="client.creditLimit == null">—</span>
+                <span *ngIf="client.effectiveCreditLimit != null">{{ client.effectiveCreditLimit | currency: currencyCode : 'symbol' : '1.2-2' }}</span>
+                <span class="td--empty-value" *ngIf="client.effectiveCreditLimit == null">—</span>
               </td>
               <td class="td--actions">
                 <button class="icon-btn icon-btn--view" (click)="openView(client)" [title]="'COMMON.VIEW' | translate"
@@ -273,14 +273,14 @@
         <div class="detail-item">
           <span class="detail-label">{{ 'CLIENTS.DETAILS.CREDIT_LIMIT' | translate }}</span>
           <span class="detail-value">
-            {{ selectedClient.creditLimit != null ? (selectedClient.creditLimit | currency: currencyCode : 'symbol' : '1.2-2'): '—' }}
+            {{ selectedClient.effectiveCreditLimit != null ? (selectedClient.effectiveCreditLimit | currency: currencyCode : 'symbol' : '1.2-2'): '—' }}
           </span>
         </div>
-        <div class="detail-item" *ngIf="selectedClient.creditLimit != null">
+        <div class="detail-item" *ngIf="selectedClient.effectiveCreditLimit != null">
           <span class="detail-label">{{ 'CLIENTS.DETAILS.OUTSTANDING_BALANCE' | translate }}</span>
           <span class="detail-value">{{ outstandingBalance | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
         </div>
-        <div class="detail-item" *ngIf="selectedClient.creditLimit != null">
+        <div class="detail-item" *ngIf="selectedClient.effectiveCreditLimit != null">
           <span class="detail-label">{{ 'CLIENTS.DETAILS.REMAINING_CREDIT' | translate }}</span>
           <span class="detail-value" [class.text-danger]="creditRemaining !== null && creditRemaining < 0">
             {{ creditRemaining !== null ? (creditRemaining | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale) : '—' }}
@@ -395,7 +395,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>

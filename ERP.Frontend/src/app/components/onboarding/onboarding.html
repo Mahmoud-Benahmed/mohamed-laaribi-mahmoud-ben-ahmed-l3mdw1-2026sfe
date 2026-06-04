@@ -134,8 +134,8 @@
               <div class="field">
                 <label>{{ 'ONBOARDING.PRIMARY_COLOR' | translate }}</label>
                 <div class="color-input-wrap">
-                  <input formControlName="primaryColor" type="color" class="color-swatch" />
-                  <input formControlName="primaryColor" type="text" class="color-text" placeholder="#4e7cff" maxlength="7" />
+                  <input formControlName="primaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"/>
+                  <input formControlName="primaryColor" type="text" class="color-text" placeholder="#4e7cff" maxlength="7" (change)="fillColorInput($event)"/>
                 </div>
                 <span class="field-error" *ngIf="form.get('primaryColor')?.touched && form.get('primaryColor')?.errors">
                   <ng-container *ngIf="form.get('primaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
@@ -146,8 +146,8 @@
               <div class="field">
                 <label>{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
                 <div class="color-input-wrap">
-                  <input formControlName="secondaryColor" type="color" class="color-swatch" />
-                  <input formControlName="secondaryColor" type="text" class="color-text" placeholder="#a0b4ff" maxlength="7" />
+                  <input formControlName="secondaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"/>
+                  <input formControlName="secondaryColor" type="text" class="color-text" placeholder="#a0b4ff" maxlength="7" (change)="fillColorInput($event)"  />
                 </div>
                 <span class="field-error" *ngIf="form.get('secondaryColor')?.touched && form.get('secondaryColor')?.errors">
                   <ng-container *ngIf="form.get('secondaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>

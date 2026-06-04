@@ -84,10 +84,10 @@ export class FournisseurComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.fournisseurForm = this.fb.group({
-      name:      ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(2), Validators.maxLength(200)]],
+      name:      ['', [Validators.required, Validators.pattern(RegexPatterns.alpha), Validators.minLength(2), Validators.maxLength(200)]],
       address:   ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(5), Validators.maxLength(500)]],
       phone:     ['', [Validators.required, Validators.pattern(RegexPatterns.phone), Validators.maxLength(20)]],
-      taxNumber: ['', [Validators.required, Validators.pattern(RegexPatterns.alphaNumeric), Validators.maxLength(50)]],
+      taxNumber: ['', [Validators.pattern(RegexPatterns.alphaNumeric), Validators.maxLength(50)]],
       rib:       ['', [Validators.required, Validators.pattern(RegexPatterns.alphaNumeric), Validators.minLength(10), Validators.maxLength(34)]],
       email:     ['', [Validators.email, Validators.maxLength(200)]],
     });

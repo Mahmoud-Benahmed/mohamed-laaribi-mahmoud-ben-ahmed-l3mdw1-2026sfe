@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -8,6 +8,7 @@ import { UserSettingsService } from '../../services/user-settings.service';
 import { SubscriptionPeriod } from '../../interfaces/TenantDto';
 import { RegexPatterns } from '../../interfaces/RegexPatterns';
 import { take } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-onboarding',
@@ -17,6 +18,7 @@ import { take } from 'rxjs';
   styleUrl: './onboarding.scss'
 })
 export class OnboardingComponent implements OnInit , OnDestroy{
+  private readonly destroyRef = inject(DestroyRef);
   private redirectTimer?: ReturnType<typeof setTimeout>;
 
   form!: FormGroup;
@@ -63,6 +65,12 @@ export class OnboardingComponent implements OnInit , OnDestroy{
       locale:         ['fr-TN',        Validators.required],
       timezone:       ['Africa/Tunis', Validators.required],
     });
+
+    ['primaryColor', 'secondaryColor'].forEach(name => {
+      this.form.get(name)?.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef)) // ← prevent leak
+        .subscribe(() => this.syncColorPickers());
+    });
   }
   submit() {
     if (this.form.invalid) {
@@ -95,6 +103,35 @@ export class OnboardingComponent implements OnInit , OnDestroy{
         this.error = err?.error?.message ?? this.translate.instant('ERRORS.UNKNOWN');
       }
     });
+  }
+
+  private syncColorPickers(): void {
+    (['primaryColor', 'secondaryColor'] as const).forEach(controlName => {
+      const value = this.form.get(controlName)?.value;
+      if (!value) return;
+
+      const pickers = document.querySelectorAll<HTMLInputElement>(
+        `input[type="color"][formControlName="${controlName}"]`
+      );
+      pickers.forEach(el => (el.value = value));
+    });
+  }
+
+  fillColorTextInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const controlName = input.getAttribute('formControlName') as string;
+    this.form.get(controlName)?.setValue(input.value, { emitEvent: false });
+  }
+
+  fillColorInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const controlName = input.getAttribute('formControlName') as string;
+    const value = input.value.trim();
+
+    // Only update if it's a valid hex color
+    if (RegexPatterns.hexColor.test(value)) {
+      this.form.get(controlName)?.setValue(value, { emitEvent: false });
+    }
   }
 
   ngOnDestroy(): void {

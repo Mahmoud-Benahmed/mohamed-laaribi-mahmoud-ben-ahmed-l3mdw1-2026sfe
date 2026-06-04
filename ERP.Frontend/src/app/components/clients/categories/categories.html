@@ -359,6 +359,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -375,6 +376,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.CODE_MIN' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.CODE_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INVALID' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -393,6 +395,7 @@
                   <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                   <span *ngIf="ctrl.errors?.['min']">{{ 'VALIDATION.DELAI_RETOUR_INVALID' | translate }}</span>
                   <span *ngIf="ctrl.errors?.['max']">{{ 'VALIDATION.DELAI_RETOUR_INVALID' | translate }}</span>
+                  <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INTEGER_ONLY' | translate }}</span>
                 </ng-container>
               </span>
           </div>
@@ -410,6 +413,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['min']">{{ 'VALIDATION.DUE_PAYMENT_PERIOD_INVALID' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['max']">{{ 'VALIDATION.DUE_PAYMENT_PERIOD_INVALID' | translate }}</span>
+                  <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INTEGER_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>

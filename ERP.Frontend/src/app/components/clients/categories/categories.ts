@@ -15,6 +15,7 @@ import { CustomToggleComponent } from '../../toggle-slider/toggle-slider';
 import { ArticleCategoryResponseDto } from '../../../services/articles/categories.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 type ViewMode = 'list' | 'create' | 'edit' | 'view' | 'list-deleted' | 'list-inactive';
 
@@ -74,10 +75,10 @@ export class ClientCategoriesComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.categoryForm = this.fb.group({
-      name:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-      code:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      delaiRetour:           [null, [Validators.required, Validators.min(7), Validators.max(270)]],
-      duePaymentPeriod:      [null, [Validators.required, Validators.min(7), Validators.max(180)]],
+      name:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.alpha)]],
+      code:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(RegexPatterns.categoryCode)]],
+      delaiRetour:           [null, [Validators.required, Validators.min(7), Validators.max(270), Validators.pattern(RegexPatterns.integer)]],
+      duePaymentPeriod:      [null, [Validators.required, Validators.min(7), Validators.max(180), Validators.pattern(RegexPatterns.integer)]],
       discountRate:          [null, [Validators.min(0), Validators.max(100)]],
       creditLimitMultiplier: [null, [Validators.min(1), Validators.max(2)]],
       useBulkPricing:        [false],

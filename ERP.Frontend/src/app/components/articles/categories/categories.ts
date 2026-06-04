@@ -13,6 +13,7 @@ import { HttpError } from '../../../interfaces/HttpError';
 import { CategoryRequestDto, ArticleCategoryResponseDto, CategoryService, ArticleCategoryStatsDto } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 type ViewMode = 'list' | 'list-deleted' | 'create' | 'edit' | 'view';
 
@@ -66,8 +67,8 @@ export class ArticleCategoriesComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      tva:  [null, [Validators.required, Validators.min(0), Validators.max(100)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), Validators.pattern(RegexPatterns.alpha)]],
+      tva:  [null, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
 

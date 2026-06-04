@@ -342,7 +342,7 @@
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -383,14 +383,13 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'STOCK.FOURNISSEURS.FORM.TAX_NUMBER' | translate }}</label>
+              <label>{{ 'STOCK.FOURNISSEURS.FORM.TAX_NUMBER' | translate }}  <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
               <mat-icon>receipt_long</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="taxNumber" [placeholder]="'STOCK.FOURNISSEURS.FORM.TAX_NUMBER_PLACEHOLDER' | translate"
                   [class.form__input--error]="fournisseurForm.get('taxNumber')?.invalid && fournisseurForm.get('taxNumber')?.touched"/>
             <span class="field__error" *ngIf="fournisseurForm.get('taxNumber') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.TAX_NUMBER_INVALID' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.TAX_NUMBER_MAX' | translate }}</span>
               </ng-container>

@@ -461,11 +461,11 @@ export class ClientsComponent implements OnInit {
         name:             val.name,
         email:            val.email,
         address:          val.address,
-        phone:            val.phone || undefined,
-        taxNumber:        val.taxNumber || undefined,
-        creditLimit:      val.creditLimit ?? undefined,
-        delaiRetour:      val.delaiRetour ?? undefined,
-        duePaymentPeriod: val.duePaymentPeriod ?? undefined,
+        phone:            val.phone ,
+        taxNumber:        val.taxNumber,
+        creditLimit:      val.creditLimit,
+        delaiRetour:      val.delaiRetour,
+        duePaymentPeriod: val.duePaymentPeriod,
       };
       this.clientsService.update(this.selectedClient.id, dto).subscribe({
         next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('SUCCESS.CLIENT_UPDATED', { name: val.name })); },
@@ -638,7 +638,7 @@ export class ClientsComponent implements OnInit {
     }
 
     // If no credit limit is set, remaining is undefined (or null)
-    if (!this.selectedClient.creditLimit) {
+    if (!this.selectedClient.effectiveCreditLimit) {
       this.creditRemaining = null;
       this.outstandingBalance = 0;
       return;
@@ -647,7 +647,7 @@ export class ClientsComponent implements OnInit {
     this.invoiceService.getClientOutstandingBalance(this.selectedClient.id).subscribe({
       next: (outstanding) => {
         this.outstandingBalance = outstanding;
-        this.creditRemaining = Math.max(0, this.selectedClient!.creditLimit! - outstanding);
+        this.creditRemaining = Math.max(0, this.selectedClient!.effectiveCreditLimit! - outstanding);
         this.cdr.markForCheck();
       },
       error: () => {

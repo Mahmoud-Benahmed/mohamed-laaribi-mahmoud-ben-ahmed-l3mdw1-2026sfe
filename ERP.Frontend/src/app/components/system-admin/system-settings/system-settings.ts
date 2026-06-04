@@ -212,8 +212,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     };
 
     this.tenantService.updateTenant(this.tenantId!, updateDto)
-      .pipe(tap(()  => this.tenantService.patchSettings(updateDto)),
-            takeUntilDestroyed(this.destroyRef))
+      .pipe(tap(()  => this.tenantService.patchSettings(updateDto)),takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           this.selectedTenant = {

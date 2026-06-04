@@ -238,6 +238,7 @@
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
               </ng-container>
             </span>
@@ -263,6 +264,7 @@
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                 <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                 <span *ngIf="ctrl.errors?.['min'] || ctrl.errors?.['max']">{{ 'VALIDATION.TVA_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INTEGER_ONLY' | translate }}</span>
               </ng-container>
             </span>
           </div>

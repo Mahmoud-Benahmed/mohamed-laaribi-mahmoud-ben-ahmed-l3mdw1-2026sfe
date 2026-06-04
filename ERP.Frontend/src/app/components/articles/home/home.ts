@@ -81,12 +81,12 @@ export class ArticleComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.articleForm = this.fb.group({
-      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.alphaNumeric)]],
       prix:       [null, [Validators.required, Validators.min(0.01)]],
       categoryId: ['', Validators.required],
       unit:       ['', Validators.required],
       barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13), Validators.pattern(RegexPatterns.barCode)]],
-      tva:        [null, [Validators.min(0.01), Validators.max(100)]],
+      tva:        [null, [Validators.min(0.01), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
 

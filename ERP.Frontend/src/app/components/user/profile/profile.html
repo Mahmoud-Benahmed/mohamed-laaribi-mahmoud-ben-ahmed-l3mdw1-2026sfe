@@ -158,7 +158,7 @@
                           <ng-container *ngIf="ctrl.invalid && ctrl.touched">
                             <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
                             <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                            <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
+                            <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
                           </ng-container>
                         </span>
                         <span class="warning-hint" *ngIf="noDataChange && !editForm.get('fullName')?.touched">
