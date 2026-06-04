@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -25,17 +25,17 @@ export class TenantService {
   // ── Public readonly signal (inject TenantService anywhere, read settings()) ─
   readonly settings = this._settings.asReadonly();
 
-  get name():           string        { return this._settings()?.name           ?? ''; }
-  get email():          string        { return this._settings()?.email          ?? ''; }
-  get phone():          string        { return this._settings()?.phone          ?? ''; }
-  get address():        string        { return this._settings()?.address        ?? ''; }
-  get slug():           string        { return this._settings()?.slug           ?? ''; }
-  get logoUrl():        string | null { return this._settings()?.logoUrl        ?? null; }
-  get primaryColor():   string        { return this._settings()?.primaryColor   ?? ''; }
-  get secondaryColor(): string        { return this._settings()?.secondaryColor ?? ''; }
-  get currency():       string        { return this._settings()?.currency       ?? ''; }
-  get locale():         string        { return this._settings()?.locale         ?? ''; }
-  get timezone():       string        { return this._settings()?.timezone       ?? ''; }
+  readonly name= computed(()=> this._settings()?.name           ?? '');
+  readonly email= computed(()=> this._settings()?.email          ?? '');
+  readonly phone= computed(()=> this._settings()?.phone          ?? '');
+  readonly address= computed(()=> this._settings()?.address        ?? '');
+  readonly slug= computed(()=> this._settings()?.slug           ?? '');
+  readonly logoUrl= computed(()=> this._settings()?.logoUrl        ?? null);
+  readonly primaryColor= computed(()=> this._settings()?.primaryColor   ?? '');
+  readonly secondaryColor= computed(()=> this._settings()?.secondaryColor ?? '');
+  readonly currency= computed(()=> this._settings()?.currency       ?? '');
+  readonly locale= computed(()=> this._settings()?.locale         ?? '');
+  readonly timezone= computed(()=> this._settings()?.timezone       ?? '');
 
   loadTenantSettings(id: string): Observable<TenantSettingsDto | null> {
     if (!id) {
