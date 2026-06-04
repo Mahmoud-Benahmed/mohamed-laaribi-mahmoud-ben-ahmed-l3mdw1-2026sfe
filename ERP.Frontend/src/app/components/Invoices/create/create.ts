@@ -430,16 +430,15 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   private calcLineAmounts(
     qty: number,
     uniPriceHT: number,
-    taxRate: number,          // as percentage e.g. 19
-    discountRate = 0          // as percentage e.g. 10
+    taxRate: number,
+    discountRate = 0
   ): { effectivePriceHT: number; totalHT: number; taxAmount: number; totalTTC: number } {
-    const effectivePriceHT = uniPriceHT * (1 - discountRate / 100);
-    const totalHT  = qty * effectivePriceHT;
-    const taxAmount = totalHT * (taxRate / 100);
-    const totalTTC  = totalHT + taxAmount;
+    const effectivePriceHT = Math.round(uniPriceHT * (1 - discountRate / 100) * 100) / 100;
+    const totalHT           = Math.round(qty * effectivePriceHT * 100) / 100;
+    const taxAmount         = Math.round(totalHT * (taxRate / 100) * 100) / 100;
+    const totalTTC          = Math.round((totalHT + taxAmount) * 100) / 100;
     return { effectivePriceHT, totalHT, taxAmount, totalTTC };
   }
-
   // In the component — replace checkClientLimitsAndDiscount():
   async checkClientLimitsAndDiscount(): Promise<void> {
     const client = this.selectedClientForValidation;
@@ -481,14 +480,14 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     const discountedTotalHT = originalTotalHT * discountMultiplier;
     const discountedTotalTTC = originalTotalTTC * discountMultiplier;
 
-    this.discountInfo = {
-      applies,
-      rate: discountRate,
-      discountAmountHT: originalTotalHT - discountedTotalHT,
-      discountAmount: originalTotalTTC - discountedTotalTTC,
-      originalTotal: originalTotalTTC,
-      discountedTotal: discountedTotalTTC
-    };
+  this.discountInfo = {
+    applies,
+    rate: discountRate,
+    discountAmountHT: Math.round((originalTotalHT - discountedTotalHT) * 100) / 100,
+    discountAmount:   Math.round((originalTotalTTC - discountedTotalTTC) * 100) / 100,
+    originalTotal:    Math.round(originalTotalTTC * 100) / 100,
+    discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
+  };
 
     // ── 2. Recalculate line prices ────────────────────────
     this.recalcAllItemPrices();
@@ -715,16 +714,13 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalHT(): number {
-    // always sum effectivePriceHT (post-discount) × qty
-    return this.pendingItems.reduce((s, i) => s + i.totalHT, 0);
+    return Math.round(this.pendingItems.reduce((s, i) => s + i.totalHT, 0) * 100) / 100;
   }
 
   get pendingTotalTVA(): number {
     if (this.taxCalculationMode === TaxCalculationMode.LINE) {
-      // sum each line's tax individually (may differ due to rounding)
-      return this.pendingItems.reduce((s, i) => s + i.taxAmount, 0);
+      return Math.round(this.pendingItems.reduce((s, i) => s + i.taxAmount, 0) * 100) / 100;
     }
-    // INVOICE mode: weighted average rate on total HT
     const totalHT = this.pendingTotalHT;
     if (totalHT === 0) return 0;
     const weightedRate = this.pendingItems.reduce(
@@ -734,7 +730,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalTTC(): number {
-    return this.pendingTotalHT + this.pendingTotalTVA;
+    return Math.round((this.pendingTotalHT + this.pendingTotalTVA) * 100) / 100;
   }
 
   trackById(_: number, item: { id: string }) { return item.id; }

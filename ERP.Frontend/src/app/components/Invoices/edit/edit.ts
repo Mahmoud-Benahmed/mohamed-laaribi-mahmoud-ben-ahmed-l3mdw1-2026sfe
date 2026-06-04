@@ -135,7 +135,6 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   constructor(
     public authService: AuthService,
     private invoiceService: InvoiceService,
-    private clientsService: ClientsService,
     private articleService: ArticleService,
     private fb: FormBuilder,
     private stock: StockService,
@@ -184,19 +183,18 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     // Build pending items from invoice items
     this.pendingItems = this.selectedInvoice.items.map(item => {
-      const taxRate = item.taxRate * 100;
-      const totalHT = item.quantity * item.uniPriceHT;
-      const taxAmount = totalHT * (taxRate / 100);
-      const totalTTC = totalHT + taxAmount;
-
+      const taxRate   = item.taxRate * 100;
+      const totalHT   = Math.round(item.quantity * item.uniPriceHT * 100) / 100;
+      const taxAmount = Math.round(totalHT * (taxRate / 100) * 100) / 100;
+      const totalTTC  = Math.round((totalHT + taxAmount) * 100) / 100;
       return {
         _localId: crypto.randomUUID(),
         articleId: item.articleId,
-        articleName: item.articleName,       // ← use item.articleName directly, don't look up from masterArticles (may not be in stock)
-        articleBarCode: item.articleBarCode, // ← same
+        articleName: item.articleName,
+        articleBarCode: item.articleBarCode,
         quantity: item.quantity,
         uniPriceHT: item.uniPriceHT,
-        effectivePriceHT: item.uniPriceHT,  // same until user changes something
+        effectivePriceHT: item.uniPriceHT,
         taxRate,
         totalHT,
         taxAmount,
@@ -576,13 +574,13 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   private calcLineAmounts(
     qty: number,
     uniPriceHT: number,
-    taxRate: number,          // as percentage e.g. 19
-    discountRate = 0          // as percentage e.g. 10
+    taxRate: number,
+    discountRate = 0
   ): { effectivePriceHT: number; totalHT: number; taxAmount: number; totalTTC: number } {
-    const effectivePriceHT = uniPriceHT * (1 - discountRate / 100);
-    const totalHT  = qty * effectivePriceHT;
-    const taxAmount = totalHT * (taxRate / 100);
-    const totalTTC  = totalHT + taxAmount;
+    const effectivePriceHT = Math.round(uniPriceHT * (1 - discountRate / 100) * 100) / 100;
+    const totalHT           = Math.round(qty * effectivePriceHT * 100) / 100;
+    const taxAmount         = Math.round(totalHT * (taxRate / 100) * 100) / 100;
+    const totalTTC          = Math.round((totalHT + taxAmount) * 100) / 100;
     return { effectivePriceHT, totalHT, taxAmount, totalTTC };
   }
 
@@ -609,10 +607,10 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     this.discountInfo = {
       applies,
       rate: discountRate,
-      discountAmountHT: originalTotalHT - discountedTotalHT,
-      discountAmount:   originalTotalTTC - discountedTotalTTC,
-      originalTotal:    originalTotalTTC,
-      discountedTotal:  discountedTotalTTC,
+      discountAmountHT: Math.round((originalTotalHT - discountedTotalHT) * 100) / 100,
+      discountAmount:   Math.round((originalTotalTTC - discountedTotalTTC) * 100) / 100,
+      originalTotal:    Math.round(originalTotalTTC * 100) / 100,
+      discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
     };
 
     try {
@@ -832,14 +830,13 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalHT(): number {
-    return this.pendingItems.reduce((s, i) => s + i.totalHT, 0);
+    return Math.round(this.pendingItems.reduce((s, i) => s + i.totalHT, 0) * 100) / 100;
   }
 
   get pendingTotalTVA(): number {
     if (this.taxCalculationMode === TaxCalculationMode.LINE) {
-      return this.pendingItems.reduce((s, i) => s + i.taxAmount, 0);
+      return Math.round(this.pendingItems.reduce((s, i) => s + i.taxAmount, 0) * 100) / 100;
     }
-    // INVOICE mode: weighted average rate on totalHT
     const totalHT = this.pendingTotalHT;
     if (totalHT === 0) return 0;
     const weightedRate = this.pendingItems.reduce(
@@ -849,8 +846,9 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalTTC(): number {
-    return this.pendingTotalHT + this.pendingTotalTVA; // derives from above, no duplication
+    return Math.round((this.pendingTotalHT + this.pendingTotalTVA) * 100) / 100;
   }
+
   trackById(_: number, item: { id: string }) { return item.id; }
   trackByLocalId(_: number, item: PendingItem) { return item._localId; }
 

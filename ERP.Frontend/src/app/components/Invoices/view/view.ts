@@ -120,7 +120,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '420px',
       data: {
-        icon: 'cancel', iconColor: 'warn',
+        icon: 'cancel', iconColor: 'danger',
         title: this.translate.instant('INVOICES.DIALOG.CANCEL_INVOICE_TITLE'),
         message: this.translate.instant('INVOICES.DIALOG.CANCEL_INVOICE_MESSAGE', { number: invoice.invoiceNumber }),
         confirmText: this.translate.instant('INVOICES.DIALOG.CANCEL_CONFIRM'),
