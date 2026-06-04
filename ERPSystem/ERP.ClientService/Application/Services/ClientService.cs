@@ -50,7 +50,7 @@ public class ClientService : IClientService
         await _clientRepository.AddAsync(client);
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Created, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Created, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -98,7 +98,8 @@ public class ClientService : IClientService
 
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        // Publish effective values — consumers use these for business rules, not raw limits
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with {CreditLimit= res.EffectiveCreditLimit, DelaiRetour= res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -112,7 +113,7 @@ public class ClientService : IClientService
         client.Delete();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Deleted, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Deleted, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
     }
 
     // =========================
@@ -128,7 +129,7 @@ public class ClientService : IClientService
         client.Restore();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Restored, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Restored, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
     }
 
     // =========================
@@ -141,7 +142,7 @@ public class ClientService : IClientService
         client.Block();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -152,7 +153,7 @@ public class ClientService : IClientService
         client.Unblock();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -172,9 +173,9 @@ public class ClientService : IClientService
         
         client.AddCategory(category, assignedById);
         await _clientRepository.SaveChangesAsync();
-        ClientResponseDto dto = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, dto);
-        return dto;
+        ClientResponseDto res = client.ToResponseDto();
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
+        return res;
     }
 
     public async Task<ClientResponseDto> RemoveCategoryAsync(Guid clientId, Guid categoryId)
@@ -187,9 +188,9 @@ public class ClientService : IClientService
         client.RemoveCategory(category);
 
         await _clientRepository.SaveChangesAsync();
-        ClientResponseDto dto = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, dto);
-        return dto;
+        ClientResponseDto res = client.ToResponseDto();
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
+        return res;
     }
 
     // =========================
