@@ -97,7 +97,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         const code = error.error?.code;
 
         const isInactive = code === 'AUTH_003';
-        
+
         if (code === 'TENANT_INACTIVE') {
           return throwError(() => error);
         }
@@ -123,7 +123,7 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // ── Unauthorized ───────────────────────────────────────────────────
-      if (error.status === 401) {
+      if (error.status === 401 || error.status === 400 && error.error?.code === 'TENANT_001') {
         const code = error.error?.code;
 
         // User deleted or inactive — session invalid
