@@ -84,14 +84,16 @@ public class ClientCacheService : IClientCacheService
 
     public async Task SyncUpdatedAsync(ClientResponseDto dto)
     {
-        Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdAsync(dto.Id) ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
+        Domain.LocalCache.Client.ClientCache? existing =
+            await _clientCacheRepository.GetByIdAsync(dto.Id)
+            ?? await _clientCacheRepository.GetByEmailAsync(dto.Email);
+
         if (existing == null)
         {
             _logger.LogWarning("Client {ClientId} not found for update. Cancelling...", dto.Id);
             return;
         }
 
-        // Update client basic info
         existing.Update(
             name: dto.Name,
             email: dto.Email,
@@ -105,20 +107,21 @@ public class ClientCacheService : IClientCacheService
             isDeleted: dto.IsDeleted,
             createdAt: dto.CreatedAt,
             updatedAt: dto.UpdatedAt
-
         );
 
+        // ✅ Step 1: update categories first — direct DB operations, no aggregate tracking
+        if (dto.Categories != null)
+            await UpdateClientCategoriesAsync(existing.Id, dto.Categories);
+
+        // ✅ Step 2: save category changes (clears ChangeTracker via SaveChangesAsync)
+        await _clientCategoryRepository.SaveChangesAsync();
+
+        // ✅ Step 3: now update the client scalar properties — tracker is clean
         await _clientCacheRepository.UpdateAsync(existing);
         await _clientCacheRepository.SaveChangesAsync();
 
-        // Update categories if needed
-        if (dto.Categories != null)
-        {
-            await UpdateClientCategoriesAsync(existing.Id, dto.Categories);
-        }
-
-
-        _logger.LogInformation("Client {ClientName} (Id: {ClientId}) updated in cache", existing.Name, existing.Id);
+        _logger.LogInformation("Client {ClientName} (Id: {ClientId}) updated in cache",
+            existing.Name, existing.Id);
     }
 
     public async Task SyncDeletedAsync(ClientResponseDto dto)

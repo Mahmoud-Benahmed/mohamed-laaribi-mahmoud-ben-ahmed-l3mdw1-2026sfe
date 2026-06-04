@@ -10,7 +10,7 @@ public sealed class FournisseurCache
     public string Address { get; private set; } = default!;
     public string Phone { get; private set; } = default!;
     public string? Email { get; private set; }
-    public string TaxNumber { get; private set; } = default!;
+    public string? TaxNumber { get; private set; }
     public string RIB { get; private set; } = default!;
     public bool IsDeleted { get; private set; }
     public bool IsBlocked { get; private set; }
@@ -29,7 +29,7 @@ public sealed class FournisseurCache
         Address = dto.Address ?? throw new ArgumentNullException(nameof(dto.Address));
         Phone = dto.Phone ?? throw new ArgumentNullException(nameof(dto.Phone));
         Email = dto.Email;
-        TaxNumber = dto.TaxNumber ?? throw new ArgumentNullException(nameof(dto.TaxNumber));
+        TaxNumber = dto.TaxNumber;
         RIB = dto.RIB ?? throw new ArgumentNullException(nameof(dto.RIB));
         IsDeleted = dto.IsDeleted;
         IsBlocked = dto.IsBlocked;
@@ -47,7 +47,7 @@ public sealed class FournisseurCache
             Name = dto.Name.Trim(),
             Address = dto.Address.Trim(),
             Phone = dto.Phone.Trim(),
-            TaxNumber = dto.TaxNumber.Trim(),
+            TaxNumber = dto.TaxNumber?.Trim(),
             RIB = dto.RIB.Trim(),
             Email = dto.Email?.Trim(),
             IsBlocked = dto.IsBlocked,
@@ -59,13 +59,14 @@ public sealed class FournisseurCache
 
     // ---------------- UPDATE ----------------
     public void Update(
-        string name, string address, string phone,
-        string taxNumber, string rib, string? email = null)
+        string name, string address, string phone, string rib, 
+        string? email = null,
+        string? taxNumber= null)
     {
         Name = name.Trim();
         Address = address.Trim();
         Phone = phone.Trim();
-        TaxNumber = taxNumber.Trim();
+        TaxNumber = taxNumber?.Trim();
         RIB = rib.Trim();
         Email = email?.Trim();
     }

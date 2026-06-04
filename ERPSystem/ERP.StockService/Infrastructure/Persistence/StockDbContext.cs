@@ -46,13 +46,19 @@ public class StockDbContext : DbContext
         m.Entity<BonEntre>().HasQueryFilter(b               => (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<BonSortie>().HasQueryFilter(b              => (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<BonRetour>().HasQueryFilter(b              => (b.TenantId == _tenantId || b.TenantId == null));
+        
         m.Entity<LigneEntre>().HasQueryFilter(b             => (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<LigneSortie>().HasQueryFilter(b            => (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<LigneRetour>().HasQueryFilter(b            => (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<JournalStock>().HasQueryFilter(b           => (b.TenantId == _tenantId || b.TenantId == null));
+        
         m.Entity<ArticleCache>().HasQueryFilter(b           => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
         m.Entity<ArticleCategoryCache>().HasQueryFilter(b   => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
-        m.Entity<ClientCache>().HasQueryFilter(b            => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
+        
+        m.Entity<ClientCache>().HasQueryFilter(b            => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null)); 
+        m.Entity<CategoryCache>()
+            .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
+
         m.Entity<FournisseurCache>().HasQueryFilter(b       => !b.IsDeleted && (b.TenantId == _tenantId || b.TenantId == null));
     }
 }

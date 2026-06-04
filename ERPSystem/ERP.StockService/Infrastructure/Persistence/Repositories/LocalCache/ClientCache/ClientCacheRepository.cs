@@ -1,12 +1,13 @@
 ﻿using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Domain.LocalCache.Client;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
 
+
 public class ClientCacheRepository : IClientCacheRepository
 {
     private readonly StockDbContext _dbContext;
-
     public ClientCacheRepository(StockDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -85,6 +86,17 @@ public class ClientCacheRepository : IClientCacheRepository
     }
 
 
+
+    public async Task<List<Domain.LocalCache.Client.ClientCache>> GetActiveAsync()
+    {
+        return await _dbContext.ClientCaches
+            .Include(c => c.ClientCategories)
+            .ThenInclude(cc => cc.Category)
+            .Where(c => !c.IsDeleted && !c.IsBlocked)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+    }
+
     public async Task<bool> ExistsAsync(Guid id)
     {
         return await _dbContext.ClientCaches.AnyAsync(c => c.Id == id);
@@ -97,12 +109,21 @@ public class ClientCacheRepository : IClientCacheRepository
 
     public Task UpdateAsync(Domain.LocalCache.Client.ClientCache client)
     {
-        _dbContext.ClientCaches.Update(client);
+        _dbContext.Entry(client).State = EntityState.Modified;
+
+        // Detach all category assignments — they're managed separately
+        // by ClientCategoryCacheRepository, not via the aggregate
+        foreach (ClientCategoryCache cc in client.ClientCategories)
+        {
+            _dbContext.Entry(cc).State = EntityState.Detached;
+        }
+
         return Task.CompletedTask;
     }
 
     public async Task SaveChangesAsync()
     {
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear(); // ← stops phantom re-inserts on subsequent operations
     }
 }
