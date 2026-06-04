@@ -25,8 +25,10 @@ public class FournisseurService : IFournisseurService
     public async Task<FournisseurResponseDto> CreateAsync(CreateFournisseurRequestDto dto)
     {
         Fournisseur f = Fournisseur.Create(
-            dto.Name, dto.Address, dto.Phone,
-            dto.TaxNumber, dto.RIB, dto.Email, _tenantContext.TenantId);
+            dto.Name, dto.Address, dto.Phone, dto.RIB, 
+            dto.Email,
+            dto.TaxNumber, 
+            _tenantContext.TenantId);
         await _repo.AddAsync(f);
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
@@ -40,7 +42,7 @@ public class FournisseurService : IFournisseurService
     public async Task<FournisseurResponseDto> UpdateAsync(Guid id, UpdateFournisseurRequestDto dto)
     {
         Fournisseur f = await _repo.GetByIdAsync(id) ?? throw new FournisseurNotFoundException(id);
-        f.Update(dto.Name, dto.Address, dto.Phone, dto.TaxNumber, dto.RIB, dto.Email);
+        f.Update(dto.Name, dto.Address, dto.Phone, dto.RIB, dto.Email, dto.TaxNumber);
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
         await _eventPublisher.PublishAsync(FournisseurTopics.Updated, res);

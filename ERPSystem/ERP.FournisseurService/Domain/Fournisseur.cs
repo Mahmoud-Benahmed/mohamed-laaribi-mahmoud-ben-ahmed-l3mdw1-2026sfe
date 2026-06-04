@@ -10,7 +10,7 @@ public sealed class Fournisseur
     public string Address { get; private set; } = default!;
     public string Phone { get; private set; } = default!;
     public string? Email { get; private set; }
-    public string TaxNumber { get; private set; } = default!;
+    public string? TaxNumber { get; private set; } = default!;
     public string RIB { get; private set; } = default!;
     public bool IsDeleted { get; private set; }
     public bool IsBlocked { get; private set; }
@@ -22,7 +22,7 @@ public sealed class Fournisseur
     // ---------------- CREATE ----------------
     public static Fournisseur Create(
         string name, string address, string phone,
-        string taxNumber, string rib, string? email = null, Guid? tenantId = null)
+        string rib, string? email = null, string? taxNumber= null, Guid? tenantId = null)
     {
         ValidateArgs(name, address, phone, taxNumber, rib, email);
 
@@ -33,7 +33,7 @@ public sealed class Fournisseur
             Name = name.Trim(),
             Address = address.Trim(),
             Phone = phone.Trim(),
-            TaxNumber = taxNumber.Trim(),
+            TaxNumber = taxNumber?.Trim(),
             RIB = rib.Trim(),
             Email = email?.Trim(),
             CreatedAt = DateTime.UtcNow,
@@ -42,8 +42,8 @@ public sealed class Fournisseur
 
     // ---------------- UPDATE ----------------
     public void Update(
-        string name, string address, string phone,
-        string taxNumber, string rib, string? email = null)
+        string name, string address, string phone, string rib, string? email = null,
+        string? taxNumber = null)
     {
         GuardNotDeleted();
         ValidateArgs(name, address, phone, taxNumber, rib, email);
@@ -51,7 +51,7 @@ public sealed class Fournisseur
         Name = name.Trim();
         Address = address.Trim();
         Phone = phone.Trim();
-        TaxNumber = taxNumber.Trim();
+        TaxNumber = taxNumber?.Trim();
         RIB = rib.Trim();
         Email = email?.Trim();
     }
@@ -98,7 +98,7 @@ public sealed class Fournisseur
     // ---------------- VALIDATION ----------------
     private static void ValidateArgs(
         string name, string address, string phone,
-        string taxNumber, string rib, string? email)
+        string? taxNumber, string rib, string? email)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.", nameof(name));
@@ -108,9 +108,6 @@ public sealed class Fournisseur
 
         if (string.IsNullOrWhiteSpace(phone))
             throw new ArgumentException("Phone is required.", nameof(phone));
-
-        if (string.IsNullOrWhiteSpace(taxNumber))
-            throw new ArgumentException("TaxNumber is required.", nameof(taxNumber));
 
         if (string.IsNullOrWhiteSpace(rib))
             throw new ArgumentException("RIB is required.", nameof(rib));

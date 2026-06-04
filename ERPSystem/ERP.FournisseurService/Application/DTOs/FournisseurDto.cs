@@ -12,12 +12,12 @@ public record CreateFournisseurRequestDto(
     [Required] [RegularExpression(RegexPatterns.Phone, ErrorMessage = "Phone must contain digits and may start with +.")] [MaxLength(20, ErrorMessage = "Phone cannot exceed 20 characters.")]
     string Phone,
 
-    [Required][MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric , ErrorMessage = "Invalid tax number.")] string TaxNumber,
-
     [Required][MinLength(10)][MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric , ErrorMessage = "Invalid RIB")] string RIB,
 
-    [EmailAddress(ErrorMessage = "Invalid email format.")][MaxLength(200)] string? Email = null
-);
+    [EmailAddress(ErrorMessage = "Invalid email format.")][MaxLength(200)] string? Email = null,
+
+    [MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric , ErrorMessage = "Invalid tax number.")] string? TaxNumber= null
+    );
 
 public record UpdateFournisseurRequestDto(
     [Required][RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")] string Name,
@@ -26,17 +26,17 @@ public record UpdateFournisseurRequestDto(
     
     [RegularExpression(RegexPatterns.Phone, ErrorMessage = "Phone must contain digits and may start with +.")] [MaxLength(20, ErrorMessage = "Phone cannot exceed 20 characters.")]
     string Phone,
-    
-    [Required][MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric, ErrorMessage = "Invalid tax number.")] string TaxNumber,
 
     [Required][MinLength(10)][MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric, ErrorMessage ="Invalid RIB")] string RIB,
     
-    [EmailAddress(ErrorMessage = "Invalid email format.")][MaxLength(200)] string? Email = null
+    [EmailAddress(ErrorMessage = "Invalid email format.")][MaxLength(200)] string? Email = null,
+
+    [MaxLength(50)][RegularExpression(RegexPatterns.AlphaNumeric, ErrorMessage = "Invalid tax number.")] string? TaxNumber=null
     );
 
 public sealed record FournisseurResponseDto(
     Guid Id, string Name, string Address, string Phone,
-    string? Email, string TaxNumber, string RIB,
+    string? Email, string? TaxNumber, string RIB,
     bool IsDeleted, bool IsBlocked,
     DateTime CreatedAt, DateTime? UpdatedAt, Guid? TenantId);
 
