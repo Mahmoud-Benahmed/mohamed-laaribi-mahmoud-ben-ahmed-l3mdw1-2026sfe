@@ -22,17 +22,18 @@ namespace ERP.PaymentService.Infrastructure.Persistence.Repositories
         }
         public async Task<RefundStatsDto> GetStatsAsync()
         {
-            var stats = await _context.Refunds
-                .GroupBy(_ => 1)
-                .Select(g => new RefundStatsDto(
-                    g.Count(),
-                    g.Count(r => r.Status == RefundStatus.PENDING),
-                    g.Count(r => r.Status == RefundStatus.COMPLETED)
-                ))
-                .FirstOrDefaultAsync();
+            var counts = await _context.Refunds
+                .GroupBy(r => r.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
 
-            return stats ?? new RefundStatsDto(0, 0, 0);
+            int total = counts.Sum(x => x.Count);
+            int pending = counts.FirstOrDefault(x => x.Status == RefundStatus.PENDING)?.Count ?? 0;
+            int completed = counts.FirstOrDefault(x => x.Status == RefundStatus.COMPLETED)?.Count ?? 0;
+
+            return new RefundStatsDto(total, pending, completed);
         }
+
         public async Task<RefundRequest?> GetByInvoiceIdAsync(Guid invoiceId, CancellationToken ct = default)
         {
             return await _context.Refunds
@@ -41,12 +42,13 @@ namespace ERP.PaymentService.Infrastructure.Persistence.Repositories
         }
 
         public async Task<List<RefundRequest>> GetByClientIdAsync(Guid clientId)
-        {
-            return await _context.Refunds
+            => await _context.Refunds
+                .AsNoTracking()
                 .Include(r => r.Lines)
                 .Where(r => r.ClientId == clientId)
+                .OrderByDescending(r => r.CompletedAt)
                 .ToListAsync();
-        }
+        
         public async Task AddAsync(RefundRequest refund, CancellationToken ct = default)
         {
             await _context.Refunds.AddAsync(refund, ct);
