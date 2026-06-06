@@ -1,5 +1,6 @@
 ﻿using ERP.ClientService.Application.DTOs;
 using ERP.ClientService.Application.Interfaces;
+using ERP.ClientService.Application.Services;
 using ERP.ClientService.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,8 +9,13 @@ namespace ERP.ClientService.Infrastructure.Persistence.Repositories;
 public class ClientRepository : IClientRepository
 {
     private readonly ClientDbContext _context;
+    private readonly ITenantContext _tenantContext;
 
-    public ClientRepository(ClientDbContext context) => _context = context;
+    public ClientRepository(ClientDbContext context, ITenantContext tenantContext)
+    {
+        _context = context;
+        _tenantContext = tenantContext;
+    }
 
     public async Task AddAsync(Client client) =>
         await _context.Clients.AddAsync(client);
@@ -28,7 +34,7 @@ public class ClientRepository : IClientRepository
                 .IgnoreQueryFilters()
                 .Include(c => c.ClientCategories)
                     .ThenInclude(cc => cc.Category)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantContext.TenantId);
 
     public Task<Client?> GetByEmailAsync(string email) =>
         _context.Clients
@@ -75,7 +81,7 @@ public class ClientRepository : IClientRepository
     {
         IOrderedQueryable<Client> query = _context.Clients
                             .IgnoreQueryFilters()
-                            .Where(c => c.IsDeleted)
+                            .Where(c => c.IsDeleted && c.TenantId == _tenantContext.TenantId)
                             .OrderByDescending(c => c.UpdatedAt);
 
         int total = await query.CountAsync();
@@ -115,10 +121,10 @@ public class ClientRepository : IClientRepository
             .GroupBy(_ => 1)
             .Select(g => new
             {
-                Total = g.Count(c => !c.IsDeleted),
-                Active = g.Count(c => !c.IsBlocked && !c.IsDeleted),
-                Blocked = g.Count(c => c.IsBlocked && !c.IsDeleted),
-                Deleted = g.Count(c => c.IsDeleted),
+                Total = g.Count(c => !c.IsDeleted && c.TenantId == _tenantContext.TenantId),
+                Active = g.Count(c => !c.IsBlocked && !c.IsDeleted && c.TenantId == _tenantContext.TenantId),
+                Blocked = g.Count(c => c.IsBlocked && !c.IsDeleted && c.TenantId == _tenantContext.TenantId),
+                Deleted = g.Count(c => c.IsDeleted && c.TenantId == _tenantContext.TenantId),
             })
             .FirstOrDefaultAsync();
 
