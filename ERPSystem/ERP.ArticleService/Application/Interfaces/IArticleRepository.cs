@@ -11,6 +11,9 @@ namespace ERP.ArticleService.Application.Interfaces
         Task<Article?> GetByCodeAsync(string code);
         Task<Article?> GetByBarCodeAsync(string barCode);
 
+        Task<bool> ExistsForCategoryAsync(Guid categoryId);
+        Task<bool> ExistsByIdAsync(Guid id);
+
         Task SaveChangesAsync();
 
         // Paging & filtering
