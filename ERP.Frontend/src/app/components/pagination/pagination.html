@@ -11,7 +11,7 @@
   <ng-container *ngIf="totalPages > 1">
     <button class="page-btn" (click)="prev()" [disabled]="pageNumber === 1">{{ 'pagination.previous' | translate }}</button>
     <span class="page-info">{{ 'pagination.page_of' | translate : { current: pageNumber, total: totalPages } }}</span>
-    <button class="page-btn" (click)="next()" [disabled]="pageNumber === totalPages">{{ 'pagintaion.next' | translate }}</button>
+    <button class="page-btn" (click)="next()" [disabled]="pageNumber === totalPages">{{ 'pagination.next' | translate }}</button>
   </ng-container>
 
 </div>
