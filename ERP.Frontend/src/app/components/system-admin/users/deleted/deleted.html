@@ -3,8 +3,8 @@
   <!-- ── PAGE HEADER ── -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'USERS.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'USERS.TITLE_DELETED' | translate }}</h1>
+      <p class="breadcrumb">{{ `${templateTranslationKey}breadcrumb` | translate }}</p>
+      <h1 class="page-title">{{ `${templateTranslationKey}title` | translate }}</h1>
     </div>
   </div>
 
@@ -38,7 +38,7 @@
       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.ACTIVE' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.active` | translate }}</p>
           <p class="stat-card__value">{{ stats?.activeUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--green">
@@ -58,7 +58,7 @@
       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER) || authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER)">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.DEACTIVATED' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.deactivated` | translate }}</p>
           <p class="stat-card__value">{{ stats?.deactivatedUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--gray">
@@ -73,7 +73,7 @@
       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.DELETED' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.deleted` | translate }}</p>
           <p class="stat-card__value">{{ stats?.deletedUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--red">
@@ -98,7 +98,7 @@
       <input
         class="search-input"
         type="text"
-        [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate"
+        [placeholder]="`${templateTranslationKey}search_placeholder` | translate"
         [(ngModel)]="searchTerm"
         (ngModelChange)="applyFilter()" />
     </div>
@@ -115,7 +115,7 @@
       <thead>
         <tr>
           <th (click)="sortBy('fullName')" class="th--sortable">
-            {{ 'USERS.TABLE.FULL_NAME' | translate }}
+            {{ `${templateTranslationKey}table.head.fullname` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'fullName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -128,7 +128,7 @@
             </span>
           </th>
           <th (click)="sortBy('email')" class="th--sortable">
-            {{ 'USERS.TABLE.EMAIL' | translate }}
+            {{ `${templateTranslationKey}table.head.email` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'email' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -141,7 +141,7 @@
             </span>
           </th>
           <th (click)="sortBy('roleName')" class="th--sortable">
-            {{ 'USERS.TABLE.ROLE' | translate }}
+            {{ `${templateTranslationKey}table.head.role` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'roleName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -154,7 +154,7 @@
             </span>
           </th>
           <th (click)="sortBy('lastLoginAt')" class="th--sortable">
-            {{ 'USERS.TABLE.LAST_LOGIN' | translate }}
+            {{ `${templateTranslationKey}table.head.last_login` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'lastLoginAt' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -166,7 +166,7 @@
               </svg>
             </span>
           </th>
-          <th>{{ 'USERS.TABLE.ACTIONS' | translate }}</th>
+          <th>{{ `${templateTranslationKey}table.head.actions` | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -189,13 +189,13 @@
 
           <td>
             <span class="date-cell">
-              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : ('USERS.TABLE.NO_LOGIN' | translate) }}
+              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : (`${templateTranslationKey}table.body.no_login` | translate) }}
             </span>
           </td>
 
           <td class="td--actions">
             <button class="icon-btn icon-btn--view"
-                    [title]="'COMMON.VIEW' | translate"
+                    [title]="`${templateTranslationKey}buttons.table.view` | translate"
                     [routerLink]="['/users', user.id]"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -203,11 +203,12 @@
               </svg>
             </button>
             <button class="icon-btn icon-btn--reactivate"
-                    [title]="'COMMON.RESTORE' | translate"
+                    [title]="`${templateTranslationKey}buttons.table.restore` | translate"
                     (click)="restore(user)"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M12 14q-.825 0-1.412-.587T10 12t.588-1.412T12 10t1.413.588T14 12t-.587 1.413T12 14m0 7q-3.475 0-6.025-2.287T3.05 13H5.1q.35 2.6 2.313 4.3T12 19q2.925 0 4.963-2.037T19 12t-2.037-4.962T12 5q-1.725 0-3.225.8T6.25 8H9v2H3V4h2v2.35q1.275-1.6 3.113-2.475T12 3q1.875 0 3.513.713t2.85 1.924t1.925 2.85T21 12t-.712 3.513t-1.925 2.85t-2.85 1.925T12 21"/>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
               </svg>
             </button>
           </td>
@@ -216,7 +217,7 @@
 
         <tr *ngIf="sortedData.length === 0">
           <td colspan="6" class="td--empty">
-            {{ 'COMMON.NO_RESULTS' | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
+            {{ `${templateTranslationKey}table.body.no_result` | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
           </td>
         </tr>
       </tbody>
