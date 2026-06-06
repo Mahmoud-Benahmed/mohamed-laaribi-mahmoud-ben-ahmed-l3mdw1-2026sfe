@@ -1,5 +1,6 @@
 ﻿using ERP.ArticleService.Application.DTOs;
 using ERP.ArticleService.Application.Interfaces;
+using ERP.ArticleService.Application.Services;
 using ERP.ArticleService.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +9,12 @@ namespace ERP.ArticleService.Infrastructure.Persistence
     public class ArticleRepository : IArticleRepository
     {
         private readonly ArticleDbContext _context;
+        private readonly ITenantContext _tenantContext;
 
-        public ArticleRepository(ArticleDbContext context)
+        public ArticleRepository(ArticleDbContext context, ITenantContext tenantContext)
         {
             _context = context;
+            _tenantContext = tenantContext;
         }
 
         private IQueryable<Article> BaseQuery() =>
@@ -40,11 +43,17 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                 .AnyAsync(a => a.Id == id);
         }
 
+        public async Task<bool> ExistsForCategoryAsync(Guid categoryId)
+        {
+            return await _context.Articles
+                .AnyAsync(a => a.CategoryId == categoryId);
+        }
+
         public async Task<Article?> GetByIdDeletedAsync(Guid id)
         {
             return await BaseQuery()
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantContext.TenantId);
         }
 
         // =========================
@@ -105,7 +114,7 @@ namespace ERP.ArticleService.Infrastructure.Persistence
             // IgnoreQueryFilters to bypass HasQueryFilter, then filter deleted only
             IQueryable<Article> query = BaseQuery()
                 .IgnoreQueryFilters()
-                .Where(a => a.IsDeleted);
+                .Where(a => a.IsDeleted && a.TenantId == _tenantContext.TenantId);
             return await PaginationHelper.ToPagedResultAsync(
                 query, pageNumber, pageSize, q => q.OrderBy(a => a.CreatedAt));
         }
@@ -115,9 +124,9 @@ namespace ERP.ArticleService.Infrastructure.Persistence
         // =========================
         public async Task<ArticleStatsDto> GetStatsAsync()
         {
-            int total = await _context.Articles.IgnoreQueryFilters().CountAsync();
+            int total = await _context.Articles.IgnoreQueryFilters().Where(a=> a.TenantId == _tenantContext.TenantId).CountAsync();
             int active = await _context.Articles.CountAsync();
-            int deleted = await _context.Articles.IgnoreQueryFilters().CountAsync(a => a.IsDeleted);
+            int deleted = await _context.Articles.IgnoreQueryFilters().CountAsync(a => a.IsDeleted && a.TenantId == _tenantContext.TenantId);
             int categoriesCount = await _context.Categories.CountAsync();
 
             return new ArticleStatsDto(
