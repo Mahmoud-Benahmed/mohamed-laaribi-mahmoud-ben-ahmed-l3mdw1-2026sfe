@@ -7,19 +7,13 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache;
 
 public sealed class ArticleCacheService : IArticleCacheService
 {
-    private readonly IArticleCategoryCacheRepository _categoryRepo;
-    private readonly IArticleCategoryCacheService _categoryService;
     private readonly IArticleCacheRepository _repo;
     private readonly ILogger<ArticleCacheService> _logger;
 
     public ArticleCacheService(
-        IArticleCategoryCacheService categoryService,
-        IArticleCategoryCacheRepository categoryRepo,
         IArticleCacheRepository repo,
         ILogger<ArticleCacheService> logger)
     {
-        _categoryService = categoryService;
-        _categoryRepo = categoryRepo;
         _repo = repo;
         _logger = logger;
     }
@@ -102,6 +96,7 @@ public sealed class ArticleCacheService : IArticleCacheService
         else
         {
             existing.ApplyUpdate(dto);
+            await _repo.UpdateAsync(existing);
             await _repo.SaveChangesAsync();
             _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
         }
@@ -154,8 +149,8 @@ public sealed class ArticleCacheService : IArticleCacheService
         UpdatedAt: a.UpdatedAt,
         TenantId: a.TenantId);
 
-    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) =>
-        new (
+    private static ArticleCategoryResponseDto? MapCategoryToDto(ArticleCategoryCache? c) =>
+        c is null ? null : new(
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
@@ -163,5 +158,5 @@ public sealed class ArticleCacheService : IArticleCacheService
             CreatedAt: c.CreatedAt,
             UpdatedAt: c.UpdatedAt,
             TenantId: c.TenantId
-            );
+        );
 }
