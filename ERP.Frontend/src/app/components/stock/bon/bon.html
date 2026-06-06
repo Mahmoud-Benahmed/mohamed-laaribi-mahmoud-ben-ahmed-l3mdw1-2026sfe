@@ -826,7 +826,7 @@
           <span class="inline-ligne-form__title">
             {{ inlineLigneLocalId ? ('STOCK.BONS.EDIT_LIGNE' | translate) : ('STOCK.BONS.ADD_LIGNE' | translate) }}
           </span>
-          <button type="button" class="icon-btn" (click)="closeInlineLigne()" [title]="'COMMON.CANCEL' | translate">
+          <button type="button" class="icon-btn" (click)="closeInlineLigne()" [title]="'common.cancel' | translate">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -947,7 +947,7 @@
         </div>
 
         <div class="inline-ligne-form__actions">
-          <button type="button" class="btn-secondary" (click)="closeInlineLigne()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="btn-secondary" (click)="closeInlineLigne()">{{ 'common.cancel' | translate }}</button>
           <button type="button" class="btn-add"
                   [disabled]="ligneForm.invalid || isInlineLigneSubmitting"
                   (click)="submitInlineLigne()">
@@ -966,7 +966,7 @@
 
       <!-- ── Final form actions ──────────────────────────────────────────── -->
       <div class="form__actions form__actions--panel">
-        <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+        <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
         <button type="submit" form="bon-header-form" class="btn-add"
                 [disabled]="headerForm.invalid
                           || (isEdit()   && editLignes.length === 0)
