@@ -142,6 +142,9 @@ namespace ERP.TenantService.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("Slug")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");

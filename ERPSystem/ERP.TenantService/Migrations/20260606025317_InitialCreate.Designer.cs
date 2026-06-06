@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.TenantService.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20260531003040_InitialCreate")]
+    [Migration("20260606025317_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -144,6 +144,9 @@ namespace ERP.TenantService.Migrations
                         .HasDefaultValue("Africa/Tunisia");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("Slug")
                         .IsUnique()

@@ -90,8 +90,11 @@ public class TenantService : ITenantService
 		if (await _tenantRepository.SubdomainSlugExistsAsync(dto.SubdomainSlug))
 			throw new InvalidOperationException($"Subdomain '{dto.SubdomainSlug}' is already taken.");
 
-		// 2. Create tenant
-		var tenant = Tenant.Create(
+        if (await _tenantRepository.SubdomainSlugExistsAsync(dto.Email))
+            throw new InvalidOperationException($"Email '{dto.Email}' is already taken.");
+
+        // 2. Create tenant
+        var tenant = Tenant.Create(
 			name: dto.Name, 
 			email: dto.Email, 
 			phone: dto.Phone, 
@@ -142,7 +145,10 @@ public class TenantService : ITenantService
 		var tenant = await _tenantRepository.GetByIdAsync(id)
 			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
 
-		tenant.Update(
+        if (await _tenantRepository.SubdomainSlugExistsAsync(dto.Email))
+            throw new InvalidOperationException($"Email '{dto.Email}' is already taken.");
+
+        tenant.Update(
 			name: dto.Name,
 			email: dto.Email,
 			phone: dto.Phone,

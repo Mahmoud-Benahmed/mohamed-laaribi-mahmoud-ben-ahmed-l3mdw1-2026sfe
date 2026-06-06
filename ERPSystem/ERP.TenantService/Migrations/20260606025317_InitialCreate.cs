@@ -88,6 +88,12 @@ namespace ERP.TenantService.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tenants_Email",
+                table: "Tenants",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tenants_Slug",
                 table: "Tenants",
                 column: "Slug",

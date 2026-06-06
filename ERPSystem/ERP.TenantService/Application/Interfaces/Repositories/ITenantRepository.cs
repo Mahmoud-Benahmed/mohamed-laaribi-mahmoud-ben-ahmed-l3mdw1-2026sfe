@@ -15,6 +15,7 @@ public interface ITenantRepository
     Task<Tenant?> GetByIdWithSubscriptionAsync(Guid id, CancellationToken ct = default);
     Task<Tenant?> GetBySlugAsync(string slug, CancellationToken ct = default);
     Task<bool> SubdomainSlugExistsAsync(string slug, Guid? excludeId = null, CancellationToken ct = default);
+    Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken ct = default);
     Task AddAsync(Tenant tenant, CancellationToken ct = default);
     Task UpdateAsync(Tenant tenant);
     Task SaveChangesAsync(CancellationToken ct = default);

@@ -126,6 +126,13 @@ public class TenantRepository : ITenantRepository
                 && (excludeId == null || t.Id != excludeId), ct);
     }
 
+    public async Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken ct = default)
+    {
+        return await _context.Tenants
+            .AnyAsync(t => t.Email == email
+                && (excludeId == null || t.Id != excludeId), ct);
+    }
+
     public async Task AddAsync(Tenant tenant, CancellationToken ct = default)
     {
         await _context.Tenants.AddAsync(tenant, ct);
