@@ -136,3 +136,9 @@ public class InvalidRefreshTokenException : Exception
     public InvalidRefreshTokenException()
         : base("Invalid refresh token.") { }
 }
+
+public class TenantUserLimitReachedException : Exception
+{
+    public TenantUserLimitReachedException()
+        : base("Tenant user limit reached.") { }
+}

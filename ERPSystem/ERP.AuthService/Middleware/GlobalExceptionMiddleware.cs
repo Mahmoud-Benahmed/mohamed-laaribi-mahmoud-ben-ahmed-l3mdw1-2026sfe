@@ -107,6 +107,7 @@ public class GlobalExceptionMiddleware
             MongoWriteException mwx when mwx.WriteError?.Code == 11000 =>
                                                                             ((int)HttpStatusCode.Conflict, "AUTH_017", "AUTH_017"),
             InvalidRefreshTokenException => ((int)HttpStatusCode.Unauthorized, "AUTH_018", "AUTH_018"),
+            TenantUserLimitReachedException => ((int)HttpStatusCode.Forbidden, "TENANT_USER_LIMIT_REACHED", "TENANT_USER_LIMIT_REACHED"),
             _ => ((int)HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "AUTH_000")
         };
 

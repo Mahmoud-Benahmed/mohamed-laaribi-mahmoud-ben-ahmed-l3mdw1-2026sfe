@@ -231,9 +231,7 @@ namespace ERP.AuthService.Application.Services
                         subscription.TenantId,
                         currentUserCount,
                         subscription.Plan.MaxUsers);
-
-                    throw new InvalidOperationException(
-                        "Unable to register user: Tenant user limit reached.");
+                    throw new TenantUserLimitReachedException();
                 }
 
                 _logger.LogInformation(
