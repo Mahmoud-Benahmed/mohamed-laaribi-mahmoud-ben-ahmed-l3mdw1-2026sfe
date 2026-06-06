@@ -70,15 +70,14 @@ public class ClientCacheService : IClientCacheService
         Domain.LocalCache.Client.ClientCache clientCache = Domain.LocalCache.Client.ClientCache.Create(dto);
 
         await _clientCacheRepository.AddAsync(clientCache);
-        await _clientCacheRepository.SaveChangesAsync();
 
         // Handle categories if any
         if (dto.Categories != null && dto.Categories.Any())
         {
             await AssignCategoriesToClientAsync(clientCache.Id, dto.Categories);
-            await _clientCacheRepository.SaveChangesAsync();
         }
 
+        await _clientCacheRepository.SaveChangesAsync();
 
         _logger.LogInformation("Client {ClientName} (Id: {ClientId}) added to cache with {CategoryCount} categories",
                 dto.Name, dto.Id, dto.Categories?.Count() ?? 0);
@@ -159,33 +158,22 @@ public class ClientCacheService : IClientCacheService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        try
+        Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdDeletedAsync(dto.Id);
+        if (existing == null)
         {
-            Domain.LocalCache.Client.ClientCache? existing = await _clientCacheRepository.GetByIdDeletedAsync(dto.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Client {ClientId} not found for restore", dto.Id);
-                return;
-            }
-
-            existing.Restore();
-            await _clientCacheRepository.UpdateAsync(existing);
-            await _clientCacheRepository.SaveChangesAsync();
-
-            // Restore category assignments if needed
-            if (dto.Categories != null && dto.Categories.Any())
-            {
-                await AssignCategoriesToClientAsync(existing.Id, dto.Categories);
-            }
-
-
-            _logger.LogInformation("Client {ClientName} (Id: {ClientId}) restored in cache", existing.Name, existing.Id);
+            _logger.LogWarning("Client {ClientId} not found for restore", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing restored client {ClientId}", dto.Id);
-            throw;
-        }
+
+        existing.Restore();
+        await _clientCacheRepository.UpdateAsync(existing);
+
+        if (dto.Categories?.Any() == true)
+            await AssignCategoriesToClientAsync(existing.Id, dto.Categories);
+
+        await _clientCacheRepository.SaveChangesAsync(); // ← save restore + assignments together
+
+        _logger.LogInformation("Client {ClientName} (Id: {ClientId}) restored in cache", existing.Name, existing.Id);
     }
 
     // =========================
@@ -223,36 +211,34 @@ public class ClientCacheService : IClientCacheService
     }
 
 
-    private async Task UpdateClientCategoriesAsync(Guid clientId, IEnumerable<ClientCategoryResponseDto> newCategories)
+    private async Task UpdateClientCategoriesAsync(
+        Guid clientId, IEnumerable<ClientCategoryResponseDto> newCategories)
     {
-        List<ClientCategoryCache> existingAssignments = await _clientCategoryRepository.GetClientAssignmentsAsync(clientId);
-        HashSet<Guid> existingCategoryIds = existingAssignments.Select(a => a.CategoryId).ToHashSet();
-        HashSet<Guid> newCategoryIds = newCategories.Select(c => c.Id).ToHashSet();
+        List<ClientCategoryCache> existingAssignments =
+            await _clientCategoryRepository.GetClientAssignmentsAsync(clientId);
 
-        // Remove stale assignments
+        HashSet<Guid> existingCategoryIds = existingAssignments
+            .Select(a => a.CategoryId).ToHashSet();
+        HashSet<Guid> newCategoryIds = newCategories
+            .Select(c => c.Id).ToHashSet();
+
+        // ── 1. Stage all removals ─────────────────────────────────────────────
         foreach (Guid categoryId in existingCategoryIds.Except(newCategoryIds))
-        {
             await _clientCategoryRepository.UnassignCategoryFromClientAsync(clientId, categoryId);
-        }
-        await _clientCategoryRepository.SaveChangesAsync(); // ← flush removals
 
-        // Add new assignments
+        // ── 2. Stage all category upserts ────────────────────────────────────
         foreach (Guid categoryId in newCategoryIds.Except(existingCategoryIds))
         {
             ClientCategoryResponseDto categoryDto = newCategories.First(c => c.Id == categoryId);
-
             CategoryCache? category = await _clientCategoryRepository.GetByIdAsync(categoryId);
-            if (category == null)
+
+            if (category is null)
             {
-                category = CategoryCache.Create(
-                    categoryDto
-                );
+                category = CategoryCache.Create(categoryDto);
                 await _clientCategoryRepository.AddCategoryAsync(category);
-                await _clientCategoryRepository.SaveChangesAsync(); // ← category must exist before FK
             }
             else
             {
-                // ← Update master data in case name/rules changed on the source service
                 category.Update(
                     name: categoryDto.Name,
                     code: categoryDto.Code,
@@ -267,12 +253,18 @@ public class ClientCacheService : IClientCacheService
                     updatedAt: categoryDto.UpdatedAt
                 );
                 await _clientCategoryRepository.UpdateCategoryAsync(category);
-                await _clientCategoryRepository.SaveChangesAsync();
             }
-
-            await _clientCategoryRepository.AssignCategoryToClientAsync(clientId, category.Id);
-            await _clientCategoryRepository.SaveChangesAsync(); // ← flush each assignment
         }
+
+        // ── 3. First save — persists category rows, satisfies FK ─────────────
+        await _clientCategoryRepository.SaveChangesAsync();
+
+        // ── 4. Stage all new assignments (FK now satisfied) ───────────────────
+        foreach (Guid categoryId in newCategoryIds.Except(existingCategoryIds))
+            await _clientCategoryRepository.AssignCategoryToClientAsync(clientId, categoryId);
+
+        // ── 5. Second save — persists removals + assignments ──────────────────
+        await _clientCategoryRepository.SaveChangesAsync();
     }
 
     private ClientResponseDto MapToDto(Domain.LocalCache.Client.ClientCache client)
@@ -304,7 +296,7 @@ public class ClientCacheService : IClientCacheService
             TaxNumber: client.TaxNumber,
             CreditLimit: client.CreditLimit,
             DelaiRetour: client.DelaiRetour,
-            DuePaymentPeriod: client.DuePaymentPeriod ?? 0,
+            DuePaymentPeriod: client.DuePaymentPeriod,
             IsBlocked: client.IsBlocked,
             IsDeleted: client.IsDeleted,
             CreatedAt: client.CreatedAt,
