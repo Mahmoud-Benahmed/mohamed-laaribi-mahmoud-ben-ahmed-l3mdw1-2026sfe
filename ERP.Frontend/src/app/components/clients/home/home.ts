@@ -141,8 +141,6 @@ export class ClientsComponent implements OnInit {
         }
       });
     }
-
-
   }
 
   // ── Page title ────────────────────────────────────────────────────────────
@@ -154,6 +152,19 @@ export class ClientsComponent implements OnInit {
     if (this.isDeletedList()) return 'CLIENTS.TITLE_DELETED';
     if (this.isBlockedList()) return 'CLIENTS.TITLE_BLOCKED';
     return 'CLIENTS.TITLE_LIST';
+  }
+
+  private translateError(errorCode: string): string {
+    // Try client errors
+    if (this.translate.instant(`CLIENTS.ERRORS.${errorCode}`) !== `CLIENTS.ERRORS.${errorCode}`) {
+      return this.translate.instant(`CLIENTS.ERRORS.${errorCode}`);
+    }
+    // Try category errors
+    if (this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`) !== `CLIENTS.CATEGORIES.ERRORS.${errorCode}`) {
+      return this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`);
+    }
+    // Fallback to generic ERRORS
+    return this.translate.instant(`ERRORS.${errorCode}`) || this.translate.instant('ERRORS.INTERNAL_ERROR');
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
@@ -429,7 +440,7 @@ export class ClientsComponent implements OnInit {
         this.clientsService.restore(client.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.CLIENT_RESTORED', { name: client.name }));
+            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_RESTORED', { name: client.name }));
             this.reload();
           },
           error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
@@ -453,7 +464,7 @@ export class ClientsComponent implements OnInit {
         duePaymentPeriod: val.duePaymentPeriod ?? undefined,
       };
       this.clientsService.create(dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('SUCCESS.CLIENT_CREATED', { name: val.name })); },
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CREATED', { name: val.name })); },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
     } else if (this.isEdit() && this.selectedClient) {
@@ -468,7 +479,7 @@ export class ClientsComponent implements OnInit {
         duePaymentPeriod: val.duePaymentPeriod,
       };
       this.clientsService.update(this.selectedClient.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('SUCCESS.CLIENT_UPDATED', { name: val.name })); },
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_UPDATED', { name: val.name })); },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
     }
@@ -494,7 +505,7 @@ export class ClientsComponent implements OnInit {
         this.clientsService.delete(client.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.CLIENT_DELETED', { name: client.name }));
+            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_DELETED', { name: client.name }));
             this.reload();
           },
           error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
@@ -524,7 +535,7 @@ export class ClientsComponent implements OnInit {
         if (!result) return;
         this.clientsService.toggleBlock(client).subscribe({
           next: (updated) => {
-            this.flash('success', this.translate.instant(`SUCCESS.CLIENT_${actionKey}ED`, { name: client.name }));
+            this.flash('success', this.translate.instant(`CLIENTS.SUCCESS.CLIENT_${actionKey}ED`, { name: client.name }));
             if (this.selectedClient?.id === client.id) this.selectedClient = updated;
             this.reload();
           },
@@ -542,7 +553,7 @@ export class ClientsComponent implements OnInit {
     this.clientsService.addCategory(clientId, dto).subscribe({
       next: (result) => {
         this.selectedCategoryId = '';
-        this.flash('success', this.translate.instant('SUCCESS.CLIENT_CATEGORY_ADDED'));
+        this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CATEGORY_ADDED'));
         this.selectedClient = result;this.reload();
       },
       error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
@@ -568,7 +579,7 @@ export class ClientsComponent implements OnInit {
         if (!result) return;
         this.clientsService.removeCategory(clientId, categoryId).subscribe({
           next: (client) => {
-            this.flash('success', this.translate.instant('SUCCESS.CLIENT_CATEGORY_REMOVED', { name: categoryName }));
+            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CATEGORY_REMOVED', { name: categoryName }));
             this.selectedClient = client;
             this.reload();
           },
