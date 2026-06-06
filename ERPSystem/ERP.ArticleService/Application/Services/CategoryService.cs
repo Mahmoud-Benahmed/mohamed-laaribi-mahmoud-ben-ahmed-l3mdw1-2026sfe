@@ -3,21 +3,25 @@ using ERP.ArticleService.Application.Exceptions;
 using ERP.ArticleService.Application.Interfaces;
 using ERP.ArticleService.Domain;
 using ERP.ArticleService.Infrastructure.Messaging;
+using ERP.ArticleService.Infrastructure.Persistence;
 
 namespace ERP.ArticleService.Application.Services;
 public class CategoryService : ICategoryService
 {
     private readonly ITenantContext _tenantContext;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IEventPublisher _eventPublisher;
+    private readonly IEventPublisher _eventPublisher; private readonly IArticleRepository _articleRepository;
 
     public CategoryService(ICategoryRepository categoryRepository, 
                             IEventPublisher eventPublisher, 
-                            ITenantContext tenantContext
+                            ITenantContext tenantContext            ,
+                            IArticleRepository articleRepository
+
         )
     {
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
+        _articleRepository = articleRepository;
         _tenantContext = tenantContext;
     }
 
@@ -120,6 +124,10 @@ public class CategoryService : ICategoryService
         Category? category = await _categoryRepository.GetByIdAsync(id);
         if (category is null || category.IsDeleted)
             throw new CategoryNotFoundException(id);
+
+        bool hasArticles = await _articleRepository.ExistsForCategoryAsync(id);
+        if (hasArticles)
+            throw new CategoryAssignedToArticlesException();
 
         category.Delete();
         await _categoryRepository.SaveChangesAsync();
