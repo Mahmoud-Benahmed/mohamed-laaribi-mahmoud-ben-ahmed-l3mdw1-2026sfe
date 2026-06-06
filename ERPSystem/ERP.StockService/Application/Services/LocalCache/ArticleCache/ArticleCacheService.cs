@@ -150,7 +150,8 @@ public sealed class ArticleCacheService : IArticleCacheService
         UpdatedAt: a.UpdatedAt,
         TenantId: a.TenantId);
 
-    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => new(
+    private static ArticleCategoryResponseDto? MapCategoryToDto(ArticleCategoryCache? c) =>
+        c is null ? null : new(
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
