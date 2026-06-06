@@ -54,13 +54,15 @@ public class PaymentService : IPaymentService
         return ToDto(payment);
     }
 
-    public async Task<PagedResultDto<PaymentDto>> GetByClientIdAsync(Guid clientId, int pageNumber, int pageSize)
+    public async Task<PagedResultDto<PaymentDto>> GetByClientIdAsync(
+        Guid clientId, int pageNumber, int pageSize)
     {
-        var items = await _paymentRepository.GetByClientIdAsync(clientId);
+        var (items, totalCount) = await _paymentRepository.GetPagedByClientIdAsync(
+            clientId, pageNumber, pageSize);
 
         return new PagedResultDto<PaymentDto>(
             items.Select(ToDto).ToList(),
-            items.Count,
+            totalCount,
             pageNumber,
             pageSize);
     }
@@ -145,15 +147,15 @@ public class PaymentService : IPaymentService
         }
 
         await _paymentRepository.AddAsync(payment);
+        await _paymentRepository.SaveChangesAsync();
 
-        // ── 1. Apply all cache updates first ─────────────────────────────────────
         var paidInvoiceEvents = new List<InvoicePaidEvent>();
 
         foreach (var allocation in dto.Allocations)
         {
             var cache = cacheEntries.First(c => c.Id == allocation.InvoiceId);
             cache.ApplyPayment(Math.Round(allocation.AmountAllocated, 2));
-            await _invoiceCacheRepository.SaveChangesAsync(cache);
+            await _invoiceCacheRepository.UpdateAsync(cache);
 
             if (cache.Status == InvoiceStatus.PAID)
             {
@@ -167,11 +169,13 @@ public class PaymentService : IPaymentService
             }
         }
 
-        // ── 2. Publish after all DB writes succeed ────────────────────────────────
+        // ── 1. Persist cache FIRST ────────────────────────────────────────────────
+        await _invoiceCacheRepository.SaveChangesAsync();
+
+        // ── 2. Publish only after all DB writes are committed ─────────────────────
         foreach (var evt in paidInvoiceEvents)
         {
             await _eventPublisher.PublishAsync(PaymentTopics.InvoicePaid, evt);
-
             _logger.LogInformation(
                 "Invoice {InvoiceId} fully paid via Payment {PaymentId}.",
                 evt.InvoiceId, evt.PaymentId);
@@ -190,9 +194,8 @@ public class PaymentService : IPaymentService
         var payment = await _paymentRepository.GetByIdAsync(id) ?? throw new PaymentNotFoundException(id);
 
         payment.CorrectDetails(dto.PaymentDate, dto.Method, dto.ExternalReference, dto.Notes);
-
         await _paymentRepository.UpdateAsync(payment);
-
+        await _paymentRepository.SaveChangesAsync(); // ← missing
         return ToDto(payment);
     }
 
@@ -223,7 +226,8 @@ public class PaymentService : IPaymentService
             );
 
             cache.ReversePayment(remaining);
-            await _invoiceCacheRepository.SaveChangesAsync(cache);
+
+            await _invoiceCacheRepository.UpdateAsync(cache);
 
             pendingEvents.Add(new PaymentCancelledEvent(
                 PaymentId: payment.Id,
@@ -234,8 +238,10 @@ public class PaymentService : IPaymentService
             ));
         }
 
+
         // ── 2. Persist PaymentInvoice rows BEFORE publishing ─────────────────────
-        await _paymentInvoiceRepo.SaveChangesAsync();
+        await _paymentRepository.SaveChangesAsync();
+        await _invoiceCacheRepository.SaveChangesAsync();
 
         // ── 3. Publish only after all DB writes are committed ────────────────────
         foreach (var evt in pendingEvents)
