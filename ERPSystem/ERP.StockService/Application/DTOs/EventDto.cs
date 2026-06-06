@@ -6,7 +6,7 @@ public sealed record ClientResponseDto(
     string Name,
     string Email,
     string Address,
-    int DuePaymentPeriod,
+    int? DuePaymentPeriod,
     string? Phone,
     string? TaxNumber,
     decimal? CreditLimit,
