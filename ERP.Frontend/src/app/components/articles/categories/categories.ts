@@ -79,11 +79,24 @@ export class ArticleCategoriesComponent implements OnInit {
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate())      return 'ARTICLES_CATEGORIES.TITLE_ADD';
-    if (this.isEdit())        return 'ARTICLES_CATEGORIES.TITLE_EDIT';
-    if (this.isView())        return 'ARTICLES_CATEGORIES.TITLE_DETAILS';
-    if (this.isDeletedList()) return 'ARTICLES_CATEGORIES.TITLE_DELETED';
-    return 'ARTICLES_CATEGORIES.TITLE_LIST';
+    if (this.isCreate())      return 'ARTICLES.CATEGORIES.TITLE_ADD';
+    if (this.isEdit())        return 'ARTICLES.CATEGORIES.TITLE_EDIT';
+    if (this.isView())        return 'ARTICLES.CATEGORIES.TITLE_DETAILS';
+    if (this.isDeletedList()) return 'ARTICLES.CATEGORIES.TITLE_DELETED';
+    return 'ARTICLES.CATEGORIES.TITLE_LIST';
+  }
+
+   private translateError(errorCode: string): string {
+    // Known category error codes
+    if (errorCode === 'CAT_001' || errorCode === 'CAT_002' || errorCode === 'ARTICLE_CATEGORY_DELETE_FAIL') {
+      return this.translate.instant(`ARTICLES.CATEGORIES.ERRORS.${errorCode}`);
+    }
+    // Generic error codes (from top-level ERRORS)
+    if (this.translate.instant(`ERRORS.${errorCode}`) !== `ERRORS.${errorCode}`) {
+      return this.translate.instant(`ERRORS.${errorCode}`);
+    }
+    // Fallback
+    return this.translate.instant('ERRORS.INTERNAL_ERROR');
   }
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -145,7 +158,10 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err) => {
+        const msg = (err.error as HttpError)?.message;
+        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
+      },
     });
   }
 
@@ -156,7 +172,10 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err) => {
+        const msg = (err.error as HttpError)?.message;
+        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
+      },
     });
   }
 
@@ -171,7 +190,10 @@ export class ArticleCategoriesComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err) => {
+        const msg = (err.error as HttpError)?.message;
+        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
+      },
     });
   }
 
@@ -267,16 +289,15 @@ export class ArticleCategoriesComponent implements OnInit {
   }
 
   restore(cat: ArticleCategoryResponseDto): void {
-    const message = this.translate.instant('SUCCESS.CATEGORY_RESTORED', { name: cat.name });
     this.categoryService.restore(cat.id).subscribe({
       next: () => {
-        this.flash('success', message);
+        this.flash('success', this.translate.instant('ARTICLES.CATEGORIES.SUCCESS.CATEGORY_RESTORED', { name: cat.name }));
         if (this.isView()) this.cancel();
         this.reload();
       },
       error: (error) => {
         const err = error.error as HttpError;
-        this.flash('error', err?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        this.flash('error', err?.message ? this.translateError(err.message) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
       },
     });
   }
@@ -290,18 +311,22 @@ export class ArticleCategoriesComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.CATEGORY_CREATED', { name: dto.name }));
+          this.flash('success', this.translate.instant('ARTICLES.CATEGORIES.SUCCESS.CATEGORY_CREATED', { name: dto.name }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
-      });
+        error: (err) => {
+          const msg = (err.error as HttpError)?.message;
+          this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        },      });
     } else if (this.isEdit() && this.selectedCategory) {
       this.categoryService.update(this.selectedCategory.id, dto).subscribe({
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.CATEGORY_UPDATED', { name: dto.name }));
+          this.flash('success', this.translate.instant('ARTICLES.CATEGORIES.SUCCESS.CATEGORY_UPDATED'));        },
+        error: (err) => {
+          const msg = (err.error as HttpError)?.message;
+          this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
     }
   }
@@ -326,10 +351,13 @@ export class ArticleCategoriesComponent implements OnInit {
         this.categoryService.delete(category.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.CATEGORY_DELETED', { name: category.name }));
+            this.flash('success', this.translate.instant('ARTICLES.CATEGORIES.SUCCESS.CATEGORY_DELETED', { name: category.name }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: (err) => {
+            const msg = (err.error as HttpError)?.message;
+            this.flash('error', msg ? this.translateError(msg) : this.translate.instant('ERRORS.INTERNAL_ERROR'));
+          },
         });
       });
   }
