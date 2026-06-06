@@ -110,7 +110,7 @@ export const routes: Routes = [
                 ])
             }
       },
-      { path: 'system-settings', component: SystemSettingsComponent, data: { privileges: pickPrivileges('USERS', ['EDIT_TENANT_SETTINGS'])} },
+      { path: 'system-settings', component: SystemSettingsComponent, data: { privileges: pickPrivileges('USERS', ['EDIT_SYSTEM_SETTINGS'])} },
       {
         path: 'subscription-expiry',
         component: SubscriptionExpiryComponent,

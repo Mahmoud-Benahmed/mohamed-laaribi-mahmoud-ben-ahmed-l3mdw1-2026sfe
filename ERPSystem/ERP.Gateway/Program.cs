@@ -171,7 +171,7 @@ builder.Services.AddAuthorization(options =>
         Privileges.Users.BUY_SUBSCRIPTION); ;
 
     Add("EDIT_TENANT_SETTINGS", 
-        Privileges.Users.EDIT_TENANT_SETTINGS, 
+        Privileges.Users.EDIT_SYSTEM_SETTINGS, 
         TenantPrivileges.UPDATE_TENANT
     );
 
