@@ -13,6 +13,7 @@ import localeEnGB from '@angular/common/locales/en-GB';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { TenantInactiveInterceptor } from './interceptor/tenant-inactive-interceptor';
+import { errorTranslateInterceptor } from './interceptor/error-Translate.interceptor';
 
 registerLocaleData(localeFrMA);
 registerLocaleData(localeFrTN);
@@ -31,7 +32,7 @@ class HttpTranslateLoader implements TranslateLoader {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),provideHttpClient(withInterceptors([LoadingInterceptor, TenantInactiveInterceptor, AuthInterceptor])),
+    provideRouter(routes),provideHttpClient(withInterceptors([LoadingInterceptor, errorTranslateInterceptor,TenantInactiveInterceptor, AuthInterceptor])),
     provideTranslateService({
       fallbackLang: 'en',
       loader: {
