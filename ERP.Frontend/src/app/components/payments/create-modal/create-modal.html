@@ -248,13 +248,22 @@
                                 </span>
                             </div>
 
-                            <button type="button"
-                                    class="icon-btn icon-btn--delete"
-                                    (click)="removeLine(i)"
-                                    [disabled]="allocations.length === 1"
-                                    [matTooltip]="'COMMON.REMOVE' | translate">
-                                <mat-icon style="font-size:24px;width:24px;height:24px;">delete_outline</mat-icon>
-                            </button>
+                            <div class="allocation-line__actions">
+                                <button type="button"
+                                        class="icon-btn icon-btn--complete"
+                                        (click)="completeLine(i)"
+                                        [disabled]="!getAllocationLine(i).get('invoiceId')?.value"
+                                        [matTooltip]="'COMMON.COMPLETE' | translate">
+                                    <mat-icon style="font-size:24px;width:24px;height:24px;">check</mat-icon>
+                                </button>
+                                <button type="button"
+                                        class="icon-btn icon-btn--delete"
+                                        (click)="removeLine(i)"
+                                        [disabled]="allocations.length === 1"
+                                        [matTooltip]="'COMMON.REMOVE' | translate">
+                                    <mat-icon style="font-size:24px;width:24px;height:24px;">delete_outline</mat-icon>
+                                </button>
+                            </div>
                         </div>
                     </ng-container>
                 </div>
@@ -266,7 +275,7 @@
 
 <mat-dialog-actions align="end">
   <button type="button" class="btn-secondary" (click)="cancel()">
-    {{ 'COMMON.CANCEL' | translate }}
+    {{ 'common.cancel' | translate }}
   </button>
   <button type="button"
           class="btn-add"
