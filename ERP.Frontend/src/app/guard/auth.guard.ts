@@ -10,8 +10,15 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const path   = route.routeConfig?.path ?? '';
 
   const proceedWithChecks = () => {
+    const mustChange= auth.getMustChangePassword();
+    
+      // ── If password already changed, block access to must-change-password
+    if (!mustChange && path === 'must-change-password') {
+      return router.createUrlTree(['/home']);
+    }
+
     // ── Force password change
-    if (auth.getMustChangePassword() && path !== 'must-change-password' && environment.production) {
+    if (mustChange && path !== 'must-change-password' && environment.production) {
       return router.createUrlTree(['/must-change-password']);
     }
 
