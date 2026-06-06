@@ -33,9 +33,6 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
-    this.updateLastLogin();
-
     if (this.authService.UserProfile) {
       this.userProfile = this.authService.UserProfile;
     } else {
@@ -53,18 +50,15 @@ export class HomeComponent implements OnInit {
   }
 
   get userName(): string {
-    return this.userProfile?.fullName || this.userProfile?.login || this.translate.instant('HOME.GUEST');
+    return this.userProfile?.fullName || this.userProfile?.login || '-';
   }
 
   get welcomeMessage(): string {
-    return this.translate.instant('HOME.WELCOME', { name: this.userName });
+    return this.translate.instant('home.title', { username: this.userName ?? '' });
   }
 
   get roleName():string{
     return this.authService.Role || '-';
-  }
-  get lastLoginMessage(): string {
-    return this.translate.instant('HOME.LAST_LOGIN', { time: this.lastLogin });
   }
 
   dismissError(): void { this.error = null; }
@@ -79,17 +73,6 @@ export class HomeComponent implements OnInit {
       this.cdr.markForCheck();
       setTimeout(() => (this.error = null), 3000);
     }
-  }
-
-  private updateLastLogin(): void {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    this.lastLogin = `${hours}:${minutes}`;
-  }
-
-  private getLastLogin(): string {
-    return this.lastLogin;
   }
 
   logout(): void {
