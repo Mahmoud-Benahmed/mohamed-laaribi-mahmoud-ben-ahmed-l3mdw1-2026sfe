@@ -2,7 +2,7 @@
 
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'CLIENT_CATEGORIES.BREADCRUMB' | translate }}</p>
+      <p class="breadcrumb">{{ 'CLIENTS.CATEGORIES.BREADCRUMB' | translate }}</p>
       <h1 class="page-title">{{ pageTitle | translate }}</h1>
     </div>
   </div>
@@ -33,7 +33,7 @@
       <div class="stat-card stat-card--green" [class.stat-card--current]="isList()" (click)="onActiveCardClick()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENT_CATEGORIES.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'CLIENTS.CATEGORIES.STATS.ACTIVE' | translate }}</p>
             <p class="stat-card__value">{{ activeCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--green">
@@ -49,7 +49,7 @@
       <div class="stat-card stat-card--amber" [class.stat-card--current]="isInactiveList()" (click)="onInactiveCardClick()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENT_CATEGORIES.STATS.INACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'CLIENTS.CATEGORIES.STATS.INACTIVE' | translate }}</p>
             <p class="stat-card__value">{{ inactiveCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--amber">
@@ -65,7 +65,7 @@
       <div class="stat-card stat-card--red" [class.stat-card--current]="isListDeleted()" (click)="onDeletedCardClick()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENT_CATEGORIES.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'CLIENTS.CATEGORIES.STATS.DELETED' | translate }}</p>
             <p class="stat-card__value">{{ deletedCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--red">
@@ -90,14 +90,14 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'CLIENT_CATEGORIES.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="'CLIENTS.CATEGORIES.SEARCH_PLACEHOLDER' | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()"
               *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT_CATEGORIES) && isList()">
-        + {{ 'CLIENT_CATEGORIES.ADD_BUTTON' | translate }}
+        + {{ 'CLIENTS.CATEGORIES.ADD_BUTTON' | translate }}
       </button>
     </div>
 
@@ -107,7 +107,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('code')" class="th--sortable">
-                {{ 'CLIENT_CATEGORIES.TABLE.CODE' | translate }}
+                {{ 'CLIENTS.CATEGORIES.TABLE.CODE' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'code' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -120,7 +120,7 @@
                 </span>
               </th>
               <th (click)="sortBy('name')" class="th--sortable">
-                {{ 'CLIENT_CATEGORIES.TABLE.NAME' | translate }}
+                {{ 'CLIENTS.CATEGORIES.TABLE.NAME' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -133,7 +133,7 @@
                 </span>
               </th>
               <th (click)="sortBy('delaiRetour')" class="th--sortable">
-                {{ 'CLIENT_CATEGORIES.TABLE.DELAI_RETOUR' | translate }}
+                {{ 'CLIENTS.CATEGORIES.TABLE.DELAI_RETOUR' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'delaiRetour' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -146,7 +146,7 @@
                 </span>
               </th>
               <th (click)="sortBy('discountRate')" class="th--sortable">
-                {{ 'CLIENT_CATEGORIES.TABLE.DISCOUNT' | translate }}
+                {{ 'CLIENTS.CATEGORIES.TABLE.DISCOUNT' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'discountRate' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -159,7 +159,7 @@
                 </span>
               </th>
               <th (click)="sortBy('isActive')" class="th--sortable">
-                {{ 'CLIENT_CATEGORIES.TABLE.STATUS' | translate }}
+                {{ 'CLIENTS.CATEGORIES.TABLE.STATUS' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'isActive' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -171,7 +171,7 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'CLIENT_CATEGORIES.TABLE.ACTIONS' | translate }}</th>
+              <th>{{ 'CLIENTS.CATEGORIES.TABLE.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -260,57 +260,57 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="isView() && selectedCategory">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'CLIENT_CATEGORIES.TITLE_DETAILS' | translate }}</h2>
+      <h2 class="panel__title">{{ 'CLIENTS.CATEGORIES.TITLE_DETAILS' | translate }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.CODE' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.CODE' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedCategory.code }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.NAME' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.NAME' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.DUE_PAYMENT_PERIOD' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.DUE_PAYMENT_PERIOD' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.duePaymentPeriod }} {{ 'COMMON.DAYS' | translate }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.DELAI_RETOUR' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.DELAI_RETOUR' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.delaiRetour }} {{ 'COMMON.DAYS' | translate }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.DISCOUNT_RATE' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.DISCOUNT_RATE' | translate }}</span>
           <span class="detail-value">
             {{ selectedCategory.discountRate != null ? (selectedCategory.discountRate *100) + '%' : '—' }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.CREDIT_LIMIT_MULTIPLIER' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.CREDIT_LIMIT_MULTIPLIER' | translate }}</span>
           <span class="detail-value">
             {{ selectedCategory.creditLimitMultiplier != null ? ('×' + selectedCategory.creditLimitMultiplier) : '—' }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.BULK_PRICING' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.BULK_PRICING' | translate }}</span>
           <span class="badge" [ngClass]="selectedCategory.useBulkPricing ? 'badge--active' : 'badge--inactive'">
             {{ selectedCategory.useBulkPricing ? ('COMMON.ENABLED' | translate) : ('COMMON.DISABLED' | translate) }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.STATUS' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.STATUS' | translate }}</span>
           <span class="badge" [ngClass]="selectedCategory.isActive ? 'badge--active' : 'badge--blocked'">
             {{ selectedCategory.isActive ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate) }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.CREATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.CREATED_AT' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.createdAt | date:'medium' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENT_CATEGORIES.DETAILS.UPDATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'CLIENTS.CATEGORIES.DETAILS.UPDATED_AT' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.updatedAt ? (selectedCategory.updatedAt | date:'medium') : '—' }}</span>
         </div>
       </div>
@@ -340,7 +340,7 @@
   <div class="panel" *ngIf="(isCreate() && authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT_CATEGORIES))
                          || (isEdit()   && authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT_CATEGORIES))">
     <div class="panel__header">
-      <h2 class="panel__title">{{ isCreate() ? ('CLIENT_CATEGORIES.FORM.ADD_TITLE' | translate) : ('CLIENT_CATEGORIES.FORM.EDIT_TITLE' | translate) }}</h2>
+      <h2 class="panel__title">{{ isCreate() ? ('CLIENTS.CATEGORIES.FORM.ADD_TITLE' | translate) : ('CLIENTS.CATEGORIES.FORM.EDIT_TITLE' | translate) }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
@@ -349,10 +349,10 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.NAME' | translate }}</label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.NAME' | translate }}</label>
               <mat-icon>label</mat-icon>
             </div>
-            <input class="form__input" type="text" formControlName="name" [placeholder]="'CLIENT_CATEGORIES.FORM.NAME_PLACEHOLDER' | translate"
+            <input class="form__input" type="text" formControlName="name" [placeholder]="'CLIENTS.CATEGORIES.FORM.NAME_PLACEHOLDER' | translate"
               [class.form__input--error]="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched"/>
             <span class="field__error" *ngIf="categoryForm.get('name') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -366,10 +366,10 @@
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.CODE' | translate }}</label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.CODE' | translate }}</label>
               <mat-icon>tag</mat-icon>
             </div>
-            <input class="form__input" type="text" formControlName="code" [placeholder]="'CLIENT_CATEGORIES.FORM.CODE_PLACEHOLDER' | translate"
+            <input class="form__input" type="text" formControlName="code" [placeholder]="'CLIENTS.CATEGORIES.FORM.CODE_PLACEHOLDER' | translate"
               [class.form__input--error]="categoryForm.get('code')?.invalid && categoryForm.get('code')?.touched"/>
             <span class="field__error" *ngIf="categoryForm.get('code') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -385,10 +385,10 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.DELAI_RETOUR' | translate }}</label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.DELAI_RETOUR' | translate }}</label>
               <mat-icon>assignment_return</mat-icon>
             </div>
-            <input class="form__input" type="number" formControlName="delaiRetour" [placeholder]="'CLIENT_CATEGORIES.FORM.DELAI_RETOUR_PLACEHOLDER' | translate" min="7" max="270"
+            <input class="form__input" type="number" formControlName="delaiRetour" [placeholder]="'CLIENTS.CATEGORIES.FORM.DELAI_RETOUR_PLACEHOLDER' | translate" min="7" max="270"
               [class.form__input--error]="categoryForm.get('delaiRetour')?.invalid && categoryForm.get('delaiRetour')?.touched"/>
               <span class="field__error" *ngIf="categoryForm.get('delaiRetour') as ctrl">
                 <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -402,11 +402,11 @@
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.DUE_PAYMENT_PERIOD' | translate }}</label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.DUE_PAYMENT_PERIOD' | translate }}</label>
               <mat-icon>schedule</mat-icon>
             </div>
             <input class="form__input" type="number" formControlName="duePaymentPeriod"
-              [placeholder]="'CLIENT_CATEGORIES.FORM.DUE_PAYMENT_PERIOD_PLACEHOLDER' | translate" min="7" max="180"
+              [placeholder]="'CLIENTS.CATEGORIES.FORM.DUE_PAYMENT_PERIOD_PLACEHOLDER' | translate" min="7" max="180"
               [class.form__input--error]="categoryForm.get('duePaymentPeriod')?.invalid && categoryForm.get('duePaymentPeriod')?.touched"/>
             <span class="field__error" *ngIf="categoryForm.get('duePaymentPeriod') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -422,13 +422,13 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.DISCOUNT_RATE' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.DISCOUNT_RATE' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
               <mat-icon>percent</mat-icon>
             </div>
             <input class="form__input"
                   type="number"
                   formControlName="discountRate"
-                  [placeholder]="'CLIENT_CATEGORIES.FORM.DISCOUNT_RATE_PLACEHOLDER' | translate"
+                  [placeholder]="'CLIENTS.CATEGORIES.FORM.DISCOUNT_RATE_PLACEHOLDER' | translate"
                   step="1"
                   min="0"
                   max="100"
@@ -444,11 +444,11 @@
           </div>
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENT_CATEGORIES.FORM.CREDIT_LIMIT_MULTIPLIER' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'CLIENTS.CATEGORIES.FORM.CREDIT_LIMIT_MULTIPLIER' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
               <mat-icon>account_balance_wallet</mat-icon>
             </div>
             <input class="form__input" type="number" formControlName="creditLimitMultiplier"
-              [placeholder]="'CLIENT_CATEGORIES.FORM.CREDIT_LIMIT_PLACEHOLDER' | translate" step="0.01" min="1" max="2"
+              [placeholder]="'CLIENTS.CATEGORIES.FORM.CREDIT_LIMIT_PLACEHOLDER' | translate" step="0.01" min="1" max="2"
               [class.form__input--error]="categoryForm.get('creditLimitMultiplier')?.invalid && categoryForm.get('creditLimitMultiplier')?.touched"
               />
             <span class="field__error" *ngIf="categoryForm.get('creditLimitMultiplier') as ctrl">
@@ -460,13 +460,13 @@
           <div class="form__field">
             <app-toggle-slider
               formControlName="useBulkPricing"
-              [label]="('CLIENT_CATEGORIES.FORM.BULK_PRICING' | translate: { value: categoryForm.get('useBulkPricing')?.value ? ('COMMON.ENABLED' | translate) : ('COMMON.DISABLED' | translate) })">
+              [label]="('CLIENTS.CATEGORIES.FORM.BULK_PRICING' | translate: { value: categoryForm.get('useBulkPricing')?.value ? ('COMMON.ENABLED' | translate) : ('COMMON.DISABLED' | translate) })">
             </app-toggle-slider>
           </div>
         </div>
 
         <div class="form__actions">
-          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="categoryForm.invalid">
             {{ isCreate() ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
           </button>
