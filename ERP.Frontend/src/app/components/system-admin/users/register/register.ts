@@ -116,7 +116,7 @@ export class RegisterComponent implements OnDestroy {
         data: {
           title: this.translate.instant('CONFIRMATION.LOGIN_CHANGE_WARNING_TITLE'),
           message: this.translate.instant('CONFIRMATION.LOGIN_CHANGE_WARNING', { login: this.login() }),
-          confirmText: this.translate.instant('COMMON.CONFIRM'),
+          confirmText: this.translate.instant('common.confirm'),
           showCancel: true,
           icon: 'check_circle',
           iconColor: 'warn'
