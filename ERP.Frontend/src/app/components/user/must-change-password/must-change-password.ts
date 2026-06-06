@@ -72,6 +72,41 @@ export class MustChangePasswordComponent implements OnInit {
     this.mustChangePassword = this.authService.getMustChangePassword();
   }
 
+private translateErrorCode(errorCode: string): string {
+    // Try generic ERRORS.*
+    const genericKey = `ERRORS.${errorCode}`;
+    const generic = this.translate.instant(genericKey);
+    if (generic !== genericKey) {
+      return generic;
+    }
+    // Try USERS.CHANGE_PASSWORD.ERRORS.*
+    const specificKey = `USERS.CHANGE_PASSWORD.ERRORS.${errorCode}`;
+    const specific = this.translate.instant(specificKey);
+    if (specific !== specificKey) {
+      return specific;
+    }
+    // Fallback
+    return this.translate.instant('ERRORS.INTERNAL_ERROR');
+  }
+
+  /**
+   * Translates a single error message – if it looks like a key, translate it.
+   */
+  private translateErrorMessage(message: string): string {
+    if (message && message.match(/^[A-Z0-9_]+$/)) {
+      const translated = this.translate.instant(message);
+      if (translated !== message) {
+        return translated;
+      }
+      const withPrefix = this.translate.instant(`ERRORS.${message}`);
+      if (withPrefix !== `ERRORS.${message}`) {
+        return withPrefix;
+      }
+    }
+    return message;
+  }
+
+
   // ── Password change handlers ──────────────────────────────────────────────
 
   onPasswordChange(): void {
@@ -79,7 +114,7 @@ export class MustChangePasswordComponent implements OnInit {
       this.passwordForm.newPassword,
       this.passwordForm.currentPassword,
     );
-    this.passwordErrors   = result.errors;
+    this.passwordErrors = result.errors.map(err => this.translateErrorMessage(err));
     this.passwordScore    = result.score;
     this.passwordStrength = result.strength;
 
@@ -124,9 +159,9 @@ export class MustChangePasswordComponent implements OnInit {
         this.dialog.open(ModalComponent, {
           width: '400px',
           data: {
-            title:       this.translate.instant('USERS.PROFILE.PASSWORD_CHANGE_SUCCESS_TITLE'),
-            message:     this.translate.instant('USERS.PROFILE.PASSWORD_CHANGE_SUCCESS_MESSAGE'),
-            confirmText: this.translate.instant('USERS.PROFILE.UNDERSTOOD'),
+            title:       this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_SUCCESS_TITLE'),
+            message:     this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_SUCCESS_MESSAGE'),
+            confirmText: this.translate.instant('USERS.CHANGE_PASSWORD.UNDERSTOOD'),
             showCancel:  false,
             icon:        'info',
             iconColor:   'success',
@@ -140,11 +175,21 @@ export class MustChangePasswordComponent implements OnInit {
         const err = error.error as HttpError;
 
         if (err.code === 'VALIDATION_ERROR' && err.errors) {
-          this.flashErrors(Object.values(err.errors).flat());
+          let allMessages: string[] = [];
+          if (Array.isArray(err.errors)) {
+            allMessages = err.errors;
+          } else if (typeof err.errors === 'object') {
+            allMessages = Object.values(err.errors).flat();
+          }
+          const translatedMessages = allMessages.map(msg => this.translateErrorMessage(msg));
+          this.flashErrors(translatedMessages);
+        } else if (err.code) {
+          const translatedMessage = this.translateErrorCode(err.code);
+          this.flash('error', translatedMessage);
         } else {
-          this.flash('error', err.message
-            ?? this.translate.instant('USERS.PROFILE.PASSWORD_CHANGE_FAILED'));
+          this.flash('error', err.message || this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_FAILED'));
         }
+        
         this.cdr.markForCheck();
       },
     });
