@@ -26,48 +26,48 @@
         <!-- Home -->
         <a class="sidebar__item" routerLink="/home" routerLinkActive="sidebar__item--active"
            [routerLinkActiveOptions]="{exact:true}" (click)="closeMobileNav()">
-          <mat-icon>home</mat-icon><span>{{ 'NAV.HOME' | translate }}</span>
+          <mat-icon>home</mat-icon><span>{{ 'nav.home' | translate }}</span>
         </a>
 
         <!-- Auth & Users -->
         <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
           <button class="sidebar__item sidebar__item--group" (click)="toggleGroup('auth')" type="button"
                   [class.sidebar__item--group-open]="openGroups['auth']">
-            <mat-icon>manage_accounts</mat-icon><span>{{ 'NAV.AUTH_USERS' | translate }}</span>
+            <mat-icon>manage_accounts</mat-icon><span>{{ 'nav.auth.main' | translate }}</span>
             <mat-icon class="sidebar__chevron" [class.open]="openGroups['auth']">expand_more</mat-icon>
           </button>
           <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['auth']">
             <a class="sidebar__subitem" routerLink="/users" routerLinkActive="sidebar__subitem--active"
                [routerLinkActiveOptions]="{exact:true}" (click)="closeMobileNav()">
-              <mat-icon>group</mat-icon> {{ 'NAV.USERS' | translate }}
+              <mat-icon>group</mat-icon> {{ 'nav.auth.list' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/users/deactivated" routerLinkActive="sidebar__subitem--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) || authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER)"
                (click)="closeMobileNav()">
-              <mat-icon>person_off</mat-icon> {{ 'NAV.DEACTIVATED' | translate }}
+              <mat-icon>person_off</mat-icon> {{ 'nav.auth.deactivated' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/users/deleted" routerLinkActive="sidebar__subitem--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)" (click)="closeMobileNav()">
-              <mat-icon>group_remove</mat-icon> {{ 'NAV.DELETED' | translate }}
+              <mat-icon>group_remove</mat-icon> {{ 'nav.auth.deleted' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/users/register" routerLinkActive="sidebar__subitem--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_USER)" (click)="closeMobileNav()">
-              <mat-icon>person_add</mat-icon> {{ 'NAV.REGISTER' | translate }}
+              <mat-icon>person_add</mat-icon> {{ 'nav.auth.register' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/users/controles" routerLinkActive="sidebar__subitem--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)" (click)="closeMobileNav()">
-              <mat-icon>verified_user</mat-icon> {{ 'NAV.CONTROLES' | translate }}
+              <mat-icon>verified_user</mat-icon> {{ 'nav.auth.controles' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/users/roles" routerLinkActive="sidebar__subitem--active"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)" (click)="closeMobileNav()">
-                <mat-icon>groups</mat-icon> {{ 'NAV.ROLES' | translate }}
+                <mat-icon>groups</mat-icon> {{ 'nav.auth.roles' | translate }}
             </a>
             <a class="sidebar__subitem"
                 routerLink="/permissions"
                 routerLinkActive="sidebar__subitem--active"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)"
                 (click)="closeMobileNav()">
-              <mat-icon>shield</mat-icon> {{ 'NAV.PERMISSIONS' | translate }}
+              <mat-icon>shield</mat-icon> {{ 'nav.auth.permissions' | translate }}
             </a>
           </div>
         </div>
@@ -79,7 +79,7 @@
                   (click)="toggleGroup('articles')"
                   type="button"
                   [class.sidebar__item--group-open]="openGroups['articles']">
-                  <mat-icon>warehouse</mat-icon><span>{{ 'NAV.ARTICLES' | translate }}</span>
+                  <mat-icon>warehouse</mat-icon><span>{{ 'nav.articles.main' | translate }}</span>
                   <mat-icon class="sidebar__chevron" [class.open]="openGroups['articles']">expand_more</mat-icon>
           </button>
           <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['articles']">
@@ -87,7 +87,7 @@
                 routerLink="/articles"
                 routerLinkActive="sidebar__subitem--active"
                 [routerLinkActiveOptions]="{exact:true}" (click)="closeMobileNav()">
-                <mat-icon>inventory_2</mat-icon> {{ 'NAV.ARTICLES' | translate }}
+                <mat-icon>inventory_2</mat-icon> {{ 'nav.articles.list' | translate }}
             </a>
             <a class="sidebar__subitem"
                 routerLink="/articles/categories"
@@ -96,7 +96,7 @@
                 (click)="closeMobileNav()"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE_CATEGORIES) ||
               authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES) || authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES)">
-                <mat-icon>list_alt</mat-icon> {{ 'NAV.CATEGORIES' | translate }}
+                <mat-icon>list_alt</mat-icon> {{ 'nav.articles.categories' | translate }}
             </a>
           </div>
         </div>
@@ -105,18 +105,18 @@
         <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.VIEW_CLIENTS)">
           <button class="sidebar__item sidebar__item--group" (click)="toggleGroup('clients')" type="button"
                   [class.sidebar__item--group-open]="openGroups['clients']">
-            <mat-icon>handshake</mat-icon><span>{{ 'NAV.CLIENTS' | translate }}</span>
+            <mat-icon>handshake</mat-icon><span>{{ 'nav.clients.main' | translate }}</span>
             <mat-icon class="sidebar__chevron" [class.open]="openGroups['clients']">expand_more</mat-icon>
           </button>
           <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['clients']">
             <a class="sidebar__subitem" routerLink="/clients" routerLinkActive="sidebar__subitem--active"
                [routerLinkActiveOptions]="{exact:true}" (click)="closeMobileNav()" *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.VIEW_CLIENTS)">
-              <mat-icon>people</mat-icon> {{ 'NAV.CLIENTS' | translate }}
+              <mat-icon>people</mat-icon> {{ 'nav.clients.list' | translate }}
             </a>
             <a class="sidebar__subitem" routerLink="/clients/categories" routerLinkActive="sidebar__subitem--active"
               [routerLinkActiveOptions]="{exact:true}" (click)="closeMobileNav()" *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT_CATEGORIES) ||
               authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT_CATEGORIES) || authService.hasPrivilege(PRIVILEGES.CLIENTS.DELETE_CLIENT_CATEGORIES)">
-              <mat-icon>list_alt</mat-icon> {{ 'NAV.CATEGORIES' | translate }}
+              <mat-icon>list_alt</mat-icon> {{ 'nav.clients.categories' | translate }}
             </a>
           </div>
         </div>
@@ -128,7 +128,7 @@
                   (click)="toggleGroup('stock')"
                   type="button"
                   [class.sidebar__item--group-open]="openGroups['stock']">
-            <mat-icon>inventory</mat-icon><span>{{ 'NAV.STOCK' | translate }}</span>
+            <mat-icon>inventory</mat-icon><span>{{ 'nav.stock.main' | translate }}</span>
             <mat-icon class="sidebar__chevron" [class.open]="openGroups['stock']">expand_more</mat-icon>
           </button>
           <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['stock']">
@@ -138,7 +138,7 @@
               routerLinkActive="sidebar__subitem--active"
               [routerLinkActiveOptions]="{exact:true}"
               (click)="closeMobileNav()">
-              <mat-icon>local_shipping</mat-icon> {{ 'NAV.FOURNISSEURS' | translate }}
+              <mat-icon>local_shipping</mat-icon> {{ 'nav.stock.suppliers' | translate }}
             </a>
             <a class="sidebar__subitem"
               *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.VIEW_STOCK)"
@@ -146,7 +146,7 @@
               routerLinkActive="sidebar__subitem--active"
               [routerLinkActiveOptions]="{exact:true}"
               (click)="closeMobileNav()">
-              <mat-icon>receipt_long</mat-icon> {{ 'NAV.BONS' | translate }}
+              <mat-icon>receipt_long</mat-icon> {{ 'nav.stock.bons' | translate }}
             </a>
           </div>
         </div>
@@ -154,7 +154,7 @@
         <!-- Invoices -->
         <a class="sidebar__item" routerLink="/invoices" routerLinkActive="sidebar__item--active"
            *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.VIEW_INVOICES)" (click)="closeMobileNav()">
-          <mat-icon>receipt</mat-icon>{{ 'NAV.INVOICES' | translate}}
+          <mat-icon>receipt</mat-icon>{{ 'nav.invoices.main' | translate}}
         </a>
 
         <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)">
@@ -162,18 +162,18 @@
                   (click)="toggleGroup('payments')"
                   type="button"
                   [class.sidebar__item--group-open]="openGroups['payments']">
-            <mat-icon>payments</mat-icon><span>{{ 'NAV.PAYMENTS' | translate }}</span>
+            <mat-icon>payments</mat-icon><span>{{ 'nav.payments.main' | translate }}</span>
             <mat-icon class="sidebar__chevron" [class.open]="openGroups['payments']">expand_more</mat-icon>
           </button>
           <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['payments']">
             <a class="sidebar__item" routerLink="/payments" routerLinkActive="sidebar__item--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)" (click)="closeMobileNav()">
-              <mat-icon>payments</mat-icon>{{ 'NAV.PAYMENTS' | translate}}
+              <mat-icon>payments</mat-icon>{{ 'nav.payments.list' | translate}}
             </a>
 
             <a class="sidebar__item" routerLink="/payments/refunds" routerLinkActive="sidebar__item--active"
                *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)" (click)="closeMobileNav()">
-              <mat-icon>currency_exchange</mat-icon>{{ 'NAV.REFUNDS' | translate}}
+              <mat-icon>currency_exchange</mat-icon>{{ 'nav.payments.refunds' | translate}}
             </a>
           </div>
 
@@ -183,7 +183,7 @@
         <!-- Audit Log -->
         <a class="sidebar__item" routerLink="/audit-log" routerLinkActive="sidebar__item--active"
            *ngIf="authService.hasPrivilege(PRIVILEGES.AUDIT.MANAGE_AUDITLOGS)" (click)="closeMobileNav()">
-          <mat-icon>history</mat-icon> {{ 'NAV.AUDIT_LOG' | translate }}
+          <mat-icon>history</mat-icon> {{ 'nav.audit_log.main' | translate }}
         </a>
       </div>
 
@@ -225,7 +225,7 @@
       <!-- Home -->
       <a class="sidebar__item" routerLink="/home" routerLinkActive="sidebar__item--active"
          [routerLinkActiveOptions]="{exact:true}">
-        <mat-icon>home</mat-icon> <span>{{ 'NAV.HOME' | translate }}</span>
+        <mat-icon>home</mat-icon> <span>{{ 'nav.home' | translate }}</span>
       </a>
 
       <a class="sidebar__item" routerLink="/tenants" routerLinkActive="sidebar__item--active"
@@ -239,43 +239,43 @@
                   PRIVILEGES.TENANTS.SUSPEND_TENANT,
                   PRIVILEGES.TENANTS.MANAGE_SUBSCRIPTIONS
                 )">
-        <mat-icon>business</mat-icon><span>{{ 'NAV.TENANTS' | translate}}</span>
+        <mat-icon>business</mat-icon><span>{{ 'nav.tenants.main' | translate}}</span>
       </a>
       <!-- Auth & Users -->
       <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
         <button class="sidebar__item sidebar__item--group" (click)="toggleGroup('auth')" type="button"
                 [class.sidebar__item--group-open]="openGroups['auth']">
-          <mat-icon>manage_accounts</mat-icon> <span>{{ 'NAV.AUTH_USERS' | translate }}</span>
+          <mat-icon>manage_accounts</mat-icon> <span>{{ 'nav.auth.main' | translate }}</span>
           <mat-icon class="sidebar__chevron" [class.open]="openGroups['auth']">expand_more</mat-icon>
         </button>
         <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['auth']">
           <a class="sidebar__subitem" routerLink="/users" routerLinkActive="sidebar__subitem--active"
              [routerLinkActiveOptions]="{exact:true}">
-            <mat-icon>group</mat-icon> <span>{{ 'NAV.USERS' | translate }}</span>
+            <mat-icon>group</mat-icon> <span>{{ 'nav.auth.list' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/users/deactivated" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) || authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER)">
-            <mat-icon>person_off</mat-icon> <span>{{ 'NAV.DEACTIVATED' | translate }}</span>
+            <mat-icon>person_off</mat-icon> <span>{{ 'nav.auth.deactivated' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/users/deleted" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)">
-            <mat-icon>group_remove</mat-icon> <span>{{ 'NAV.DELETED' | translate }}</span>
+            <mat-icon>group_remove</mat-icon> <span>{{ 'nav.auth.deleted' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/users/register" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_USER)">
-            <mat-icon>person_add</mat-icon> <span>{{ 'NAV.REGISTER' | translate }}</span>
+            <mat-icon>person_add</mat-icon> <span>{{ 'nav.auth.register' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/users/controles" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
-            <mat-icon>verified_user</mat-icon> <span>{{ 'NAV.CONTROLES' | translate }}</span>
+            <mat-icon>verified_user</mat-icon> <span>{{ 'nav.auth.controles' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/users/roles" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
-            <mat-icon>groups</mat-icon> <span>{{ 'NAV.ROLES' | translate }}</span>
+            <mat-icon>groups</mat-icon> <span>{{ 'nav.auth.roles' | translate }}</span>
           </a>
           <a class="sidebar__subitem" routerLink="/permissions" routerLinkActive="sidebar__subitem--active"
              *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
-            <mat-icon>shield</mat-icon> <span>{{ 'NAV.PERMISSIONS' | translate }}</span>
+            <mat-icon>shield</mat-icon> <span>{{ 'nav.auth.permissions' | translate }}</span>
           </a>
         </div>
       </div>
@@ -286,7 +286,7 @@
                 (click)="toggleGroup('articles')"
                 type="button"
                 [class.sidebar__item--group-open]="openGroups['articles']">
-          <mat-icon>warehouse</mat-icon> <span>{{ 'NAV.ARTICLES' | translate }}</span>
+          <mat-icon>warehouse</mat-icon> <span>{{ 'nav.articles.main' | translate }}</span>
           <mat-icon class="sidebar__chevron" [class.open]="openGroups['articles']">expand_more</mat-icon>
         </button>
         <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['articles']">
@@ -294,7 +294,7 @@
               routerLink="/articles"
               routerLinkActive="sidebar__subitem--active"
               [routerLinkActiveOptions]="{exact:true}">
-            <mat-icon>inventory_2</mat-icon> <span>{{ 'NAV.ARTICLES' | translate }}</span>
+            <mat-icon>inventory_2</mat-icon> <span>{{ 'nav.articles.list' | translate }}</span>
           </a>
           <a class="sidebar__subitem"
               routerLink="/articles/categories"
@@ -303,7 +303,7 @@
               *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE_CATEGORIES)
               || authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES)
               || authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES)">
-            <mat-icon>list_alt</mat-icon> <span>{{ 'NAV.CATEGORIES' | translate }}</span>
+            <mat-icon>list_alt</mat-icon> <span>{{ 'nav.articles.categories' | translate }}</span>
           </a>
         </div>
       </div>
@@ -315,14 +315,14 @@
                 (click)="toggleGroup('clients')"
                 type="button"
                 [class.sidebar__item--group-open]="openGroups['clients']">
-          <mat-icon>handshake</mat-icon> <span>{{ 'NAV.CLIENTS' | translate }}</span>
+          <mat-icon>handshake</mat-icon> <span>{{ 'nav.clients.main' | translate }}</span>
           <mat-icon class="sidebar__chevron" [class.open]="openGroups['clients']">expand_more</mat-icon>
         </button>
         <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['clients']">
           <a class="sidebar__subitem"
               routerLink="/clients" routerLinkActive="sidebar__subitem--active"
               [routerLinkActiveOptions]="{exact:true}">
-            <mat-icon>people</mat-icon> <span>{{ 'NAV.CLIENTS' | translate }}</span>
+            <mat-icon>people</mat-icon> <span>{{ 'nav.clients.list' | translate }}</span>
           </a>
           <a class="sidebar__subitem"
               routerLink="/clients/categories"
@@ -330,7 +330,7 @@
               [routerLinkActiveOptions]="{exact:true}"
               *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT_CATEGORIES) ||
               authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT_CATEGORIES) || authService.hasPrivilege(PRIVILEGES.CLIENTS.DELETE_CLIENT_CATEGORIES)">
-              <mat-icon>list_alt</mat-icon> <span>{{ 'NAV.CATEGORIES' | translate }}</span>
+              <mat-icon>list_alt</mat-icon> <span>{{ 'nav.clients.categories' | translate }}</span>
           </a>
         </div>
       </div>
@@ -342,7 +342,7 @@
                 (click)="toggleGroup('stock')"
                 type="button"
                 [class.sidebar__item--group-open]="openGroups['stock']">
-          <mat-icon>inventory</mat-icon> <span>{{ 'NAV.STOCK' | translate }}</span>
+          <mat-icon>inventory</mat-icon> <span>{{ 'nav.stock.main' | translate }}</span>
           <mat-icon class="sidebar__chevron" [class.open]="openGroups['stock']">expand_more</mat-icon>
         </button>
         <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['stock']">
@@ -351,14 +351,14 @@
             routerLink="/stock/fournisseurs"
             routerLinkActive="sidebar__subitem--active"
             [routerLinkActiveOptions]="{exact:true}">
-            <mat-icon>local_shipping</mat-icon> <span>{{ 'NAV.FOURNISSEURS' | translate }}</span>
+            <mat-icon>local_shipping</mat-icon> <span>{{ 'nav.stock.suppliers' | translate }}</span>
           </a>
           <a class="sidebar__subitem"
             *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.VIEW_STOCK)"
             routerLink="/stock/bons"
             routerLinkActive="sidebar__subitem--active"
             [routerLinkActiveOptions]="{exact:true}">
-            <mat-icon>receipt_long</mat-icon> <span>{{ 'NAV.BONS' | translate }}</span>
+            <mat-icon>receipt_long</mat-icon> <span>{{ 'nav.stock.bons' | translate }}</span>
           </a>
         </div>
       </div>
@@ -366,7 +366,7 @@
       <!-- Invoices -->
       <a class="sidebar__item" routerLink="/invoices" routerLinkActive="sidebar__item--active"
          *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.VIEW_INVOICES)">
-        <mat-icon>receipt</mat-icon><span>{{ 'NAV.INVOICES' | translate}}</span>
+        <mat-icon>receipt</mat-icon><span>{{ 'nav.invoices.main' | translate}}</span>
       </a>
 
       <div class="sidebar__group" *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)">
@@ -374,18 +374,18 @@
                 (click)="toggleGroup('payments')"
                 type="button"
                 [class.sidebar__item--group-open]="openGroups['payments']">
-          <mat-icon>payments</mat-icon> <span>{{ 'NAV.PAYMENTS' | translate }}</span>
+          <mat-icon>payments</mat-icon> <span>{{ 'nav.payments.main' | translate }}</span>
           <mat-icon class="sidebar__chevron" [class.open]="openGroups['payments']">expand_more</mat-icon>
         </button>
         <div class="sidebar__sub" [class.sidebar__sub--open]="openGroups['payments']">
           <a class="sidebar__subitem" routerLink="/payments" routerLinkActive="sidebar__subitem--active" [routerLinkActiveOptions]="{exact:true}"
              *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)">
-            <mat-icon>payments</mat-icon><span>{{ 'NAV.PAYMENTS' | translate}}</span>
+            <mat-icon>payments</mat-icon><span>{{ 'nav.payments.list' | translate}}</span>
           </a>
 
           <a class="sidebar__subitem" routerLink="/payments/refunds" routerLinkActive="sidebar__subitem--active" [routerLinkActiveOptions]="{exact:true}"
              *ngIf="authService.hasPrivilege(PRIVILEGES.PAYMENTS.VIEW_PAYMENTS)">
-            <mat-icon>currency_exchange</mat-icon><span>{{ 'NAV.REFUNDS' | translate}}</span>
+            <mat-icon>currency_exchange</mat-icon><span>{{ 'nav.payments.refunds' | translate}}</span>
           </a>
         </div>
 
@@ -394,7 +394,7 @@
       <!-- Audit Log -->
       <a class="sidebar__item" routerLink="/audit-log" routerLinkActive="sidebar__item--active"
          *ngIf="authService.hasPrivilege(PRIVILEGES.AUDIT.MANAGE_AUDITLOGS)">
-        <mat-icon>history</mat-icon> <span>{{ 'NAV.AUDIT_LOG' | translate }}</span>
+        <mat-icon>history</mat-icon> <span>{{ 'nav.audit_log.main' | translate }}</span>
       </a>
     </nav>
 
