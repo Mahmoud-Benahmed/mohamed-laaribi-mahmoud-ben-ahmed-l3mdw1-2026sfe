@@ -13,7 +13,7 @@ import { CategoriesService, CategoryStatsDto, CreateCategoryRequestDto, UpdateCa
 import { ClientCategoryResponseDto } from '../../../services/clients/categories.service';
 import { CustomToggleComponent } from '../../toggle-slider/toggle-slider';
 import { ArticleCategoryResponseDto } from '../../../services/articles/categories.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
@@ -29,6 +29,7 @@ type ViewMode = 'list' | 'create' | 'edit' | 'view' | 'list-deleted' | 'list-ina
 export class ClientCategoriesComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly location= inject(Location);
+  private translate = inject(TranslateService);
 
   dataSource = new MatTableDataSource<ClientCategoryResponseDto>([]);
   stats: CategoryStatsDto | null = null;
@@ -115,11 +116,24 @@ export class ClientCategoriesComponent implements OnInit {
         },
         error: (error)=>{
           const err= error.error as HttpError;
-          this.flash("error", err.message);
+          this.flash("error", this.translateError(err.code ));
           this.cancel();
         }
       });
     }
+  }
+
+  private translateError(errorCode: string): string {
+    // Try client errors
+    if (this.translate.instant(`CLIENTS.ERRORS.${errorCode}`) !== `CLIENTS.ERRORS.${errorCode}`) {
+      return this.translate.instant(`CLIENTS.ERRORS.${errorCode}`);
+    }
+    // Try category errors
+    if (this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`) !== `CLIENTS.CATEGORIES.ERRORS.${errorCode}`) {
+      return this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`);
+    }
+    // Fallback to generic ERRORS
+    return this.translate.instant(`ERRORS.${errorCode}`) || this.translate.instant('ERRORS.INTERNAL_ERROR');
   }
 
   // ── Page title ────────────────────────────────────────────────────────────
@@ -189,7 +203,7 @@ export class ClientCategoriesComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', 'Failed to load categories.');
+        this.flash('error', this.translateError('FAILED_TO_LOAD_CATEGORIES'));
         this.loading = false;
       },
     });
@@ -202,14 +216,14 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', 'Failed to load deleted categories.'),
+      error: () => this.flash('error', this.translateError('FAILED_TO_LOAD_DELETED_CATEGORIES')),
     });
   }
 
   loadStats(): void {
     this.categoriesService.getStats().subscribe({
       next: (res) => { this.stats = res; this.cdr.markForCheck(); },
-      error: () => this.flash('error', 'Failed to load stats.'),
+      error: () => this.flash('error', this.translateError('FAILED_TO_LOAD_STATS')),
     });
   }
 
@@ -221,7 +235,7 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: (error) => this.flash('error', (error as HttpError).message || 'Failed to load categories.'),
+      error: (error) => this.flash('error', this.translateError('FAILED_TO_LOAD_CATEGORIES')),
     });
     this.cdr.markForCheck();
   }
@@ -341,8 +355,8 @@ export class ClientCategoriesComponent implements OnInit {
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.create(dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', `Category "${val.name}" created successfully.`); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? 'Failed to create category.'),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_CREATED')); },
+        error: (err) => this.flash('error', this.translateError('ERRORS.INTERNAL_ERROR')),
       });
     } else if (this.isEdit() && this.selectedCategory) {
       const dto: UpdateCategoryRequestDto = {   // same shape for UpdateCategoryRequestDto
@@ -355,8 +369,8 @@ export class ClientCategoriesComponent implements OnInit {
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.update(this.selectedCategory.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', `Category "${val.name}" updated successfully.`); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? 'Failed to update category.'),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_UPDATED')); },
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translateError('ERRORS.INTERNAL_ERROR')),
       });
     }
   }
@@ -365,9 +379,9 @@ export class ClientCategoriesComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       'Delete Category',
-        message:     `Category "${category.name}" will be soft-deleted. Clients assigned to it will not be affected. Proceed?`,
-        confirmText: 'Delete',
+        title:       this.translate.instant('CONFIRMATION.DELETE_CATEGORY_TITLE'),
+        message:     this.translate.instant('CONFIRMATION.DELETE_CATEGORY_SOFT', { name: category.name }),
+        confirmText: this.translate.instant('COMMON.DELETE'),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -381,13 +395,13 @@ export class ClientCategoriesComponent implements OnInit {
         this.categoriesService.delete(category.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', `Category "${category.name}" deleted successfully.`);
+            this.flash('success',this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_DELETED'));
             this.reload();
           },
           error: (error) =>
           {
             const err= error.error as HttpError;
-            this.flash('error', err.message);
+            this.flash('error', this.translateError(err.code));
           },
         });
       });
@@ -398,13 +412,13 @@ export class ClientCategoriesComponent implements OnInit {
   restore(cat: ClientCategoryResponseDto): void {
       this.categoriesService.restore(cat.id).subscribe({
         next: () => {
-          this.flash('success', `ClientCategoryResponseDto "${cat.name}" has been restored. You can find it in the Categories page.`);
+          this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_RESTORED'));
           this.reload();
           if(this.isView())this.cancel();
         },
         error: (error) =>{
           const err= error.error as HttpError;
-          this.flash('error', error.message);
+          this.flash('error', this.translateError(err.code));
         }
       });
   }
@@ -417,9 +431,9 @@ export class ClientCategoriesComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       `${action} Category`,
-        message:     `Are you sure you want to ${action.toLowerCase()} "${category.name}"?`,
-        confirmText: action,
+        title:       this.translate.instant(`CONFIRMATION.${action.toUpperCase()}_CATEGORY_TITLE`),
+        message:     this.translate.instant(`CONFIRMATION.${action.toUpperCase()}_CATEGORY`, { name: category.name }),
+        confirmText: this.translate.instant(`COMMON.${action.toUpperCase()}`),
         showCancel:  true,
         icon:        category.isActive ? 'toggle_off' : 'toggle_on',
         iconColor:   category.isActive ? 'warning' : 'success',
@@ -436,11 +450,11 @@ export class ClientCategoriesComponent implements OnInit {
 
         call.subscribe({
           next: (updated) => {
-            this.flash('success', `Category "${category.name}" ${action.toLowerCase()}d successfully.`);
+            this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_ACTIVATED'));
             if (this.selectedCategory?.id === category.id) this.selectedCategory = updated;
             this.reload();
           },
-          error: () => this.flash('error', `Failed to ${action.toLowerCase()} category.`),
+          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
         });
       });
   }
