@@ -51,6 +51,7 @@ public class InvoiceCacheService : IInvoiceCacheService
     {
         var invoiceCache = InvoiceCache.From(dto);
         await _invoiceCacheRepository.AddAsync(invoiceCache);
+        await _invoiceCacheRepository.SaveChangesAsync();
     }
 
     public async Task<PagedResultDto<InvoiceEventDto>> GetPagedAsync(int pageNumber, int pageSize, string? search = null)
@@ -94,6 +95,8 @@ public class InvoiceCacheService : IInvoiceCacheService
             }
 
             await _invoiceCacheRepository.AddAsync(InvoiceCache.From(dto));
+            await _invoiceCacheRepository.SaveChangesAsync();
+
 
             _logger.LogInformation(
                 "Created invoice cache for Id: {InvoiceId}, InvoiceNumber: {InvoiceNumber}.",
@@ -121,7 +124,9 @@ public class InvoiceCacheService : IInvoiceCacheService
         }
 
         existing.MarkCancelled();
-        await _invoiceCacheRepository.SaveChangesAsync(existing);  // ← let it throw on failure
+        
+        await _invoiceCacheRepository.UpdateAsync(existing);
+        await _invoiceCacheRepository.SaveChangesAsync();
 
         _logger.LogInformation(
             "Invoice {InvoiceId} marked CANCELLED in cache.", dto.Id);
