@@ -27,22 +27,14 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
     public async Task<ClientCategoryResponseDto?> GetByIdAsync(Guid id)
     {
-        try
-        {
+
             CategoryCache? category = await _repository.GetByIdAsync(id);
             return category != null ? await MapToDto(category) : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting client category by ID {CategoryId}", id);
-            throw;
-        }
     }
 
     public async Task<List<ClientCategoryResponseDto>> GetByClientIdAsync(Guid clientId)
     {
-        try
-        {
+
             List<CategoryCache> categories = await _repository.GetByClientIdAsync(clientId);
             List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
             foreach (CategoryCache category in categories)
@@ -50,18 +42,11 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
                 categoryDtos.Add(await MapToDto(category));
             }
             return categoryDtos;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting categories for client {ClientId}", clientId);
-            throw;
-        }
     }
 
     public async Task<List<ClientCategoryResponseDto>> GetAllAsync()
     {
-        try
-        {
+
             List<CategoryCache> categories = await _repository.GetAllAsync();
             List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
             foreach (CategoryCache category in categories)
@@ -69,52 +54,23 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
                 categoryDtos.Add(await MapToDto(category));
             }
             return categoryDtos;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all client categories");
-            throw;
-        }
     }
 
     public async Task<bool> ExistsAsync(Guid id)
     {
-        try
-        {
+
             return await _repository.ExistsAsync(id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking existence for category {CategoryId}", id);
-            throw;
-        }
     }
 
     public async Task<bool> ExistsForClientAsync(Guid clientId, Guid categoryID)
     {
-        try
-        {
+
             return await _repository.ExistsForClientAsync(clientId, categoryID);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking category {CategoryId} for client {ClientId}",
-                categoryID, clientId);
-            throw;
-        }
     }
 
     public async Task<int> GetCountForClientAsync(Guid clientId)
     {
-        try
-        {
             return await _repository.GetCountForClientAsync(clientId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting category count for client {ClientId}", clientId);
-            throw;
-        }
     }
 
     // =========================
@@ -175,26 +131,19 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        try
+        CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
-                return;
-            }
-
-            await _repository.DeleteCategoryAsync(dto.Id);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
-                existing.Name, existing.Code);
+            _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing deleted category {CategoryId}", dto.Id);
-            throw;
-        }
+
+        existing.Delete();
+        await _repository.UpdateAsync(existing);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
+            existing.Name, existing.Code);
     }
 
     public async Task SyncRestoredAsync(ClientCategoryResponseDto dto)
@@ -212,7 +161,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             }
 
             existing.Restore();
-            await _repository.UpdateCategoryAsync(existing);
+            await _repository.UpdateAsync(existing);
             await _repository.SaveChangesAsync();
 
             _logger.LogInformation("Category {CategoryName} (Code: {Code}) restored",
@@ -297,34 +246,26 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         if (!dtoList.Any())
             return;
 
-        try
+        // Check if client exists
+        bool clientExists = await _clientRepository.ExistsAsync(clientId);
+        if (!clientExists)
         {
-            // Check if client exists
-            bool clientExists = await _clientRepository.ExistsAsync(clientId);
-            if (!clientExists)
-            {
-                _logger.LogWarning("Client {ClientId} not found when adding categories. Skipping.", clientId);
-                return;
-            }
-
-            foreach (ClientCategoryResponseDto? dto in dtoList)
-            {
-                // Sync category master data first
-                await SyncCreatedAsync(dto);
-
-                // Then assign to client
-                await AssignCategoryToClientAsync(clientId, dto.Id);
-            }
-
-            await _repository.SaveChangesAsync();
-            _logger.LogInformation("Synced {Count} categories for client {ClientId}",
-                dtoList.Count, clientId);
+            _logger.LogWarning("Client {ClientId} not found when adding categories. Skipping.", clientId);
+            return;
         }
-        catch (Exception ex)
+
+        foreach (ClientCategoryResponseDto? dto in dtoList)
         {
-            _logger.LogError(ex, "Error syncing range of categories for client {ClientId}", clientId);
-            throw;
+            // Sync category master data first
+            await SyncCreatedAsync(dto);
+
+            // Then assign to client
+            await AssignCategoryToClientAsync(clientId, dto.Id);
         }
+
+        await _repository.SaveChangesAsync();
+        _logger.LogInformation("Synced {Count} categories for client {ClientId}",
+            dtoList.Count, clientId);
     }
 
     public async Task SyncDeletedForClientAsync(Guid clientId)
