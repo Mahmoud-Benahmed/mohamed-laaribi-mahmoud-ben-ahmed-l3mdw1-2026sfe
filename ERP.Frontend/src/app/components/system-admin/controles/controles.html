@@ -3,8 +3,8 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'CONTROLES.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'CONTROLES.TITLE_LIST' | translate }}</h1>
+      <p class="breadcrumb">{{ `${templateTranslationKey}breadcrumb` | translate }}</p>
+      <h1 class="page-title">{{ `${templateTranslationKey}title_list` | translate }}</h1>
     </div>
   </div>
 
@@ -45,13 +45,13 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'CONTROLES.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="`${templateTranslationKey}search_placeholder` | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_CONTROLE)">
-        + {{ 'CONTROLES.ADD_BUTTON' | translate }}
+        + {{ 'common.add' | translate }}
       </button>
     </div>
 
@@ -62,7 +62,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('category')" class="th--sortable">
-                {{ 'CONTROLES.TABLE.CATEGORY' | translate }}
+                {{ `${templateTranslationKey}table.head.category` | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'category' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -75,7 +75,7 @@
                 </span>
               </th>
               <th (click)="sortBy('libelle')" class="th--sortable">
-                {{ 'CONTROLES.TABLE.LIBELLE' | translate }}
+                {{ `${templateTranslationKey}table.head.libelle` | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'libelle' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -87,8 +87,8 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'CONTROLES.TABLE.DESCRIPTION' | translate }}</th>
-              <th>{{ 'CONTROLES.TABLE.ACTIONS' | translate }}</th>
+              <th>{{ `${templateTranslationKey}table.head.description` | translate }}</th>
+              <th>{{ `${templateTranslationKey}table.head.actions` | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,21 +99,21 @@
               <td class="td--name">{{ controle.libelle }}</td>
               <td class="td--description">{{ controle.description }}</td>
               <td class="td--actions">
-                <button class="icon-btn icon-btn--view" (click)="openView(controle)" [title]="'COMMON.VIEW' | translate">
+                <button class="icon-btn icon-btn--view" (click)="openView(controle)" [title]="`common.view` | translate">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--edit" (click)="openEdit(controle)" [title]="'COMMON.EDIT' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_CONTROLE)">
+                <button class="icon-btn icon-btn--edit" (click)="openEdit(controle)" [title]="`common.edit` | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_CONTROLE)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--delete" (click)="delete(controle)" [title]="'COMMON.DELETE' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_CONTROLE)">
+                <button class="icon-btn icon-btn--delete" (click)="delete(controle)" [title]="`common.delete` | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_CONTROLE)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
@@ -146,21 +146,21 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="viewMode === 'view' && selectedControle">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'CONTROLES.TITLE_DETAILS' | translate }}</h2>
+      <h2 class="panel__title">{{ `${templateTranslationKey}title_details` | translate }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'CONTROLES.TABLE.CATEGORY' | translate }}</span>
+          <span class="detail-label">{{ `${templateTranslationKey}table.head.category` | translate }}</span>
           <span class="detail-value">{{ selectedControle.category }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CONTROLES.TABLE.LIBELLE' | translate }}</span>
+          <span class="detail-label">{{ `${templateTranslationKey}table.head.libelle` | translate }}</span>
           <span class="detail-value">{{ selectedControle.libelle }}</span>
         </div>
         <div class="detail-item detail-item--full">
-          <span class="detail-label">{{ 'CONTROLES.TABLE.DESCRIPTION' | translate }}</span>
+          <span class="detail-label">{{ `${templateTranslationKey}table.head.description` | translate }}</span>
           <span class="detail-value">{{ selectedControle.description }}</span>
         </div>
         <div class="detail-item">
@@ -178,7 +178,7 @@
   <!-- ===================== FORM PANEL ===================== -->
   <div class="panel" *ngIf="viewMode === 'create' || viewMode === 'edit'">
     <div class="panel__header">
-      <h2 class="panel__title">{{ viewMode === 'create' ? ('CONTROLES.TITLE_ADD' | translate) : ('CONTROLES.TITLE_EDIT' | translate) }}</h2>
+      <h2 class="panel__title">{{ viewMode === 'create' ? (`${templateTranslationKey}title_add` | translate) : (`${templateTranslationKey}title_edit` | translate) }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
@@ -188,14 +188,14 @@
           <!-- Category -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CONTROLES.FORM.CATEGORY' | translate }}</label>
+              <label>{{ `${templateTranslationKey}form.category` | translate }}</label>
               <mat-icon>folder_open</mat-icon>
             </div>
             <input
               class="form__input"
               type="text"
               formControlName="category"
-              [placeholder]="'CONTROLES.FORM.CATEGORY_PLACEHOLDER' | translate"
+              [placeholder]="`${templateTranslationKey}form.category_placeholder` | translate"
               [class.form__input--error]="controleForm.get('category')?.invalid && controleForm.get('category')?.touched"
             />
             <span class="form__error"
@@ -207,14 +207,14 @@
           <!-- Libelle -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CONTROLES.FORM.LIBELLE' | translate }}</label>
+              <label>{{ `${templateTranslationKey}form.libelle` | translate }}</label>
               <mat-icon>new_label</mat-icon>
             </div>
             <input
               class="form__input"
               type="text"
               formControlName="libelle"
-              [placeholder]="'CONTROLES.FORM.LIBELLE_PLACEHOLDER' | translate"
+              [placeholder]="`${templateTranslationKey}form.libelle_placeholder` | translate"
               [class.form__input--error]="controleForm.get('libelle')?.invalid && controleForm.get('libelle')?.touched"
             />
             <span class="form__error"
@@ -227,13 +227,13 @@
         <!-- Description -->
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'CONTROLES.FORM.DESCRIPTION' | translate }}</label>
+            <label>{{ `${templateTranslationKey}form.description` | translate }}</label>
             <mat-icon>description</mat-icon>
           </div>
           <textarea
             class="form__input form__textarea"
             formControlName="description"
-            [placeholder]="'CONTROLES.FORM.DESCRIPTION_PLACEHOLDER' | translate"
+            [placeholder]="`${templateTranslationKey}form.description_placeholder` | translate"
             rows="4"
             [class.form__input--error]="controleForm.get('description')?.invalid && controleForm.get('description')?.touched"
           ></textarea>
@@ -246,7 +246,7 @@
         <div class="form__actions">
           <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="controleForm.invalid">
-            {{ viewMode === 'create' ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
+            {{ viewMode === 'create' ? ('common.add' | translate) : ('common.save' | translate) }}
           </button>
         </div>
 

@@ -13,6 +13,7 @@ import { PaginationComponent } from '../../pagination/pagination';
 import { ControleResponseDto } from '../../../interfaces/AuthDto';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type ViewMode = 'list' | 'create' | 'edit' | 'view';
 
@@ -52,6 +53,11 @@ export class ControleComponent implements OnInit {
   searchQuery = '';
 
   controleForm: FormGroup;
+
+  readonly templateTranslationKey= `auth.controles.`;
+  readonly responseSuccessTranslationKey="auth.responses.success.";
+  readonly confirmationsTranslationKey="auth.confirmations.";
+
 
   readonly PRIVILEGES = PRIVILEGES;
 
@@ -133,10 +139,10 @@ export class ControleComponent implements OnInit {
         this.loading = false;
         this.cdr.markForCheck();
       },
-      error: () => {
-        this.flash('error', this.translate.instant('CONTROLES.ERRORS.LOAD_FAILED'));
-        this.loading = false;
-      },
+      error: (err: HttpErrorResponse) => {
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+        this.flash('error', errorMessage);
+      }
     });
   }
 
@@ -185,35 +191,36 @@ export class ControleComponent implements OnInit {
         next: () => {
           this.reload();
           this.cancel();
-          this.flash('success', this.translate.instant('SUCCESS.CONTROLE_CREATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_created`, { name: val.libelle }));
         },
-        error: (error) => {
-          const err = error.error as HttpError;
-          this.flash('error', err?.message ?? this.translate.instant('CONTROLES.ERRORS.CREATE_FAILED'));
-        },
+        error: (err: HttpErrorResponse) => {
+          const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+          this.flash('error', errorMessage);
+        }
       });
     } else if (this.viewMode === 'edit' && this.selectedControle) {
       this.controleService.update(this.selectedControle.id, val).subscribe({
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.CONTROLE_UPDATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_updated`, { name: val.libelle }));
         },
-        error: (error) => {
-          const err = error.error as HttpError;
-          this.flash('error', err?.message ?? this.translate.instant('CONTROLES.ERRORS.UPDATE_FAILED'));
-        },
+        error: (err: HttpErrorResponse) => {
+          const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+          this.flash('error', errorMessage);
+        }
       });
     }
   }
 
   delete(controle: ControleResponseDto): void {
+    const prefix=`auth.confirmations.delete_controle`;
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.DELETE_CONTROLE_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.DELETE_CONTROLE', { name: controle.libelle }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title:       this.translate.instant(`${prefix}.title`),
+        message:     this.translate.instant(`${prefix}.message`, { name: controle.libelle }),
+        confirmText: this.translate.instant(`${prefix}.confirm_text`),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -227,11 +234,13 @@ export class ControleComponent implements OnInit {
         this.controleService.delete(controle.id).subscribe({
           next: () => {
             if (this.viewMode === 'view') this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.CONTROLE_DELETED', { name: controle.libelle }));
+            this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_deleted`, { name: controle.libelle }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('CONTROLES.ERRORS.DELETE_FAILED', { name: controle.libelle })),
-        });
+          error: (err: HttpErrorResponse) => {
+            const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+            this.flash('error', errorMessage);
+          }        });
       });
   }
 
