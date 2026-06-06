@@ -22,6 +22,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-deleted',
@@ -83,6 +84,11 @@ export class DeletedUsersComponent implements OnInit {
 
   readonly PRIVILEGES = PRIVILEGES;
 
+  readonly templateTranslationKey="auth.deleted.";
+  readonly responseSuccessTranslationKey="auth.responses.success.";
+  readonly confirmationsTranslationKey="auth.confirmations.";
+
+
   constructor(
     private cdr: ChangeDetectorRef,
     public authService: AuthService,
@@ -93,13 +99,9 @@ export class DeletedUsersComponent implements OnInit {
     this.reload();
   }
 
-  // ── Page title ────────────────────────────────────────────────────────────
-
   get pageTitle(): string {
-    return this.translate.instant('USERS.TITLE_DELETED');
+    return this.translate.instant(`${this.templateTranslationKey}title`);
   }
-
-  // ── Stats ─────────────────────────────────────────────────────────────────
 
   get activeUsers(): number { return this.stats?.activeUsers ?? 0; }
   get deactivatedUsers(): number { return this.stats?.deactivatedUsers ?? 0; }
@@ -117,7 +119,7 @@ export class DeletedUsersComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('USERS.ERRORS.LOAD_DELETED_FAILED'));
+        this.flash('error', this.translate.instant(`${this.templateTranslationKey}responses.errors.load_deleted_failed`));
       },
     });
   }
@@ -127,7 +129,7 @@ export class DeletedUsersComponent implements OnInit {
       next: (result) => this.stats = result,
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('USERS.ERRORS.LOAD_STATS_FAILED'));
+        this.flash('error', this.translate.instant(`${this.templateTranslationKey}responses.errors.load_stats_failed`));
       }
     });
   }
@@ -185,12 +187,13 @@ export class DeletedUsersComponent implements OnInit {
   }
 
   restore(user: AuthUserGetResponseDto): void {
+    const prefix=`${this.confirmationsTranslationKey}restore_user`;
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('CONFIRMATION.RESTORE_USER_TITLE'),
-        message: this.translate.instant('CONFIRMATION.RESTORE_USER', { name: user.fullName ?? user.login }),
-        confirmText: this.translate.instant('COMMON.RESTORE'),
+        title: this.translate.instant(`${prefix}.title`),
+        message: this.translate.instant(`${prefix}.message`, { name: user.fullName ?? user.login }),
+        confirmText: this.translate.instant(`${prefix}.confirm_text`),
         showCancel: true,
         icon: 'restore_from_trash',
         iconColor: 'success',
@@ -203,10 +206,14 @@ export class DeletedUsersComponent implements OnInit {
         if (!result) return;
         this.authService.restore(user.id).subscribe({
           next: () => {
-            this.flash('success', this.translate.instant('SUCCESS.USER_RESTORED', { name: user.fullName ?? user.login }));
+            this.flash('success', this.translate.instant(`${this.templateTranslationKey}responses.success.user_restored`, { name: user.fullName ?? user.login }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('USERS.ERRORS.RESTORE_FAILED'))
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+            this.flash('error', errorMessage);
+          }
         });
       });
   }
