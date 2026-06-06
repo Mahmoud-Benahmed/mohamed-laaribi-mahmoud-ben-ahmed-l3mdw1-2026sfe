@@ -173,7 +173,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     if (this.clientsLoading) return;
     this.clientsLoading = true;
 
-    this.stock.getClientsPaged(page, this.clientPageSize, this.clientSearchQuery)
+    this.invoiceService.getClientsPaged(page, this.clientPageSize, this.clientSearchQuery)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -299,7 +299,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   getUnitTranslation(): string {
     const unit = this._selectedArticle?.unit;
     if (!unit) return '';
-    return this.translate.instant(`ARTICLES.UNIT.${unit.toUpperCase()}`);
+    return this.translate.instant(`UNIT.${unit.toUpperCase()}`);
   }
 
   getAvailableStock(articleId: string): number {
