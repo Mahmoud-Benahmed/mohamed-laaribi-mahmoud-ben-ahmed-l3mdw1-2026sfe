@@ -42,7 +42,6 @@ export class CreatePaymentModal implements OnInit{
   private readonly destroyRef = inject(DestroyRef);
   private cdr = inject(ChangeDetectorRef);
   private translate = inject(TranslateService);
-  private router = inject(Location);
 
   form!: FormGroup;
 
@@ -233,6 +232,7 @@ export class CreatePaymentModal implements OnInit{
           const unpaidClientIds = new Set(
             unpaidResult.items.map(inv => inv.clientId)
           );
+          console.log('unpaid result', unpaidResult, 'unpaidClientIds', unpaidClientIds);
 
           if (unpaidClientIds.size === 0) {
             // No unpaid invoices — no clients to show
@@ -248,7 +248,7 @@ export class CreatePaymentModal implements OnInit{
             map(clientResult => ({ ...clientResult, unpaidClientIds }))
           );
         }),
-        takeUntilDestroyed(this.destroyRef)
+        take(1)
       )
       .subscribe({
         next: ({ items, totalCount, unpaidClientIds }) => {
@@ -259,10 +259,9 @@ export class CreatePaymentModal implements OnInit{
           this.hasMoreClients = this.clients.length < totalCount;
           this.clientsLoading = false;
 
-          // Auto-select first client only on create
           if (!append && this.mode === 'create' &&
               this.clients.length > 0 && !this.form?.get('clientId')?.value) {
-            this.selectClient(this.clients[0]);
+            setTimeout(() => this.selectClient(this.clients[0])); // ← defers past CD
           }
 
           this.cdr.markForCheck();
@@ -371,6 +370,21 @@ export class CreatePaymentModal implements OnInit{
       this.allocations.removeAt(index);
       this.onAllocatedAmountChange(); // ← recalculate total after removal
     }
+  }
+
+  completeLine(index: number): void {
+    if (index < 0 || index >= this.allocations.length) return;
+
+    const line = this.getAllocationLine(index);
+    const invoiceId = line.get('invoiceId')?.value;
+    if (!invoiceId) return;
+
+    const invoice = this.invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) return;
+
+    line.patchValue({ allocatedAmount: invoice.remainingAmount });
+    this.onAllocatedAmountChange();
+    this.cdr.markForCheck();
   }
 
   onAllocatedAmountChange(): void {
