@@ -69,11 +69,14 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(t => t.Name)
             .IsRequired()
-            .HasMaxLength(150); 
-        
+            .HasMaxLength(150);
+
         builder.Property(t => t.Email)
             .IsRequired()
             .HasMaxLength(200);
+
+        builder.HasIndex(t => t.Email)
+            .IsUnique();
 
         builder.Property(t => t.Phone)
             .IsRequired()
