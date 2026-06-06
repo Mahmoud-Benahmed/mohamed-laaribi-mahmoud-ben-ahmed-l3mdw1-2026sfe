@@ -337,7 +337,7 @@ export class ArticleComponent implements OnInit {
         next: () => {
           this.reload();
           this.cancel();
-          this.flash('success', this.translate.instant('SUCCESS.ARTICLE_CREATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant('ARTICLES.SUCCESS.ARTICLE_CREATED', { name: val.libelle }));
         },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
@@ -355,7 +355,7 @@ export class ArticleComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.ARTICLE_UPDATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant('ARTICLES.SUCCESS.ARTICLE_UPDATED', { name: val.libelle }));
         },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
@@ -382,7 +382,7 @@ export class ArticleComponent implements OnInit {
         this.articleService.delete(article.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.ARTICLE_DELETED', { name: article.libelle }));
+            this.flash('success', this.translate.instant('ARTICLES.SUCCESS.ARTICLE_DELETED', { name: article.libelle }));
             this.reload();
           },
           error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
@@ -393,7 +393,7 @@ export class ArticleComponent implements OnInit {
   restore(article: ArticleResponseDto): void {
     this.articleService.restore(article.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.ARTICLE_RESTORED', { name: article.libelle }));
+        this.flash('success', this.translate.instant('ARTICLES.SUCCESS.ARTICLE_RESTORED', { name: article.libelle }));
         this.reload();
         if (this.isView()) this.cancel();
       },
