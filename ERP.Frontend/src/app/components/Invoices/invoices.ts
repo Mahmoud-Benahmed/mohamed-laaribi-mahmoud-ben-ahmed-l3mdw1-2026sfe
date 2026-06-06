@@ -306,7 +306,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         title: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_TITLE'),
         message: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_MESSAGE', { number: invoice.invoiceNumber }),
         confirmText: this.translate.instant('INVOICES.DIALOG.DELETE_CONFIRM'),
-        cancelText: this.translate.instant('COMMON.CANCEL'),
+        cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
