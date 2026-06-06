@@ -171,7 +171,7 @@
                 </ng-template>
               </td>
 
-              <td class="text-center">
+              <td>
                 <span class="role-badge role-badge--clickable"
                       [routerLink]="['/invoices', refund.invoiceId]"
                       style="cursor:pointer">
@@ -179,15 +179,15 @@
                 </span>
               </td>
 
-              <td class="text-center">
+              <td>
                 <span class="badge" [ngClass]="statusClass(refund.status)">
                   {{ 'REFUNDS.STATUS.' + refund.status | translate }}
                 </span>
               </td>
 
-              <td class="text-center">{{ refund.lines.length }}</td>
+              <td>{{ refund.lines.length }}</td>
 
-              <td class="td--price text-center">
+              <td class="td--price">
                 {{ getTotalRefundAmount(refund) | number:'1.2-2' }} TND
               </td>
 
