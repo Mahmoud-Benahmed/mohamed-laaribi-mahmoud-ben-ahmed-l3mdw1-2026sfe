@@ -161,18 +161,18 @@ export class LoginComponent implements OnInit, OnDestroy {
       : translatedMsg;
 
     // Determine dialog title based on error type
-    let titleKey = 'DIALOG.ACCESS_DENIED';
-    if (code === 'SERVER_UNREACHABLE') titleKey = 'DIALOG.SERVER_UNREACHABLE';
-    if (code === 'RATE_LIMIT') titleKey = 'DIALOG.RATE_LIMIT';
-    if (code === 'AUTH_003') titleKey = 'DIALOG.ACCOUNT_DEACTIVATED';
-    if (code === 'AUTH_019') titleKey = 'DIALOG.SESSION_EXPIRED';
+    let titleKey = 'auth.responses.errors.AUTH_006';
+    if (code === 'SERVER_UNREACHABLE') titleKey = 'auth.responses.errors.SERVER_UNREACHABLE';
+    if (code === 'RATE_LIMIT')         titleKey = 'auth.responses.errors.RATE_LIMIT';
+    if (code === 'AUTH_003')           titleKey = 'auth.responses.errors.AUTH_003';
+    if (code === 'AUTH_019')           titleKey = 'auth.responses.errors.AUTH_019';
 
     this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
         title:       this.translate.instant(titleKey),
         message:     displayMessage,
-        confirmText: this.translate.instant('DIALOG.OK'),
+        confirmText: this.translate.instant('common.ok'),
         showCancel:  false,
         icon:        'dangerous',
         iconColor:   'danger'
