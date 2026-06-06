@@ -355,7 +355,7 @@ export class FournisseurComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.FOURNISSEUR_CREATED', { name: val.name }));
+          this.flash('success', this.translate.instant('STOCK.FOURNISSEURS.SUCCESS.FOURNISSEUR_CREATED', { name: val.name }));
         },
         error: (err) => {
           const error = err.error as HttpError;
@@ -376,7 +376,7 @@ export class FournisseurComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.FOURNISSEUR_UPDATED', { name: val.name }));
+          this.flash('success', this.translate.instant('STOCK.FOURNISSEURS.SUCCESS.FOURNISSEUR_UPDATED', { name: val.name }));
         },
         error: (err) => {
           const error = err.error as HttpError;
@@ -408,7 +408,7 @@ export class FournisseurComponent implements OnInit {
           next: () => {
             if (this.isView()) this.cancel();
             this.reload();
-            this.flash('success', this.translate.instant('SUCCESS.FOURNISSEUR_DELETED', { name: fournisseur.name }));
+            this.flash('success', this.translate.instant('STOCK.FOURNISSEURS.SUCCESS.FOURNISSEUR_DELETED', { name: fournisseur.name }));
           },
           error: (err) => {
             const error = err.error as HttpError;
@@ -421,7 +421,7 @@ export class FournisseurComponent implements OnInit {
   restore(id: string): void {
     this.service.restoreFournisseur(id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.FOURNISSEUR_RESTORED'));
+        this.flash('success', this.translate.instant('STOCK.FOURNISSEURS.SUCCESS.FOURNISSEUR_RESTORED'));
         this.reload();
       },
       error: (err) => {
@@ -453,7 +453,7 @@ export class FournisseurComponent implements OnInit {
         if (!result) return;
         this.service.toggleBlock(fournisseur).subscribe({
           next: (updated) => {
-            this.flash('success', this.translate.instant(`SUCCESS.FOURNISSEUR_${actionKey}ED`, { name: fournisseur.name }));
+            this.flash('success', this.translate.instant(`STOCK.FOURNISSEURS.SUCCESS.FOURNISSEUR_${actionKey}ED`, { name: fournisseur.name }));
             if (this.selectedFournisseur?.id === fournisseur.id) this.selectedFournisseur = updated;
             this.reload();
           },
