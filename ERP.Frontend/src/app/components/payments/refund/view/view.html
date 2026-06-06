@@ -205,14 +205,14 @@
                   </ng-template>
                 </td>
 
-                <td class="date-cell text-center">
+                <td class="date-cell">
                   <span *ngIf="getPaymentForLine(line) as payment">
                     {{ payment.paymentDate | date:'dd/MM/yyyy' }}
                   </span>
                   <span *ngIf="!getPaymentForLine(line)" class="text-muted">—</span>
                 </td>
 
-                <td class="text-center">
+                <td>
                   <span *ngIf="getPaymentForLine(line) as payment">
                     <span class="badge badge--blue">
                       {{ 'PAYMENTS.METHOD.' + payment.method | translate }}
@@ -221,11 +221,11 @@
                   <span *ngIf="!getPaymentForLine(line)" class="text-muted">—</span>
                 </td>
 
-                <td class="td--price text-center">
+                <td class="td--price">
                   {{ line.amount | number:'1.2-2' }} TND
                 </td>
 
-                <td class="text-center">
+                <td>
                   <button class="icon-btn icon-btn--view"
                           [matTooltip]="'REFUNDS.VIEW.TABLE.VIEW_PAYMENT' | translate"
                           [routerLink]="['/payments', line.paymentId]">
