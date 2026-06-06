@@ -70,13 +70,12 @@ public interface IClientCategoryCacheRepository
     // Write operations - Master data
     Task AddCategoryAsync(Domain.LocalCache.Client.CategoryCache category);
     Task AddRangeCategoriesAsync(IEnumerable<Domain.LocalCache.Client.CategoryCache> categories);
-    Task UpdateCategoryAsync(Domain.LocalCache.Client.CategoryCache category);
-    Task DeleteCategoryAsync(Guid id);
+    Task UpdateAsync(Domain.LocalCache.Client.CategoryCache category);
+    Task DeleteAsync(CategoryCache category);
     Task DeleteAllCategoriesForClientAsync(Guid clientId);
 
     // Save changes
     Task SaveChangesAsync();
-    Task DeleteAsync(Domain.LocalCache.Client.CategoryCache category);
 }
 
 public interface IFournisseurCacheRepository
