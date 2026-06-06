@@ -3,8 +3,8 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'ROLES.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'ROLES.TITLE_LIST' | translate }}</h1>
+      <p class="breadcrumb">{{ `${templateTranslationKey}breadcrumb` | translate }}</p>
+      <h1 class="page-title">{{ `${templateTranslationKey}title_list` | translate }}</h1>
     </div>
   </div>
 
@@ -45,13 +45,13 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'ROLES.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="`${templateTranslationKey}search_placeholder` | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_ROLE)">
-        + {{ 'ROLES.ADD_BUTTON' | translate }}
+        + {{ 'common.add' | translate }}
       </button>
     </div>
 
@@ -62,7 +62,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('libelle')" class="th--sortable">
-                {{ 'ROLES.TABLE.LIBELLE' | translate }}
+                {{ `${templateTranslationKey}table.head.libelle` | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'libelle' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -74,8 +74,8 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'ROLES.TABLE.ID' | translate }}</th>
-              <th>{{ 'ROLES.TABLE.ACTIONS' | translate }}</th>
+              <th>{{ `${templateTranslationKey}table.head.id` | translate }}</th>
+              <th>{{ `${templateTranslationKey}table.head.actions` | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -85,21 +85,21 @@
               </td>
               <td class="td--mono">{{ role.id }}</td>
               <td class="td--actions">
-                <button class="icon-btn icon-btn--view" (click)="openView(role)" [title]="'COMMON.VIEW' | translate">
+                <button class="icon-btn icon-btn--view" (click)="openView(role)" [title]="'common.view' | translate">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--edit" (click)="openEdit(role)" [title]="'COMMON.EDIT' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_ROLE)">
+                <button class="icon-btn icon-btn--edit" (click)="openEdit(role)" [title]="'common.edit' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_ROLE)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--delete" (click)="delete(role)" [title]="'COMMON.DELETE' | translate"
+                <button class="icon-btn icon-btn--delete" (click)="delete(role)" [title]="'common.delete' | translate"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_ROLE)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" stroke-width="2">
@@ -112,44 +112,44 @@
               </td>
             </tr>
             <tr *ngIf="sortedData.length === 0">
-              <td colspan="3" class="td--empty">{{ 'COMMON.NO_RESULTS' | translate }}</td>
+              <td colspan="3" class="td--empty">{{ 'common.no_result' | translate }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- PAGINATION -->
-        <app-pagination
-          [pageNumber]="pageNumber()"
-          [totalPages]="totalPages"
-          [pageSize]="pageSize()"
-          [pageSizeOptions]="pageSizeOptions"
-          (pageChange)="pageNumber.set($event); reload()"
-          (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
-        </app-pagination>
+      <app-pagination
+        [pageNumber]="pageNumber()"
+        [totalPages]="totalPages"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="pageNumber.set($event); reload()"
+        (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+      </app-pagination>
     </div>
   </ng-container>
 
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="viewMode === 'view' && selectedRole">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'ROLES.TITLE_DETAILS' | translate }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ `${templateTranslationKey}title_details` | translate }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'ROLES.TABLE.LIBELLE' | translate }}</span>
+          <span class="detail-label">{{ `${templateTranslationKey}table.head.libelle` | translate }}</span>
           <span class="detail-value">{{ selectedRole.libelle }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'ROLES.TABLE.ID' | translate }}</span>
+          <span class="detail-label">{{ `${templateTranslationKey}table.head.id` | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedRole.id }}</span>
         </div>
       </div>
       <div class="panel__actions">
-        <button class="btn-secondary" (click)="openEdit(selectedRole)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_ROLE)">{{ 'COMMON.EDIT' | translate }}</button>
-        <button class="btn-danger" (click)="delete(selectedRole)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_ROLE)">{{ 'COMMON.DELETE' | translate }}</button>
+        <button class="btn-secondary" (click)="openEdit(selectedRole)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_ROLE)">{{ 'common.edit' | translate }}</button>
+        <button class="btn-danger" (click)="delete(selectedRole)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_ROLE)">{{ 'common.delete' | translate }}</button>
       </div>
     </div>
   </div>
@@ -157,8 +157,8 @@
   <!-- ===================== FORM PANEL ===================== -->
   <div class="panel" *ngIf="viewMode === 'create' || viewMode === 'edit'">
     <div class="panel__header">
-      <h2 class="panel__title">{{ viewMode === 'create' ? ('ROLES.TITLE_ADD' | translate) : ('ROLES.TITLE_EDIT' | translate) }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ viewMode === 'create' ? (`${templateTranslationKey}title_add` | translate) : (`${templateTranslationKey}title_edit` | translate) }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <form [formGroup]="roleForm" (ngSubmit)="submit()" class="form">
@@ -166,14 +166,14 @@
         <!-- Libelle -->
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'ROLES.FORM.LIBELLE' | translate }}</label>
+            <label>{{ `${templateTranslationKey}form.libelle` | translate }}</label>
             <mat-icon>badge</mat-icon>
           </div>
           <input
             class="form__input"
             type="text"
             formControlName="libelle"
-            [placeholder]="'ROLES.FORM.LIBELLE_PLACEHOLDER' | translate"
+            [placeholder]="`${templateTranslationKey}form.libelle_placeholder` | translate"
             [class.form__input--error]="roleForm.get('libelle')?.invalid && roleForm.get('libelle')?.touched"
           />
           <span class="form__error"
@@ -185,7 +185,7 @@
         <div class="form__actions">
           <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="roleForm.invalid">
-            {{ viewMode === 'create' ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
+            {{ viewMode === 'create' ? ('common.add' | translate) : ('common.save' | translate) }}
           </button>
         </div>
 

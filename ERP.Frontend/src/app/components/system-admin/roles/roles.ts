@@ -5,11 +5,11 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { MatIcon } from '@angular/material/icon';
 import { ModalComponent } from '../../modal/modal';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpError } from '../../../interfaces/HttpError';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PaginationComponent } from '../../pagination/pagination';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
-import { PagedResultDto, RoleResponseDto } from '../../../interfaces/AuthDto';
+import { RoleResponseDto } from '../../../interfaces/AuthDto';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -32,6 +32,11 @@ type ViewMode = 'list' | 'create' | 'edit' | 'view';
 export class RoleComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private translate = inject(TranslateService);
+
+  // Translation prefixes
+  readonly templateTranslationKey = 'auth.roles.';
+  readonly responseSuccessTranslationKey = 'auth.responses.success.';
+  readonly confirmationsTranslationKey = 'auth.confirmations.';
 
   dataSource = new MatTableDataSource<RoleResponseDto>([]);
 
@@ -70,20 +75,18 @@ export class RoleComponent implements OnInit {
     this.reload();
   }
 
-  // ── Page title ────────────────────────────────────────────────────────────
-
-  get pageTitle(): string {
-    if (this.viewMode === 'create') return 'ROLES.TITLE_ADD';
-    if (this.viewMode === 'edit') return 'ROLES.TITLE_EDIT';
-    if (this.viewMode === 'view') return 'ROLES.TITLE_DETAILS';
-    return 'ROLES.TITLE_LIST';
-  }
-
   // ── Pagination ────────────────────────────────────────────────────────────
 
   get totalPages(): number {
     return Math.ceil(this.totalCount / this.pageSize());
   }
+
+  onPageSizeChange(): void {
+    this.pageNumber.set(1);
+    this.reload();
+  }
+
+  // ── Search ────────────────────────────────────────────────────────────────
 
   applyFilter(): void {
     this.dataSource.filter = this.searchQuery.trim().toLowerCase();
@@ -119,7 +122,6 @@ export class RoleComponent implements OnInit {
       });
     }
 
-    // client-side pagination slice
     const start = (this.pageNumber() - 1) * this.pageSize();
     return filtered.slice(start, start + this.pageSize());
   }
@@ -136,8 +138,9 @@ export class RoleComponent implements OnInit {
         this.loading = false;
         this.cdr.markForCheck();
       },
-      error: () => {
-        this.flash('error', this.translate.instant('ROLES.ERRORS.LOAD_FAILED'));
+      error: (err: HttpErrorResponse) => {
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.errors.load_failed');
+        this.flash('error', errorMessage);
         this.loading = false;
       },
     });
@@ -185,11 +188,11 @@ export class RoleComponent implements OnInit {
         next: (role) => {
           this.reload();
           this.cancel();
-          this.flash('success', this.translate.instant('SUCCESS.ROLE_CREATED', { name: role.libelle }));
+          this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}role_created`, { name: role.libelle }));
         },
-        error: (error) => {
-          const err = error.error as HttpError;
-          this.flash('error', err?.message ?? this.translate.instant('ROLES.ERRORS.CREATE_FAILED'));
+        error: (err: HttpErrorResponse) => {
+          const errorMessage = err.error?.message || this.translate.instant('auth.responses.errors.create_failed');
+          this.flash('error', errorMessage);
         },
       });
     } else if (this.viewMode === 'edit' && this.selectedRole) {
@@ -198,41 +201,44 @@ export class RoleComponent implements OnInit {
         next: (role) => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.ROLE_UPDATED', { name: role.libelle }));
+          this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}role_updated`, { name: role.libelle }));
         },
-        error: (error) => {
-          const err = error.error as HttpError;
-          this.flash('error', err?.message ?? this.translate.instant('ROLES.ERRORS.UPDATE_FAILED'));
+        error: (err: HttpErrorResponse) => {
+          const errorMessage = err.error?.message || this.translate.instant('auth.responses.errors.update_failed');
+          this.flash('error', errorMessage);
         },
       });
     }
   }
 
   delete(role: RoleResponseDto): void {
+    const prefix = `${this.confirmationsTranslationKey}delete_role`;
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('CONFIRMATION.DELETE_ROLE_TITLE'),
-        message: this.translate.instant('CONFIRMATION.DELETE_ROLE', { name: role.libelle }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title: this.translate.instant(`${prefix}.title`),
+        message: this.translate.instant(`${prefix}.message`, { name: role.libelle }),
+        confirmText: this.translate.instant(`${prefix}.confirm_text`),
         showCancel: true,
         icon: 'auto_delete',
         iconColor: 'danger',
       },
     });
 
-    dialogRef
-      .afterClosed()
+    dialogRef.afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
         this.roleService.delete(role.id).subscribe({
           next: () => {
             if (this.viewMode === 'view') this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.ROLE_DELETED', { name: role.libelle }));
+            this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}role_deleted`, { name: role.libelle }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ROLES.ERRORS.DELETE_FAILED', { name: role.libelle })),
+          error: (err: HttpErrorResponse) => {
+            const errorMessage = err.error?.message || this.translate.instant('auth.responses.errors.delete_failed', { name: role.libelle });
+            this.flash('error', errorMessage);
+          },
         });
       });
   }
@@ -255,11 +261,6 @@ export class RoleComponent implements OnInit {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-
-  onPageSizeChange(): void {
-    this.pageNumber.set(1);
-    this.reload();
-  }
 
   trackById(_: number, r: RoleResponseDto): string {
     return r.id;
