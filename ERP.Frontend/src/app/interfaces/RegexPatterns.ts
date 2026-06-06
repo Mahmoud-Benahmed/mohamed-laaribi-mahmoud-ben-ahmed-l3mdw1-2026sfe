@@ -1,6 +1,7 @@
 export const RegexPatterns = {
 safeText    : /^[\p{L}0-9\s,.'\\-]+$/u,
 phone       : /^\+?\d{8,15}$/,
+email: /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
 alphaNumeric: /^[\p{L}0-9\s]+$/u,
 categoryCode : /^[\p{L}0-9_\-]+$/u,
 hexColor     : /^#[0-9a-fA-F]{6}$/,
