@@ -42,6 +42,10 @@ class PrivilegeRepository : BaseRepository<Privilege>, IPrivilegeRepository
     public async Task DeleteAsync(Guid id)
         => await _collection.DeleteOneAsync(WithTenant(x => x.Id == id));
 
+    public async Task DeleteByRoleIdAsync(Guid roleId)
+        => await _collection.DeleteManyAsync(
+            WithTenant(x => x.RoleId == roleId));
+
     public async Task DeleteAllAsync()
         => await _collection.DeleteManyAsync(TenantFilter);
 

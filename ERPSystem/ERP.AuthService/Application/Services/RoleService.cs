@@ -13,9 +13,14 @@ namespace ERP.AuthService.Application.Services
         private readonly IAuditLogger _auditLogger;
         private readonly IRoleRepository _roleRepository;
         private readonly ITenantContext _tenantContext;
+        private readonly IPrivilegeRepository _privilegeRepository;
 
-        public RoleService(IAuditLogger auditLogger, IRoleRepository roleRepository, ITenantContext tenantContext)
+        public RoleService(IAuditLogger auditLogger, 
+            IRoleRepository roleRepository, 
+            ITenantContext tenantContext,
+            IPrivilegeRepository privilegeRepo)
         {
+            _privilegeRepository = privilegeRepo;
             _auditLogger = auditLogger;
             _roleRepository = roleRepository;
             _tenantContext = tenantContext;
@@ -91,7 +96,10 @@ namespace ERP.AuthService.Application.Services
         public async Task DeleteAsync(Guid id, Guid performedById)
         {
             Role role = await _roleRepository.GetByIdAsync(id) ?? throw new RoleNotFoundException(id);
+            
+            await _privilegeRepository.DeleteByRoleIdAsync(id);
             await _roleRepository.DeleteAsync(id);
+         
             await _auditLogger.LogAsync(
                     AuditAction.RoleDeleted,
                     success: true,

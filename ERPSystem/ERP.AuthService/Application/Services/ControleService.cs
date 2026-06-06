@@ -12,10 +12,13 @@ namespace ERP.AuthService.Application.Services
     {
         private readonly IAuditLogger _auditLogger;
         private readonly IControleRepository _controleRepository;
+        private readonly IPrivilegeRepository _privilegeRepository;
 
         public ControleService(IAuditLogger auditLogger,
-                                IControleRepository controleRepository)
+                                IControleRepository controleRepository,
+                                IPrivilegeRepository privilegeRepository)
         {
+            _privilegeRepository = privilegeRepository;
             _auditLogger = auditLogger;
             _controleRepository = controleRepository;
         }
@@ -123,6 +126,8 @@ namespace ERP.AuthService.Application.Services
         {
             Controle existing = await _controleRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Controle with ID '{id}' was not found.");
 
+
+            await _privilegeRepository.DeleteByControleIdAsync(id);
             await _controleRepository.DeleteAsync(id);
 
             await _auditLogger.LogAsync(
