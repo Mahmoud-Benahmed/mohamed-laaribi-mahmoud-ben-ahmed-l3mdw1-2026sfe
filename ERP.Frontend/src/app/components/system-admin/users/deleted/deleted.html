@@ -189,13 +189,13 @@
 
           <td>
             <span class="date-cell">
-              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : (`${templateTranslationKey}table.body.no_login` | translate) }}
+              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : ('common.no_login' | translate) }}
             </span>
           </td>
 
           <td class="td--actions">
             <button class="icon-btn icon-btn--view"
-                    [title]="`${templateTranslationKey}buttons.table.view` | translate"
+                    [title]="`common.view` | translate"
                     [routerLink]="['/users', user.id]"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -203,7 +203,7 @@
               </svg>
             </button>
             <button class="icon-btn icon-btn--reactivate"
-                    [title]="`${templateTranslationKey}buttons.table.restore` | translate"
+                    [title]="`common.restore` | translate"
                     (click)="restore(user)"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -217,7 +217,7 @@
 
         <tr *ngIf="sortedData.length === 0">
           <td colspan="6" class="td--empty">
-            {{ `${templateTranslationKey}table.body.no_result` | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
+            {{ 'common.no_result' | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
           </td>
         </tr>
       </tbody>

@@ -117,19 +117,21 @@ export class DeletedUsersComponent implements OnInit {
         this.isLoading = false;
         this.loadStats();
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant(`${this.templateTranslationKey}responses.errors.load_deleted_failed`));
-      },
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+        this.flash('error', errorMessage);
+      }
     });
   }
 
   loadStats(): void {
     this.authService.getStats().subscribe({
       next: (result) => this.stats = result,
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant(`${this.templateTranslationKey}responses.errors.load_stats_failed`));
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+        this.flash('error', errorMessage);
       }
     });
   }

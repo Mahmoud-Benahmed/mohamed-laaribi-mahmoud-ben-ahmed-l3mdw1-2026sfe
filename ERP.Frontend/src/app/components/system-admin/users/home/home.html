@@ -84,7 +84,7 @@
     </div>
     <button class="btn-add" (click)="goToRegister()"
             *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_USER)">
-      + {{ `${templateTranslationKey}buttons.add` | translate }}
+      + {{ 'common.add' | translate }}
     </button>
   </div>
 
@@ -165,12 +165,12 @@
             <td><span class="role-badge">{{ user.roleName }}</span></td>
             <td>
               <span class="date-cell">
-                {{ user.lastLoginAt && user.isActive ? (user.lastLoginAt | date:'dd MMM yyyy') : (`${templateTranslationKey}table.body.no_login` | translate) }}
+                {{ user.lastLoginAt && user.isActive ? (user.lastLoginAt | date:'dd MMM yyyy') : ('common.no_login' | translate) }}
               </span>
             </td>
             <td class="td--actions">
               <!-- View button -->
-              <button class="icon-btn icon-btn--view" [title]="`${templateTranslationKey}buttons.table.view` | translate"
+              <button class="icon-btn icon-btn--view" [title]="`common.view` | translate"
                       (click)="goToProfile(user.id)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,7 +179,7 @@
               </button>
 
               <!-- Deactivate button -->
-              <button class="icon-btn icon-btn--deactivate" [title]="`${templateTranslationKey}buttons.table.deactivate` | translate"
+              <button class="icon-btn icon-btn--deactivate" [title]="`common.deactivate` | translate"
                       (click)="deactivateUser(user)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) && user.id !== currentUserId">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -188,7 +188,7 @@
               </button>
 
               <!-- Delete button (only one, not duplicated) -->
-              <button class="icon-btn icon-btn--delete" [title]="`${templateTranslationKey}buttons.table.delete` | translate"
+              <button class="icon-btn icon-btn--delete" [title]="`common.delete` | translate"
                       (click)="softDeleteUser(user)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_USER) && user.id !== currentUserId">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -203,7 +203,7 @@
 
           <tr *ngIf="sortedData.length === 0">
             <td colspan="5" class="td--empty">
-              {{ `${templateTranslationKey}table.body.no_result` | translate }}{{ searchTerm ? ' "' + searchTerm + '"' : '' }}
+              {{ 'common.no_result' | translate }}{{ searchTerm ? ' "' + searchTerm + '"' : '' }}
             </td>
           </tr>
         </tbody>
