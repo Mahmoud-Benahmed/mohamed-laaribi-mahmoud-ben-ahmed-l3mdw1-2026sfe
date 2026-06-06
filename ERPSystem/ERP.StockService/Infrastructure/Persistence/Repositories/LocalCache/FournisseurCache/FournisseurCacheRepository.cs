@@ -1,4 +1,5 @@
 ﻿using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Application.Services;
 using ERP.StockService.Domain.LocalCache.Fournisseur;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,13 +9,16 @@ public class FournisseurCacheRepository : IFournisseurCacheRepository
 {
     private readonly StockDbContext _dbContext;
     private readonly ILogger<FournisseurCacheRepository> _logger;
+    private readonly ITenantContext _tenantContext;
 
     public FournisseurCacheRepository(
         StockDbContext dbContext,
-        ILogger<FournisseurCacheRepository> logger)
+        ILogger<FournisseurCacheRepository> logger,
+        ITenantContext tenantContext)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -23,92 +27,39 @@ public class FournisseurCacheRepository : IFournisseurCacheRepository
 
     public async Task<FournisseurCache?> GetByIdAsync(Guid id)
     {
-        try
-        {
+
             return await _dbContext.FournisseurCaches
                 .FirstOrDefaultAsync(f => f.Id == id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by ID {FournisseurId}", id);
-            throw;
-        }
     }
 
     public async Task<FournisseurCache?> GetByIdDeletedAsync(Guid id)
-    {
-        try
-        {
-            return await _dbContext.FournisseurCaches.IgnoreQueryFilters()
-                .FirstOrDefaultAsync(f => f.Id == id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by ID {FournisseurId}", id);
-            throw;
-        }
-    }
+        => await _dbContext.FournisseurCaches
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(f => f.Id == id && f.TenantId == _tenantContext.TenantId);
 
     public async Task<FournisseurCache?> GetByNameAsync(string name)
     {
-        try
-        {
-            return await _dbContext.FournisseurCaches
-                .FirstOrDefaultAsync(f => f.Name == name && !f.IsDeleted);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by name {FournisseurName}", name);
-            throw;
-        }
+        return await _dbContext.FournisseurCaches
+            .FirstOrDefaultAsync(f => f.Name.ToLower() == name.Trim().ToLower());
     }
 
     public async Task<FournisseurCache?> GetByTaxNumberAsync(string taxNumber)
     {
-        try
-        {
             return await _dbContext.FournisseurCaches
-                .FirstOrDefaultAsync(f => f.TaxNumber == taxNumber && !f.IsDeleted);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by tax number {TaxNumber}", taxNumber);
-            throw;
-        }
+                .FirstOrDefaultAsync(f => f.TaxNumber.ToLower() == taxNumber.Trim().ToLower());
     }
 
     public async Task<FournisseurCache?> GetByEmailAsync(string email)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return null;
-
             return await _dbContext.FournisseurCaches
-                .FirstOrDefaultAsync(f => f.Email == email && !f.IsDeleted);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by email {Email}", email);
-            throw;
-        }
+                .FirstOrDefaultAsync(f => f.Email.ToLower() == email.Trim().ToLower());
     }
 
     public async Task<List<FournisseurCache>> GetBlockedAsync()
-    {
-        try
-        {
-            return await _dbContext.FournisseurCaches
-                .Where(f => !f.IsDeleted && f.IsBlocked)
-                .OrderBy(f => f.Name)
-                .ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting blocked fournisseurs");
-            throw;
-        }
-    }
+        => await _dbContext.FournisseurCaches
+            .Where(f => f.IsBlocked)
+            .OrderBy(f => f.Name)
+            .ToListAsync();
 
     public async Task<(List<FournisseurCache> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? search = null)
@@ -124,7 +75,7 @@ public class FournisseurCacheRepository : IFournisseurCacheRepository
             string q = search.Trim().ToLower();
             baseQuery = baseQuery.Where(c =>
                 c.Name.ToLower().Contains(q) ||
-                c.Email.ToLower().Contains(q)
+                (c.Email != null && c.Email.ToLower().Contains(q))
             );
         }
         int totalCount = await baseQuery.CountAsync();
@@ -179,94 +130,51 @@ public class FournisseurCacheRepository : IFournisseurCacheRepository
 
     public async Task<int> GetCountAsync()
     {
-        try
-        {
-            return await _dbContext.FournisseurCaches.CountAsync(f => !f.IsDeleted);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur count");
-            throw;
-        }
+        return await _dbContext.FournisseurCaches.CountAsync();
     }
 
     // =========================
     // WRITE OPERATIONS
     // =========================
 
-    public async Task AddAsync(FournisseurCache fournisseur)
+    public Task AddAsync(FournisseurCache fournisseur)
     {
-        try
-        {
-            if (fournisseur == null)
-                throw new ArgumentNullException(nameof(fournisseur));
-
-            await _dbContext.FournisseurCaches.AddAsync(fournisseur);
-            _logger.LogDebug("Fournisseur {FournisseurName} added to context", fournisseur.Name);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding fournisseur {FournisseurName}", fournisseur.Name);
-            throw;
-        }
+        if (fournisseur is null) throw new ArgumentNullException(nameof(fournisseur));
+        _dbContext.FournisseurCaches.Add(fournisseur);
+        return Task.CompletedTask;
     }
 
-    public async Task AddRangeAsync(IEnumerable<FournisseurCache> fournisseurs)
+    public Task AddRangeAsync(IEnumerable<FournisseurCache> fournisseurs)
     {
-        try
-        {
-            if (fournisseurs == null)
-                throw new ArgumentNullException(nameof(fournisseurs));
 
-            List<FournisseurCache> fournisseurList = fournisseurs.ToList();
-            if (!fournisseurList.Any())
-                return;
+        if (fournisseurs == null)
+            throw new ArgumentNullException(nameof(fournisseurs));
 
-            await _dbContext.FournisseurCaches.AddRangeAsync(fournisseurList);
-            _logger.LogDebug("Added {Count} fournisseurs to context", fournisseurList.Count);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding range of fournisseurs");
-            throw;
-        }
+        List<FournisseurCache> fournisseurList = fournisseurs.ToList();
+        if (!fournisseurList.Any())
+            return Task.CompletedTask;
+
+        _dbContext.FournisseurCaches.AddRangeAsync(fournisseurList);
+        return Task.CompletedTask;
     }
 
     public Task UpdateAsync(FournisseurCache fournisseur)
     {
-        try
-        {
             if (fournisseur == null)
                 throw new ArgumentNullException(nameof(fournisseur));
 
             _dbContext.FournisseurCaches.Update(fournisseur);
-            _logger.LogDebug("Fournisseur {FournisseurName} marked as updated", fournisseur.Name);
             return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating fournisseur {FournisseurName}", fournisseur.Name);
-            throw;
-        }
     }
 
     public Task DeleteAsync(FournisseurCache fournisseur)
     {
-        try
-        {
-            if (fournisseur == null)
-                throw new ArgumentNullException(nameof(fournisseur));
 
-            fournisseur.MarkDeleted();
-            _dbContext.FournisseurCaches.Update(fournisseur);
-            _logger.LogDebug("Fournisseur {FournisseurName} marked as deleted (soft delete)", fournisseur.Name);
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting fournisseur {FournisseurName}", fournisseur.Name);
-            throw;
-        }
+        if (fournisseur == null)
+            throw new ArgumentNullException(nameof(fournisseur));
+
+        _dbContext.FournisseurCaches.Remove(fournisseur);
+        return Task.CompletedTask;
     }
 
     public async Task DeletePermanentlyAsync(Guid id)
