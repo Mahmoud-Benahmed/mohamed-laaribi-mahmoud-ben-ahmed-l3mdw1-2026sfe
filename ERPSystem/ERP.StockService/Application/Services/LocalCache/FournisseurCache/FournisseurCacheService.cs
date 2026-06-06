@@ -25,44 +25,21 @@ public class FournisseurCacheService : IFournisseurCacheService
 
     public async Task<FournisseurResponseDto?> GetByIdAsync(Guid id)
     {
-        try
-        {
             FournisseurCache? fournisseur = await _repository.GetByIdAsync(id);
             return fournisseur != null ? MapToDto(fournisseur) : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by ID {FournisseurId}", id);
-            throw;
-        }
     }
 
     public async Task<FournisseurResponseDto?> GetByNameAsync(string name)
     {
-        try
-        {
-            FournisseurCache? fournisseur = await _repository.GetByNameAsync(name);
-            return fournisseur != null ? MapToDto(fournisseur) : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by name {FournisseurName}", name);
-            throw;
-        }
+
+        FournisseurCache? fournisseur = await _repository.GetByNameAsync(name);
+        return fournisseur != null ? MapToDto(fournisseur) : null;
     }
 
     public async Task<FournisseurResponseDto?> GetByTaxNumberAsync(string taxNumber)
     {
-        try
-        {
             FournisseurCache? fournisseur = await _repository.GetByTaxNumberAsync(taxNumber);
             return fournisseur != null ? MapToDto(fournisseur) : null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting fournisseur by tax number {TaxNumber}", taxNumber);
-            throw;
-        }
     }
 
     public async Task<PagedResultDto<FournisseurResponseDto>> GetPagedAsync(
@@ -88,29 +65,13 @@ public class FournisseurCacheService : IFournisseurCacheService
 
     public async Task<List<FournisseurResponseDto>> GetBlockedAsync()
     {
-        try
-        {
             List<FournisseurCache> fournisseurs = await _repository.GetBlockedAsync();
             return fournisseurs.Select(MapToDto).ToList();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting blocked fournisseurs");
-            throw;
-        }
     }
 
     public async Task<bool> ExistsAsync(Guid id)
     {
-        try
-        {
             return await _repository.ExistsAsync(id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking existence for fournisseur {FournisseurId}", id);
-            throw;
-        }
     }
 
     // =========================
@@ -159,27 +120,19 @@ public class FournisseurCacheService : IFournisseurCacheService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        try
+        FournisseurCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
         {
-            FournisseurCache? existing = await _repository.GetByIdAsync(dto.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Fournisseur {FournisseurId} not found for deletion", dto.Id);
-                return;
-            }
-
-            existing.MarkDeleted();
-            await _repository.UpdateAsync(existing);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Fournisseur {FournisseurName} (Id: {FournisseurId}) marked as deleted in cache",
-                dto.Name, dto.Id);
+            _logger.LogWarning("Fournisseur {FournisseurId} not found for deletion", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing deleted fournisseur {FournisseurId}", dto.Id);
-            throw;
-        }
+
+        existing.MarkDeleted();
+        await _repository.UpdateAsync(existing);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Fournisseur {FournisseurName} (Id: {FournisseurId}) marked as deleted in cache",
+            dto.Name, dto.Id);
     }
 
     public async Task SyncRestoredAsync(FournisseurResponseDto dto)
