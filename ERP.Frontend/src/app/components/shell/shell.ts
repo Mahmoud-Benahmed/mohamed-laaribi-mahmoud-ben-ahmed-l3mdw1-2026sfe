@@ -1,3 +1,4 @@
+import { ThemeType, LanguageType, Language, Theme } from './../../interfaces/AuthDto';
 import { AuthService, PRIVILEGES } from './../../services/auth/auth.service';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -39,7 +40,11 @@ export class ShellComponent implements OnInit, OnDestroy {
   userName = '';
   userRole = '';
   initials = '';
+
   readonly PRIVILEGES = PRIVILEGES;
+  readonly THEME= Theme;
+  readonly LANGUAGE=  Language;
+
 
   constructor(
     private router: Router,
@@ -197,8 +202,8 @@ export class ShellComponent implements OnInit, OnDestroy {
     // Other top-level routes
     if (url.startsWith('/permissions')) return [{ label: t('nav.auth.permissions') }];
     if (url.startsWith('/audit-log')) return [{ label: t('nav.audit_log.main') }];
-    if (url.startsWith('/profile')) return [{ label: t('HOME.QUICK_ACCESS.MY_PROFILE') }];
-    if (url.startsWith('/change-password')) return [{ label: t('USERS.CHANGE_PASSWORD.TITLE') }];
+    if (url.startsWith('/profile')) return [{ label: t('home.quick_access.my_profile') }];
+    if (url.startsWith('/change-password')) return [{ label: t('auth.profile.changePassword.title_change') }];
     if (url.startsWith('/tenants')) return [{ label: t('nav.tenants.main') }];
     if (url.startsWith('/home')) return [{ label: t('nav.home') }];
 
