@@ -3,7 +3,7 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'ARTICLES_CATEGORIES.BREADCRUMB' | translate }}</p>
+      <p class="breadcrumb">{{ 'ARTICLES.CATEGORIES.BREADCRUMB' | translate }}</p>
       <h1 class="page-title">{{ pageTitle | translate }}</h1>
     </div>
   </div>
@@ -36,7 +36,7 @@
       <div class="stat-card stat-card--blue" (click)="onActiveCardClick()" [class.stat-card--current]="isList()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'ARTICLES_CATEGORIES.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'ARTICLES.CATEGORIES.STATS.ACTIVE' | translate }}</p>
             <p class="stat-card__value">{{ activeCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--blue">
@@ -54,7 +54,7 @@
             *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.RESTORE_ARTICLE_CATEGORIES) || authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES)">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'ARTICLES_CATEGORIES.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'ARTICLES.CATEGORIES.STATS.DELETED' | translate }}</p>
             <p class="stat-card__value">{{ deletedCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--red">
@@ -79,13 +79,13 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'ARTICLES_CATEGORIES.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="'ARTICLES.CATEGORIES.SEARCH_PLACEHOLDER' | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE_CATEGORIES) && isList()">
-        + {{ 'ARTICLES_CATEGORIES.ADD_BUTTON' | translate }}
+        + {{ 'ARTICLES.CATEGORIES.ADD_BUTTON' | translate }}
       </button>
     </div>
 
@@ -96,7 +96,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('name')" class="th--sortable">
-                {{ 'ARTICLES_CATEGORIES.TABLE.NAME' | translate }}
+                {{ 'ARTICLES.CATEGORIES.TABLE.NAME' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -109,7 +109,7 @@
                 </span>
               </th>
               <th (click)="sortBy('tva')" class="th--sortable">
-                {{ 'ARTICLES_CATEGORIES.TABLE.TVA' | translate }}
+                {{ 'ARTICLES.CATEGORIES.TABLE.TVA' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'tva' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -121,7 +121,7 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'ARTICLES_CATEGORIES.TABLE.ACTIONS' | translate }}</th>
+              <th>{{ 'ARTICLES.CATEGORIES.TABLE.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -178,21 +178,21 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="isView() && selectedCategory">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'ARTICLES_CATEGORIES.TITLE_DETAILS' | translate }}</h2>
+      <h2 class="panel__title">{{ 'ARTICLES.CATEGORIES.TITLE_DETAILS' | translate }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES_CATEGORIES.DETAILS.ID' | translate }}</span>
+          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.ID' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedCategory.id }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES_CATEGORIES.DETAILS.NAME' | translate }}</span>
+          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.NAME' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES_CATEGORIES.DETAILS.TVA' | translate }}</span>
+          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.TVA' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.tva }}%</span>
         </div>
       </div>
@@ -213,7 +213,7 @@
   <!-- ===================== FORM PANEL ===================== -->
   <div class="panel" *ngIf="isCreate() || (isEdit() && selectedCategory)">
     <div class="panel__header">
-      <h2 class="panel__title">{{ isCreate() ? ('ARTICLES_CATEGORIES.FORM.ADD_TITLE' | translate) : ('ARTICLES_CATEGORIES.FORM.EDIT_TITLE' | translate) }}</h2>
+      <h2 class="panel__title">{{ isCreate() ? ('ARTICLES.CATEGORIES.FORM.ADD_TITLE' | translate) : ('ARTICLES.CATEGORIES.FORM.EDIT_TITLE' | translate) }}</h2>
       <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
     </div>
     <div class="panel__body">
@@ -224,14 +224,14 @@
           <!-- Name -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'ARTICLES_CATEGORIES.FORM.NAME' | translate }}</label>
+              <label>{{ 'ARTICLES.CATEGORIES.FORM.NAME' | translate }}</label>
               <mat-icon>label</mat-icon>
             </div>
             <input
               class="form__input"
               type="text"
               formControlName="name"
-              [placeholder]="'ARTICLES_CATEGORIES.FORM.NAME_PLACEHOLDER' | translate"
+              [placeholder]="'ARTICLES.CATEGORIES.FORM.NAME_PLACEHOLDER' | translate"
               [class.form__input--error]="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched"
             />
             <span class="field__error" *ngIf="categoryForm.get('name') as ctrl">
@@ -247,14 +247,14 @@
           <!-- TVA -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'ARTICLES_CATEGORIES.FORM.TVA' | translate }}</label>
+              <label>{{ 'ARTICLES.CATEGORIES.FORM.TVA' | translate }}</label>
               <mat-icon>percent</mat-icon>
             </div>
             <input
               class="form__input"
               type="number"
               formControlName="tva"
-              [placeholder]="'ARTICLES_CATEGORIES.FORM.TVA_PLACEHOLDER' | translate"
+              [placeholder]="'ARTICLES.CATEGORIES.FORM.TVA_PLACEHOLDER' | translate"
               step="1"
               min="0"
               max="100"
@@ -272,7 +272,7 @@
         </div>
 
         <div class="form__actions">
-          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="categoryForm.invalid">
             {{ isCreate() ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
           </button>
