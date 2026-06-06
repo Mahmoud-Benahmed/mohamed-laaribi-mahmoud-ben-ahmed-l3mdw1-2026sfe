@@ -1,4 +1,5 @@
 ﻿using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -6,8 +7,10 @@ namespace ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
 public class ClientCacheRepository : IClientCacheRepository
 {
     private readonly InvoiceDbContext _dbContext;
-    public ClientCacheRepository(InvoiceDbContext dbContext)
+    private readonly ITenantContext _tenantContext;
+    public ClientCacheRepository(InvoiceDbContext dbContext, ITenantContext tenantContext)
     {
+        _tenantContext = tenantContext;
         _dbContext = dbContext;
     }
 
@@ -20,20 +23,17 @@ public class ClientCacheRepository : IClientCacheRepository
     }
 
     public async Task<Domain.LocalCache.Client.ClientCache?> GetByIdDeletedAsync(Guid id)
-    {
-        return await _dbContext.ClientCaches.IgnoreQueryFilters()
+        => await _dbContext.ClientCaches
+            .IgnoreQueryFilters()
             .Include(c => c.ClientCategories)
-            .ThenInclude(cc => cc.Category)
-            .FirstOrDefaultAsync(c => c.Id == id);
-    }
+                .ThenInclude(cc => cc.Category)
+            .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantContext.TenantId);
 
-    public async Task DeleteAsync(Domain.LocalCache.Client.ClientCache client)
+    public Task DeleteAsync(Domain.LocalCache.Client.ClientCache client)
     {
-        if (client == null)
-            throw new ArgumentNullException(nameof(client));
-
-        _dbContext.ClientCaches.Remove(client); // Use correct DbSet
-        await _dbContext.SaveChangesAsync();
+        if (client is null) throw new ArgumentNullException(nameof(client));
+        _dbContext.ClientCaches.Remove(client);
+        return Task.CompletedTask;
     }
 
     public async Task<Domain.LocalCache.Client.ClientCache?> GetByNameAsync(string name)
@@ -45,12 +45,10 @@ public class ClientCacheRepository : IClientCacheRepository
     }
 
     public async Task<Domain.LocalCache.Client.ClientCache?> GetByEmailAsync(string email)
-    {
-        return await _dbContext.ClientCaches
+        => await _dbContext.ClientCaches
             .Include(c => c.ClientCategories)
-            .ThenInclude(cc => cc.Category)
-            .FirstOrDefaultAsync(c => c.Email == email && !c.IsDeleted);
-    }
+                .ThenInclude(cc => cc.Category)
+            .FirstOrDefaultAsync(c => c.Email.ToLower() == email.Trim().ToLower());
 
     public async Task<(List<Domain.LocalCache.Client.ClientCache> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? search = null)
@@ -59,7 +57,7 @@ public class ClientCacheRepository : IClientCacheRepository
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        IQueryable<Domain.LocalCache.Client.ClientCache> baseQuery = _dbContext.ClientCaches.AsQueryable().AsNoTracking();
+        IQueryable<Domain.LocalCache.Client.ClientCache> baseQuery = _dbContext.ClientCaches.Where(c=> !c.IsBlocked).AsQueryable().AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -73,9 +71,9 @@ public class ClientCacheRepository : IClientCacheRepository
         int totalCount = await baseQuery.CountAsync(); // counts filtered results
 
         List<Domain.LocalCache.Client.ClientCache> items = await baseQuery
-            .OrderBy(c => c.Name)
             .Include(c => c.ClientCategories)
-            .ThenInclude(cc => cc.Category)
+                .ThenInclude(cc => cc.Category)
+            .OrderBy(c => c.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -83,17 +81,13 @@ public class ClientCacheRepository : IClientCacheRepository
         return (items, totalCount);
     }
 
-
-
     public async Task<List<Domain.LocalCache.Client.ClientCache>> GetActiveAsync()
-    {
-        return await _dbContext.ClientCaches
+        => await _dbContext.ClientCaches
+            .Where(c => !c.IsBlocked)
             .Include(c => c.ClientCategories)
-            .ThenInclude(cc => cc.Category)
-            .Where(c => !c.IsDeleted && !c.IsBlocked)
+                .ThenInclude(cc => cc.Category)
             .OrderBy(c => c.Name)
             .ToListAsync();
-    }
 
     public async Task<bool> ExistsAsync(Guid id)
     {
