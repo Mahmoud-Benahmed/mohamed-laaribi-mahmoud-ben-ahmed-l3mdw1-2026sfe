@@ -140,7 +140,7 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
         title: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_TITLE'),
         message: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_MESSAGE', { name: tenant.name }),
         confirmText: this.translate.instant('TENANTS.DIALOG.SUSPEND_CONFIRM'),
-        cancelText: this.translate.instant('COMMON.CANCEL'),
+        cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
@@ -165,7 +165,7 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
         title: this.translate.instant('TENANTS.DIALOG.ACTIVATE_TENANT_TITLE'),
         message: this.translate.instant('TENANTS.DIALOG.ACTIVATE_TENANT_MESSAGE', { name: tenant.name }),
         confirmText: this.translate.instant('TENANTS.DIALOG.ACTIVATE_CONFIRM'),
-        cancelText: this.translate.instant('COMMON.CANCEL'),
+        cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
@@ -190,7 +190,7 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
         title: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_TITLE'),
         message: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_MESSAGE', { name: tenant.name }),
         confirmText: this.translate.instant('TENANTS.DIALOG.DELETE_CONFIRM'),
-        cancelText: this.translate.instant('COMMON.CANCEL'),
+        cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
@@ -275,7 +275,7 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
           title: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_TITLE'),
           message: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_CONFIRM', { name: this.selectedTenant.name }),
           confirmText: this.translate.instant('TENANTS.DIALOG.REMOVE_CONFIRM'),
-          cancelText: this.translate.instant('COMMON.CANCEL'),
+          cancelText: this.translate.instant('common.cancel'),
           showCancel: true,
         },
       });
