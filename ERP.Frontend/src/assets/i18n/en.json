@@ -74,14 +74,6 @@
         "inactive":"Inactive"
       },
       "search_placeholder":"Search by fullname, email, role, etc..",
-      "buttons":{
-        "add":"Add new user",
-        "table":{
-          "view":"View",
-          "deactivate":"Deactivate",
-          "delete":"Delete"
-        }
-      },
       "table":{
         "head":{
           "fullname":"Fullname",
@@ -89,10 +81,6 @@
           "role":"Role",
           "last_login":"Last login",
           "actions":"Actions"
-        },
-        "body":{
-          "no_login": "Never logged in",
-          "no_result":"No results were found"
         }
       }
     },
@@ -104,13 +92,6 @@
         "deactivated": "Deactivated"
       },
       "search_placeholder": "Search by name, email, or role…",
-      "buttons":{
-        "table":{
-          "view":"View",
-          "activate":"activate",
-          "delete":"Delete"
-        }
-      },
       "table": {
         "head": {
           "fullname": "Full name",
@@ -118,10 +99,6 @@
           "role": "Role",
           "last_login": "Last login",
           "actions": "Actions"
-        },
-        "body": {
-          "no_login": "Never logged in",
-          "no_result":"No results were found"
         }
       }
     },
@@ -147,15 +124,190 @@
           "role": "Role",
           "last_login": "Last login",
           "actions": "Actions"
-        },
-        "body": {
-          "no_login": "Never logged in",
-          "no_result":"No results were found"
         }
       }
     },
-    "controles":{
-      
+    "controles": {
+      "breadcrumb": "Access controls",
+      "title": "Controls",
+      "search_placeholder": "Search by category, label or description...",
+      "table": {
+        "head": {
+          "category": "Category",
+          "libelle": "Label",
+          "description": "Description",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "category": "Category",
+        "category_placeholder": "E.g., User management",
+        "libelle": "Label",
+        "libelle_placeholder": "E.g., View users",
+        "description": "Description",
+        "description_placeholder": "Describe the control purpose..."
+      },
+      "title_list": "Controls",
+      "title_details": "Control Details",
+      "title_add": "Add Control",
+      "title_edit": "Edit Control"
+    },
+    "roles": {
+      "breadcrumb": "Role management",
+      "title": "Roles",
+      "search_placeholder": "Search by role name...",
+      "table": {
+        "head": {
+          "libelle": "Role name",
+          "id": "ID",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "libelle": "Role name",
+        "libelle_placeholder": "e.g., Manager"
+      },
+      "title_list": "Roles",
+      "title_details": "Role details",
+      "title_add": "Add role",
+      "title_edit": "Edit role"
+    },
+    "register":{
+      "roles":{
+        "ACCOUNTANT":"Accountant",
+        "SYSTEM_ADMIN":"System admin",
+        "STOCK_MANAGER":"Stock manager",
+        "SALES_MANAGER":"Sales manager"
+      },
+      "breadcrumb": "User registration",
+      "title": "Register new user",
+      "title_panel": "Create account",
+      "subtitle": "Fill in the details to create a new user account",
+      "full_name": "Full name",
+      "full_name_placeholder": "John Doe",
+      "login": "Login",
+      "login_placeholder": "johndoe",
+      "email": "Email",
+      "email_placeholder": "john.doe@example.com",
+      "role": "Role",
+      "select_role": "-- Select a role --",
+      "password": "Password",
+      "password_placeholder": "Enter a strong password",
+      "generate_password": "Generate password",
+      "register_button": "Register user",
+      "creating": "Creating...",
+      "validation": {
+        "required": "This field is required.",
+        "min_length": "Minimum {{min}} characters required.",
+        "max_length": "Maximum {{max}} characters allowed.",
+        "invalid_email": "Please enter a valid email address (e.g., name@example.com).",
+        "invalid_login": "Login may only contain lowercase letters a‑z, digits 0‑9, and underscores (_). No spaces or uppercase.",
+        "name_required": "Name is required (2–200 characters, letters/numbers/spaces/some punctuation).",
+        "password_required": "Password is required.",
+        "pattern_invalid": "Invalid format.",
+        "integer_only": "Only integer numbers are allowed.",
+        "decimal_only": "Only decimal numbers are allowed.",
+        "alphanumeric": "Only letters, numbers, and spaces are allowed.",
+        "alpha_only": "Only letters and spaces are allowed.",
+        "password_strength":{
+          "weak":"Weak",
+          "fair":"Fair",
+          "good": "Good",
+          "strong":"Strong"
+        }
+      }
+    },
+    "changePassword": {
+      "breadcrumb": "Change password",
+      "title": "Change password",
+      "title_panel": "Change password",
+      "subtitle": "Set a new password for the user",
+      "new_password": "New password",
+      "new_password_placeholder": "Enter a new password",
+      "admin_notice": "You are changing the password for another user. The user will be prompted to change it on next login.",
+      "back": "Back",
+      "generate": "Generate",
+      "change_button": "Change password",
+      "saving": "Saving...",
+      "validation": {
+        "password_required": "Password is required.",
+        "min_length": "Minimum {{min}} characters required."
+      }
+    },
+    "profile": {
+      "changePassword": {
+        "breadcrumb": "Change password",
+        "title_required": "Password change required",
+        "title_change": "Change password",
+        "subtitle_required": "For security reasons, you must change your password before continuing.",
+        "subtitle_change": "Choose a strong password that you don't use elsewhere.",
+        "current_password": "Current password",
+        "current_password_placeholder": "Enter your current password",
+        "new_password": "New password",
+        "new_password_placeholder": "Enter a new password",
+        "generate": "Generate",
+        "change_button": "Change password",
+        "saving": "Saving...",
+        "success_dialog": {
+          "title": "Password changed",
+          "message": "Your password has been updated successfully. You will be redirected to the home page.",
+          "button": "Got it"
+        },
+        "validation": {
+          "password_required": "Password is required.",
+          "password_same": "New password cannot be the same as the current one.",
+          "min_length": "Minimum {{min}} characters required."
+        },
+        "errors": {
+          "change_failed": "Failed to change password. Please check your current password and try again.",
+          "invalid_current_password": "Current password is incorrect.",
+          "password_too_weak": "Password is too weak. Please choose a stronger password.",
+          "password_same_as_old": "New password cannot be the same as the current one."
+        }
+      },
+      "breadcrumb": "User profile",
+      "title_own": "My profile",
+      "title_other": "User profile",
+      "hero": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "role": "Role"
+      },
+      "actions": {
+        "edit_profile": "Edit profile",
+        "change_password": "Change password",
+        "system_settings": "System settings"
+      },
+      "personal_info": {
+        "title": "Personal information",
+        "full_name": "Full name",
+        "login": "Login",
+        "email": "Email address",
+        "member_since": "Member since",
+        "last_updated": "Last updated"
+      },
+      "account_details": {
+        "title": "Account details",
+        "auth_id": "Authentication ID",
+        "status": "Status",
+        "last_login": "Last login"
+      },
+      "edit_profile": {
+        "title": "Edit profile",
+        "full_name": "Full name",
+        "email": "Email",
+        "no_changes": "No changes to save",
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "validation": {
+          "required": "This field is required.",
+          "name_max": "Maximum 100 characters allowed.",
+          "alpha_only": "Only letters and spaces are allowed.",
+          "email_invalid": "Please enter a valid email address.",
+          "email_max": "Email cannot exceed 255 characters."
+        }
+      }
     },
     "responses": {
       "errors":{
@@ -174,39 +326,148 @@
         "AUTH_016": "Validation error.",
         "AUTH_017": "Duplicate key error.",
         "AUTH_018": "Invalid refresh token.",
+        "AUTH_019": "Your session has expired. Please log in again.",
+        "RATE_LIMIT": "Too many requests. Please slow down.",
+        "SERVER_UNREACHABLE": "Server is unreachable. Please check your connection.",
+        "ACCESS_DENIED":          "Access denied.",
+        "AUTH_003_TITLE":         "Account deactivated.",
+        "SERVER_UNREACHABLE_MSG": "Unable to connect to the server. Check your connection or try again later.",
+        "SERVICE_UNAVAILABLE":    "Service unavailable.",
+        "SERVICE_UNAVAILABLE_MSG":"The requested service is temporarily unavailable. Please try again later.",
+        "RATE_LIMIT_TENANTS":     "Too many registration attempts. Please wait 10 minutes before retrying.",
+        "RATE_LIMIT_LOGIN":       "Too many login attempts. Please wait {{seconds}} seconds before retrying.",
+        "RATE_LIMIT_FALLBACK":    "a few minutes",
+        "TENANT_USER_LIMIT_REACHED": "Your plan's user limit has been reached. Please upgrade your subscription.",
         "AUTH_000": "An unknown error occurred.",
         "INTERNAL_ERROR": "An internal error occurred. Please try again later.",
         "AUTH_010": "Role not found.",
         "AUTH_011": "Control not found.",
         "AUTH_012": "Privilege not found.",
-        "load_deactivated_failed": "failed to load deactivated users.",
-        "load_stats_failed": "failed to load user statistics.",
-        "activate_failed": "could not activate user {{name}}.",
-        "delete_failed": "could not delete user."
+        "reset_failed": "Failed to change the password. Please try again later.",
+        "update_failed": "Failed to update profile.",
+        "load_failed": "Could not load user profile. Please try again later."
       },
       "success":{
+        "password_changed": "Password changed successfully.",
         "user_deactivated":"User {{fullname}} deactivated successfully.",
         "user_activated":"User {{fullname}} activated successfully.",
         "user_registered":"User {{fullname}} has been registered successfully.",
         "user_deleted":"User {{fullname}} deleted successfully.",
-        "user_restored":"User {{fullname}} restored successfully."
+        "user_restored":"User {{fullname}} restored successfully.",
+        "controle_created": "control \"{{name}}\" created successfully.",
+        "controle_updated": "control \"{{name}}\" updated successfully.",
+        "controle_deleted": "control \"{{name}}\" deleted successfully.",
+        "role_created": "Role \"{{name}}\" created successfully.",
+        "role_updated": "Role \"{{name}}\" updated successfully.",
+        "role_deleted": "Role \"{{name}}\" deleted successfully.",
+        "reset_success_title": "Password changed",
+        "reset_success_message": "The password has been updated successfully.",
+        "got_it": "Got it",
+        "profile_updated": "Profile updated successfully."
       }
     },
     "confirmations":{
-      "deactivate_user":{
-        "title":"Deactivating user",
-        "message":"The current user `{{fullname}}` will be deactivated meaning he won't be able to login nor accessing his account until he got reactivated.",
-        "confirm_text":"Deactivate anyways"
+        "login_change_warning": {
+          "title": "Login will be changed",
+          "message": "Login will be changed to {{login}}, since login cannot contain spaces nor uppercase letters. Do you want to proceed with this username?",
+          "confirm_text": "Proceed"
+        },
+        "delete_role": {
+          "title": "Delete role?",
+          "message": "Role \"{{name}}\" will be permanently deleted. Do you want to proceed?",
+          "confirm_text": "Delete"
+        },
+        "delete_controle": {
+          "title": "Delete control?",
+          "message": "Control \"{{name}}\" will be permanently deleted. do you want to proceed?",
+          "confirm_text": "Delete"
+        },
+        "deactivate_user":{
+          "title":"Deactivating user",
+          "message":"The current user `{{fullname}}` will be deactivated meaning he won't be able to login nor accessing his account until he got reactivated.",
+          "confirm_text":"Deactivate anyways"
+        },
+        "delete_user":{
+          "title":"Deleting user",
+          "message":"The current user `{{fullname}}` will be deleted.",
+          "confirm_text":"Delete anyways"
+        },
+        "restore_user":{
+          "title":"Restoring deleted user",
+          "message":"The current user `{{fullname}}` is deleted and he will be restored back.",
+          "confirm_text":"Restore"
+        }
+    }
+  },
+  "tenant": {
+    "settings": {
+      "breadcrumb": "System settings",
+      "title": "System settings",
+      "edit": "Edit",
+      "undo": "Undo",
+      "save_changes": "Save changes",
+      "saving": "Saving",
+      "processing": "Processing",
+      "tenant_details": "Tenant details",
+      "edit_tenant_info": "Edit tenant information",
+      "form": {
+        "name": "Tenant name",
+        "name_placeholder": "Enter tenant name",
+        "email": "Email address",
+        "email_placeholder": "admin@tenant.com",
+        "phone": "Phone number",
+        "phone_placeholder": "+216 12 345 678",
+        "address": "Address",
+        "address_placeholder": "Street, city, postal code",
+        "currency": "Currency",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "logo_url": "Logo URL (optional)",
+        "logo_url_placeholder": "https://acme.com/logo.png",
+        "primary_color": "Primary color",
+        "secondary_color": "Secondary color"
       },
-      "delete_user":{
-        "title":"Deleting user",
-        "message":"The current user `{{fullname}}` will be deleted.",
-        "confirm_text":"Delete anyways"
+      "currencies": {
+        "TND": "Tunisian Dinar",
+        "EUR": "Euro",
+        "USD": "US Dollar"
       },
-      "restore_user":{
-        "title":"Restoring deleted user",
-        "message":"The current user `{{fullname}}` is deleted and he will be restored back.",
-        "confirm_text":"Restore"
+      "locales": {
+        "EN": "English",
+        "FR": "French",
+        "AR": "Arabic"
+      },
+      "timezones": {
+        "UTC": "UTC",
+        "AFRICA_TUNIS": "Africa/Tunis (UTC+1)",
+        "EUROPE_PARIS": "Europe/Paris (UTC+1)",
+        "EUROPE_LONDON": "Europe/London (UTC)"
+      },
+      "validation": {
+        "required": "This field is required.",
+        "min_length": "Minimum {{min}} characters required.",
+        "max_length": "Maximum {{max}} characters allowed.",
+        "invalid_email": "Please enter a valid email address (e.g., name@example.com).",
+        "invalid_phone": "Phone number must contain 8 to 15 digits and may start with a '+'. No spaces, dashes, or parentheses.",
+        "invalid_hex_color": "Enter a valid hex color code (e.g., #4e7cff – exactly 6 hex digits after #).",
+        "invalid_url": "Enter a valid URL starting with https:// (e.g., https://example.com).",
+        "alpha_only": "Only letters and spaces are allowed."
+      }
+    },
+    "responses":{
+      "errors":{
+        "update_failed": "Failed to update system settings.",
+        "TENANT_001": "Tenant not found.",
+        "TENANT_002": "Tenant subscription not found.",
+        "TENANT_003": "Subdomain already taken.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+        "INVALID_ARGUMENT": "Invalid argument provided.",
+        "UNAUTHORIZED": "Unauthorized access.",
+        "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later."
+      },
+      "success":{
+        "update_success": "System settings updated."
       }
     }
   },
@@ -217,7 +478,31 @@
     "next": "Next ›"
   },
   "common":{
+    "ok": "Ok",
+    "view":"View",
+    "edit":"Edit",
+    "restore":"Restore",
+    "delete":"Delete",
+    "activate":"Activate",
+    "deactivate":"Deactivate",
+    "block":"Block",
+    "unblock":"Unblock",
+    "no_result":"No results were found",
+    "no_login":"Never logged in",
     "cancel":"Cancel",
-    "confirm":"Confirm"
+    "confirm":"Confirm",
+    "save":"Save",
+    "add":"Add",
+    "back":"Back",
+    "generate_password":"Generate password",
+    "logout":"Logout",
+    "change_language_to":"Change language to {{language}}",
+    "change_theme_to":"Change theme to {{theme}}",
+    "en": "English",
+    "fr":"French",
+    "light": "Light",
+    "dark":"Dark",
+    "loading":"Loading",
+    "processing": "Processing"
   }
 }
