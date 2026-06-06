@@ -13,12 +13,14 @@ public interface IInvoiceRepository
 
     // ── Existing queries ─────────────────────────────────────────────────────
     Task<Invoice?> GetByIdAsync(Guid id);
+    Task<Invoice?> GetByIdDeletedAsync(Guid id);
     Task<Invoice?> GetByInvoiceNumberAsync(string invoiceNumber);
     Task<(List<Invoice> Items, int TotalCount)> GetAllAsync(int pageNumber, int pageSize, bool includeDeleted = false);
     Task<(List<Invoice> Items, int TotalCount)> GetByClientIdAsync(Guid clientId, int pageNumber, int pageSize);
     Task<(List<Invoice> Items, int TotalCount)> GetByStatusAsync(InvoiceStatus status, int pageNumber, int pageSize);
     Task AddAsync(Invoice invoice);
     Task UpdateAsync(Invoice invoice);
+    Task SaveChangesAsync();
     Task<bool> ExistsByInvoiceNumberAsync(string invoiceNumber);
     Task<List<Invoice>> GetByClientIdAsNoTrackingAsync(Guid clientId);
 
