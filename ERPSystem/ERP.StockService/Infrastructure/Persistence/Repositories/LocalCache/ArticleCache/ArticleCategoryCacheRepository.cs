@@ -1,4 +1,5 @@
 ﻿using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Application.Services;
 using ERP.StockService.Domain.LocalCache.Article;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,17 +8,21 @@ namespace ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache.Ar
 public sealed class ArticleCategoryCacheRepository : IArticleCategoryCacheRepository
 {
     private readonly StockDbContext _db;
+    private readonly ITenantContext _tenantContext;
 
-    public ArticleCategoryCacheRepository(StockDbContext db) => _db = db;
+    public ArticleCategoryCacheRepository(StockDbContext db, ITenantContext tenantContext)
+    {
+        _db = db;
+        _tenantContext = tenantContext;
+    }
 
     public async Task<ArticleCategoryCache?> GetByIdAsync(Guid id)
-        => await _db.ArticleCategoryCaches.FindAsync(id);
-    public async Task<ArticleCategoryCache?> GetByIdDeletedAsync(Guid id)
-    => await _db.ArticleCategoryCaches.IgnoreQueryFilters().FirstOrDefaultAsync(ca=> ca.Id == id);
+        => await _db.ArticleCategoryCaches.FirstOrDefaultAsync(c => c.Id == id);
 
-    public async Task<ArticleCategoryCache?> GetByNameAsync(string name)
+    public async Task<ArticleCategoryCache?> GetByIdDeletedAsync(Guid id)
         => await _db.ArticleCategoryCaches
-            .FirstOrDefaultAsync(c => c.Name == name);
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ca => ca.Id == id && ca.TenantId == _tenantContext.TenantId);
 
     public async Task<List<ArticleCategoryCache>> GetAllAsync()
         => await _db.ArticleCategoryCaches
@@ -33,12 +38,12 @@ public sealed class ArticleCategoryCacheRepository : IArticleCategoryCacheReposi
     public async Task<(List<ArticleCategoryCache> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize)
     {
-        IOrderedQueryable<ArticleCategoryCache> query = _db.ArticleCategoryCaches
-            .Where(c => !c.IsDeleted)
-            .OrderBy(c => c.Name);
+        IQueryable<ArticleCategoryCache> baseQuery = _db.ArticleCategoryCaches.AsNoTracking();
 
-        int totalCount = await query.CountAsync();
-        List<ArticleCategoryCache> items = await query
+        int totalCount = await baseQuery.CountAsync();
+
+        List<ArticleCategoryCache> items = await baseQuery
+            .OrderBy(c => c.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -46,22 +51,26 @@ public sealed class ArticleCategoryCacheRepository : IArticleCategoryCacheReposi
         return (items, totalCount);
     }
 
-    public async Task DeleteAsync(ArticleCategoryCache category)
-    {
-        if (category == null)
-            throw new ArgumentNullException(nameof(category));
-
-        _db.ArticleCategoryCaches.Remove(category); // Use correct DbSet
-        await _db.SaveChangesAsync();
-    }
+    public async Task<ArticleCategoryCache?> GetByNameAsync(string name)
+        => await _db.ArticleCategoryCaches
+            .FirstOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
 
     public async Task<bool> ExistsAsync(string name)
+        => await _db.ArticleCategoryCaches
+            .AnyAsync(c => c.Name.ToLower() == name.Trim().ToLower());
+
+    public Task AddAsync(ArticleCategoryCache category)
     {
-        return await _db.ArticleCategoryCaches.AnyAsync(c => c.Name == name);
+        _db.ArticleCategoryCaches.Add(category);
+        return Task.CompletedTask;
     }
 
-    public async Task AddAsync(ArticleCategoryCache category)
-        => await _db.ArticleCategoryCaches.AddAsync(category);
+    public Task DeleteAsync(ArticleCategoryCache category)
+    {
+        if (category is null) throw new ArgumentNullException(nameof(category));
+        _db.ArticleCategoryCaches.Remove(category);
+        return Task.CompletedTask;
+    }
     public async Task SaveChangesAsync()
         => await _db.SaveChangesAsync();
 }
