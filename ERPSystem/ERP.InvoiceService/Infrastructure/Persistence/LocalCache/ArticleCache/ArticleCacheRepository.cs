@@ -1,4 +1,5 @@
 ﻿using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -6,8 +7,12 @@ namespace ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
 public sealed class ArticleCacheRepository : IArticleCacheRepository
 {
     private readonly InvoiceDbContext _db;
-
-    public ArticleCacheRepository(InvoiceDbContext db) => _db = db;
+    private readonly ITenantContext _tenantContext;
+    public ArticleCacheRepository(InvoiceDbContext db, ITenantContext tenantContext)
+    {
+        _tenantContext = tenantContext;
+        _db = db;
+    }
 
     public async Task<List<Domain.LocalCache.Article.ArticleCache>> GetByIdsAsync(List<Guid> ids)
         => await _db.ArticleCaches
@@ -21,9 +26,10 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         .FirstOrDefaultAsync(a => a.Id == id);
 
     public async Task<Domain.LocalCache.Article.ArticleCache?> GetByIdDeletedAsync(Guid id)
-    => await _db.ArticleCaches.IgnoreQueryFilters()
-        .Include(a => a.Category)
-        .FirstOrDefaultAsync(a => a.Id == id);
+        => await _db.ArticleCaches
+            .IgnoreQueryFilters()
+            .Include(a => a.Category)
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == _tenantContext.TenantId);
 
     public async Task<Domain.LocalCache.Article.ArticleCache?> GetByBarCodeAsync(string barCode)
         => await _db.ArticleCaches
@@ -44,6 +50,7 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
     public async Task<List<Domain.LocalCache.Article.ArticleCache>> GetAllActiveAsync()
         => await _db.ArticleCaches
             .Include(a => a.Category)
+            .Where(a => !a.IsDeleted)   // or whatever your "active" flag is
             .OrderBy(a => a.Libelle)
             .ToListAsync();
 
@@ -60,7 +67,7 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         {
             string q = search.Trim().ToLower();
             baseQuery = baseQuery.Where(c =>
-                c.BarCode.ToLower().Contains(q) ||
+                (c.BarCode != null && c.BarCode.ToLower().Contains(q)) ||
                 c.Libelle.ToLower().Contains(q) ||
                 c.CodeRef.ToLower().Contains(q)
             );
@@ -70,8 +77,8 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         int totalCount = await baseQuery.CountAsync();
 
         List<Domain.LocalCache.Article.ArticleCache> items = await baseQuery
+            .Include(a => a.Category)   // ← move up
             .OrderBy(a => a.Libelle)
-            .Include(a => a.Category)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -79,18 +86,25 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         return (items, totalCount);
     }
 
-    public async Task AddAsync(Domain.LocalCache.Article.ArticleCache article)
-        => await _db.ArticleCaches.AddAsync(article);
+    public Task AddAsync(Domain.LocalCache.Article.ArticleCache article)
+    {
+        _db.ArticleCaches.Add(article);
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(Domain.LocalCache.Article.ArticleCache article)
+    {
+        _db.ArticleCaches.Update(article);
+        return Task.CompletedTask;
+    }
 
     public async Task SaveChangesAsync()
         => await _db.SaveChangesAsync();
 
-    public async Task DeleteAsync(Domain.LocalCache.Article.ArticleCache article)
+    public Task DeleteAsync(Domain.LocalCache.Article.ArticleCache article)
     {
-        if (article == null)
-            throw new ArgumentNullException(nameof(article));
-
-        _db.ArticleCaches.Remove(article); // Use correct DbSet
-        await _db.SaveChangesAsync();
+        if (article is null) throw new ArgumentNullException(nameof(article));
+        _db.ArticleCaches.Remove(article);
+        return Task.CompletedTask; // caller calls SaveChangesAsync
     }
 }
