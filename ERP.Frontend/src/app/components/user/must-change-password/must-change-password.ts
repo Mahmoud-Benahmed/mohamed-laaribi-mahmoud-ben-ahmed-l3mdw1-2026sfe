@@ -10,12 +10,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../services/auth/auth.service';
-import { PasswordService } from '../../../services/password.service';         // ← added
+import { PasswordService } from '../../../services/password.service';
 import { NotSameAsDirective } from '../../../util/NotSameAsDirective';
 import { ChangeProfilePasswordRequestDto } from '../../../interfaces/AuthDto';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
-import { HttpError } from '../../../interfaces/HttpError';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -35,87 +35,51 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     TranslatePipe
   ],
   templateUrl: './must-change-password.html',
-  styleUrl: './must-change-password.scss',
+  styleUrls: ['./must-change-password.scss'],
 })
 export class MustChangePasswordComponent implements OnInit {
   @ViewChild('passwordFormRef') passwordFormRef!: NgForm;
 
-  private translate      = inject(TranslateService);
-  private passwordService = inject(PasswordService);              // ← added
+  private translate = inject(TranslateService);
+  private passwordService = inject(PasswordService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+  private location = inject(Location);
+
+  // Translation prefix
+  readonly templateTranslationKey = 'auth.profile.changePassword.';
 
   mustChangePassword = false;
-  errors: string[]   = [];
+  errors: string[] = [];
   successMessage: string | null = null;
 
-  isLoading           = false;
+  isLoading = false;
   showCurrentPassword = false;
-  showNewPassword     = false;
+  showNewPassword = false;
 
-  passwordErrors:   string[] = [];
-  passwordScore:    number   = 0;
-  passwordStrength: string   = '';
+  passwordErrors: string[] = [];
+  passwordStrength = '';
 
   passwordForm: ChangeProfilePasswordRequestDto = {
     currentPassword: '',
     newPassword: '',
   };
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private dialog: MatDialog,
-    private cdr: ChangeDetectorRef,
-    private location: Location
-  ) {}
-
   ngOnInit(): void {
     this.mustChangePassword = this.authService.getMustChangePassword();
   }
 
-private translateErrorCode(errorCode: string): string {
-    // Try generic ERRORS.*
-    const genericKey = `ERRORS.${errorCode}`;
-    const generic = this.translate.instant(genericKey);
-    if (generic !== genericKey) {
-      return generic;
-    }
-    // Try USERS.CHANGE_PASSWORD.ERRORS.*
-    const specificKey = `USERS.CHANGE_PASSWORD.ERRORS.${errorCode}`;
-    const specific = this.translate.instant(specificKey);
-    if (specific !== specificKey) {
-      return specific;
-    }
-    // Fallback
-    return this.translate.instant('ERRORS.INTERNAL_ERROR');
-  }
-
-  /**
-   * Translates a single error message – if it looks like a key, translate it.
-   */
-  private translateErrorMessage(message: string): string {
-    if (message && message.match(/^[A-Z0-9_]+$/)) {
-      const translated = this.translate.instant(message);
-      if (translated !== message) {
-        return translated;
-      }
-      const withPrefix = this.translate.instant(`ERRORS.${message}`);
-      if (withPrefix !== `ERRORS.${message}`) {
-        return withPrefix;
-      }
-    }
-    return message;
-  }
-
-
   // ── Password change handlers ──────────────────────────────────────────────
 
   onPasswordChange(): void {
-    const result = this.passwordService.validatePassword(    // ← was checkPassword()
+    const result = this.passwordService.validatePassword(
       this.passwordForm.newPassword,
       this.passwordForm.currentPassword,
     );
+    // Translate each validation error (if it's a key, translate it)
     this.passwordErrors = result.errors.map(err => this.translateErrorMessage(err));
-    this.passwordScore    = result.score;
     this.passwordStrength = result.strength;
 
     // Keep notSameAs cross-validation in sync
@@ -128,29 +92,43 @@ private translateErrorCode(errorCode: string): string {
   }
 
   generatePassword(): void {
-    this.passwordForm.newPassword = this.passwordService.generatePassword();  // ← was generatePassword()
+    this.passwordForm.newPassword = this.passwordService.generatePassword();
     this.showNewPassword = true;
     this.onPasswordChange();
   }
 
-  // ── Strength helpers — all delegated to PasswordService ──────────────────
+  // ── Strength helpers ──────────────────────────────────────────────────────
 
   getScore(): number {
-    return this.passwordService.getStrengthScore(this.passwordStrength);      // ← was inline map
+    return this.passwordService.getStrengthScore(this.passwordStrength);
   }
 
   getStrengthClass(): string {
-    return this.passwordService.getStrengthClass(this.passwordStrength);      // ← was inline map
+    return this.passwordService.getStrengthClass(this.passwordStrength);
   }
 
   getStrengthLabel(): string {
-    return this.passwordService.getStrengthLabel(this.passwordStrength);      // ← was inline translate.instant
+    return this.passwordService.getStrengthLabel(this.passwordStrength);
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
+  // ── Translate a single error message (fallback for validation strings) ────
+
+  private translateErrorMessage(message: string): string {
+    if (message && message.match(/^[A-Z0-9_]+$/)) {
+      const translated = this.translate.instant(message);
+      if (translated !== message) return translated;
+      const withPrefix = this.translate.instant(`VALIDATION.${message}`);
+      if (withPrefix !== `VALIDATION.${message}`) return withPrefix;
+    }
+    return message;
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
 
   onSubmit(): void {
+    if (this.passwordFormRef.invalid || this.passwordErrors.length > 0) return;
     this.isLoading = true;
+
     this.authService.changeProfilePassword(this.passwordForm).subscribe({
       next: () => {
         this.isLoading = false;
@@ -159,46 +137,30 @@ private translateErrorCode(errorCode: string): string {
         this.dialog.open(ModalComponent, {
           width: '400px',
           data: {
-            title:       this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_SUCCESS_TITLE'),
-            message:     this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_SUCCESS_MESSAGE'),
-            confirmText: this.translate.instant('USERS.CHANGE_PASSWORD.UNDERSTOOD'),
-            showCancel:  false,
-            icon:        'info',
-            iconColor:   'success',
+            title: this.translate.instant(`${this.templateTranslationKey}success_dialog.title`),
+            message: this.translate.instant(`${this.templateTranslationKey}success_dialog.message`),
+            confirmText: this.translate.instant(`${this.templateTranslationKey}success_dialog.button`),
+            showCancel: false,
+            icon: 'check_circle',
+            iconColor: 'success',
           },
         });
 
         this.router.navigate(['/home']);
       },
-      error: (error) => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        const err = error.error as HttpError;
-
-        if (err.code === 'VALIDATION_ERROR' && err.errors) {
-          let allMessages: string[] = [];
-          if (Array.isArray(err.errors)) {
-            allMessages = err.errors;
-          } else if (typeof err.errors === 'object') {
-            allMessages = Object.values(err.errors).flat();
-          }
-          const translatedMessages = allMessages.map(msg => this.translateErrorMessage(msg));
-          this.flashErrors(translatedMessages);
-        } else if (err.code) {
-          const translatedMessage = this.translateErrorCode(err.code);
-          this.flash('error', translatedMessage);
-        } else {
-          this.flash('error', err.message || this.translate.instant('USERS.CHANGE_PASSWORD.PASSWORD_CHANGE_FAILED'));
-        }
-        
+        // The interceptor already provides a translated message in err.error?.message
+        const errorMessage = err.error?.message || this.translate.instant(`${this.templateTranslationKey}errors.change_failed`);
+        this.flash('error', errorMessage);
         this.cdr.markForCheck();
       },
     });
   }
 
-  goBack(){
+  goBack(): void {
     this.location.back();
   }
-  // ── Auth ──────────────────────────────────────────────────────────────────
 
   logout(): void {
     this.authService.logout();
