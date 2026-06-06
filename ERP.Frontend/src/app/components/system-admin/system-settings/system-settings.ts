@@ -9,7 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { TenantResponseDto, SubscriptionPlanDto, UpdateTenantRequestDto, AssignSubscriptionRequestDto, SubscriptionPeriod, LocaleEnum, TimeZoneEnum, CurrencyEnum, TenantSettingsDto } from '../../../interfaces/TenantDto';
 import { catchError, forkJoin, of, tap } from 'rxjs';
-import { HttpError } from '../../../interfaces/HttpError';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TenantService } from '../../../services/tenant/tenant.service';
@@ -40,6 +40,11 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private location = inject(Location);
 
+  // Translation prefix
+  readonly templateTranslationKey = 'tenant.settings.';
+  readonly errorsTranslationKey = 'tenant.settings.responses.errors.';
+  readonly successTranslationKey = 'tenant.settings.responses.success.';
+
   // ── Forms ──────────────────────────────────────────────────────────────────
   tenantForm!: FormGroup;
 
@@ -69,7 +74,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.isEdit = true;  // start in view mode (disabled)
+    this.isEdit = true;
     this.tenantId = this.authService.TenantId;
 
     if (!this.tenantId) {
@@ -78,30 +83,27 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     }
 
     this.buildForms();
-    this.tenantForm.disable(); // ← disable immediately, matching isEdit = true
+    this.tenantForm.disable();
 
-    this.reload(); // syncColorPickers is called inside populateFormFromTenant already
+    this.reload();
 
     ['primaryColor', 'secondaryColor'].forEach(name => {
       this.tenantForm.get(name)?.valueChanges
-        .pipe(takeUntilDestroyed(this.destroyRef)) // ← prevent leak
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.syncColorPickers());
     });
   }
 
   private buildForms(): void {
     this.tenantForm = this.fb.group({
-      // Company
       name:           ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       email:          ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
       phone:          ['', [Validators.required, Validators.pattern(RegexPatterns.phone)]],
       subdomainSlug:  ['', [Validators.required, Validators.maxLength(100), Validators.pattern(RegexPatterns.subdomainSlug)]],
       address:        ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       logoUrl:        ['', [Validators.maxLength(500)]],
-      // Branding
       primaryColor:   ['', [Validators.pattern(RegexPatterns.hexColor)]],
       secondaryColor: ['', [Validators.pattern(RegexPatterns.hexColor)]],
-      // Regional
       currency: [CurrencyEnum.TND, Validators.required],
       locale: [LocaleEnum.FR, Validators.required],
       timezone: [TimeZoneEnum.AFRICA_TUNIS, Validators.required],
@@ -117,15 +119,13 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (tenant) => {
           this.selectedTenant = tenant;
-
           this.populateFormFromTenant(tenant);
           this.loading = false;
-
           this.cdr.markForCheck();
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
           this.loading = false;
-          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.LOAD_FAILED');
+          const errorMsg = err.error?.message || this.translate.instant(`${this.errorsTranslationKey}update_failed`);
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -133,7 +133,6 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   }
 
   private populateFormFromTenant(tenant: TenantSettingsDto): void {
-
     this.tenantForm.patchValue({
       name: tenant.name,
       subdomainSlug: tenant.slug,
@@ -147,8 +146,6 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
       primaryColor: tenant.primaryColor,
       secondaryColor: tenant.secondaryColor
     });
-
-
     this.tenantForm.markAsPristine();
     this.syncColorPickers();
   }
@@ -157,16 +154,12 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     (['primaryColor', 'secondaryColor'] as const).forEach(controlName => {
       const value = this.tenantForm.get(controlName)?.value;
       if (!value) return;
-
       const pickers = document.querySelectorAll<HTMLInputElement>(
         `input[type="color"][formControlName="${controlName}"]`
       );
       pickers.forEach(el => (el.value = value));
     });
   }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
 
   get canSubmit(): boolean {
     if (this.tenantForm.invalid) return false;
@@ -175,29 +168,26 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   }
 
   getSubmitButtonTooltip(): string {
-    if (this.isValidating) return this.translate.instant('COMMON.PROCESSING');
-    if (this.tenantForm.invalid) return this.translate.instant('VALIDATION.REQUIRED');
+    if (this.isValidating) return this.translate.instant('common.processing');
+    if (this.tenantForm.invalid) return this.translate.instant(`${this.templateTranslationKey}validation.required`);
     return '';
   }
 
-  // ── CRUD actions ───────────────────────────────────────────────────────────
-
   updateTenant(): void {
     if (this.tenantForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant(`${this.templateTranslationKey}validation.required`));
       return;
     }
 
     if (!this.selectedTenant) {
-      this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+      this.flash('error', this.translate.instant(`${this.errorsTranslationKey}update_failed`));
       return;
     }
 
     this.isValidating = true;
-    this.loading= true;
+    this.loading = true;
 
     const formValue = this.tenantForm.value;
-
     const updateDto: UpdateTenantRequestDto = {
       name: formValue.name,
       email: formValue.email,
@@ -212,7 +202,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     };
 
     this.tenantService.updateTenant(this.tenantId!, updateDto)
-      .pipe(tap(()  => this.tenantService.patchSettings(updateDto)),takeUntilDestroyed(this.destroyRef))
+      .pipe(tap(() => this.tenantService.patchSettings(updateDto)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           this.selectedTenant = {
@@ -228,21 +218,20 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
             timezone: updated.timezone,
             logoUrl: updated.logoUrl
           };
-          this.flash('success', this.translate.instant('USERS_SYSTEM_SETTINGS.UPDATED'));
-
+          this.flash('success', this.translate.instant(`${this.templateTranslationKey}update_success`));
           this.currencyConfig.save(updated.currency, updated.locale);
           this.isEdit = false;
           setTimeout(() => {
             this.isValidating = false;
-            this.loading= false;
+            this.loading = false;
             this.cdr.markForCheck();
           }, 2000);
         },
-        error: (err) => {
-        
-          this.flash('error', this.translate.instant('USERS_SYSTEM_SETTINGS.UPDATE_FAILED'));
+        error: (err: HttpErrorResponse) => {
+          const errorMsg = err.error?.message || this.translate.instant(`${this.templateTranslationKey}update_failed`);
+          this.flash('error', errorMsg);
           this.isValidating = false;
-          this.loading= false;
+          this.loading = false;
           this.cdr.markForCheck();
         }
       });
@@ -250,7 +239,6 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
 
   edit(): void {
     this.isEdit = !this.isEdit;
-
     if (this.isEdit) {
       this.tenantForm.disable();
       this.populateFormFromTenant(this.selectedTenant!);
@@ -269,13 +257,10 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const controlName = input.getAttribute('formControlName') as string;
     const value = input.value.trim();
-
-    // Only update if it's a valid hex color
     if (RegexPatterns.hexColor.test(value)) {
       this.tenantForm.get(controlName)?.setValue(value, { emitEvent: false });
     }
   }
-  // ── Helpers ────────────────────────────────────────────────────────────────
 
   flash(type: 'success' | 'error', msg: string): void {
     if (type === 'success') {
@@ -295,9 +280,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
-  ngOnDestroy(): void {
-    // cleanup
-  }
+  ngOnDestroy(): void {}
 
   private localeToEnum(locale: string | undefined): LocaleEnum {
     const map: Record<string, LocaleEnum> = {
