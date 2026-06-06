@@ -30,7 +30,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         try
         {
             CategoryCache? category = await _repository.GetByIdAsync(id);
-            return category != null ? await MapToDto(category) : null;
+            return category != null ? MapToDto(category) : null;
         }
         catch (Exception ex)
         {
@@ -47,7 +47,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
             foreach (CategoryCache category in categories)
             {
-                categoryDtos.Add(await MapToDto(category));
+                categoryDtos.Add(MapToDto(category));
             }
             return categoryDtos;
         }
@@ -60,21 +60,13 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
     public async Task<List<ClientCategoryResponseDto>> GetAllAsync()
     {
-        try
-        {
-            List<CategoryCache> categories = await _repository.GetAllAsync();
-            List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
-            foreach (CategoryCache category in categories)
-            {
-                categoryDtos.Add(await MapToDto(category));
-            }
-            return categoryDtos;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all client categories");
-            throw;
-        }
+        List<CategoryCache> categories = await _repository.GetAllAsync();
+        Dictionary<Guid, int> counts = await _repository
+            .GetClientCountsByCategoryIdsAsync(categories.Select(c => c.Id).ToList());
+
+        return categories
+            .Select(c => MapToDto(c, counts.GetValueOrDefault(c.Id, 0)))
+            .ToList();
     }
 
     public async Task<bool> ExistsAsync(Guid id)
@@ -165,6 +157,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             updatedAt: dto.UpdatedAt
         );
 
+        await _repository.UpdateCategoryAsync(existing); // ← missing
         await _repository.SaveChangesAsync();
 
         _logger.LogInformation("Category {CategoryName} (Code: {Code}) updated", dto.Name, dto.Code);
@@ -175,26 +168,19 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        try
+        CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
-                return;
-            }
-
-            await _repository.DeleteCategoryAsync(dto.Id);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
-                existing.Name, existing.Code);
+            _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing deleted category {CategoryId}", dto.Id);
-            throw;
-        }
+
+        existing.Delete();
+        await _repository.UpdateCategoryAsync(existing); // use the already-loaded entity
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
+            existing.Name, existing.Code);
     }
 
     public async Task SyncRestoredAsync(ClientCategoryResponseDto dto)
@@ -346,11 +332,8 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
     // PRIVATE HELPERS
     // =========================
 
-    private async Task<ClientCategoryResponseDto> MapToDto(CategoryCache category)
-    {
-        int clientCount = await _repository.GetCountForClientAsync(category.Id);
-
-        return new ClientCategoryResponseDto(
+    private static ClientCategoryResponseDto MapToDto(CategoryCache category, int clientCount = 0)
+        => new(
             Id: category.Id,
             Name: category.Name,
             Code: category.Code,
@@ -365,5 +348,5 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             UpdatedAt: category.UpdatedAt,
             TenantId: category.TenantId
             );
-    }
+
 }
