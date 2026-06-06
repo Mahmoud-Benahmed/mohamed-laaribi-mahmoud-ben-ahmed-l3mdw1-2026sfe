@@ -1,3 +1,5 @@
+using Confluent.Kafka;
+using ERP.InvoiceService.Application.Services;
 using InvoiceService.Application.Interfaces;
 using InvoiceService.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -9,22 +11,20 @@ namespace ERP.InvoiceService.Infrastructure.Persistence;
 public class InvoiceRepository : IInvoiceRepository
 {
     private readonly InvoiceDbContext _context;
+    private readonly ITenantContext _tenantContext;
 
-    public InvoiceRepository(InvoiceDbContext context)
+    public InvoiceRepository(InvoiceDbContext context, ITenantContext tenantContext)
     {
         _context = context;
+        _tenantContext = tenantContext;
     }
 
     public async Task<List<Invoice>> GetOverdueAsync(DateTime asOf)
-    {
-        return await _context.Invoices
+        => await _context.Invoices
             .Include(i => i.Items)
             .AsSplitQuery()
-            .Where(i => i.Status == InvoiceStatus.UNPAID
-                     && i.DueDate <= asOf
-                     && !i.IsDeleted)
+            .Where(i => i.Status == InvoiceStatus.UNPAID && i.DueDate <= asOf)
             .ToListAsync();
-    }
 
     public async Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber)
     {
@@ -51,7 +51,15 @@ public class InvoiceRepository : IInvoiceRepository
     public async Task<Invoice?> GetByIdAsync(Guid id)
     {
         return await _context.Invoices
-            .IgnoreQueryFilters()
+            .Include(i => i.Items)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(i => i.Id == id);
+    }
+
+    public async Task<Invoice?> GetByIdDeletedAsync(Guid id)
+    {
+        return await _context.Invoices.IgnoreQueryFilters()
+            .Where(i=> i.TenantId == _tenantContext.TenantId)
             .Include(i => i.Items)
             .AsSplitQuery()
             .FirstOrDefaultAsync(i => i.Id == id);
@@ -82,7 +90,7 @@ public class InvoiceRepository : IInvoiceRepository
 
         int totalCount = await query.CountAsync();
 
-        var items = await query
+        List<Invoice> items = await query
             .Include(i => i.Items)
             .AsSplitQuery()
             .OrderByDescending(i => i.CreatedAt)
@@ -144,11 +152,12 @@ public class InvoiceRepository : IInvoiceRepository
 
         return (items, totalCount);
     }
-
-    public async Task AddAsync(Invoice invoice)
+    public async Task SaveChangesAsync()
+    => await _context.SaveChangesAsync();
+    public Task AddAsync(Invoice invoice)
     {
-        await _context.Invoices.AddAsync(invoice);
-        await _context.SaveChangesAsync();
+        _context.Invoices.Add(invoice);
+        return Task.CompletedTask;
     }
 
     public async Task UpdateAsync(Invoice invoice)
@@ -166,8 +175,6 @@ public class InvoiceRepository : IInvoiceRepository
         {
             _context.InvoiceItems.Add(item);
         }
-
-        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> ExistsByInvoiceNumberAsync(string invoiceNumber)
