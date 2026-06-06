@@ -3,8 +3,8 @@
   <!-- ── PAGE HEADER ── -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'USERS.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'USERS.TITLE_DEACTIVATED' | translate }}</h1>
+      <p class="breadcrumb">{{ `${templateTranslationKey}breadcrumb` | translate }}</p>
+      <h1 class="page-title">{{ `${templateTranslationKey}title` | translate }}</h1>
     </div>
   </div>
 
@@ -38,7 +38,7 @@
       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.ACTIVE' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.active` | translate }}</p>
           <p class="stat-card__value">{{ stats?.activeUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--green">
@@ -58,7 +58,8 @@
       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) || authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER)">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.DEACTIVATED' | translate }}</p>
+          <!-- FIX: use stats.deactivated instead of stats.active -->
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.deactivated` | translate }}</p>
           <p class="stat-card__value">{{ stats?.deactivatedUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--red">
@@ -80,7 +81,7 @@
       <input
         class="search-input"
         type="text"
-        [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate"
+        [placeholder]="`${templateTranslationKey}search_placeholder` | translate"
         [(ngModel)]="searchTerm"
         (ngModelChange)="applyFilter()" />
     </div>
@@ -97,7 +98,7 @@
       <thead>
         <tr>
           <th (click)="sortBy('fullName')" class="th--sortable">
-            {{ 'USERS.TABLE.FULL_NAME' | translate }}
+            {{ `${templateTranslationKey}table.head.fullname` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'fullName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -110,7 +111,7 @@
             </span>
           </th>
           <th (click)="sortBy('email')" class="th--sortable">
-            {{ 'USERS.TABLE.EMAIL' | translate }}
+            {{ `${templateTranslationKey}table.head.email` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'email' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -123,7 +124,7 @@
             </span>
           </th>
           <th (click)="sortBy('roleName')" class="th--sortable">
-            {{ 'USERS.TABLE.ROLE' | translate }}
+            {{ `${templateTranslationKey}table.head.role` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'roleName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -136,7 +137,7 @@
             </span>
           </th>
           <th (click)="sortBy('lastLoginAt')" class="th--sortable">
-            {{ 'USERS.TABLE.LAST_LOGIN' | translate }}
+            {{ `${templateTranslationKey}table.head.last_login` | translate }}
             <span class="sort-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                   [style.opacity]="sortColumn === 'lastLoginAt' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -148,7 +149,7 @@
               </svg>
             </span>
           </th>
-          <th>{{ 'USERS.TABLE.ACTIONS' | translate }}</th>
+          <th>{{ `${templateTranslationKey}table.head.actions` | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -171,13 +172,13 @@
 
           <td>
             <span class="date-cell">
-              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : ('USERS.TABLE.NO_LOGIN' | translate) }}
+              {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd MMM yyyy') : (`${templateTranslationKey}table.body.no_login` | translate) }}
             </span>
           </td>
 
           <td class="td--actions">
             <button class="icon-btn icon-btn--view"
-                    [title]="'COMMON.VIEW' | translate"
+                    [title]="`${templateTranslationKey}buttons.table.view` | translate"
                     [routerLink]="['/users', user.id]"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -185,7 +186,7 @@
               </svg>
             </button>
             <button class="icon-btn icon-btn--reactivate"
-                    [title]="'COMMON.ACTIVATE' | translate"
+                    [title]="`${templateTranslationKey}buttons.table.activate` | translate"
                     (click)="activateUser(user)"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -193,7 +194,7 @@
               </svg>
             </button>
             <button class="icon-btn icon-btn--delete"
-                    [title]="'COMMON.DELETE' | translate"
+                    [title]="`${templateTranslationKey}buttons.table.delete` | translate"
                     (click)="delete(user)"
                     *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_USER)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -209,7 +210,7 @@
 
         <tr *ngIf="sortedData.length === 0">
           <td colspan="6" class="td--empty">
-            {{ 'COMMON.NO_RESULTS' | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
+            {{ `${templateTranslationKey}table.body.no_result` | translate }}{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}
           </td>
         </tr>
       </tbody>
