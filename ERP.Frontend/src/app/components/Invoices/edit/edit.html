@@ -393,7 +393,7 @@
                 </div>
 
                 <div class="form__actions">
-                  <button type="button" class="btn-secondary" (click)="closeInlineItem()">{{ 'COMMON.CANCEL' | translate }}</button>
+                  <button type="button" class="btn-secondary" (click)="closeInlineItem()">{{ 'common.cancel' | translate }}</button>
                   <button type="button" class="btn-add" (click)="submitInlineItem()" [disabled]="itemForm.invalid">
                     {{ inlineItemLocalId ? ('INVOICES.FORM.UPDATE_ITEM' | translate) : ('INVOICES.FORM.ADD_ITEM' | translate) }}
                   </button>
@@ -483,7 +483,7 @@
               </div>
 
               <div class="panel__actions">
-                <button class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
                 <button class="btn-add"
                         [disabled]="!canSubmit"
                         [class.disabled]="!canSubmit"
