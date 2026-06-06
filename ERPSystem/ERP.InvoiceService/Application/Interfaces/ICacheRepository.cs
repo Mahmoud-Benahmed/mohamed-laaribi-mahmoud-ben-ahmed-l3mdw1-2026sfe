@@ -15,6 +15,7 @@ public interface IArticleCacheRepository
     Task<List<ArticleCache>> GetAllActiveAsync();
     Task<(List<ArticleCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null);
     Task AddAsync(ArticleCache article);
+    Task UpdateAsync(ArticleCache article);
     Task SaveChangesAsync();
     Task DeleteAsync(ArticleCache article);
 }
@@ -29,7 +30,7 @@ public interface IArticleCategoryCacheRepository
     Task<List<Domain.LocalCache.Article.ArticleCategoryCache>> GetAllActiveAsync();
     Task<(List<Domain.LocalCache.Article.ArticleCategoryCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
     Task AddAsync(Domain.LocalCache.Article.ArticleCategoryCache category);
-    Task SaveChangesAsync();
+    Task SaveChangesAsync(); Task UpdateAsync(Domain.LocalCache.Article.ArticleCategoryCache article);
     Task DeleteAsync(Domain.LocalCache.Article.ArticleCategoryCache cache);
 }
 
@@ -75,6 +76,7 @@ public interface IClientCategoryCacheRepository
     Task DeleteAllCategoriesForClientAsync(Guid clientId);
 
     // Save changes
+    Task UpdateAsync(CategoryCache category);
     Task SaveChangesAsync();
     Task DeleteAsync(Domain.LocalCache.Client.CategoryCache category);
 }
