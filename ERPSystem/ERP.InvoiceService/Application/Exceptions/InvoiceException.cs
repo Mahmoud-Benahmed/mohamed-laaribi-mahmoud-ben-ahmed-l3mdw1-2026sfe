@@ -24,3 +24,8 @@ public class InvoiceDomainException : Exception
     public InvoiceDomainException(string message)
         : base(message) { }
 }
+
+public class ClientBlockedException : Exception 
+{
+    public ClientBlockedException(): base("Cannot create an invoice for a blocked client.") { }
+}
