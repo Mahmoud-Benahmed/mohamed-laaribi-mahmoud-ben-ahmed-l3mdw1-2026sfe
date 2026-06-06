@@ -68,32 +68,13 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
     // CategoryCacheService.cs
     public async Task SyncCreatedAsync(ArticleCategoryResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
-
-        if (string.IsNullOrWhiteSpace(dto.Name))
+        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
+        if (existing is not null)
         {
-            _logger.LogWarning("Category event has null or empty Name. Id: {CategoryId}", dto.Id);
-            return;
-        }
-        // Try to find by ID first, then by Name
-        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id) ?? await _repo.GetByNameAsync(dto.Name);
-
-        if (existing != null)
-        {
-            _logger.LogInformation(
-                existing.Id == dto.Id
-                    ? "Category {Name} (Id: {Id}) found. Updating."
-                    : "Category name '{Name}' found with different ID (Existing: {ExistingId}, New: {NewId}). Updating existing.",
-                dto.Name, dto.Id, existing.Id);
-
-            existing.ApplyUpdate(dto);
-            await _repo.SaveChangesAsync();
+            _logger.LogWarning("SyncCreated: category {Id} already exists, skipping", dto.Id);
             return;
         }
 
-        // Create new category
-        _logger.LogInformation("Creating new category: {Name} (Id: {Id})", dto.Name, dto.Id);
         await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
         await _repo.SaveChangesAsync();
     }
