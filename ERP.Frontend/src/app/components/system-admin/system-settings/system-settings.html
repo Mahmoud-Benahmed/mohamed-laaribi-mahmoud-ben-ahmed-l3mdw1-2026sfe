@@ -41,7 +41,7 @@
       <div class="panel__body">
         <form [formGroup]="tenantForm" class="form">
 
-          <!-- Name & Subdomain -->
+          <!-- Name & Email -->
           <div class="form__row form__row--2">
             <div class="form__field">
               <label class="form__label">
@@ -59,10 +59,7 @@
                 <span *ngIf="tenantForm.get('name')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 2} }}</span>
               </span>
             </div>
-          </div>
 
-          <!-- Email & Phone -->
-          <div class="form__row form__row--2">
             <div class="form__field">
               <label class="form__label">
                 {{ 'TENANTS.FORM.EMAIL' | translate }}
@@ -79,7 +76,10 @@
                 <span *ngIf="tenantForm.get('email')?.hasError('email')">{{ 'VALIDATION.INVALID_EMAIL' | translate }}</span>
               </span>
             </div>
+          </div>
 
+          <!-- Phone & Address -->
+          <div class="form__row form__row--2">
             <div class="form__field">
               <label class="form__label">
                 {{ 'TENANTS.FORM.PHONE' | translate }}
@@ -96,10 +96,7 @@
                 <span *ngIf="tenantForm.get('phone')?.hasError('minlength')">{{ 'VALIDATION.MIN_LENGTH' | translate: {min: 8} }}</span>
               </span>
             </div>
-          </div>
 
-
-          <div class="form__row form__row--2">
             <div class="form__field">
                 <label class="form__label">
                 {{ 'TENANTS.FORM.ADDRESS' | translate }}
@@ -115,91 +112,94 @@
                 {{ 'VALIDATION.REQUIRED' | translate }}
                 </span>
             </div>
+          </div>
 
-            <div class="form__field">
-                <label class="form__label">{{ 'ONBOARDING.LOGO_URL' | translate }}</label>
-                <input formControlName="logoUrl" type="text" class="form__input"
-                        [placeholder]="'ONBOARDING.LOGO_URL_PLACEHOLDER' | translate" />
-                <span class="field-error" *ngIf="tenantForm.get('logoUrl')?.touched && tenantForm.get('logoUrl')?.errors">
-                    <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_URL' | translate }}</ng-container>
-                    <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: tenantForm.get('logoUrl')?.errors?.['maxlength'].requiredLength } }}</ng-container>
-                </span>
+          <!-- Currency & Locale -->
+            <div class="form__row form__row--2">
+              <div class="form__field">
+                  <label class="form__label">
+                      {{ 'TENANTS.FORM.CURRENCY' | translate }}
+                      <span class="form__required">*</span>
+                  </label>
+                  <select class="form__input" formControlName="currency" [class.disabled]="isEdit">
+                      <option [value]="CurrencyEnum.TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
+                      <option [value]="CurrencyEnum.EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
+                      <option [value]="CurrencyEnum.USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
+                  </select>
+              </div>
+
+              <div class="form__field">
+                  <label class="form__label">
+                      {{ 'TENANTS.FORM.LOCALE' | translate }}
+                      <span class="form__required">*</span>
+                  </label>
+                  <select class="form__input" formControlName="locale" [class.disabled]="isEdit">
+                      <option [value]="LocaleEnum.EN">{{ 'TENANTS.LOCALES.EN' | translate}} - ({{ LocaleEnum.EN }})</option>
+                      <option [value]="LocaleEnum.FR">{{ 'TENANTS.LOCALES.FR' | translate}} - ({{ LocaleEnum.FR }})</option>
+                      <option [value]="LocaleEnum.AR">{{ 'TENANTS.LOCALES.AR' | translate}} - ({{ LocaleEnum.AR }})</option>
+                  </select>
+              </div>
+
             </div>
-					</div>
-
-
 
             <div class="form__row form__row--2">
-                <div class="form__field">
-                    <label class="form__label">{{ 'ONBOARDING.PRIMARY_COLOR' | translate }}</label>
-                    <div class="color-input-wrap">
-											<input formControlName="primaryColor" type="color" class="color-swatch"   (change)="fillColorTextInput($event)" [class.disabled]="isEdit"/>
-											<input formControlName="primaryColor" type="text"  class="color-text"     (change)="fillColorInput($event)"
-												[class.disabled]="isEdit" placeholder="#a0b4ff" maxlength="7" />
-                    </div>
-                    <span class="field-error" *ngIf="tenantForm.get('primaryColor')?.touched && tenantForm.get('primaryColor')?.errors">
-                        <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
-                        <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
-                    </span>
-                </div>
+              <div class="form__field">
+                  <label class="form__label">{{ 'ONBOARDING.LOGO_URL' | translate }}</label>
+                  <input formControlName="logoUrl" type="text" class="form__input"
+                          [placeholder]="'ONBOARDING.LOGO_URL_PLACEHOLDER' | translate" />
+                  <span class="field-error" *ngIf="tenantForm.get('logoUrl')?.touched && tenantForm.get('logoUrl')?.errors">
+                      <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_URL' | translate }}</ng-container>
+                      <ng-container *ngIf="tenantForm.get('logoUrl')?.errors?.['maxlength']">{{ 'VALIDATION.MAX_LENGTH' | translate : { max: tenantForm.get('logoUrl')?.errors?.['maxlength'].requiredLength } }}</ng-container>
+                  </span>
+              </div>
 
-                <div class="form__field">
-                    <label class="form__label">{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
-                    <div class="color-input-wrap">
-                        <input formControlName="secondaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"	[class.disabled]="isEdit" />
-                        <input formControlName="secondaryColor" type="text" class="color-text"    (change)="fillColorInput($event)" 		[class.disabled]="isEdit"
-                                placeholder="#4e7cff" maxlength="7" />
-                    </div>
-                    <span class="field-error" *ngIf="tenantForm.get('secondaryColor')?.touched && tenantForm.get('secondaryColor')?.errors">
-                        <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
-                        <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
-                    </span>
+              <div class="form__field">
+                <label class="form__label">
+                  {{ 'TENANTS.FORM.TIMEZONE' | translate }}
+                  <span class="form__required">*</span>
+                </label>
+                <select class="form__input" formControlName="timezone" [class.disabled]="isEdit">
+                  <option [value]="TimeZoneEnum.UTC">UTC</option>
+                  <option [value]="TimeZoneEnum.AFRICA_TUNIS">Africa/Tunis (UTC+1)</option>
+                  <option [value]="TimeZoneEnum.EUROPE_PARIS">Europe/Paris (UTC+1)</option>
+                  <option [value]="TimeZoneEnum.EUROPE_LONDON">Europe/London (UTC)</option>
+                </select>
               </div>
             </div>
 
-            <!-- Currency, Locale, Timezone -->
-            <div class="form__row form__row--3">
+            <div class="form__row form__row--2">
                 <div class="form__field">
-                    <label class="form__label">
-                        {{ 'TENANTS.FORM.CURRENCY' | translate }}
-                        <span class="form__required">*</span>
-                    </label>
-                    <select class="form__input" formControlName="currency" [class.disabled]="isEdit">
-                        <option [value]="CurrencyEnum.TND">TND — {{ 'TENANTS.CURRENCIES.TND' | translate }}</option>
-                        <option [value]="CurrencyEnum.EUR">EUR — {{ 'TENANTS.CURRENCIES.EUR' | translate }}</option>
-                        <option [value]="CurrencyEnum.USD">USD — {{ 'TENANTS.CURRENCIES.USD' | translate }}</option>
-                    </select>
+                  <label class="form__label">{{ 'ONBOARDING.PRIMARY_COLOR' | translate }}</label>
+                  <div class="color-input-wrap">
+                    <input formControlName="primaryColor" type="color" class="color-swatch"   (change)="fillColorTextInput($event)" [class.disabled]="isEdit"/>
+                    <input formControlName="primaryColor" type="text"  class="color-text"     (change)="fillColorInput($event)"
+                      [class.disabled]="isEdit" placeholder="#a0b4ff" maxlength="7" />
+                  </div>
+                  <span class="field-error" *ngIf="tenantForm.get('primaryColor')?.touched && tenantForm.get('primaryColor')?.errors">
+                      <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                      <ng-container *ngIf="tenantForm.get('primaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                  </span>
                 </div>
 
-                <div class="form__field">
-                    <label class="form__label">
-                        {{ 'TENANTS.FORM.LOCALE' | translate }}
-                        <span class="form__required">*</span>
-                    </label>
-                    <select class="form__input" formControlName="locale" [class.disabled]="isEdit">
-                        <option [value]="LocaleEnum.EN">{{ 'TENANTS.LOCALES.EN' | translate}} - ({{ LocaleEnum.EN }})</option>
-                        <option [value]="LocaleEnum.FR">{{ 'TENANTS.LOCALES.FR' | translate}} - ({{ LocaleEnum.FR }})</option>
-                        <option [value]="LocaleEnum.AR">{{ 'TENANTS.LOCALES.AR' | translate}} - ({{ LocaleEnum.AR }})</option>
-                    </select>
+              <div class="form__field">
+                <label class="form__label">{{ 'ONBOARDING.SECONDARY_COLOR' | translate }}</label>
+                <div class="color-input-wrap">
+                    <input formControlName="secondaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"	[class.disabled]="isEdit" />
+                    <input formControlName="secondaryColor" type="text" class="color-text"    (change)="fillColorInput($event)" 		[class.disabled]="isEdit"
+                            placeholder="#4e7cff" maxlength="7" />
                 </div>
-
-            <div class="form__field">
-              <label class="form__label">
-                {{ 'TENANTS.FORM.TIMEZONE' | translate }}
-                <span class="form__required">*</span>
-              </label>
-              <select class="form__input" formControlName="timezone" [class.disabled]="isEdit">
-                <option [value]="TimeZoneEnum.UTC">UTC</option>
-                <option [value]="TimeZoneEnum.AFRICA_TUNIS">Africa/Tunis (UTC+1)</option>
-                <option [value]="TimeZoneEnum.EUROPE_PARIS">Europe/Paris (UTC+1)</option>
-                <option [value]="TimeZoneEnum.EUROPE_LONDON">Europe/London (UTC)</option>
-              </select>
+                <span class="field-error" *ngIf="tenantForm.get('secondaryColor')?.touched && tenantForm.get('secondaryColor')?.errors">
+                    <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</ng-container>
+                    <ng-container *ngIf="tenantForm.get('secondaryColor')?.errors?.['pattern']">{{ 'VALIDATION.INVALID_HEX_COLOR' | translate }}</ng-container>
+                </span>
+              </div>
             </div>
-          </div>
+
+
 
           <!-- Save Button -->
           <div class="form__actions">
-            <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
             <button type="button"
                     class="btn-primary"
                     [disabled]="!canSubmit || isEdit"
