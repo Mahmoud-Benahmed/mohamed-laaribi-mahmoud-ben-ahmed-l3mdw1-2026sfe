@@ -49,6 +49,7 @@ public class ClientService : IClientService
 
         await _clientRepository.AddAsync(client);
         await _clientRepository.SaveChangesAsync();
+
         ClientResponseDto res = client.ToResponseDto();
         await _eventPublisher.PublishAsync(ClientTopics.Created, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
