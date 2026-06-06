@@ -1,10 +1,13 @@
 <div class="modal-header">
   @if(data.icon) {
-    <mat-icon [ngClass]="'icon--' + (data.iconColor || 'primary')">
+    <mat-icon [ngClass]="'color-'+(data.iconColor || 'primary')">
       {{ data.icon }}
     </mat-icon>
   }
-  <h2 mat-dialog-title>{{ data.title | translate }}</h2>
+  <h2 mat-dialog-title
+      [ngClass]="'color-'+(data.iconColor || 'primary')">
+    {{ data.title | translate }}
+  </h2>
 </div>
 
 <mat-dialog-content>
@@ -14,10 +17,10 @@
 <mat-dialog-actions align="end">
   @if(data.showCancel !== false) {
     <button mat-button class="btn-secondary" (click)="cancel()">
-      {{ data.cancelText ? (data.cancelText | translate) : ('COMMON.CANCEL' | translate) }}
+      {{ data.cancelText ? (data.cancelText | translate) : ('common.cancel' | translate) }}
     </button>
   }
-  <button mat-raised-button color="primary" (click)="confirm()">
-    {{ data.confirmText ? (data.confirmText | translate) : ('COMMON.CONFIRM' | translate) }}
+  <button mat-raised-button [ngClass]="'btn-'+(data.iconColor || 'secondary')" (click)="confirm()">
+    {{ data.confirmText ? (data.confirmText | translate) : ('common.confirm' | translate) }}
   </button>
 </mat-dialog-actions>
