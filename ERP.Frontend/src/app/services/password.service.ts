@@ -32,12 +32,12 @@ export class PasswordService {
    */
   getStrengthLabel(strength: string): string {
     const strengthMap: Record<string, string> = {
-      'weak': 'VALIDATION.PASSWORD_WEAK',
-      'fair': 'VALIDATION.PASSWORD_FAIR',
-      'strong': 'VALIDATION.PASSWORD_GOOD',
-      'very strong': 'VALIDATION.PASSWORD_STRONG',
+      'weak':       'weak',
+      'fair':       'fair',
+      'strong':     'good',
+      'very strong':'strong',
     };
-    return this.translate.instant(strengthMap[strength] || '');
+    return strengthMap[strength] || 'weak'; // return the key, don't translate here
   }
 
   /**
