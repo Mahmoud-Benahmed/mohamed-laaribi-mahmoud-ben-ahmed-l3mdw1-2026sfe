@@ -52,6 +52,7 @@ public class GlobalExceptionMiddleware
             // 400 Bad Request (domain rule violation)
             InvoiceDomainException e =>
                 (HttpStatusCode.BadRequest, e.Message),
+            ClientBlockedException ex => (HttpStatusCode.Forbidden, ex.Message),
 
             // 500 Internal Server Error (for any other exception)
             _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred.")
