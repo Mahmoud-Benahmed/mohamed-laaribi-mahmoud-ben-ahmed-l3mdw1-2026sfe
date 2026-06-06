@@ -63,7 +63,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
-    private tenantService: TenantService,
+    public tenantService: TenantService,
     private fb: FormBuilder,
     private currencyConfig: CurrencyConfigService,
   ) {}
@@ -228,7 +228,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
             timezone: updated.timezone,
             logoUrl: updated.logoUrl
           };
-          this.flash('success', this.translate.instant('USERS.SYSTEM_SETTINGS.UPDATED'));
+          this.flash('success', this.translate.instant('USERS_SYSTEM_SETTINGS.UPDATED'));
 
           this.currencyConfig.save(updated.currency, updated.locale);
           this.isEdit = false;
@@ -239,8 +239,8 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
           }, 2000);
         },
         error: (err) => {
-          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('USERS.SYSTEM_SETTINGS.UPDATE_FAILED');
-          this.flash('error', errorMsg);
+        
+          this.flash('error', this.translate.instant('USERS_SYSTEM_SETTINGS.UPDATE_FAILED'));
           this.isValidating = false;
           this.loading= false;
           this.cdr.markForCheck();
