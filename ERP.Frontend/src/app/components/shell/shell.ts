@@ -30,42 +30,38 @@ export class ShellComponent implements OnInit, OnDestroy {
   openGroups: Record<string, boolean> = {
     auth: false,
     articles: false,
-    clients:  false,
-    stock:    false,
-    invoices: false
+    clients: false,
+    stock: false,
+    invoices: false,
+    payments: false
   };
 
   userName = '';
   userRole = '';
   initials = '';
-  readonly PRIVILEGES= PRIVILEGES;
+  readonly PRIVILEGES = PRIVILEGES;
 
-
-  constructor(private router: Router,
-              public authService: AuthService,
-              private cdr: ChangeDetectorRef,
-              public userSettings: UserSettingsService,
-              public translate: TranslateService,
-              public tenantService :TenantService,
-              public themeService: UserSettingsService
-  ) {
-  }
-
+  constructor(
+    private router: Router,
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    public userSettings: UserSettingsService,
+    public translate: TranslateService,
+    public tenantService: TenantService,
+    public themeService: UserSettingsService
+  ) {}
 
   ngOnInit(): void {
     this.subs.add(
-      this.router.events.pipe(
-        filter(e => e instanceof NavigationEnd)
-      ).subscribe((e: any) => {
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
         const url: string = e.urlAfterRedirects;
         this.breadcrumbs = this.getBreadcrumbs(url);
         if (url.startsWith('/users') || url.startsWith('/permissions')) this.openGroups['auth'] = true;
         if (url.startsWith('/articles')) this.openGroups['articles'] = true;
-        if (url.startsWith('/clients'))  this.openGroups['clients']  = true;
-        if (url.startsWith('/stock'))    this.openGroups['stock']    = true;
+        if (url.startsWith('/clients')) this.openGroups['clients'] = true;
+        if (url.startsWith('/stock')) this.openGroups['stock'] = true;
         if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
         if (url.startsWith('/payments')) this.openGroups['payments'] = true;
-
       })
     );
 
@@ -84,49 +80,129 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.breadcrumbs = this.getBreadcrumbs(url);
     if (url.startsWith('/users') || url.startsWith('/permissions')) this.openGroups['auth'] = true;
     if (url.startsWith('/articles')) this.openGroups['articles'] = true;
-    if (url.startsWith('/clients'))  this.openGroups['clients']  = true;
-    if (url.startsWith('/stock'))    this.openGroups['stock']    = true;
+    if (url.startsWith('/clients')) this.openGroups['clients'] = true;
+    if (url.startsWith('/stock')) this.openGroups['stock'] = true;
     if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
     if (url.startsWith('/payments')) this.openGroups['payments'] = true;
+
     window.addEventListener('resize', this.resizeListener);
   }
 
   private getBreadcrumbs(url: string): { label: string; link?: string }[] {
-    if (url.startsWith('/change-password/'))  return [{ label: 'Users', link: '/users' }, { label: 'Reset Password' }];
+    const t = (key: string) => this.translate.instant(key);
 
-    if (url.startsWith('/users/register'))    return [{ label: 'Users', link: '/users' }, { label: 'Register' }];
-    if (url.startsWith('/users/deactivated')) return [{ label: 'Users', link: '/users' }, { label: 'Deactivated' }];
-    if (url.startsWith('/users/deleted'))     return [{ label: 'Users', link: '/users' }, { label: 'Deleted' }];
-    if (url.startsWith('/users/categories'))  return [{ label: 'Users', link: '/users' }, { label: 'Controles' }];
-    if (url.startsWith('/users/roles'))       return [{ label: 'Users', link: '/roles' }, { label: 'Roles' }];
-    if (url.startsWith('/users/'))            return [{ label: 'Users', link: '/users' }, { label: 'Profile' }];
-    if (url.startsWith('/users'))             return [{ label: 'Users' }];
+    // Special dynamic routes (with parameters)
+    if (url.startsWith('/change-password/')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('USERS.CHANGE_PASSWORD.TITLE') } // or a dedicated key if exists
+      ];
+    }
 
-    if (url.startsWith('/articles/categories'))   return [{ label: 'Articles', link: '/articles/categories' }, { label: 'Categories' }];
-    if (url.startsWith('/articles'))              return [{ label: 'Articles' }];
+    if (url.startsWith('/users/register')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('nav.auth.register') }
+      ];
+    }
+    if (url.startsWith('/users/deactivated')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('nav.auth.deactivated') }
+      ];
+    }
+    if (url.startsWith('/users/deleted')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('nav.auth.deleted') }
+      ];
+    }
+    if (url.startsWith('/users/categories')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('nav.auth.controles') }
+      ];
+    }
+    if (url.startsWith('/users/roles')) {
+      return [
+        { label: t('nav.auth.roles'), link: '/roles' },
+        { label: t('nav.auth.roles') }
+      ];
+    }
+    if (url.startsWith('/users/')) {
+      return [
+        { label: t('nav.auth.list'), link: '/users' },
+        { label: t('USERS.PROFILE.EDIT_PROFILE') } // adjust as needed
+      ];
+    }
+    if (url.startsWith('/users')) {
+      return [{ label: t('nav.auth.list') }];
+    }
 
-    if (url.startsWith('/clients/categories'))    return [{ label: 'Clients', link: '/clients/categories' }, { label: 'Categories' }];
-    if (url.startsWith('/clients'))               return [{ label: 'Clients' }];
+    // Articles
+    if (url.startsWith('/articles/categories')) {
+      return [
+        { label: t('nav.articles.main'), link: '/articles' },
+        { label: t('nav.articles.categories') }
+      ];
+    }
+    if (url.startsWith('/articles')) {
+      return [{ label: t('nav.articles.main') }];
+    }
 
-    if (url.startsWith('/invoices'))              return [{ label: this.translate.instant('NAV.INVOICES'), link:'/invoices' }];
+    // Clients
+    if (url.startsWith('/clients/categories')) {
+      return [
+        { label: t('nav.clients.main'), link: '/clients' },
+        { label: t('nav.clients.categories') }
+      ];
+    }
+    if (url.startsWith('/clients')) {
+      return [{ label: t('nav.clients.main') }];
+    }
 
-    if (url.startsWith('/stock/fournisseurs'))    return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock/fournisseurs'}, {label: this.translate.instant('NAV.FOURNISSEURS')}];
-    if (url.startsWith('/stock/bons'))            return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock/bons'}, {label: this.translate.instant('NAV.BONS')}];
-    if (url.startsWith('/stock'))                 return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock'}];
+    // Invoices
+    if (url.startsWith('/invoices')) {
+      return [{ label: t('nav.invoices.main') }];
+    }
 
-    if (url.startsWith('/payments'))              return [{ label: this.translate.instant('NAV.PAYMENTS') , link:'/payments'}];
-    if (url.startsWith('/payments/refunds'))      return [{ label: this.translate.instant('NAV.REFUNDS') , link:'/payments/refunds'}];
+    // Stock
+    if (url.startsWith('/stock/fournisseurs')) {
+      return [
+        { label: t('nav.stock.main'), link: '/stock' },
+        { label: t('nav.stock.suppliers') }
+      ];
+    }
+    if (url.startsWith('/stock/bons')) {
+      return [
+        { label: t('nav.stock.main'), link: '/stock' },
+        { label: t('nav.stock.bons') }
+      ];
+    }
+    if (url.startsWith('/stock')) {
+      return [{ label: t('nav.stock.main') }];
+    }
 
+    // Payments
+    if (url.startsWith('/payments/refunds')) {
+      return [
+        { label: t('nav.payments.main'), link: '/payments' },
+        { label: t('nav.payments.refunds') }
+      ];
+    }
+    if (url.startsWith('/payments')) {
+      return [{ label: t('nav.payments.main') }];
+    }
 
+    // Other top-level routes
+    if (url.startsWith('/permissions')) return [{ label: t('nav.auth.permissions') }];
+    if (url.startsWith('/audit-log')) return [{ label: t('nav.audit_log.main') }];
+    if (url.startsWith('/profile')) return [{ label: t('HOME.QUICK_ACCESS.MY_PROFILE') }];
+    if (url.startsWith('/change-password')) return [{ label: t('USERS.CHANGE_PASSWORD.TITLE') }];
+    if (url.startsWith('/tenants')) return [{ label: t('nav.tenants.main') }];
+    if (url.startsWith('/home')) return [{ label: t('nav.home') }];
 
-
-    if (url.startsWith('/permissions'))       return [{ label: 'Permissions' }];
-    if (url.startsWith('/audit-log'))         return [{ label: 'Audit Log' }];
-    if (url.startsWith('/profile'))           return [{ label: 'My Profile' }];
-    if (url.startsWith('/change-password'))   return [{ label: 'Change Password' }];
-    if (url.startsWith('/home'))              return [{ label: 'Home' }];
-
-    return [{ label: 'Dashboard' }];
+    return [{ label: t('COMMON.SELECT') }]; // fallback
   }
 
   private resizeListener = () => {
@@ -134,12 +210,12 @@ export class ShellComponent implements OnInit, OnDestroy {
   };
 
   toggleNav(): void {
-  if (window.innerWidth <= 768) {
-    this.mobileNavOpen ? this.closeMobileNav() : this.openMobileNav();
-  } else {
-    this.toggleSidebar();
+    if (window.innerWidth <= 768) {
+      this.mobileNavOpen ? this.closeMobileNav() : this.openMobileNav();
+    } else {
+      this.toggleSidebar();
+    }
   }
-}
 
   toggleSidebar(): void {
     this.collapsed = !this.collapsed;
@@ -150,16 +226,16 @@ export class ShellComponent implements OnInit, OnDestroy {
   }
 
   openMobileNav(): void {
-    this.mobileNavOpen    = true;
+    this.mobileNavOpen = true;
     this.mobileNavClosing = false;
     document.body.style.overflow = 'hidden';
   }
 
   closeMobileNav(): void {
-    document.body.style.overflow = ''; // ← immediately, before animation
+    document.body.style.overflow = '';
     this.mobileNavClosing = true;
     setTimeout(() => {
-      this.mobileNavOpen    = false;
+      this.mobileNavOpen = false;
       this.mobileNavClosing = false;
     }, 220);
   }
