@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace ERP.InvoiceService.Infrastructure.Persistence;
 public class InvoiceDbContext : DbContext
 {
-    private readonly Guid? _tenantId;
+    private readonly ITenantContext _tenantContext;
     public InvoiceDbContext(DbContextOptions<InvoiceDbContext> options, ITenantContext? tenantContext = null): base(options)
     {
-        _tenantId = tenantContext?.TenantId;
+         _tenantContext= tenantContext;
     }
 
     public DbSet<Invoice> Invoices => Set<Invoice>();
@@ -33,23 +33,23 @@ public class InvoiceDbContext : DbContext
         m.Entity<Invoice>()
             .HasQueryFilter(i =>
                 !i.IsDeleted &&
-                (_tenantId == null || i.TenantId == _tenantId));
+                (_tenantContext.TenantId == null || i.TenantId == _tenantContext.TenantId));
         m.Entity<InvoiceSequence>()
             .HasQueryFilter(i =>
-                (_tenantId == null || i.TenantId == _tenantId));
+                (_tenantContext.TenantId == null || i.TenantId == _tenantContext.TenantId));
 
         m.Entity<ArticleCategoryCache>()
-            .HasQueryFilter(a => !a.IsDeleted && (_tenantId == null || a.TenantId == _tenantId));
+            .HasQueryFilter(a => !a.IsDeleted && (_tenantContext.TenantId == null || a.TenantId == _tenantContext.TenantId));
         m.Entity<ArticleCache>()
-            .HasQueryFilter(a => !a.IsDeleted && (_tenantId == null || a.TenantId == _tenantId));
+            .HasQueryFilter(a => !a.IsDeleted && (_tenantContext.TenantId == null || a.TenantId == _tenantContext.TenantId));
 
         m.Entity<ClientCache>()
-            .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
+            .HasQueryFilter(c => !c.IsDeleted && (_tenantContext.TenantId == null || c.TenantId == _tenantContext.TenantId));
         m.Entity<CategoryCache>()
-            .HasQueryFilter(c => !c.IsDeleted && (_tenantId == null || c.TenantId == _tenantId));
+            .HasQueryFilter(c => !c.IsDeleted && (_tenantContext.TenantId == null || c.TenantId == _tenantContext.TenantId));
 
         m.Entity<InvoiceSequence>()
-            .HasQueryFilter(c => _tenantId == null || c.TenantId == _tenantId);
+            .HasQueryFilter(c => _tenantContext.TenantId == null || c.TenantId == _tenantContext.TenantId);
     }
 }
 
