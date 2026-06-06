@@ -1,5 +1,6 @@
 ﻿using ERP.ClientService.Application.DTOs;
 using ERP.ClientService.Application.Interfaces;
+using ERP.ClientService.Application.Services;
 using ERP.ClientService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -9,8 +10,13 @@ namespace ERP.ClientService.Infrastructure.Persistence.Repositories;
 public class CategoryRepository : ICategoryRepository
 {
     private readonly ClientDbContext _context;
+    private readonly ITenantContext _tenantContext;
 
-    public CategoryRepository(ClientDbContext context) => _context = context;
+    public CategoryRepository(ClientDbContext context, ITenantContext tenantContext)
+    {
+        _tenantContext = tenantContext;
+        _context = context;
+    }
 
     public async Task AddAsync(Category category) =>
         await _context.Categories.AddAsync(category);
@@ -28,7 +34,7 @@ public class CategoryRepository : ICategoryRepository
                 .IgnoreQueryFilters()
                 .Include(c => c.ClientCategories)
                 .ThenInclude(cc => cc.Client)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantContext.TenantId);
 
     public Task<Category?> GetByCodeAsync(string code) =>
         _context.Categories
@@ -46,13 +52,13 @@ public class CategoryRepository : ICategoryRepository
     public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
         int pageNumber, int pageSize)
     {
-        IIncludableQueryable<Category, Client?> query = _context.Categories
-                            .OrderBy(c => c.Name)
-                            .Include(c => c.ClientCategories)
-                            .ThenInclude(cc => cc.Client);
+        IQueryable<Category> baseQuery = _context.Categories.OrderBy(c => c.Name);
 
-        int total = await query.CountAsync();
-        List<Category> items = await query
+        int total = await baseQuery.CountAsync();
+
+        List<Category> items = await baseQuery
+            .Include(c => c.ClientCategories)
+                .ThenInclude(cc => cc.Client)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -63,15 +69,16 @@ public class CategoryRepository : ICategoryRepository
     public async Task<(List<Category> Items, int TotalCount)> GetPagedDeletedAsync(
         int pageNumber, int pageSize)
     {
-        IOrderedQueryable<Category> query = _context.Categories
-                            .IgnoreQueryFilters()
-                            .Where(c => c.IsDeleted)
-                            .Include(c => c.ClientCategories)
-                            .ThenInclude(cc => cc.Client)
-                            .OrderByDescending(c => c.UpdatedAt);
+        IQueryable<Category> query = _context.Categories
+            .IgnoreQueryFilters()
+            .Where(c => c.IsDeleted && c.TenantId == _tenantContext.TenantId)
+            .Include(c => c.ClientCategories)
+                .ThenInclude(cc => cc.Client);
 
         int total = await query.CountAsync();
+
         List<Category> items = await query
+            .OrderByDescending(c => c.UpdatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -83,14 +90,16 @@ public class CategoryRepository : ICategoryRepository
         string nameFilter, int pageNumber, int pageSize)
     {
         string term = nameFilter.Trim().ToLower();
-        IOrderedQueryable<Category> query = _context.Categories
-                            .Where(c => c.Name.ToLower().Contains(term))
-                            .Include(c => c.ClientCategories)
-                            .ThenInclude(cc => cc.Client)
-                            .OrderBy(c => c.Name);
 
-        int total = await query.CountAsync();
-        List<Category> items = await query
+        IQueryable<Category> baseQuery = _context.Categories
+            .Where(c => c.Name.ToLower().Contains(term));
+
+        int total = await baseQuery.CountAsync();
+
+        List<Category> items = await baseQuery
+            .Include(c => c.ClientCategories)
+                .ThenInclude(cc => cc.Client)
+            .OrderBy(c => c.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -106,20 +115,17 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<CategoryStatsDto> GetStatsAsync()
     {
-        var counts = await _context.Categories
+        var all = await _context.Categories
             .IgnoreQueryFilters()
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                Total = g.Count(c => !c.IsDeleted),
-                Active = g.Count(c => c.IsActive && !c.IsDeleted),
-                Inactive = g.Count(c => !c.IsActive && !c.IsDeleted),
-                Deleted = g.Count(c => c.IsDeleted),
-            })
-            .FirstOrDefaultAsync();
+            .Where(c => c.TenantId == _tenantContext.TenantId)
+            .Select(c => new { c.IsDeleted, c.IsActive })
+            .ToListAsync();
 
-        return counts is null
-            ? new CategoryStatsDto(0, 0, 0, 0)
-            : new CategoryStatsDto(counts.Total, counts.Active, counts.Inactive, counts.Deleted);
+        return new CategoryStatsDto(
+            TotalCategories: all.Count(c => !c.IsDeleted),
+            ActiveCategories: all.Count(c => c.IsActive && !c.IsDeleted),
+            InactiveCategories: all.Count(c => !c.IsActive && !c.IsDeleted),
+            DeletedCategories: all.Count(c => c.IsDeleted)
+        );
     }
 }
