@@ -135,7 +135,9 @@ export class ProfileComponent implements OnInit {
       } else {
         this.authService.getMe().subscribe({
           next:  u  => { this.userProfile = u; this.authService.setUserProfile(u); this.stopLoading('isLoading'); },
-          error: () => { this.stopLoading('isLoading'); this.showErrorDialog(this.translate.instant('USERS.PROFILE.LOAD_ERROR_TITLE'), this.translate.instant('USERS.PROFILE.LOAD_ERROR_MESSAGE')); }
+          error: (err) => { this.stopLoading('isLoading');
+            const error= err as HttpError;
+            this.showErrorDialog('',this.translateError(error.code, error.message));}
         });
       }
     }
@@ -168,6 +170,10 @@ export class ProfileComponent implements OnInit {
     this.noDataChange = fullName === this.userProfile.fullName && email === this.userProfile.email;
   }
 
+  private translateError(code: string, fallback:string=''):string{
+    return this.translate.instant("AUTH.ERRORS." + code) || fallback;
+  }
+
   saveProfile(): void {
     if (this.editForm.invalid || !this.userProfile) return;
     this.isSaving = true;
@@ -177,13 +183,14 @@ export class ProfileComponent implements OnInit {
         this.userProfile = { ...updated, mustChangePassword: this.userProfile!.mustChangePassword, lastLoginAt: this.userProfile!.lastLoginAt };
         this.isEditing = false;
         this.stopLoading('isSaving');
-        this.showSuccessDialog(this.translate.instant('SUCCESS.USER_UPDATED'));
+        this.showSuccessDialog(this.translate.instant('COMMON.UPDATE' +" "+'COMMON.STATUS.FAILED'),this.translate.instant('USERS.PROFILE.SUCCESS.USER_UPDATED'));
         if (this.isOwnProfile) this.authService.setUserProfile(this.userProfile);
         else this.loadProfile();
       },
       error: err => {
         this.stopLoading('isSaving');
-        this.showErrorDialog(this.translate.instant('USERS.PROFILE.UPDATE_ERROR_TITLE'), (err.error as HttpError).message);
+        const error= err as HttpError;
+        this.showErrorDialog(this.translate.instant('COMMON.UPDATE' +" "+'COMMON.STATUS.FAILED'),this.translateError(error.code, error.message));
       }
     });
   }
@@ -196,8 +203,11 @@ export class ProfileComponent implements OnInit {
     this.isSaving = true;
 
     const stop = () => { this.isSaving = false; this.cdr.markForCheck(); };
-    const onSuccess = () => { stop(); this.showSuccessDialog(this.translate.instant('SUCCESS.PASSWORD_CHANGED')); form.reset(); };
-    const onError   = (err: any) => { stop(); this.showErrorDialog(this.translate.instant('USERS.PROFILE.UPDATE_ERROR_TITLE'), (err.error as HttpError).message); };
+    const onSuccess = () => { stop(); this.showSuccessDialog(this.translate.instant('COMMON.UPDATE' +" "+'COMMON.STATUS.FAILED'),this.translate.instant('SUCCESS.PASSWORD_CHANGED')); form.reset(); };
+    const onError   = (err: any) => { stop();
+        const error= err as HttpError;
+        this.showErrorDialog('',this.translateError(error.code, error.message));
+    };
 
     if (this.isOwnProfile) {
       this.authService.changeProfilePassword(this.passwordForm.value).subscribe({ next: onSuccess, error: onError });
@@ -267,7 +277,7 @@ export class ProfileComponent implements OnInit {
     this.dialog.open(ModalComponent, { width: '400px', data: { title, message, confirmText: this.translate.instant('COMMON.OK'), showCancel: false, icon: 'info', iconColor: 'warn' } });
   }
 
-  private showSuccessDialog(message: string): void {
-    this.dialog.open(ModalComponent, { width: '400px', data: { title: this.translate.instant('USERS.PROFILE.SUCCESS_TITLE'), message, confirmText: this.translate.instant('COMMON.OK'), showCancel: false, icon: 'check_circle', iconColor: 'success' } });
+  private showSuccessDialog(title: string, message: string): void {
+    this.dialog.open(ModalComponent, { width: '400px', data: { title, message, confirmText: this.translate.instant('COMMON.OK'), showCancel: false, icon: 'check_circle', iconColor: 'success' } });
   }
 }
