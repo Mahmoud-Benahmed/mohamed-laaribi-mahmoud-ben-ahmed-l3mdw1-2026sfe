@@ -2,7 +2,7 @@
 
 // ── Layout ────────────────────────────────────────
 .form {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -10,7 +10,12 @@
 .allocation-form {
   margin-top: 0.5rem;
 }
-
+.allocation-invoice-select{
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
 .allocation-line__amount {
   max-width: 160px;
   flex-shrink: 0;
@@ -59,9 +64,6 @@ input[readonly] {
   border-color: $border !important;
   &:focus { border-color: $border !important; }
 }
-.allocation-invoice-select{
-  max-width: 320px;
-}
 
 // ── Disabled select ───────────────────────────────
 select:disabled {
@@ -72,7 +74,7 @@ select:disabled {
 .form__row{
   display: flex;
   align-items: center;
-  align-content: space-between;
+  justify-content: start;
 }
 
 // ── Inline item form override (no hover bg) ───────
@@ -172,4 +174,18 @@ mat-dialog-actions {
     align-items: center;
     &:hover { opacity: 1; }
   }
+}
+
+.icon-btn{
+  &--complete {
+    color: $green;
+  }
+  &--delete {
+    color: $red;
+  }
+}
+
+.allocation-line__actions{
+  display: flex;
+  gap: 0.5rem;
 }
