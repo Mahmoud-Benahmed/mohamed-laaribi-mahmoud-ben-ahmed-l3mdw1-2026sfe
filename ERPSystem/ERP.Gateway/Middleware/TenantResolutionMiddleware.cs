@@ -139,7 +139,7 @@ public sealed class TenantResolutionMiddleware
             });
             return;
         }
-
+        
         // 5. Reject inactive tenant
         if (tenant != null && !tenant.IsActive)
         {
