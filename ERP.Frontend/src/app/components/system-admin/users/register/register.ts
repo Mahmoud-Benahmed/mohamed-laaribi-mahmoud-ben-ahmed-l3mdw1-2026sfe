@@ -199,7 +199,7 @@ export class RegisterComponent implements OnDestroy {
       next: (registeredUser) => {
         this.stopLoading();
         this.resetForm();
-        this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}user_registered`, { name: registeredUser.fullName }));
+        this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}user_registered`, { fullname: registeredUser.fullName }));
         setTimeout(() => {
           document.getElementById('top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 0);
