@@ -99,7 +99,7 @@ export class PermissionMatrixComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.LOAD_MATRIX_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.load_matrix_failed'));
       },
     });
   }
@@ -147,7 +147,7 @@ export class PermissionMatrixComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.LOAD_PRIVILEGES_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.load_privileges_failed'));
       },
     });
   }
@@ -170,13 +170,13 @@ export class PermissionMatrixComponent implements OnInit {
 
     this.http.patch(url, {}).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.PRIVILEGE_UPDATED'));
+        this.flash('success', this.translate.instant('auth.responses.success.privilege_updated'));
         cell.isGranted = !wasGranted;
         cell.loading = false;
       },
       error: () => {
         cell.loading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.OPERATION_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.operation_failed'));
       },
     });
   }

@@ -26,15 +26,15 @@
       <div class="start">
         <div class="breadcrumb-title">
           <p class="breadcrumb">
-            {{ 'REFUNDS.BREADCRUMB' | translate }} › {{ refund.id | slice:0:8 }}…
+            {{ 'payments.refunds.breadcrumb' | translate }} › {{ refund.id | slice:0:8 }}…
           </p>
           <h1 class="page-title">
-            {{ 'REFUNDS.VIEW.TITLE' | translate }}
+            {{ 'payments.refunds.view.title' | translate }}
             <span *ngIf="client"> — {{ client.name }}</span>
           </h1>
         </div>
     </div>
-    <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+    <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
 
     <div class="detail-columns">
@@ -44,7 +44,7 @@
           <div class="panel__title-wrap">
             <div class="panel__icon"><mat-icon>assignment_return</mat-icon></div>
             <div>
-              <h2 class="panel__title">{{ 'REFUNDS.VIEW.REFUND_INFO' | translate }}</h2>
+              <h2 class="panel__title">{{ 'payments.refunds.view.refund_info' | translate }}</h2>
             </div>
           </div>
         </div>
@@ -52,26 +52,26 @@
           <div class="detail-grid">
 
             <div class="detail-item detail-item--full">
-              <span class="detail-label">{{ 'REFUNDS.VIEW.REFUND_ID' | translate }}</span>
+              <span class="detail-label">{{ 'payments.refunds.view.refund_id' | translate }}</span>
               <span class="detail-value detail-value--mono">{{ refund.id }}</span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">{{ 'REFUNDS.VIEW.STATUS' | translate }}</span>
+              <span class="detail-label">{{ 'payments.refunds.view.status' | translate }}</span>
               <span class="badge" [ngClass]="statusClass(refund.status)">
-                {{ 'REFUNDS.STATUS.' + refund.status | translate }}
+                {{ 'payments.refunds.status.' + refund.status | translate }}
               </span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">{{ 'REFUNDS.VIEW.TOTAL_AMOUNT' | translate }}</span>
+              <span class="detail-label">{{ 'payments.refunds.view.total_amount' | translate }}</span>
               <span class="detail-value detail-value--large">
                 {{ getTotalRefundAmount() | number:'1.2-2' }} TND
               </span>
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">{{ 'REFUNDS.VIEW.LINE_COUNT' | translate }}</span>
+              <span class="detail-label">{{ 'payments.refunds.view.line_count' | translate }}</span>
               <span class="detail-value">{{ refund.lines.length }}</span>
             </div>
 
@@ -85,14 +85,14 @@
           <div class="panel__title-wrap">
             <div class="panel__icon"><mat-icon>person_outline</mat-icon></div>
             <div>
-              <h2 class="panel__title">{{ 'REFUNDS.VIEW.CLIENT_INFO' | translate }}</h2>
+              <h2 class="panel__title">{{ 'payments.refunds.view.client_info' | translate }}</h2>
             </div>
           </div>
         </div>
         <div class="panel__body">
           <div class="detail-grid" *ngIf="client; else noClient">
             <div class="detail-item detail-item--full">
-              <span class="detail-label">{{ 'CLIENTS.DETAILS.NAME' | translate }}</span>
+              <span class="detail-label">{{ 'clients.details.name' | translate }}</span>
               <span class="role-badge role-badge--clickable"
                     [routerLink]="['/clients', client.id]"
                     style="cursor:pointer">
@@ -100,20 +100,20 @@
               </span>
             </div>
             <div class="detail-item detail-item--full">
-              <span class="detail-label">{{ 'CLIENTS.DETAILS.ADDRESS' | translate }}</span>
+              <span class="detail-label">{{ 'clients.details.address' | translate }}</span>
               <span class="detail-value">{{ client.address ?? '-' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'CLIENTS.DETAILS.EMAIL' | translate }}</span>
+              <span class="detail-label">{{ 'clients.details.email' | translate }}</span>
               <span class="detail-value">{{ client.email ?? '-' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'CLIENTS.DETAILS.PHONE' | translate }}</span>
+              <span class="detail-label">{{ 'clients.details.phone' | translate }}</span>
               <span class="detail-value">{{ client.phone ?? '-' }}</span>
             </div>
           </div>
           <ng-template #noClient>
-            <p class="detail-value text-muted">{{ 'REFUNDS.VIEW.CLIENT_NOT_FOUND' | translate }}</p>
+            <p class="detail-value text-muted">{{ 'payments.refunds.view.client_not_found' | translate }}</p>
           </ng-template>
         </div>
       </div>
@@ -124,14 +124,14 @@
           <div class="panel__title-wrap">
             <div class="panel__icon"><mat-icon>receipt_long</mat-icon></div>
             <div>
-              <h2 class="panel__title">{{ 'REFUNDS.VIEW.INVOICE_INFO' | translate }}</h2>
+              <h2 class="panel__title">{{ 'payments.refunds.view.invoice_info' | translate }}</h2>
             </div>
           </div>
         </div>
         <div class="panel__body">
           <div class="detail-grid" *ngIf="invoice; else noInvoice">
             <div class="detail-item detail-item--full">
-              <span class="detail-label">{{ 'INVOICES.DETAILS.INVOICE_NUMBER' | translate }}</span>
+              <span class="detail-label">{{ 'invoices.details.invoice_number' | translate }}</span>
               <span class="role-badge role-badge--clickable"
                     [routerLink]="['/invoices', invoice.id]"
                     style="cursor:pointer">
@@ -139,24 +139,24 @@
               </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'INVOICES.TABLE.TOTAL_TTC' | translate }}</span>
+              <span class="detail-label">{{ 'invoices.table.total_ttc' | translate }}</span>
               <span class="detail-value">{{ invoice.totalTTC | number:'1.2-2' }} TND</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'INVOICES.TABLE.STATUS' | translate }}</span>
-              <span class="badge">{{ 'INVOICES.STATUS.' + invoice.status | translate }}</span>
+              <span class="detail-label">{{ 'invoices.table.status' | translate }}</span>
+              <span class="badge">{{ 'invoices.status.' + invoice.status | translate }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'INVOICES.TABLE.DATE' | translate }}</span>
+              <span class="detail-label">{{ 'invoices.table.date' | translate }}</span>
               <span class="detail-value date-cell">{{ invoice.invoiceDate | date:'dd/MM/yyyy' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ 'INVOICES.TABLE.DUE_DATE' | translate }}</span>
+              <span class="detail-label">{{ 'invoices.table.due_date' | translate }}</span>
               <span class="detail-value date-cell">{{ invoice.dueDate | date:'dd/MM/yyyy' }}</span>
             </div>
           </div>
           <ng-template #noInvoice>
-            <p class="detail-value text-muted">{{ 'REFUNDS.VIEW.INVOICE_NOT_FOUND' | translate }}</p>
+            <p class="detail-value text-muted">{{ 'payments.refunds.view.invoice_not_found' | translate }}</p>
           </ng-template>
         </div>
       </div>
@@ -169,10 +169,10 @@
         <div class="panel__title-wrap">
           <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
           <div>
-            <h2 class="panel__title">{{ 'REFUNDS.VIEW.LINES' | translate }}</h2>
+            <h2 class="panel__title">{{ 'payments.refunds.view.lines' | translate }}</h2>
             <p class="panel__subtitle">
-              {{ refund.lines.length }} {{ 'REFUNDS.VIEW.LINES_SUBTITLE' | translate }}
-              — {{ 'REFUNDS.VIEW.TOTAL' | translate }}: {{ getTotalRefundAmount() | number:'1.2-2' }} TND
+              {{ refund.lines.length }} {{ 'payments.refunds.view.lines_subtitle' | translate }}
+              — {{ 'payments.refunds.view.total' | translate }}: {{ getTotalRefundAmount() | number:'1.2-2' }} TND
             </p>
           </div>
         </div>
@@ -182,16 +182,16 @@
           <table class="table">
             <thead>
               <tr>
-                <th>{{ 'REFUNDS.VIEW.TABLE.PAYMENT_NUMBER' | translate }}</th>
-                <th class="text-center">{{ 'REFUNDS.VIEW.TABLE.PAYMENT_DATE' | translate }}</th>
-                <th class="text-center">{{ 'REFUNDS.VIEW.TABLE.METHOD' | translate }}</th>
-                <th class="text-center">{{ 'REFUNDS.VIEW.TABLE.AMOUNT' | translate }}</th>
-                <th class="text-center">{{ 'REFUNDS.VIEW.TABLE.PAYMENT_LINK' | translate }}</th>
+                <th>{{ 'payments.refunds.view.table.payment_number' | translate }}</th>
+                <th class="text-center">{{ 'payments.refunds.view.table.payment_date' | translate }}</th>
+                <th class="text-center">{{ 'payments.refunds.view.table.method' | translate }}</th>
+                <th class="text-center">{{ 'payments.refunds.view.table.amount' | translate }}</th>
+                <th class="text-center">{{ 'payments.refunds.view.table.payment_link' | translate }}</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngIf="refund.lines.length === 0">
-                <td colspan="5" class="td--empty">{{ 'REFUNDS.VIEW.NO_LINES' | translate }}</td>
+                <td colspan="5" class="td--empty">{{ 'payments.refunds.view.no_lines' | translate }}</td>
               </tr>
               <tr class="table__row"
                   *ngFor="let line of refund.lines; trackBy: trackById">
@@ -215,7 +215,7 @@
                 <td>
                   <span *ngIf="getPaymentForLine(line) as payment">
                     <span class="badge badge--blue">
-                      {{ 'PAYMENTS.METHOD.' + payment.method | translate }}
+                      {{ 'payments.method.' + payment.method | translate }}
                     </span>
                   </span>
                   <span *ngIf="!getPaymentForLine(line)" class="text-muted">—</span>
@@ -227,7 +227,7 @@
 
                 <td>
                   <button class="icon-btn icon-btn--view"
-                          [matTooltip]="'REFUNDS.VIEW.TABLE.VIEW_PAYMENT' | translate"
+                          [matTooltip]="'payments.refunds.view.table.view_payment' | translate"
                           [routerLink]="['/payments', line.paymentId]">
                     <mat-icon style="font-size:16px;width:16px;height:16px;">visibility</mat-icon>
                   </button>

@@ -1,5 +1,5 @@
 <div class="modal-header" id="top">
-  <h2 class="modal-title">{{ 'REFUNDS.FORM.TITLE' | translate }}</h2>
+  <h2 class="modal-title">{{ 'payments.refunds.form.title' | translate }}</h2>
   <button type="button" class="shell-icon-btn" (click)="cancel()">
     <mat-icon>close</mat-icon>
   </button>
@@ -23,18 +23,18 @@
     <form [formGroup]="form" class="form">
       <div class="form__field">
         <div class="form__label">
-          <label>{{ 'REFUNDS.COMPLETE.REASON_LABEL' | translate }}</label>
+          <label>{{ 'payments.refunds.complete.reason_label' | translate }}</label>
           <mat-icon>checkbook</mat-icon>
         </div>
         <input type="text"
               class="form__input"
               formControlName="refundReason"
-              [placeholder]="'REFUNDS.COMPLETE.REASON_PLACEHOLDER' | translate"
+              [placeholder]="'payments.refunds.complete.reason_placeholder' | translate"
               [class.form__input--error]="form.get('refundReason')?.invalid
                                         && form.get('refundReason')?.touched">
         <span class="form__error"
               *ngIf="form.get('refundReason')?.invalid && form.get('refundReason')?.touched">
-          {{ 'VALIDATION.REQUIRED' | translate }}
+          {{ 'validation.required' | translate }}
         </span>
       </div>
     </form>
@@ -48,7 +48,7 @@
           class="btn-add"
           [class.disabled]="form.invalid || isSubmitting"
           (click)="onSubmit()">
-    <span *ngIf="!isSubmitting">{{ 'COMMON.SAVE' | translate }}</span>
-    <span *ngIf="isSubmitting">{{ 'COMMON.SAVING' | translate }}...</span>
+    <span *ngIf="!isSubmitting">{{ 'common.save' | translate }}</span>
+    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}...</span>
   </button>
 </mat-dialog-actions>

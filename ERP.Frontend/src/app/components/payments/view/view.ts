@@ -122,7 +122,7 @@ export class ViewPaymentComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           const errorMsg = (err.error as HttpError)?.message
-            ?? this.translate.instant('INVOICES.ERRORS.LOAD_FAILED');
+            ?? this.translate.instant('invoices.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }

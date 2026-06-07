@@ -109,7 +109,7 @@ export class ClientsComponent implements OnInit {
       phone:            ['', [Validators.maxLength(20), Validators.pattern(RegexPatterns.phone)]],
       taxNumber:        ['', [Validators.maxLength(50), Validators.pattern(RegexPatterns.alphaNumeric)]],
       creditLimit:      [null, this.optionalMin(1000)],
-      duePaymentPeriod: [null, this.optionalRange(7, 180)],  // backend: Range(7, 180)
+      duePaymentPeriod: [null, this.optionalRange(7, 180)],
       delaiRetour:      [null, this.optionalRange(7, 270)],
     });
   }
@@ -135,7 +135,7 @@ export class ClientsComponent implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          this.flash('error', this.translate.instant('ERRORS.CLIENT_NOT_FOUND'));
+          this.flash('error', this.translate.instant('clients.responses.errors.CLIENT_NOT_FOUND'));
           this.setViewMode('list');
           this.reload();
         }
@@ -146,25 +146,24 @@ export class ClientsComponent implements OnInit {
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate())      return 'CLIENTS.TITLE_ADD';
-    if (this.isEdit())        return 'CLIENTS.TITLE_EDIT';
-    if (this.isView())        return 'CLIENTS.TITLE_DETAILS';
-    if (this.isDeletedList()) return 'CLIENTS.TITLE_DELETED';
-    if (this.isBlockedList()) return 'CLIENTS.TITLE_BLOCKED';
-    return 'CLIENTS.TITLE_LIST';
+    if (this.isCreate())      return 'clients.title_add';
+    if (this.isEdit())        return 'clients.title_edit';
+    if (this.isView())        return 'clients.title_details';
+    if (this.isDeletedList()) return 'clients.title_deleted';
+    if (this.isBlockedList()) return 'clients.title_blocked';
+    return 'clients.title_list';
   }
 
   private translateError(errorCode: string): string {
-    // Try client errors
-    if (this.translate.instant(`CLIENTS.ERRORS.${errorCode}`) !== `CLIENTS.ERRORS.${errorCode}`) {
-      return this.translate.instant(`CLIENTS.ERRORS.${errorCode}`);
+    const clientKey = `clients.responses.errors.${errorCode}`;
+    if (this.translate.instant(clientKey) !== clientKey) {
+      return this.translate.instant(clientKey);
     }
-    // Try category errors
-    if (this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`) !== `CLIENTS.CATEGORIES.ERRORS.${errorCode}`) {
-      return this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`);
+    const categoryKey = `clients.categories.responses.errors.${errorCode}`;
+    if (this.translate.instant(categoryKey) !== categoryKey) {
+      return this.translate.instant(categoryKey);
     }
-    // Fallback to generic ERRORS
-    return this.translate.instant(`ERRORS.${errorCode}`) || this.translate.instant('ERRORS.INTERNAL_ERROR');
+    return this.translate.instant('errors.unknown');
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
@@ -227,7 +226,7 @@ export class ClientsComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.unknown')),
     });
   }
 
@@ -238,7 +237,7 @@ export class ClientsComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.unknown')),
     });
   }
 
@@ -249,14 +248,14 @@ export class ClientsComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.unknown')),
     });
   }
 
   loadCategories(): void {
     this.categoriesService.getAll().subscribe({
       next: (cats) => { this.categories = cats; this.cdr.markForCheck(); },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'))
+      error: () => this.flash('error', this.translate.instant('errors.unknown'))
     });
   }
 
@@ -264,19 +263,17 @@ export class ClientsComponent implements OnInit {
     this.clientsService.getStats().subscribe({
       next: (res) => {
         this.stats = res;
-        // auto-switch back to list when no deleted clients remain
         if (this.isDeletedList() && res.deletedClients === 0) {
           this.setViewMode('list');
           this.load();
         }
-        // auto-switch back to list when no blocked clients remain
         if (this.isBlockedList() && res.blockedClients === 0) {
           this.setViewMode('list');
           this.load();
         }
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.unknown')),
     });
   }
 
@@ -296,7 +293,7 @@ export class ClientsComponent implements OnInit {
         this.loadCreditLimitInfo();
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'))
+      error: () => this.flash('error', this.translate.instant('errors.unknown'))
     });
   }
 
@@ -339,7 +336,7 @@ export class ClientsComponent implements OnInit {
     this.previousMode = this.viewMode();
     this.setViewMode('view');
     this.selectedClient = client;
-    this.loadCreditLimitInfo();  // <-- add this
+    this.loadCreditLimitInfo();
     this.selectedCategoryId = '';
     this.cdr.markForCheck();
   }
@@ -356,11 +353,8 @@ export class ClientsComponent implements OnInit {
       address:          client.address,
       phone:            client.phone ?? '',
       taxNumber:        client.taxNumber ?? '',
-      // nullable decimals — 0 is not a valid credit limit per backend [Range(0.01, ...)]
       creditLimit:      client.creditLimit ?? null,
-      // non-nullable int in response but optional in update — treat 0 as unset
       duePaymentPeriod: client.duePaymentPeriod > 0 ? client.duePaymentPeriod : null,
-      // nullable int — null stays null
       delaiRetour:      client.delaiRetour && client.delaiRetour > 0 ? client.delaiRetour : null,
     });
 
@@ -424,9 +418,9 @@ export class ClientsComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.RESTORE_CLIENT_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.RESTORE_CLIENT', { name: client.name }),
-        confirmText: this.translate.instant('COMMON.RESTORE'),
+        title:       this.translate.instant('clients.confirmations.restore_client.title'),
+        message:     this.translate.instant('clients.confirmations.restore_client.message', { name: client.name }),
+        confirmText: this.translate.instant('common.restore'),
         showCancel:  true,
         icon:        'settings_backup_restore',
         iconColor:   'success',
@@ -440,10 +434,10 @@ export class ClientsComponent implements OnInit {
         this.clientsService.restore(client.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_RESTORED', { name: client.name }));
+            this.flash('success', this.translate.instant('clients.responses.success.client_restored', { name: client.name }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.unknown')),
         });
       });
   }
@@ -464,23 +458,23 @@ export class ClientsComponent implements OnInit {
         duePaymentPeriod: val.duePaymentPeriod ?? undefined,
       };
       this.clientsService.create(dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CREATED', { name: val.name })); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.responses.success.client_created', { name: val.name })); },
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
       });
     } else if (this.isEdit() && this.selectedClient) {
       const dto: UpdateClientRequestDto = {
         name:             val.name,
         email:            val.email,
         address:          val.address,
-        phone:            val.phone ,
+        phone:            val.phone,
         taxNumber:        val.taxNumber,
         creditLimit:      val.creditLimit,
         delaiRetour:      val.delaiRetour,
         duePaymentPeriod: val.duePaymentPeriod,
       };
       this.clientsService.update(this.selectedClient.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_UPDATED', { name: val.name })); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.responses.success.client_updated', { name: val.name })); },
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
       });
     }
   }
@@ -489,9 +483,9 @@ export class ClientsComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.DELETE_CLIENT_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.DELETE_CLIENT', { name: client.name }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title:       this.translate.instant('clients.confirmations.delete_client.title'),
+        message:     this.translate.instant('clients.confirmations.delete_client.message', { name: client.name }),
+        confirmText: this.translate.instant('common.delete'),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -505,27 +499,28 @@ export class ClientsComponent implements OnInit {
         this.clientsService.delete(client.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_DELETED', { name: client.name }));
+            this.flash('success', this.translate.instant('clients.responses.success.client_deleted', { name: client.name }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.unknown')),
         });
       });
   }
 
   toggleBlock(client: ClientResponseDto): void {
-    const action = client.isBlocked ? 'Unblock' : 'Block';
-    const actionKey = client.isBlocked ? 'UNBLOCK' : 'BLOCK';
+    const isBlocked = client.isBlocked;
+    const confirmationKey = isBlocked ? 'unblock_client' : 'block_client';
+    const successKey = isBlocked ? 'client_unblocked' : 'client_blocked';
 
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant(`CONFIRMATION.${actionKey}_CLIENT_TITLE`),
-        message:     this.translate.instant(`CONFIRMATION.${actionKey}_CLIENT`, { name: client.name }),
-        confirmText: this.translate.instant(`COMMON.${actionKey}`),
+        title:       this.translate.instant(`clients.confirmations.${confirmationKey}.title`),
+        message:     this.translate.instant(`clients.confirmations.${confirmationKey}.message`, { name: client.name }),
+        confirmText: this.translate.instant(isBlocked ? 'common.unblock' : 'common.block'),
         showCancel:  true,
-        icon:        client.isBlocked ? 'lock_open' : 'block',
-        iconColor:   client.isBlocked ? 'success' : 'warning',
+        icon:        isBlocked ? 'lock_open' : 'block',
+        iconColor:   isBlocked ? 'success' : 'warning',
       },
     });
 
@@ -535,11 +530,11 @@ export class ClientsComponent implements OnInit {
         if (!result) return;
         this.clientsService.toggleBlock(client).subscribe({
           next: (updated) => {
-            this.flash('success', this.translate.instant(`CLIENTS.SUCCESS.CLIENT_${actionKey}ED`, { name: client.name }));
+            this.flash('success', this.translate.instant(`clients.responses.success.${successKey}`, { name: client.name }));
             if (this.selectedClient?.id === client.id) this.selectedClient = updated;
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.unknown')),
         });
       });
   }
@@ -553,10 +548,10 @@ export class ClientsComponent implements OnInit {
     this.clientsService.addCategory(clientId, dto).subscribe({
       next: (result) => {
         this.selectedCategoryId = '';
-        this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CATEGORY_ADDED'));
-        this.selectedClient = result;this.reload();
+        this.flash('success', this.translate.instant('clients.responses.success.client_category_added'));
+        this.selectedClient = result; this.reload();
       },
-      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
     });
   }
 
@@ -564,9 +559,9 @@ export class ClientsComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.REMOVE_CATEGORY_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.REMOVE_CATEGORY', { name: categoryName }),
-        confirmText: this.translate.instant('COMMON.REMOVE'),
+        title:       this.translate.instant('clients.confirmations.remove_category.title'),
+        message:     this.translate.instant('clients.confirmations.remove_category.message', { name: categoryName }),
+        confirmText: this.translate.instant('common.remove'),
         showCancel:  true,
         icon:        'label_off',
         iconColor:   'danger',
@@ -579,11 +574,11 @@ export class ClientsComponent implements OnInit {
         if (!result) return;
         this.clientsService.removeCategory(clientId, categoryId).subscribe({
           next: (client) => {
-            this.flash('success', this.translate.instant('CLIENTS.SUCCESS.CLIENT_CATEGORY_REMOVED', { name: categoryName }));
+            this.flash('success', this.translate.instant('clients.responses.success.client_category_removed', { name: categoryName }));
             this.selectedClient = client;
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.unknown')),
         });
       });
   }
@@ -639,8 +634,6 @@ export class ClientsComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-
-
   loadCreditLimitInfo(): void {
     if (!this.selectedClient?.id) {
       this.creditRemaining = null;
@@ -648,7 +641,6 @@ export class ClientsComponent implements OnInit {
       return;
     }
 
-    // If no credit limit is set, remaining is undefined (or null)
     if (!this.selectedClient.effectiveCreditLimit) {
       this.creditRemaining = null;
       this.outstandingBalance = 0;
@@ -678,7 +670,6 @@ export class ClientsComponent implements OnInit {
     return rates.length > 0 ? Math.max(...rates) * 100 : 0;
   }
 
-    // Helper: optional number validator (allows null/undefined)
   optionalMin(minValue: number): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const val = control.value;

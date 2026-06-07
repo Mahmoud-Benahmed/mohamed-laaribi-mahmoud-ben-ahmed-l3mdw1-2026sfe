@@ -3,8 +3,8 @@
   <!-- ── PAGE HEADER ── -->
   <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;">
     <div>
-      <p class="breadcrumb">{{ 'AUDIT.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'AUDIT.TITLE' | translate }}</h1>
+      <p class="breadcrumb">{{ 'auth.audit_log.breadcrumb' | translate }}</p>
+      <h1 class="page-title">{{ 'auth.audit_log.title' | translate }}</h1>
     </div>
     <div style="display:flex; gap:10px;">
       <button class="btn-secondary btn-icon" (click)="load()">
@@ -13,7 +13,7 @@
           <polyline points="1 20 1 14 7 14"/>
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
-        {{ 'AUDIT.REFRESH' | translate }}
+        {{ 'auth.audit_log.refresh' | translate }}
       </button>
       <button class="btn-danger btn-icon" (click)="confirmClear()" *ngIf="dataSource.data.length > 0">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -22,7 +22,7 @@
           <path d="M10 11v6"/><path d="M14 11v6"/>
           <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
         </svg>
-        {{ 'AUDIT.CLEAR' | translate }}
+        {{ 'auth.audit_log.clear' | translate }}
       </button>
     </div>
   </div>
@@ -36,18 +36,18 @@
       <input
         class="search-input"
         type="text"
-        [placeholder]="'AUDIT.FILTER_USER' | translate"
+        [placeholder]="'auth.audit_log.filter_user' | translate"
         [(ngModel)]="userIdFilter"
         (ngModelChange)="onFilterChange()" />
     </div>
 
     <div class="status-toggle">
       <button class="toggle-btn" [class.toggle-btn--active]="selectedStatus === null"
-        (click)="selectedStatus = null; onFilterChange()">{{ 'AUDIT.ALL' | translate }}</button>
+        (click)="selectedStatus = null; onFilterChange()">{{ 'auth.audit_log.all' | translate }}</button>
       <button class="toggle-btn toggle-btn--success" [class.toggle-btn--active]="selectedStatus === true"
-        (click)="selectedStatus = true; onFilterChange()">{{ 'AUDIT.SUCCESS' | translate }}</button>
+        (click)="selectedStatus = true; onFilterChange()">{{ 'auth.audit_log.success' | translate }}</button>
       <button class="toggle-btn toggle-btn--fail" [class.toggle-btn--active]="selectedStatus === false"
-        (click)="selectedStatus = false; onFilterChange()">{{ 'AUDIT.FAILED' | translate }}</button>
+        (click)="selectedStatus = false; onFilterChange()">{{ 'auth.audit_log.failed' | translate }}</button>
     </div>
   </div>
 
@@ -70,11 +70,11 @@
       <thead>
         <tr>
           <th style="width:32px"></th>
-          <th>{{ 'AUDIT.ACTION' | translate }}</th>
-          <th>{{ 'AUDIT.PERFORMED_BY' | translate }}</th>
-          <th>{{ 'AUDIT.TARGET' | translate }}</th>
-          <th>{{ 'AUDIT.IP_ADDRESS' | translate }}</th>
-          <th>{{ 'AUDIT.TIMESTAMP' | translate }}</th>
+          <th>{{ 'auth.audit_log.action' | translate }}</th>
+          <th>{{ 'auth.audit_log.performed_by' | translate }}</th>
+          <th>{{ 'auth.audit_log.target' | translate }}</th>
+          <th>{{ 'auth.audit_log.ip_address' | translate }}</th>
+          <th>{{ 'auth.audit_log.timestamp' | translate }}</th>
           <th style="width:40px"></th>
         </tr>
       </thead>
@@ -95,7 +95,7 @@
               <span class="action-icon" [ngClass]="'action-icon--' + getActionCategory(log.action)">
                 <mat-icon>{{ getActionIcon(log.action) }}</mat-icon>
               </span>
-              <span class="action-label">{{ 'AUDIT.ACTIONS.' + log.action | translate }}</span>
+              <span class="action-label">{{ 'auth.audit_log.actions.' + log.action | translate }}</span>
             </div>
           </td>
 
@@ -127,7 +127,7 @@
 
           <td>
             <button class="icon-btn icon-btn--view" *ngIf="hasDetails(log)"
-              (click)="openDetail(log)" [title]="'COMMON.VIEW' | translate">
+              (click)="openDetail(log)" [title]="'common.view' | translate">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
@@ -137,20 +137,17 @@
         </tr>
 
         <tr *ngIf="dataSource.data.length === 0">
-          <td colspan="7" class="td--empty">{{ 'AUDIT.NO_LOGS' | translate }}</td>
+          <td colspan="7" class="td--empty">{{ 'auth.audit_log.no_logs' | translate }}</td>
         </tr>
       </tbody>
     </table>
 
     <!-- PAGINATION -->
-    <app-pagination
-      [pageNumber]="pageNumber()"
-      [totalPages]="totalPages"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="pageSizeOptions"
-      (pageChange)="pageNumber.set($event); load()"
-      (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
-    </app-pagination>
+    <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+      <button class="page-btn" (click)="prevPage()" [disabled]="pageNumber === 1">{{ 'pagination.previous' | translate }}</button>
+      <span class="page-info">{{ 'pagination.page_of' | translate : { current: pageNumber, total: totalPages } }}</span>
+      <button class="page-btn" (click)="nextPage()" [disabled]="pageNumber === totalPages">{{ 'pagination.next' | translate }}</button>
+    </div>
 
   </div>
 
@@ -163,7 +160,7 @@
       <mat-icon>{{ getActionIcon(log.action) }}</mat-icon>
     </span>
     <div>
-      <h2 mat-dialog-title>{{ 'AUDIT.ACTIONS.' + log.action | translate }}</h2>
+      <h2 mat-dialog-title>{{ 'auth.audit_log.actions.' + log.action | translate }}</h2>
       <p class="dialog-ts">{{ log.timestamp | date:'dd MMM yyyy · HH:mm:ss' }}</p>
     </div>
   </div>
@@ -178,7 +175,7 @@
     </div>
 
     <div class="detail-section" *ngIf="metadataEntries(log).length">
-      <p class="detail-section__title">{{ 'AUDIT.DETAILS.METADATA' | translate }}</p>
+      <p class="detail-section__title">{{ 'auth.audit_log.details.metadata' | translate }}</p>
       <div class="detail-grid">
         <ng-container *ngFor="let entry of metadataEntries(log)">
           <span class="detail-key">{{ entry.key }}</span>
@@ -188,12 +185,12 @@
     </div>
 
     <div class="detail-section" *ngIf="log.userAgent">
-      <p class="detail-section__title">{{ 'AUDIT.DETAILS.USER_AGENT' | translate }}</p>
+      <p class="detail-section__title">{{ 'auth.audit_log.details.user_agent' | translate }}</p>
       <p class="detail-val mono small">{{ log.userAgent }}</p>
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button class="btn-secondary" mat-dialog-close>{{ 'AUDIT.DETAILS.CLOSE' | translate }}</button>
+    <button class="btn-secondary" mat-dialog-close>{{ 'auth.audit_log.details.close' | translate }}</button>
   </mat-dialog-actions>
 </ng-template>

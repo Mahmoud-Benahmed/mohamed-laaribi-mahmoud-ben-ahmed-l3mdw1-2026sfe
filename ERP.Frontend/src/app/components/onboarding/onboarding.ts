@@ -78,7 +78,7 @@ export class OnboardingComponent implements OnInit , OnDestroy{
       return;
     }
     if (!this.planId) {
-      this.error = this.translate.instant('ERRORS.NO_PLAN_SELECTED');
+      this.error = this.translate.instant('errors.no_plan_selected');
       return;
     }
 
@@ -100,7 +100,7 @@ export class OnboardingComponent implements OnInit , OnDestroy{
       },
       error: (err) => {
         this.loading = false;
-        this.error = err?.error?.message ?? this.translate.instant('ERRORS.UNKNOWN');
+        this.error = err?.error?.message ?? this.translate.instant('errors.unknown');
       }
     });
   }

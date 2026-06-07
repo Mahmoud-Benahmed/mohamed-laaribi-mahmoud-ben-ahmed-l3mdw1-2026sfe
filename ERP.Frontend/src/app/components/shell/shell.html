@@ -394,10 +394,10 @@
       <!-- Audit Log -->
       <a class="sidebar__item" routerLink="/audit-log" routerLinkActive="sidebar__item--active"
          *ngIf="authService.hasPrivilege(PRIVILEGES.AUDIT.MANAGE_AUDITLOGS)">
-        <mat-icon>history</mat-icon> <span>{{ 'nav.audit_log.main' | translate }}</span>
+        <mat-icon>history</mat-icon> <span>{{ 'nav.auth.audit_log' | translate }}</span>
       </a>
     </nav>
-
+    
     <!-- Footer -->
     <div class="sidebar__footer">
       <div class="sidebar__user" [routerLink]="['/profile']" style="cursor:pointer;">

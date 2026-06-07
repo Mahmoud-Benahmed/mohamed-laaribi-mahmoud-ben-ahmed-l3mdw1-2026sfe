@@ -3,7 +3,7 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'ARTICLES.CATEGORIES.BREADCRUMB' | translate }}</p>
+      <p class="breadcrumb">{{ 'articles.categories.breadcrumb' | translate }}</p>
       <h1 class="page-title">{{ pageTitle | translate }}</h1>
     </div>
   </div>
@@ -36,7 +36,7 @@
       <div class="stat-card stat-card--blue" (click)="onActiveCardClick()" [class.stat-card--current]="isList()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'ARTICLES.CATEGORIES.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'articles.categories.stats.active' | translate }}</p>
             <p class="stat-card__value">{{ activeCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--blue">
@@ -54,7 +54,7 @@
             *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.RESTORE_ARTICLE_CATEGORIES) || authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES)">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'ARTICLES.CATEGORIES.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'articles.categories.stats.deleted' | translate }}</p>
             <p class="stat-card__value">{{ deletedCategories }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--red">
@@ -79,13 +79,13 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'ARTICLES.CATEGORIES.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="'articles.categories.search_placeholder' | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE_CATEGORIES) && isList()">
-        + {{ 'ARTICLES.CATEGORIES.ADD_BUTTON' | translate }}
+        + {{ 'articles.categories.add_button' | translate }}
       </button>
     </div>
 
@@ -96,7 +96,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('name')" class="th--sortable">
-                {{ 'ARTICLES.CATEGORIES.TABLE.NAME' | translate }}
+                {{ 'articles.categories.table.name' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -109,7 +109,7 @@
                 </span>
               </th>
               <th (click)="sortBy('tva')" class="th--sortable">
-                {{ 'ARTICLES.CATEGORIES.TABLE.TVA' | translate }}
+                {{ 'articles.categories.table.tva' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                       [style.opacity]="sortColumn === 'tva' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -121,7 +121,7 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'ARTICLES.CATEGORIES.TABLE.ACTIONS' | translate }}</th>
+              <th>{{ 'articles.categories.table.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -129,19 +129,19 @@
               <td class="td--name">{{ category.name }}</td>
               <td class="td--tva">{{ category.tva }}%</td>
               <td class="td--actions">
-                <button class="icon-btn icon-btn--view" (click)="openView(category)" [title]="'COMMON.VIEW' | translate" *ngIf="isList() || isDeletedList()">
+                <button class="icon-btn icon-btn--view" (click)="openView(category)" [title]="'common.view' | translate" *ngIf="isList() || isDeletedList()">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--edit" (click)="openEdit(category)" [title]="'COMMON.EDIT' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES) && !category.isDeleted">
+                <button class="icon-btn icon-btn--edit" (click)="openEdit(category)" [title]="'common.edit' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES) && !category.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--delete" (click)="delete(category)" [title]="'COMMON.DELETE' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES) && !category.isDeleted">
+                <button class="icon-btn icon-btn--delete" (click)="delete(category)" [title]="'common.delete' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES) && !category.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -149,7 +149,7 @@
                     <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--reactivate" (click)="restore(category)" [title]="'COMMON.RESTORE' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.RESTORE_ARTICLE_CATEGORIES) && category.isDeleted">
+                <button class="icon-btn icon-btn--reactivate" (click)="restore(category)" [title]="'common.restore' | translate" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.RESTORE_ARTICLE_CATEGORIES) && category.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
@@ -158,7 +158,7 @@
               </td>
             </tr>
             <tr *ngIf="sortedData.length === 0">
-              <td colspan="3" class="td--empty">{{ 'COMMON.NO_RESULTS' | translate }}</td>
+              <td colspan="3" class="td--empty">{{ 'common.no_results' | translate }}</td>
             </tr>
           </tbody>
         </table>
@@ -178,33 +178,33 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="isView() && selectedCategory">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'ARTICLES.CATEGORIES.TITLE_DETAILS' | translate }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ 'articles.categories.title_details' | translate }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.ID' | translate }}</span>
+          <span class="detail-label">{{ 'articles.categories.details.id' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedCategory.id }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.NAME' | translate }}</span>
+          <span class="detail-label">{{ 'articles.categories.details.name' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'ARTICLES.CATEGORIES.DETAILS.TVA' | translate }}</span>
+          <span class="detail-label">{{ 'articles.categories.details.tva' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.tva }}%</span>
         </div>
       </div>
       <div class="panel__actions">
         <button class="btn-secondary" (click)="openEdit(selectedCategory)" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES) && !selectedCategory.isDeleted">
-          {{ 'COMMON.EDIT' | translate }}
+          {{ 'common.edit' | translate }}
         </button>
         <button class="btn-danger" (click)="delete(selectedCategory)" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES) && !selectedCategory.isDeleted">
-          {{ 'COMMON.DELETE' | translate }}
+          {{ 'common.delete' | translate }}
         </button>
         <button class="btn-success" (click)="restore(selectedCategory)" *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.RESTORE_ARTICLE_CATEGORIES) && selectedCategory.isDeleted">
-          {{ 'COMMON.RESTORE' | translate }}
+          {{ 'common.restore' | translate }}
         </button>
       </div>
     </div>
@@ -213,8 +213,8 @@
   <!-- ===================== FORM PANEL ===================== -->
   <div class="panel" *ngIf="isCreate() || (isEdit() && selectedCategory)">
     <div class="panel__header">
-      <h2 class="panel__title">{{ isCreate() ? ('ARTICLES.CATEGORIES.FORM.ADD_TITLE' | translate) : ('ARTICLES.CATEGORIES.FORM.EDIT_TITLE' | translate) }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ isCreate() ? ('articles.categories.form.add_title' | translate) : ('articles.categories.form.edit_title' | translate) }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <form [formGroup]="categoryForm" (ngSubmit)="submit()" class="form">
@@ -224,22 +224,22 @@
           <!-- Name -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'ARTICLES.CATEGORIES.FORM.NAME' | translate }}</label>
+              <label>{{ 'articles.categories.form.name' | translate }}</label>
               <mat-icon>label</mat-icon>
             </div>
             <input
               class="form__input"
               type="text"
               formControlName="name"
-              [placeholder]="'ARTICLES.CATEGORIES.FORM.NAME_PLACEHOLDER' | translate"
+              [placeholder]="'articles.categories.form.name_placeholder' | translate"
               [class.form__input--error]="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched"
             />
             <span class="field__error" *ngIf="categoryForm.get('name') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ALPHA_ONLY' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['minlength']">{{ 'validation.name_min' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.alpha_only' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'validation.name_max' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -247,14 +247,14 @@
           <!-- TVA -->
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'ARTICLES.CATEGORIES.FORM.TVA' | translate }}</label>
+              <label>{{ 'articles.categories.form.tva' | translate }}</label>
               <mat-icon>percent</mat-icon>
             </div>
             <input
               class="form__input"
               type="number"
               formControlName="tva"
-              [placeholder]="'ARTICLES.CATEGORIES.FORM.TVA_PLACEHOLDER' | translate"
+              [placeholder]="'articles.categories.form.tva_placeholder' | translate"
               step="1"
               min="0"
               max="100"
@@ -262,9 +262,9 @@
             />
             <span class="field__error" *ngIf="categoryForm.get('tva') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['min'] || ctrl.errors?.['max']">{{ 'VALIDATION.TVA_INVALID' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.INTEGER_ONLY' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['min'] || ctrl.errors?.['max']">{{ 'validation.tva_invalid' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.integer_only' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -274,7 +274,7 @@
         <div class="form__actions">
           <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="categoryForm.invalid">
-            {{ isCreate() ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
+            {{ isCreate() ? ('common.add' | translate) : ('common.save' | translate) }}
           </button>
         </div>
 

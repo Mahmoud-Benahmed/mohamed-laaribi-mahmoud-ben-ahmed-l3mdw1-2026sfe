@@ -141,7 +141,7 @@ export class PaymentComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error:()=>{
-        this.flash("error", this.translate.instant('INVOICES.ERRORS.LOAD_FAILED'));
+        this.flash("error", this.translate.instant('invoices.errors.load_failed'));
         this.cdr.markForCheck();
       }
 
@@ -151,11 +151,11 @@ export class PaymentComponent implements OnInit {
   cancel(payment: PaymentDto){
     this.paymentService.cancelPayment(payment.id).subscribe({
       next:()=>{
-        this.flash('success', this.translate.instant('PAYMENTS.SUCCESS.CANCELLED'));
+        this.flash('success', this.translate.instant('payments.success.cancelled'));
         this.reload();
       },
       error:()=>{
-        this.flash('error', this.translate.instant('PAYMENTS.ERRORS.CANCELLED'));
+        this.flash('error', this.translate.instant('payments.errors.cancel_failed'));
       }
     })
   }
@@ -237,7 +237,7 @@ export class PaymentComponent implements OnInit {
   }
 
   getAddButtonTooltip(): string {
-    return this.invoicesCached.length === 0 ? this.translate.instant('PAYMENTS.ERRORS.UNPAID_INVOICES_NOT_FOUND') : '';
+    return this.invoicesCached.length === 0 ? this.translate.instant('payments.errors.unpaid_invoices_not_found') : '';
   }
   dismissError(): void { this.errors = []; }
 

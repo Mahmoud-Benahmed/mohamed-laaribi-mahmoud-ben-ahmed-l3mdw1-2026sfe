@@ -150,7 +150,7 @@ export class RegisterComponent implements OnDestroy {
             width: '400px',
             data: {
               title: this.translate.instant('common.error'),
-              message: this.translate.instant('auth.responses.errors.login_exists', { login: this.login() }),
+              message: this.translate.instant('auth.responses.errors.AUTH_015'),
               confirmText: this.translate.instant('common.ok'),
               showCancel: false,
               icon: 'error',
@@ -165,7 +165,7 @@ export class RegisterComponent implements OnDestroy {
             width: '400px',
             data: {
               title: this.translate.instant('common.error'),
-              message: this.translate.instant('auth.responses.errors.email_exists', { email: this.email() }),
+              message: this.translate.instant('auth.responses.errors.AUTH_001'),
               confirmText: this.translate.instant('common.ok'),
               showCancel: false,
               icon: 'error',

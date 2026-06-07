@@ -48,14 +48,14 @@ export class CompleteRefundModal implements OnInit{
   ngOnInit(): void {
     console.log(this.data);
 
-    this.completingRefund = this.data.refund; // ← read from injected data
+    this.completingRefund = this.data.refund;
     this.initForm();
   }
 
 
   initForm(): void {
     this.form = this.fb.group({
-      refundReason: [null, Validators.required], // ← required, can't complete without it
+      refundReason: [null, Validators.required],
     });
   }
 
@@ -69,23 +69,23 @@ export class CompleteRefundModal implements OnInit{
     console.log(this.completingRefund);
 
     if (!this.completingRefund) {
-      this.flash('error', this.translate.instant('REFUNDS.ERRORS.COMPLETE_FAILED'));
+      this.flash('error', this.translate.instant('payments.refunds.errors.complete_failed'));
       return;
     }
 
-    this.isSubmitting = true; // ← was missing
+    this.isSubmitting = true;
 
     this.paymentService.completeRefund(this.completingRefund.id, {
-      refundReason: this.form.get('refundReason')?.value?.trim(),
+      externalReference: this.form.get('refundReason')?.value?.trim(), // ✅ fixed
     }).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.flash('success', this.translate.instant('REFUNDS.SUCCESS.COMPLETED'));
-        setTimeout(() => this.dialogRef.close(true), 1500); // ← close with true so caller can reload
+        this.flash('success', this.translate.instant('payments.refunds.success.completed'));
+        setTimeout(() => this.dialogRef.close(true), 1500);
       },
       error: (err) => {
         this.isSubmitting = false;
-        const msg = err?.error?.message ?? this.translate.instant('REFUNDS.ERRORS.COMPLETE_FAILED');
+        const msg = err?.error?.message ?? this.translate.instant('payments.refunds.errors.complete_failed');
         this.flash('error', msg);
       },
     });
@@ -109,6 +109,6 @@ export class CompleteRefundModal implements OnInit{
   }
 
   cancel(): void {
-    this.dialogRef.close(); // ← close with no result
+    this.dialogRef.close();
   }
 }

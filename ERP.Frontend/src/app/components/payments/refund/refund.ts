@@ -130,7 +130,7 @@ export class RefundsComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('REFUNDS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('payments.refunds.errors.load_failed'));
         this.cdr.markForCheck();
       },
     });
@@ -149,7 +149,7 @@ export class RefundsComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('REFUNDS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('payments.refunds.errors.load_failed'));
         this.cdr.markForCheck();
       },
     });

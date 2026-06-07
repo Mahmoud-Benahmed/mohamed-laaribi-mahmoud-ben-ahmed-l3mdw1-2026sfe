@@ -143,7 +143,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
           error: () => {
               this.invoices = [];
               this.cdr.markForCheck();
-              this.flash('error', this.translate.instant('INVOICES.ERRORS.LOAD_FAILED'));
+              this.flash('error', this.translate.instant('invoices.errors.load_failed'));
           }
       });
   }
@@ -180,7 +180,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('INVOICES.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('invoices.errors.load_failed'));
       }
     });
   }
@@ -210,7 +210,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         this.invoices   = [];
         this.totalCount = 0;
         this.cdr.markForCheck();
-        this.flash('error', this.translate.instant('INVOICES.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('invoices.errors.load_failed'));
       },
     });
   }
@@ -233,7 +233,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         setTimeout(() => this.renderStatusPieChart(), 100);
       },
       error: () => {
-        this.flash('error', this.translate.instant('INVOICES.ERRORS.LOAD_STATS_FAILED'));
+        this.flash('error', this.translate.instant('invoices.errors.load_stats_failed'));
         this.statsLoading = false;
       },
     });
@@ -303,9 +303,9 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       width: '420px',
       data: {
         icon: 'delete', iconColor: 'warn',
-        title: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_TITLE'),
-        message: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_MESSAGE', { number: invoice.invoiceNumber }),
-        confirmText: this.translate.instant('INVOICES.DIALOG.DELETE_CONFIRM'),
+        title: this.translate.instant('invoices.dialog.delete_invoice_title'),
+        message: this.translate.instant('invoices.dialog.delete_invoice_message', { number: invoice.invoiceNumber }),
+        confirmText: this.translate.instant('invoices.dialog.delete_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -314,10 +314,10 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.delete(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('INVOICES.SUCCESS.DELETED'));
+          this.flash('success', this.translate.instant('invoices.success.deleted'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.DELETE_FAILED')),
+        error: () => this.flash('error', this.translate.instant('invoices.errors.delete_failed')),
       });
     });
   }
@@ -325,10 +325,10 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   restore(invoice: InvoiceDto): void {
     this.invoiceService.restore(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.RESTORED'));
+        this.flash('success', this.translate.instant('invoices.success.restored'));
         this.isDeletedList() ? this.loadDeletedInvoices() : this.reload();
       },
-      error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.RESTORE_FAILED')),
+      error: () => this.flash('error', this.translate.instant('invoices.errors.restore_failed')),
     });
   }
 
@@ -352,8 +352,8 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   }
 
   getAddButtonTooltip(): string {
-    if(this.articles.length< 1) return this.articles.length === 0 ? this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND') : '';
-    else if(this.clients.length< 1) return this.clients.length === 0 ? this.translate.instant('STOCK.ERRORS.CLIENTS_NOT_FOUND') : '';
+    if(this.articles.length< 1) return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
+    else if(this.clients.length< 1) return this.clients.length === 0 ? this.translate.instant('stock.responses.errors.CLIENTS_NOT_FOUND') : '';
     else return '';
   }
 
@@ -382,7 +382,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
 
     const textHi = this.getCSSVariable('--text-hi', '#ffffff');
     const labels = ['DRAFT', 'UNPAID', 'PAID', 'CANCELLED'].map(s =>
-      this.translate.instant(`INVOICES.STATUS.${s}`)
+      this.translate.instant(`invoices.status.${s}`)
     );
     const data = [
       this.invoiceStats.draftCount,
@@ -434,6 +434,4 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       attributes: true, attributeFilter: ['class', 'data-theme'],
     });
   }
-
-
 }
