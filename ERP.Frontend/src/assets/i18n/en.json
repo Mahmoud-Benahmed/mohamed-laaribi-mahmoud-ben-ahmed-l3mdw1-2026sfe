@@ -345,7 +345,10 @@
         "AUTH_012": "Privilege not found.",
         "reset_failed": "Failed to change the password. Please try again later.",
         "update_failed": "Failed to update profile.",
-        "load_failed": "Could not load user profile. Please try again later."
+        "load_failed": "Could not load user profile. Please try again later.",
+        "login_exists": "Login already exists.",
+        "email_exists": "Email already exists."
+
       },
       "success":{
         "password_changed": "Password changed successfully.",
@@ -503,6 +506,7 @@
     "light": "Light",
     "dark":"Dark",
     "loading":"Loading",
-    "processing": "Processing"
+    "processing": "Processing",
+    "error":"Something went wrong"
   }
 }
