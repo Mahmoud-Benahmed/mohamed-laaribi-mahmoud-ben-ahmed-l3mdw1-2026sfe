@@ -32,10 +32,11 @@ namespace ERP.AuthService.Application.Services
         private readonly ILogger<AuthUserService> _logger;
         private readonly IControleRepository _controleRepository;
         private readonly IPrivilegeRepository _privilegeRepository;
-        private readonly ITenantContext _tenantContext;
         private readonly IRefreshTokenHashingHelper _refreshTokenHelper;
         private readonly ITenantApiClient _tenantApi;
         private readonly ITenantCacheRepository _tenantRepo;
+
+        private readonly ITenantContext _tenantContext;
 
 
         public AuthUserService(
@@ -292,7 +293,7 @@ namespace ERP.AuthService.Application.Services
                         AuditAction.Login,
                         success: true,
                         performedBy: user.Id,
-                        metadata: new() { ["login"] = request.Login, ["tenantId"] = user.TenantId?.ToString() ?? "platform-admin" },
+                        metadata: new() { ["login"] = request.Login },
                         ipAddress: GetIp(),
                         userAgent: GetUserAgent());
                 return token;
@@ -523,7 +524,6 @@ namespace ERP.AuthService.Application.Services
             await _auditLogger.LogAsync(
                 AuditAction.UserActivated,
                 success: true,
-                tenantId: _tenantContext.TenantId,
                 performedBy: performedById,
                 targetUserId: user.Id,
                 ipAddress: GetIp());
