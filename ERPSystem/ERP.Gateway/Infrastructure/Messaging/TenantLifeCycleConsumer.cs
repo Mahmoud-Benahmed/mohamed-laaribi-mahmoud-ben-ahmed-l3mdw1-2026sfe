@@ -99,6 +99,10 @@ public sealed class TenantLifecycleConsumer : BackgroundService
                             if (existing != null)
                                 await cache.RemoveAsync(existing.TenantId);
 
+                            _logger.LogInformation(
+                                "payload: {0}",
+                                evt);
+
                             await cache.SetAsync(new TenantCacheEntry
                             {
                                 TenantId = evt.TenantId,
