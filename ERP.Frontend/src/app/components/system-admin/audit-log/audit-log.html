@@ -101,7 +101,6 @@
 
           <td>
             <span class="uid-chip" *ngIf="log.performedBy; else dash1"
-              (click)="goToProfile(log.performedBy)"
               [title]="log.performedBy">
               {{ log.performedBy | slice:0:8 }}…
             </span>
@@ -144,11 +143,14 @@
     </table>
 
     <!-- PAGINATION -->
-    <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
-      <button class="page-btn" (click)="prevPage()" [disabled]="pageNumber === 1">{{ 'COMMON.PREVIOUS' | translate }}</button>
-      <span class="page-info">{{ 'COMMON.PAGE_OF' | translate : { current: pageNumber, total: totalPages } }}</span>
-      <button class="page-btn" (click)="nextPage()" [disabled]="pageNumber === totalPages">{{ 'COMMON.NEXT' | translate }}</button>
-    </div>
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      (pageChange)="pageNumber.set($event); load()"
+      (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+    </app-pagination>
 
   </div>
 
