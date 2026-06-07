@@ -1,5 +1,5 @@
 import { AuthService } from './../../../services/auth/auth.service';
-import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, formatNumber, KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { ModalComponent } from '../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { PaginationComponent } from "../../pagination/pagination";
 
 interface ActionMeta {
   icon: string;
@@ -38,8 +39,9 @@ interface ActionMeta {
     MatSelectModule, MatButtonToggleModule, MatProgressSpinnerModule,
     MatTooltipModule, MatDividerModule, MatSnackBarModule,
     MatDialogModule, MatChipsModule, MatInputModule, MatSelectModule, MatFormFieldModule,
-    TranslatePipe
-  ],
+    TranslatePipe,
+    PaginationComponent
+],
   templateUrl: './audit-log.html',
   styleUrl: './audit-log.scss',
 })
@@ -52,9 +54,6 @@ export class AuditLogComponent implements OnInit {
   displayedColumns = ['status', 'action', 'performedBy', 'targetUserId', 'ipAddress', 'timestamp', 'details'];
   dataSource = new MatTableDataSource<AuditLogResponseDto>([]);
 
-  totalCount = 0;
-  pageNumber = 1;
-  pageSize = 20;
   isLoading = false;
 
   selectedAction: AuditAction | null = null;
@@ -104,6 +103,12 @@ export class AuditLogComponent implements OnInit {
       UnhandledError:           { icon: 'bug_report',         category: 'danger' }
   };
 
+    // ── Pagination ────────────────────────────────────────────────────────────
+  pageNumber = signal(1);
+  pageSize = signal(10);
+  pageSizeOptions = [5, 10, 25, 50];
+  totalCount = 0;
+
   constructor(
     private authService: AuthService,
     private auditLogService: AuditLogService,
@@ -118,12 +123,19 @@ export class AuditLogComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize()); }
+  onPageSizeChange(): void {
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+
   load(): void {
     this.isLoading = true;
 
     const source$ = this.userIdFilter.trim()
-      ? this.auditLogService.getByUser(this.userIdFilter.trim(), this.pageNumber, this.pageSize)
-      : this.auditLogService.getAll(this.pageNumber, this.pageSize);
+      ? this.auditLogService.getByUser(this.userIdFilter.trim(), this.pageNumber(), this.pageSize())
+      : this.auditLogService.getAll(this.pageNumber(), this.pageSize());
 
     source$.subscribe({
       next: (result) => {
@@ -140,24 +152,8 @@ export class AuditLogComponent implements OnInit {
     });
   }
 
-  get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize); }
-
-  prevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.load();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.load();
-    }
-  }
-
   onFilterChange(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.load();
   }
 
