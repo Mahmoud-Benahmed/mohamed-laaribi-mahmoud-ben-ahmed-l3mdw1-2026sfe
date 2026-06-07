@@ -385,7 +385,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
     });
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(confirmed => {
       if (!confirmed) return;
-      this.tenantService.suspendTenant(tenant.id).subscribe({
+      this.tenantService.removeSubscription(tenant.id).subscribe({
         next: () => {
           this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUSPENDED'));
           this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
