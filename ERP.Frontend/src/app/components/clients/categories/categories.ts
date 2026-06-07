@@ -116,7 +116,7 @@ export class ClientCategoriesComponent implements OnInit {
         },
         error: (error)=>{
           const err= error.error as HttpError;
-          this.flash("error", this.translateError(err.code ));
+          this.flash("error", this.translateError(err.code));
           this.cancel();
         }
       });
@@ -124,25 +124,24 @@ export class ClientCategoriesComponent implements OnInit {
   }
 
   private translateError(errorCode: string): string {
-    // Try client errors
-    if (this.translate.instant(`CLIENTS.ERRORS.${errorCode}`) !== `CLIENTS.ERRORS.${errorCode}`) {
-      return this.translate.instant(`CLIENTS.ERRORS.${errorCode}`);
+    const clientKey = `clients.responses.errors.${errorCode}`;
+    if (this.translate.instant(clientKey) !== clientKey) {
+      return this.translate.instant(clientKey);
     }
-    // Try category errors
-    if (this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`) !== `CLIENTS.CATEGORIES.ERRORS.${errorCode}`) {
-      return this.translate.instant(`CLIENTS.CATEGORIES.ERRORS.${errorCode}`);
+    const categoryKey = `clients.categories.responses.errors.${errorCode}`;
+    if (this.translate.instant(categoryKey) !== categoryKey) {
+      return this.translate.instant(categoryKey);
     }
-    // Fallback to generic ERRORS
-    return this.translate.instant(`ERRORS.${errorCode}`) || this.translate.instant('ERRORS.INTERNAL_ERROR');
+    return this.translate.instant('errors.unknown');
   }
 
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate()) return 'Add Category';
-    if (this.isEdit())   return 'Edit Category';
-    if (this.isView())   return 'Category Details';
-    return 'Client Categories';
+    if (this.isCreate()) return 'clients.categories.title_add';
+    if (this.isEdit())   return 'clients.categories.title_edit';
+    if (this.isView())   return 'clients.categories.title_details';
+    return 'clients.categories.title_list';
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
@@ -203,7 +202,7 @@ export class ClientCategoriesComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translateError('FAILED_TO_LOAD_CATEGORIES'));
+        this.flash('error', this.translate.instant('clients.categories.responses.errors.load_failed'));
         this.loading = false;
       },
     });
@@ -216,17 +215,16 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translateError('FAILED_TO_LOAD_DELETED_CATEGORIES')),
+      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_deleted_failed')),
     });
   }
 
   loadStats(): void {
     this.categoriesService.getStats().subscribe({
       next: (res) => { this.stats = res; this.cdr.markForCheck(); },
-      error: () => this.flash('error', this.translateError('FAILED_TO_LOAD_STATS')),
+      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_stats_failed')),
     });
   }
-
 
   loadInactive(): void {
     this.categoriesService.getAllPaged(this.pageNumber(), this.pageSize()).subscribe({
@@ -235,7 +233,7 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: (error) => this.flash('error', this.translateError('FAILED_TO_LOAD_CATEGORIES')),
+      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_failed')),
     });
     this.cdr.markForCheck();
   }
@@ -267,7 +265,7 @@ export class ClientCategoriesComponent implements OnInit {
       name:                  category.name,
       code:                  category.code,
       delaiRetour:           category.delaiRetour,
-      duePaymentPeriod:      category.duePaymentPeriod,    // ← added
+      duePaymentPeriod:      category.duePaymentPeriod,
       useBulkPricing:        category.useBulkPricing,
       discountRate: category.discountRate != null ? category.discountRate * 100 : null,
       creditLimitMultiplier: category.creditLimitMultiplier ?? null,
@@ -303,22 +301,18 @@ export class ClientCategoriesComponent implements OnInit {
   private resolveCancel(): ViewMode {
     const current = this.viewMode();
 
-    // edit → view: only go back to view if selectedCategory is still available
     if (current === 'edit' && this.previousMode === 'view' && this.selectedCategory) {
       return 'view';
     }
 
-    // view → list / list-deleted: go back to wherever list was
     if (current === 'view' && (this.previousMode === 'list' || this.previousMode === 'list-deleted')) {
       return this.previousMode;
     }
 
-    // create → list: always safe
     if (current === 'create') {
       return this.previousMode ?? 'list';
     }
 
-    // fallback
     return 'list';
   }
 
@@ -345,32 +339,32 @@ export class ClientCategoriesComponent implements OnInit {
     const val = this.categoryForm.value;
 
     if (this.isCreate()) {
-      const dto: CreateCategoryRequestDto = {   // same shape for UpdateCategoryRequestDto
+      const dto: CreateCategoryRequestDto = {
         name:                  val.name,
         code:                  val.code,
         delaiRetour:           val.delaiRetour,
-        duePaymentPeriod:      val.duePaymentPeriod,          // ← added
+        duePaymentPeriod:      val.duePaymentPeriod,
         useBulkPricing:        val.useBulkPricing ?? false,
         discountRate: val.discountRate != null && val.discountRate !== '' ? val.discountRate / 100 : null,
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.create(dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_CREATED')); },
-        error: (err) => this.flash('error', this.translateError('ERRORS.INTERNAL_ERROR')),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.categories.responses.success.category_created')); },
+        error: () => this.flash('error', this.translate.instant('errors.unknown')),
       });
     } else if (this.isEdit() && this.selectedCategory) {
-      const dto: UpdateCategoryRequestDto = {   // same shape for UpdateCategoryRequestDto
+      const dto: UpdateCategoryRequestDto = {
         name:                  val.name,
         code:                  val.code,
         delaiRetour:           val.delaiRetour,
-        duePaymentPeriod:      val.duePaymentPeriod,          // ← added
+        duePaymentPeriod:      val.duePaymentPeriod,
         useBulkPricing:        val.useBulkPricing ?? false,
         discountRate:          val.discountRate != null && val.discountRate !== '' ? val.discountRate / 100 : null,
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.update(this.selectedCategory.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_UPDATED')); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translateError('ERRORS.INTERNAL_ERROR')),
+        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.categories.responses.success.category_updated')); },
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
       });
     }
   }
@@ -379,9 +373,9 @@ export class ClientCategoriesComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.DELETE_CATEGORY_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.DELETE_CATEGORY_SOFT', { name: category.name }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title:       this.translate.instant('clients.categories.confirmations.delete_category.title'),
+        message:     this.translate.instant('clients.categories.confirmations.delete_category.message', { name: category.name }),
+        confirmText: this.translate.instant('common.delete'),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -395,11 +389,10 @@ export class ClientCategoriesComponent implements OnInit {
         this.categoriesService.delete(category.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success',this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_DELETED'));
+            this.flash('success', this.translate.instant('clients.categories.responses.success.category_deleted'));
             this.reload();
           },
-          error: (error) =>
-          {
+          error: (error) => {
             const err= error.error as HttpError;
             this.flash('error', this.translateError(err.code));
           },
@@ -407,36 +400,35 @@ export class ClientCategoriesComponent implements OnInit {
       });
   }
 
-
-
   restore(cat: ClientCategoryResponseDto): void {
-      this.categoriesService.restore(cat.id).subscribe({
-        next: () => {
-          this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_RESTORED'));
-          this.reload();
-          if(this.isView())this.cancel();
-        },
-        error: (error) =>{
-          const err= error.error as HttpError;
-          this.flash('error', this.translateError(err.code));
-        }
-      });
+    this.categoriesService.restore(cat.id).subscribe({
+      next: () => {
+        this.flash('success', this.translate.instant('clients.categories.responses.success.category_restored'));
+        this.reload();
+        if(this.isView()) this.cancel();
+      },
+      error: (error) => {
+        const err= error.error as HttpError;
+        this.flash('error', this.translateError(err.code));
+      }
+    });
   }
-
 
   // ── Activate / Deactivate ─────────────────────────────────────────────────
 
   toggleActive(category: ClientCategoryResponseDto): void {
-    const action = category.isActive ? 'Deactivate' : 'Activate';
+    const isActive = category.isActive;
+    const confirmationKey = isActive ? 'deactivate_category' : 'activate_category';
+
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant(`CONFIRMATION.${action.toUpperCase()}_CATEGORY_TITLE`),
-        message:     this.translate.instant(`CONFIRMATION.${action.toUpperCase()}_CATEGORY`, { name: category.name }),
-        confirmText: this.translate.instant(`COMMON.${action.toUpperCase()}`),
+        title:       this.translate.instant(`clients.categories.confirmations.${confirmationKey}.title`),
+        message:     this.translate.instant(`clients.categories.confirmations.${confirmationKey}.message`, { name: category.name }),
+        confirmText: this.translate.instant(isActive ? 'common.deactivate' : 'common.activate'),
         showCancel:  true,
-        icon:        category.isActive ? 'toggle_off' : 'toggle_on',
-        iconColor:   category.isActive ? 'warning' : 'success',
+        icon:        isActive ? 'toggle_off' : 'toggle_on',
+        iconColor:   isActive ? 'warning' : 'success',
       },
     });
 
@@ -444,17 +436,17 @@ export class ClientCategoriesComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        const call = category.isActive
+        const call = isActive
           ? this.categoriesService.deactivate(category.id)
           : this.categoriesService.activate(category.id);
 
         call.subscribe({
           next: (updated) => {
-            this.flash('success', this.translate.instant('CLIENTS.CATEGORIES.SUCCESS.CATEGORY_ACTIVATED'));
+            this.flash('success', this.translate.instant('clients.categories.responses.success.category_activated'));
             if (this.selectedCategory?.id === category.id) this.selectedCategory = updated;
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.unknown')),
         });
       });
   }

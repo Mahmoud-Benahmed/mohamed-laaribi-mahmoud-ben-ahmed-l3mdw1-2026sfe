@@ -33,7 +33,7 @@ import { TenantService } from '../../services/tenant/tenant.service';
     TranslatePipe,
     ReactiveFormsModule,
     RouterLink
-],
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   encapsulation: ViewEncapsulation.None
@@ -62,8 +62,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private themeService: TenantThemeService,
   ) {
     this.loginForm = this.fb.group({
-      login:       ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
-      password:    ['', [Validators.required, Validators.minLength(8)]],
+      login:    ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
 
@@ -93,7 +93,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = null;
 
-    const {login, password}= this.loginForm.value;
+    const { login, password } = this.loginForm.value;
 
     this.authService.login({ login, password }).pipe(
       switchMap(response =>
@@ -131,7 +131,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.stopLoading();
 
-        // Handle specific status codes
         if (error.status === 0) {
           this.showErrorDialog('SERVER_UNREACHABLE', error);
           return;
@@ -145,26 +144,26 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
 
-        const code = error.error?.code ?? 'UNKNOWN';
+        const code = error.error?.code ?? 'AUTH_000';
         this.showErrorDialog(code, error);
       }
     });
   }
 
   private showErrorDialog(code: string, error: any): void {
-    const key = `ERRORS.${code}`;
-    const translatedMsg = this.translate.instant(key);
+    const msgKey = `auth.responses.errors.${code}`;
+    const translatedMsg = this.translate.instant(msgKey);
 
-    // If translation key doesn't exist, fall back to error message from server
-    const displayMessage = translatedMsg === key
-      ? (error.error?.message ?? translatedMsg)
+    // Fall back to server message if translation key is missing
+    const displayMessage = translatedMsg === msgKey
+      ? (error?.error?.message ?? translatedMsg)
       : translatedMsg;
 
-    // Determine dialog title based on error type
+    // Determine dialog title key based on error code
     let titleKey = 'auth.responses.errors.AUTH_006';
     if (code === 'SERVER_UNREACHABLE') titleKey = 'auth.responses.errors.SERVER_UNREACHABLE';
     if (code === 'RATE_LIMIT')         titleKey = 'auth.responses.errors.RATE_LIMIT';
-    if (code === 'AUTH_003')           titleKey = 'auth.responses.errors.AUTH_003';
+    if (code === 'AUTH_003')           titleKey = 'auth.responses.errors.AUTH_003_TITLE';
     if (code === 'AUTH_019')           titleKey = 'auth.responses.errors.AUTH_019';
 
     this.dialog.open(ModalComponent, {

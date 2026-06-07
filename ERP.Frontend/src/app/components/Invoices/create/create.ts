@@ -284,7 +284,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   isOutOfStock(stock: number): boolean { return stock === 0; }
 
   getAddButtonTooltip(): string {
-    return this.articles.length === 0 ? this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND') : '';
+    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
   }
 
   checkArticleStock(articleId: string, _requestedQuantity: number): void {
@@ -299,7 +299,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   getUnitTranslation(): string {
     const unit = this._selectedArticle?.unit;
     if (!unit) return '';
-    return this.translate.instant(`UNIT.${unit.toUpperCase()}`);
+    return this.translate.instant(`unit.${unit.toUpperCase()}`);
   }
 
   getAvailableStock(articleId: string): number {
@@ -353,7 +353,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   submitInlineItem(): void {
     if (this.itemForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
 
@@ -362,7 +362,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     // Use masterArticles for the real stock ceiling
     const master = this.masterArticles.find(a => a.id === articleId);
     if (!master) {
-      this.flash('error', this.translate.instant('ERRORS.ARTICLE_NOT_FOUND'));
+      this.flash('error', this.translate.instant('errors.article_not_found'));
       return;
     }
 
@@ -374,7 +374,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     const maxAllowed = master.quantity - alreadyConsumed;
 
     if (quantity > maxAllowed) {
-      this.flash('error', this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK', {
+      this.flash('error', this.translate.instant('stock.responses.errors.INSUFFICIENT_STOCK', {
         max: maxAllowed, requested: quantity
       }));
       return;
@@ -531,7 +531,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   get duePaymentPeriodHint(): string {
     if (!this.selectedClientForValidation?.duePaymentPeriod) return '';
-    return this.translate.instant('INVOICES.FORM.DUE_DATE_HINT', {
+    return this.translate.instant('invoices.form.due_date_hint', {
       days: this.selectedClientForValidation.duePaymentPeriod
     });
   }
@@ -592,10 +592,10 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   getSubmitButtonTooltip(): string {
-    if (this.isValidating) return this.translate.instant('COMMON.PROCESSING');
-    if (this.invoiceForm.invalid) return this.translate.instant('VALIDATION.REQUIRED');
-    if (this.pendingItems.length === 0) return this.translate.instant('INVOICES.FORM.NO_ITEMS_YET');
-    if (this.creditWarning) return this.translate.instant('INVOICES.ERRORS.CREDIT_LIMIT_EXCEEDED');
+    if (this.isValidating) return this.translate.instant('common.processing');
+    if (this.invoiceForm.invalid) return this.translate.instant('validation.required');
+    if (this.pendingItems.length === 0) return this.translate.instant('invoices.form.no_items_yet');
+    if (this.creditWarning) return this.translate.instant('invoices.errors.credit_limit_exceeded');
     return '';
   }
 
@@ -618,7 +618,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
     if (failures.length > 0) {
       const msgs = failures.map(f =>
-        this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK_DETAIL', {
+        this.translate.instant('stock.responses.errors.INSUFFICIENT_STOCK_DETAIL', {
           article: (f as any).articleName,
           requested: (f as any).requested,
           available: (f as any).available,
@@ -633,28 +633,28 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   // ── CRUD actions ──────────────────────────────────────────────────────────
   async submit(): Promise<void> {
     if (this.invoiceForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
     if (this.pendingItems.length === 0) {
-      this.flash('error', this.translate.instant('INVOICES.FORM.NO_ITEMS_YET'));
+      this.flash('error', this.translate.instant('invoices.form.no_items_yet'));
       return;
     }
 
     const formValue = this.invoiceForm.value;
     const selectedClient = this.clients.find(c => c.id === formValue.clientId);
     if (!selectedClient) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_NOT_FOUND'));
+      this.flash('error', this.translate.instant('invoices.errors.client_not_found'));
       return;
     }
 
     // ── UI-level guards only ──────────────────────────────────────────────
     if (selectedClient.isBlocked) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_BLOCKED', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.errors.client_blocked', {client: selectedClient.name}));
       return;
     }
     if (selectedClient.isDeleted) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_DELETED', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.errors.client_deleted', {client: selectedClient.name}));
       return;
     }
 
@@ -678,7 +678,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     };
     this.invoiceService.create(dto).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.CREATED'));
+        this.flash('success', this.translate.instant('invoices.success.created'));
         setTimeout(() => {
           document.getElementById('top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 0);
@@ -689,7 +689,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
       },
       error: (err) => {
         const errorMsg = (err.error as HttpError)?.message
-          || this.translate.instant('INVOICES.ERRORS.CREATE_FAILED');
+          || this.translate.instant('invoices.errors.create_failed');
         this.flash('error', errorMsg);
         this.isValidating = false;
       },
@@ -900,7 +900,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   // Template
   get pageTitle():string{
-    return 'INVOICES.TITLE_NEW';
+    return 'invoices.title_new';
   }
 
   flash(type: 'success' | 'error', msg: string): void {

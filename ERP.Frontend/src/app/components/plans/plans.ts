@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TenantService } from '../../services/tenant/tenant.service';
 import { SubscriptionPlanDto } from '../../interfaces/TenantDto';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { SubscriptionPlanService } from '../../services/tenant/subscription-plan.service';
 
@@ -26,16 +26,16 @@ export class PlansComponent implements OnInit {
     private tenantService: TenantService,
     private planService: SubscriptionPlanService,
     private router: Router,
-    public userSettings: UserSettingsService
+    public userSettings: UserSettingsService,
+    private translate: TranslateService
   ) {}
   ngOnInit() {
     this.planService.getAllPlans(1, 3).subscribe({
       next: (plans) => {
-
         this.plans = plans.items.filter(p => p.isActive);
       },
       error: () => {
-        this.error = 'Failed to load plans. Please try again.';
+        this.error = this.translate.instant('tenant.plans.errors.load_failed');
       }
     });
   }

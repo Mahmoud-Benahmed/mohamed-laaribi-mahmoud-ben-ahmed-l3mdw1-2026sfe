@@ -201,7 +201,7 @@ export class ShellComponent implements OnInit, OnDestroy {
 
     // Other top-level routes
     if (url.startsWith('/permissions')) return [{ label: t('nav.auth.permissions') }];
-    if (url.startsWith('/audit-log')) return [{ label: t('nav.audit_log.main') }];
+    if (url.startsWith('/audit-log')) return [{ label: t('nav.auth.audit_log') }];
     if (url.startsWith('/profile')) return [{ label: t('home.quick_access.my_profile') }];
     if (url.startsWith('/change-password')) return [{ label: t('auth.profile.changePassword.title_change') }];
     if (url.startsWith('/tenants')) return [{ label: t('nav.tenants.main') }];

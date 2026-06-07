@@ -135,7 +135,7 @@ export class AuditLogComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        this.flash('error', this.translate.instant('auth.audit_log.responses.errors.internal_error'));
       }
     });
   }
@@ -169,9 +169,9 @@ export class AuditLogComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('AUDIT.CLEAR'),
-        message: this.translate.instant('CONFIRMATION.CLEAR_AUDIT_LOGS'),
-        confirmText: this.translate.instant('COMMON.OK'),
+        title: this.translate.instant('auth.audit_log.clear'),
+        message: this.translate.instant('auth.audit_log.confirmations.clear_logs'),
+        confirmText: this.translate.instant('common.ok'),
         showCancel: true,
         icon: 'playlist_remove',
         iconColor: 'warn',
@@ -184,11 +184,11 @@ export class AuditLogComponent implements OnInit {
         if (result) {
           this.auditLogService.clear().subscribe({
             next: () => {
-              this.flash('success', this.translate.instant('SUCCESS.AUDIT_LOG_CLEARED'));
+              this.flash('success', this.translate.instant('auth.audit_log.responses.success.logs_cleared'));
               this.load();
               this.cdr.markForCheck();
             },
-            error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'))
+            error: () => this.flash('error', this.translate.instant('auth.audit_log.responses.errors.internal_error'))
           });
         }
       });
@@ -196,7 +196,7 @@ export class AuditLogComponent implements OnInit {
 
   formatAction(action: AuditAction): string {
     // Return the translation key path, the template will use the translate pipe
-    return `AUDIT.ACTIONS.${action}`;
+    return `auth.audit_log.actions.${action}`;
   }
 
   getActionIcon(action: AuditAction): string {

@@ -187,7 +187,7 @@ export class CreatePaymentModal implements OnInit{
       },
       error: (err) => {
         this.invoicesLoading = false;
-        const msg = err?.error?.message ?? this.translate.instant('INVOICES.ERRORS.LOAD_FAILED');
+        const msg = err?.error?.message ?? this.translate.instant('invoices.errors.load_failed');
         this.flash('error', msg);
         this.cdr.markForCheck();
       }
@@ -268,7 +268,7 @@ export class CreatePaymentModal implements OnInit{
         },
         error: (err) => {
           this.clientsLoading = false;
-          const msg = err?.error?.message ?? this.translate.instant('INVOICES.ERRORS.LOAD_CLIENTS_FAILED');
+          const msg = err?.error?.message ?? this.translate.instant('invoices.errors.load_clients_failed');
           this.flash('error', msg);
           this.cdr.markForCheck();
         }
@@ -429,14 +429,14 @@ export class CreatePaymentModal implements OnInit{
         .subscribe({
           next: (payment) => {
             this.isSubmitting = false;
-            this.flash('success', this.translate.instant('PAYMENTS.SUCCESS.CREATED'));
+            this.flash('success', this.translate.instant('payments.success.created'));
             setTimeout(() =>
               this.dialogRef.close(payment), 1500
             ); // ← let user see success
           },
           error: (err) => {
             this.isSubmitting = false;
-            const msg = err?.error?.message ?? this.translate.instant('PAYMENTS.ERRORS.CREATE_FAILED');
+            const msg = err?.error?.message ?? this.translate.instant('payments.errors.create_failed');
             this.flash('error', msg);
           }
         });

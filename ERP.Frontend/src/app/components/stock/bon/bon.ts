@@ -293,7 +293,7 @@ export class BonsComponent implements OnInit {
         this.pageNumber.set(1);
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.DATE_FILTER_FAILED'))
+      error: () => this.flash('error', this.translate.instant('stock.bons.errors.date_filter_failed'))
     });
   }
 
@@ -411,7 +411,7 @@ export class BonsComponent implements OnInit {
         error: (err) => {
           this.flash(
             'error',
-            (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_FAILED')
+            (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.load_failed')
           );
         },
       });
@@ -445,7 +445,7 @@ export class BonsComponent implements OnInit {
           }
           this.cdr.markForCheck();
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_SOURCE_BONS_FAILED')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.load_source_bons_failed')),
       });
   }
 
@@ -478,7 +478,7 @@ export class BonsComponent implements OnInit {
 
           this.syncArticles();
         },
-        error: () => this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.LOAD_ARTICLES_FAILED'))
+        error: () => this.flash('error', this.translate.instant('stock.bons.errors.load_articles_failed'))
       });
   }
 
@@ -559,7 +559,7 @@ export class BonsComponent implements OnInit {
         },
         error: (err) => {
           const error = err.error as HttpError;
-          this.flash('error', error.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_SOURCE_BON_LIGNES_FAILED'));
+          this.flash('error', error.message ?? this.translate.instant('stock.bons.errors.load_source_bon_lignes_failed'));
         }
       });
     }
@@ -699,7 +699,7 @@ export class BonsComponent implements OnInit {
 
     const master = this.masterArticles.find(a => a.id === val.articleId);
     if (!master) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.ARTICLE_NOT_FOUND'));
+      this.flash('error', this.translate.instant('stock.bons.errors.article_not_found'));
       return;
     }
 
@@ -717,7 +717,7 @@ export class BonsComponent implements OnInit {
 
     if (max !== Infinity) {
       if (val.quantity > max) {
-        this.flash('error', this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK', {
+        this.flash('error', this.translate.instant('stock.responses.errors.insufficient_stock', {
           max, requested: val.quantity
         }));
         return;
@@ -728,7 +728,7 @@ export class BonsComponent implements OnInit {
           ? (this.masterStockMap.get(val.articleId) ?? 0)
           : (this.masterRetourMap.get(val.articleId) ?? 0);
         if (combined > masterMax) {
-          this.flash('error', this.translate.instant('STOCK.ERRORS.MERGED_QUANTITY_EXCEEDS_STOCK', {
+          this.flash('error', this.translate.instant('stock.responses.errors.merged_quantity_exceeds_stock', {
             article: master.libelle, total: combined, max: masterMax
           }));
           return;
@@ -816,12 +816,12 @@ export class BonsComponent implements OnInit {
     if (this.headerForm.invalid) return;
 
     if (this.isCreate() && this.pendingLignes.length === 0) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.NO_LIGNES'));
+      this.flash('error', this.translate.instant('stock.bons.errors.no_lignes'));
       return;
     }
 
     if (this.isEdit() && this.editLignes.length === 0) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.NO_LIGNES'));
+      this.flash('error', this.translate.instant('stock.bons.errors.no_lignes'));
       return;
     }
 
@@ -834,12 +834,12 @@ export class BonsComponent implements OnInit {
     req$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.flash('success', creating
-          ? this.translate.instant('STOCK.BONS.SUCCESS.CREATED')
-          : this.translate.instant('STOCK.BONS.SUCCESS.UPDATED'));
+          ? this.translate.instant('stock.bons.success.created')
+          : this.translate.instant('stock.bons.success.updated'));
         this.cancel();
         this.reload();
       },
-      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.OPERATION_FAILED')),
+      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.operation_failed')),
     });
   }
 
@@ -910,9 +910,9 @@ export class BonsComponent implements OnInit {
       .open(ModalComponent, {
         width: '400px',
         data: {
-          title:       this.translate.instant('CONFIRMATION.DELETE_BON_TITLE'),
-          message:     this.translate.instant('CONFIRMATION.DELETE_BON', { numero: bon.numero }),
-          confirmText: this.translate.instant('COMMON.DELETE'),
+          title:       this.translate.instant('stock.bons.confirmations.delete_bon.title'),
+          message:     this.translate.instant('stock.bons.confirmations.delete_bon.message', { numero: bon.numero }),
+          confirmText: this.translate.instant('common.delete'),
           showCancel:  true,
           icon:        'auto_delete',
           iconColor:   'danger',
@@ -930,9 +930,9 @@ export class BonsComponent implements OnInit {
         next: () => {
           if (this.isView()) this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('STOCK.BONS.SUCCESS.DELETED', { numero: bon.numero }));
+          this.flash('success', this.translate.instant('stock.bons.success.deleted', { numero: bon.numero }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.DELETE_FAILED')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.delete_failed')),
       });
   }
 
@@ -1046,9 +1046,9 @@ export class BonsComponent implements OnInit {
 
   getAddButtonTooltip(): string {
     if (this.fournisseurs.length === 0 && this.activeBonType === 'entre')
-      return this.translate.instant('STOCK.ERRORS.FOURNISSEURS_NOT_FOUND');
+      return this.translate.instant('stock.responses.errors.fournisseurs_not_found');
     if (this.articles.length === 0 && (this.activeBonType === 'retour' || this.activeBonType === 'sortie'))
-      return this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND');
+      return this.translate.instant('stock.responses.errors.articles_not_found');
     return '';
   }
 
