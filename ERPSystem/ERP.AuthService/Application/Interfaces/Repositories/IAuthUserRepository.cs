@@ -10,7 +10,7 @@ namespace ERP.AuthService.Application.Interfaces.Repositories
         Task<AuthUser?> GetByEmailAsync(string email);
         Task<AuthUser?> GetByIdAsync(Guid id);
         Task<AuthUser?> GetByDeletedIdAsync(Guid id);
-
+        Task<bool> DuplicateExists(string email, string? login=null, Guid? excludeId = null);
         Task<(List<AuthUser> Items, int TotalCount)> GetAllAsync(int pageNumber, int pageSize, Guid? excludeId = null);
         Task<(List<AuthUser> Items, int TotalCount)> GetPagedByStatusAsync(bool status, int pageNumber, int pageSize, Guid? excludeId = null);
         Task<(List<AuthUser> Items, int TotalCount)> GetPagedByRoleAsync(Guid role, int pageNumber, int pageSize, Guid? excludeId = null);
