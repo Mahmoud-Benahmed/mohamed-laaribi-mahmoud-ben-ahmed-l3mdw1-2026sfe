@@ -80,7 +80,6 @@ public class FournisseurCacheService : IFournisseurCacheService
 
     public async Task SyncCreatedAsync(FournisseurResponseDto dto)
     {
-        // If the exact same ID already exists, just update it
         FournisseurCache? existing = await _repository.GetByIdAsync(dto.Id);
         if (existing != null)
         {
