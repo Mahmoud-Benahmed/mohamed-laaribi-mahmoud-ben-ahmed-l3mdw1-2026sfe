@@ -62,7 +62,6 @@ namespace ERP.FournisseurService.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TaxNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -77,7 +76,7 @@ namespace ERP.FournisseurService.Migrations
                     b.HasIndex("TaxNumber", "TenantId")
                         .IsUnique()
                         .HasDatabaseName("IX_Fournisseurs_TaxNumber")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
 
                     b.ToTable("Fournisseurs", (string)null);
                 });

@@ -21,7 +21,7 @@ namespace ERP.FournisseurService.Migrations
                     Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    TaxNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TaxNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     RIB = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsBlocked = table.Column<bool>(type: "bit", nullable: false),
@@ -38,7 +38,7 @@ namespace ERP.FournisseurService.Migrations
                 table: "Fournisseurs",
                 columns: new[] { "TaxNumber", "TenantId" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
         }
 
         /// <inheritdoc />
