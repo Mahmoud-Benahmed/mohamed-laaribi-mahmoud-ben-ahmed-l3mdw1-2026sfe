@@ -119,7 +119,7 @@ builder.Services.AddAuthentication(options =>
             await context.Response.WriteAsJsonAsync(new
             {
                 statusCode = 403,
-                code = "AUTH_007",
+                code = "AUTH_006",
                 message = "You do not have permission to access this resource."
             });
         }
