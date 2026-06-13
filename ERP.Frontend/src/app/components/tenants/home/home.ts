@@ -75,7 +75,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
   isList        = computed(() => this.viewMode() === 'list');
   isDeletedList = computed(() => this.viewMode() === 'list-deleted');
   isStats       = computed(() => this.viewMode() === 'stats');
-  isSuspended   = computed(() => this.viewMode() === 'list-suspended');  // ← ADD
+  isSuspended   = computed(() => this.viewMode() === 'list-suspended');
 
   // ── Tenant list state ──────────────────────────────────────────────────────
   loading: boolean= false;
@@ -100,11 +100,11 @@ export class TenantsComponent implements OnInit, OnDestroy {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   get sortedData(): TenantResponseDto[] {
-  let data = this.isDeletedList()
-    ? [...this.deletedTenants]
-    : this.isSuspended()  // ← ADD
-    ? [...this.suspendedTenants]  // ← ADD
-    : [...this.tenants];
+    let data = this.isDeletedList()
+      ? [...this.deletedTenants]
+      : this.isSuspended()
+      ? [...this.suspendedTenants]
+      : [...this.tenants];
 
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
@@ -160,13 +160,13 @@ export class TenantsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError(err => {
-          this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+          this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
           return of({ items: [], totalCount: 0 });
         })
       )
       .subscribe(activeResult => {
         // Load deleted tenants count (for stats only, not for display)
-        this.tenantService.getDeletedTenants(1, 100) // use page 1, size large enough to count all
+        this.tenantService.getDeletedTenants(1, 100)
           .pipe(
             takeUntilDestroyed(this.destroyRef),
             catchError(() => of({ items: [], totalCount: 0 }))
@@ -209,7 +209,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
       }
     });
   }
@@ -221,7 +221,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
       }
     });
   }
@@ -250,7 +250,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
         this.tenants = [];
         this.totalCount = 0;
         this.cdr.markForCheck();
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
       },
     });
   }
@@ -259,7 +259,6 @@ export class TenantsComponent implements OnInit, OnDestroy {
     this.statsLoading = true;
     this.tenantAnalytics = null;
 
-    // Mock analytics call - replace with actual service if available
     this.tenantService.getAllTenants(1, 1000).subscribe({
       next: res => {
         const allTenants = res.items;
@@ -289,7 +288,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
         setTimeout(() => this.renderRevenueChart(), 100);
       },
       error: () => {
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_ANALYTICS_FAILED'));
+        this.flash('error', this.translate.instant('tenants.responses.errors.load_analytics_failed'));
         this.statsLoading = false;
       },
     });
@@ -322,7 +321,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
   onPageChange(page: number): void {
     this.currentPage = page;
     if (this.isDeletedList()) this.loadDeletedTenants();
-    else if (this.isSuspended()) this.loadSuspendedTenants();  // ← ADD
+    else if (this.isSuspended()) this.loadSuspendedTenants();
     else this.load();
   }
 
@@ -330,7 +329,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
     this.currentSize = size;
     this.currentPage = 1;
     if (this.isDeletedList()) this.loadDeletedTenants();
-    else if (this.isSuspended()) this.loadSuspendedTenants();  // ← ADD
+    else if (this.isSuspended()) this.loadSuspendedTenants();
     else this.load();
   }
 
@@ -340,9 +339,9 @@ export class TenantsComponent implements OnInit, OnDestroy {
       width: '420px',
       data: {
         icon: 'delete', iconColor: 'warn',
-        title: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_MESSAGE', { name: tenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.DELETE_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.delete_tenant_title'),
+        message: this.translate.instant('tenants.list.dialog.delete_tenant_message', { name: tenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.delete_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -351,10 +350,10 @@ export class TenantsComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.tenantService.deleteTenant(tenant.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.DELETED'));
+          this.flash('success', this.translate.instant('tenants.responses.success.deleted'));
           this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.DELETE_FAILED')),
+        error: (err) => this.handleApiError(err),
       });
     });
   }
@@ -362,11 +361,10 @@ export class TenantsComponent implements OnInit, OnDestroy {
   restore(tenant: TenantResponseDto): void {
     this.tenantService.restoreTenant(tenant.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('TENANTS.SUCCESS.RESTORED'));
-        this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
+        this.flash('success', this.translate.instant('tenants.responses.success.restored'));
         this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
       },
-      error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.RESTORE_FAILED')),
+      error: (err) => this.handleApiError(err),
     });
   }
 
@@ -376,22 +374,21 @@ export class TenantsComponent implements OnInit, OnDestroy {
       data: {
         icon: 'pause_circle',
         iconColor: 'warn',
-        title: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_MESSAGE', { name: tenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.SUSPEND_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.suspend_tenant_title'),
+        message: this.translate.instant('tenants.list.dialog.suspend_tenant_message', { name: tenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.suspend_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(confirmed => {
       if (!confirmed) return;
-      this.tenantService.removeSubscription(tenant.id).subscribe({
+      this.tenantService.suspendTenant(tenant.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUSPENDED'));
-          this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
+          this.flash('success', this.translate.instant('tenants.responses.success.suspended'));
           this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.SUSPEND_FAILED')),
+        error: (err) => this.handleApiError(err),
       });
     });
   }
@@ -399,11 +396,23 @@ export class TenantsComponent implements OnInit, OnDestroy {
   activate(tenant: TenantResponseDto): void {
     this.tenantService.activateTenant(tenant.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('TENANTS.SUCCESS.ACTIVATED'));
+        this.flash('success', this.translate.instant('tenants.responses.success.activated'));
         this.isDeletedList() ? this.loadDeletedTenants() : this.reload();
       },
-      error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.ACTIVATE_FAILED')),
+      error: (err) => this.handleApiError(err),
     });
+  }
+
+  // Handle API errors using backend error codes
+  private handleApiError(error: any): void {
+    const errorCode = error?.error?.code;
+    if (errorCode && this.translate.instant(`tenants.responses.errors.${errorCode}`) !== `tenants.responses.errors.${errorCode}`) {
+      // If translation exists for the code, use it
+      this.flash('error', this.translate.instant(`tenants.responses.errors.${errorCode}`, error?.error?.params || {}));
+    } else {
+      // Fallback to generic message
+      this.flash('error', this.translate.instant('tenants.responses.errors.unknown_error'));
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -416,13 +425,12 @@ export class TenantsComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(tenant: TenantResponseDto): string {
-    if (tenant.isDeleted) return 'TENANTS.STATUS.DELETED';
-    return tenant.isActive ? 'TENANTS.STATUS.ACTIVE' : 'TENANTS.STATUS.SUSPENDED';
+    if (tenant.isDeleted) return 'tenants.list.status.deleted';
+    return tenant.isActive ? 'tenants.list.status.active' : 'tenants.list.status.suspended';
   }
 
   getPlanName(tenant: TenantResponseDto): string {
-    return tenant.subscription?.plan?.name
-      || this.translate.instant('TENANTS.NO_PLAN');
+    return tenant.subscription?.plan?.name || this.translate.instant('tenants.list.no_plan');
   }
 
   trackById(_: number, item: { id: string }) { return item.id; }
@@ -457,7 +465,7 @@ export class TenantsComponent implements OnInit, OnDestroy {
       data: {
         labels,
         datasets: [{
-          label: this.translate.instant('TENANTS.STATS.REVENUE_BY_PLAN'),
+          label: this.translate.instant('tenants.list.stats.revenue_by_plan'),
           data,
           backgroundColor: ['#3ecf8e', '#f5a623', '#e05252', '#6366f1', '#8b92a8'],
           borderRadius: 6,
