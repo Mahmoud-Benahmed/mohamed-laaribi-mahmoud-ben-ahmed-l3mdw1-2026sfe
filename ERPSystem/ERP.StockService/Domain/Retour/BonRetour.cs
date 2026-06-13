@@ -74,7 +74,7 @@ public sealed class BonRetour : PieceStock
             return existing;
         }
 
-        LigneRetour ligne = LigneRetour.Create(Id, articleId, qty, price);
+        LigneRetour ligne = LigneRetour.Create(Id, articleId, qty, price, tenantId:TenantId);
         _lignes.Add(ligne);
 
         return ligne;
