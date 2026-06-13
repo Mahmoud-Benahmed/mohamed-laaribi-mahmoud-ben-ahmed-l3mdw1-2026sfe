@@ -21,9 +21,12 @@ public class InvoiceRepository : IInvoiceRepository
 
     public async Task<List<Invoice>> GetOverdueAsync(DateTime asOf)
         => await _context.Invoices
+            .IgnoreQueryFilters()           // ← add this
             .Include(i => i.Items)
             .AsSplitQuery()
-            .Where(i => i.Status == InvoiceStatus.UNPAID && i.DueDate <= asOf)
+            .Where(i => !i.IsDeleted
+                     && i.Status == InvoiceStatus.UNPAID
+                     && i.DueDate <= asOf)
             .ToListAsync();
 
     public async Task<bool> PenaltyExistsForInvoiceAsync(string originalInvoiceNumber)
@@ -41,9 +44,10 @@ public class InvoiceRepository : IInvoiceRepository
         DateTime periodStart = asOf.AddDays(-duePeriod);
 
         return await _context.Invoices
-            .AnyAsync(i => i.OriginalInvoiceNumber == originalInvoiceNumber
-                        && i.CreatedAt >= periodStart
-                        && !i.IsDeleted);
+               .IgnoreQueryFilters()
+               .AnyAsync(i => i.OriginalInvoiceNumber == originalInvoiceNumber
+                           && i.CreatedAt >= periodStart
+                           && !i.IsDeleted);
     }
 
     // ── Existing queries ─────────────────────────────────────────────────────
