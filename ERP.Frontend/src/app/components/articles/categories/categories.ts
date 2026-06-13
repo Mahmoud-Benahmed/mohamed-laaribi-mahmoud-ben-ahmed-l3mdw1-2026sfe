@@ -14,6 +14,7 @@ import { CategoryRequestDto, ArticleCategoryResponseDto, CategoryService, Articl
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RegexPatterns } from '../../../interfaces/RegexPatterns';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type ViewMode = 'list' | 'list-deleted' | 'create' | 'edit' | 'view';
 
@@ -59,6 +60,10 @@ export class ArticleCategoriesComponent implements OnInit {
   readonly PRIVILEGES = PRIVILEGES;
   categoryForm: FormGroup;
 
+  readonly templateTranslationKey= `articles.categories`;
+  readonly responseSuccessTranslationKey="articles.responses.success";
+  readonly confirmationsTranslationKey="articles.confirmations";
+
   constructor(
     public authService: AuthService,
     private categoryService: CategoryService,
@@ -79,11 +84,11 @@ export class ArticleCategoriesComponent implements OnInit {
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate())      return 'articles.categories.title_add';
-    if (this.isEdit())        return 'articles.categories.title_edit';
-    if (this.isView())        return 'articles.categories.title_details';
-    if (this.isDeletedList()) return 'articles.categories.title_deleted';
-    return 'articles.categories.title_list';
+    if (this.isCreate())      return `${this.templateTranslationKey}.title_add`;
+    if (this.isEdit())        return `${this.templateTranslationKey}.title_edit`;
+    if (this.isView())        return `${this.templateTranslationKey}.title_details`;
+    if (this.isDeletedList()) return `${this.templateTranslationKey}.title_deleted`;
+    return `${this.templateTranslationKey}.title_deleted`;
   }
 
   private translateError(errorCode: string): string {
@@ -122,11 +127,11 @@ export class ArticleCategoriesComponent implements OnInit {
     }
   }
 
-  get sortedData(): ArticleCategoryResponseDto[] {
-    const filtered = [...this.dataSource.filteredData];
+  get sortedData() {
+    const data = [...this.dataSource.filteredData];
+    if (!this.sortColumn) return data;
 
-    if (this.sortColumn) {
-      filtered.sort((a, b) => {
+    return data.sort((a, b) => {
         let valA = (a as any)[this.sortColumn];
         let valB = (b as any)[this.sortColumn];
 
@@ -137,11 +142,7 @@ export class ArticleCategoriesComponent implements OnInit {
         if (typeof valB === 'string') valB = valB.toLowerCase();
 
         return (valA < valB ? -1 : valA > valB ? 1 : 0) * (this.sortDirection === 'asc' ? 1 : -1);
-      });
-    }
-
-    const start = (this.pageNumber() - 1) * this.pageSize();
-    return filtered.slice(start, start + this.pageSize());
+    });
   }
 
   // ── Load ──────────────────────────────────────────────────────────────────
@@ -154,9 +155,9 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        const msg = (err.error as HttpError)?.message;
-        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
       },
     });
   }
@@ -168,9 +169,9 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        const msg = (err.error as HttpError)?.message;
-        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
       },
     });
   }
@@ -186,9 +187,9 @@ export class ArticleCategoriesComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        const msg = (err.error as HttpError)?.message;
-        this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
       },
     });
   }
@@ -291,9 +292,9 @@ export class ArticleCategoriesComponent implements OnInit {
         if (this.isView()) this.cancel();
         this.reload();
       },
-      error: (error) => {
-        const err = error.error as HttpError;
-        this.flash('error', err?.message ? this.translateError(err.message) : this.translate.instant('errors.internal_error'));
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
       },
     });
   }
@@ -309,19 +310,23 @@ export class ArticleCategoriesComponent implements OnInit {
           this.reload();
           this.flash('success', this.translate.instant('articles.categories.responses.success.category_created', { name: dto.name }));
         },
-        error: (err) => {
-          const msg = (err.error as HttpError)?.message;
-          this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
-        },      });
+        error: (err: HttpErrorResponse) => {
+          console.log(err);
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
+        },
+      });
     } else if (this.isEdit() && this.selectedCategory) {
       this.categoryService.update(this.selectedCategory.id, dto).subscribe({
         next: () => {
           this.cancel();
           this.reload();
           this.flash('success', this.translate.instant('articles.categories.responses.success.category_updated'));        },
-        error: (err) => {
-          const msg = (err.error as HttpError)?.message;
-          this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
+        error: (err: HttpErrorResponse) => {
+          console.log(err);
+          
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
         },
       });
     }
@@ -350,10 +355,10 @@ export class ArticleCategoriesComponent implements OnInit {
             this.flash('success', this.translate.instant('articles.categories.responses.success.category_deleted', { name: category.name }));
             this.reload();
           },
-          error: (err) => {
-            const msg = (err.error as HttpError)?.message;
-            this.flash('error', msg ? this.translateError(msg) : this.translate.instant('errors.internal_error'));
-          },
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
+        },
         });
       });
   }
