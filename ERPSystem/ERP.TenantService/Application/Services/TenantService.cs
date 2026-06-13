@@ -74,24 +74,21 @@ public class TenantService : ITenantService
 
 	public async Task<TenantResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
 	{
-		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id, ct) ?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id, ct) ?? throw new TenantNotFoundException(id);
 		return MapToDto(tenant);
 	}
 
 	public async Task<TenantResponseDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
 	{
-		var tenant = await _tenantRepository.GetBySlugAsync(slug, ct) ?? throw new KeyNotFoundException($"Tenant with slug {slug} not found.");
+		var tenant = await _tenantRepository.GetBySlugAsync(slug, ct) ?? throw new TenantNotFoundException();
 		return MapToDto(tenant);
 	}
 
 	public async Task<TenantResponseDto> CreateAsync(CreateTenantRequestDto dto, CancellationToken ct = default)
 	{
 		// 1. Validate slug uniqueness
-		if (await _tenantRepository.SubdomainSlugExistsAsync(dto.SubdomainSlug))
-			throw new InvalidOperationException($"Subdomain '{dto.SubdomainSlug}' is already taken.");
-
-        if (await _tenantRepository.SubdomainSlugExistsAsync(dto.Email))
-            throw new InvalidOperationException($"Email '{dto.Email}' is already taken.");
+		if (await _tenantRepository.DuplicateExists(dto.Email, dto.Phone, dto.SubdomainSlug))
+			throw new DuplicateKeyException($"Tenant.Email: {dto.Email} | Tenant.Phone: {dto.Phone}");
 
         // 2. Create tenant
         var tenant = Tenant.Create(
@@ -112,9 +109,10 @@ public class TenantService : ITenantService
 		
 		// 3. Auto-assign default plan (Starter) on creation
 		var plan = await _planRepository.GetByIdAsync(subscription.SubscriptionPlanId, ct)
-			?? throw new InvalidOperationException("Selected plan not found.");
+        ?? throw new SubscriptionPlanNotFoundException(subscription.SubscriptionPlanId);
 
-		tenant.AssignSubscription(subscription.SubscriptionPlanId, subscription.StartDate, subscription.Period);
+
+        tenant.AssignSubscription(subscription.SubscriptionPlanId, subscription.StartDate, subscription.Period);
 		tenant.Activate();
 
 		await _tenantRepository.AddAsync(tenant);
@@ -142,11 +140,10 @@ public class TenantService : ITenantService
 
 	public async Task<TenantResponseDto> UpdateAsync(Guid id, UpdateTenantRequestDto dto, CancellationToken ct = default)
 	{
-		var tenant = await _tenantRepository.GetByIdAsync(id)
-			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+		var tenant = await _tenantRepository.GetByIdAsync(id) ?? throw new TenantNotFoundException(id);
 
-        if (await _tenantRepository.SubdomainSlugExistsAsync(dto.Email))
-            throw new InvalidOperationException($"Email '{dto.Email}' is already taken.");
+        if (await _tenantRepository.DuplicateExists(dto.Email, dto.Phone, null, id))
+            throw new DuplicateKeyException($"Tenant.Email: {dto.Email} | Tenant.Phone: {dto.Phone}");
 
         tenant.Update(
 			name: dto.Name,
@@ -183,7 +180,7 @@ public class TenantService : ITenantService
 	public async Task DeleteAsync(Guid tenantId, CancellationToken ct = default)
 	{
 		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId) 
-											?? throw new KeyNotFoundException($"Tenant with id '{tenantId}' not found.");
+											?? throw new TenantNotFoundException(tenantId);
 		if (tenant.IsActive)
 			throw new InvalidOperationException("Current tenant is active, cannot delete it.");
 
@@ -212,7 +209,7 @@ public class TenantService : ITenantService
 	public async Task RestoreAsync(Guid id, CancellationToken ct = default)
 	{
 		var tenant = await _tenantRepository.GetByIdDeletedAsync(id)
-			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+			?? throw new TenantNotFoundException(id);
 
 		tenant.Restore();
 
@@ -229,7 +226,7 @@ public class TenantService : ITenantService
 	public async Task ActivateAsync(Guid id, CancellationToken ct = default)
 	{
 		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(id)
-			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+			?? throw new TenantNotFoundException(id);
 
 		tenant.Activate();
 		await _tenantRepository.UpdateAsync(tenant);
@@ -244,7 +241,7 @@ public class TenantService : ITenantService
 	public async Task DeactivateAsync(Guid id, CancellationToken ct = default)
 	{
 		var tenant = await _tenantRepository.GetByIdAsync(id)
-			?? throw new KeyNotFoundException($"Tenant with id '{id}' not found.");
+			?? throw new TenantNotFoundException(id);
 
 		tenant.Suspend();
 		await _tenantRepository.UpdateAsync(tenant);
@@ -259,16 +256,16 @@ public class TenantService : ITenantService
 	public async Task<TenantSubscriptionResponseDto> AssignSubscriptionAsync(Guid tenantId, AssignSubscriptionRequestDto dto, CancellationToken ct = default)
 	{
 		var tenant = await _tenantRepository.GetByIdWithSubscriptionAsync(tenantId)
-			?? throw new KeyNotFoundException($"Tenant with id '{tenantId}' not found.");
+			?? throw new TenantNotFoundException(tenantId);
 		var subscription = await _subscriptionRepository.GetByTenantIdAsync(tenantId);
 		
 		if(subscription is not null)
-			throw new InvalidOperationException("Unable to assign new plan, current tenant has an active subscription.");
+			throw new SubscriptionPlanNotFoundException(dto.SubscriptionPlanId);
 
 		var newplan = await _planRepository.GetByIdAsync(dto.SubscriptionPlanId)
-			?? throw new KeyNotFoundException($"SubscriptionPlan with id '{dto.SubscriptionPlanId}' not found.");
+            ?? throw new SubscriptionPlanNotFoundException(dto.SubscriptionPlanId);
 
-		if (!newplan.IsActive)
+        if (!newplan.IsActive)
 			throw new InvalidOperationException("Cannot assign an inactive subscription plan.");
 		
 		var oldPlanId = tenant.Subscription?.SubscriptionPlanId;
