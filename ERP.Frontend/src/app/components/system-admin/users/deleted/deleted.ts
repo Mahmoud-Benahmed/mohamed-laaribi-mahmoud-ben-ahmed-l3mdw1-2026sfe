@@ -194,7 +194,7 @@ export class DeletedUsersComponent implements OnInit {
       width: '400px',
       data: {
         title: this.translate.instant(`${prefix}.title`),
-        message: this.translate.instant(`${prefix}.message`, { name: user.fullName ?? user.login }),
+        message: this.translate.instant(`${prefix}.message`, { fullname: user.fullName ?? user.login }),
         confirmText: this.translate.instant(`${prefix}.confirm_text`),
         showCancel: true,
         icon: 'restore_from_trash',
