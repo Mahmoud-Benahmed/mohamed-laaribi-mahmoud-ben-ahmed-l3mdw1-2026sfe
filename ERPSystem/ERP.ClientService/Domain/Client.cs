@@ -206,7 +206,8 @@ public class Client
 
     public int GetEffectiveDuePaymentPeriod()
     {
-        if (DuePaymentPeriod.HasValue) return DuePaymentPeriod.Value;
+        if (DuePaymentPeriod.HasValue && DuePaymentPeriod.Value > 0)
+            return DuePaymentPeriod.Value;
 
         int categoryMax = ClientCategories
             .Select(cc => cc.Category)
@@ -215,7 +216,7 @@ public class Client
             .DefaultIfEmpty(0)
             .Max();
 
-        return categoryMax;
+        return categoryMax > 0 ? categoryMax : 30; // ← fallback to 30 days
     }
 
     public bool CanPlaceOrder(decimal orderAmount, decimal currentBalance)
