@@ -5,6 +5,7 @@ namespace ERP.TenantService.Application.Interfaces.Repositories;
 
 public interface ITenantRepository
 {
+    Task<bool> DuplicateExists(string email, string phone, string? slug=null, Guid? excludeId= null);
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
     Task<(List<Tenant> Items, int TotalCount)> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
     Task<List<Tenant>> GetAllActiveAsync(CancellationToken ct = default);
@@ -16,6 +17,7 @@ public interface ITenantRepository
     Task<Tenant?> GetBySlugAsync(string slug, CancellationToken ct = default);
     Task<bool> SubdomainSlugExistsAsync(string slug, Guid? excludeId = null, CancellationToken ct = default);
     Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken ct = default);
+    Task<Tenant?> GetByEmailAsync(string email, CancellationToken ct = default);
     Task AddAsync(Tenant tenant, CancellationToken ct = default);
     Task UpdateAsync(Tenant tenant);
     Task SaveChangesAsync(CancellationToken ct = default);
