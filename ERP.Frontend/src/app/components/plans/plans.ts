@@ -22,6 +22,11 @@ export class PlansComponent implements OnInit {
   period: SubscriptionPeriod = 'MONTH';
   billingYearly= this.period === 'YEAR';
   error = '';
+
+  readonly templateTranslationKey= `tenants.plans.`;
+  readonly responseSuccessTranslationKey="tenants.responses.success.";
+  readonly responseErrorsTranslationKey="tenants.responses.errors.";
+
   constructor(
     private tenantService: TenantService,
     private planService: SubscriptionPlanService,
@@ -35,7 +40,7 @@ export class PlansComponent implements OnInit {
         this.plans = plans.items.filter(p => p.isActive);
       },
       error: () => {
-        this.error = this.translate.instant('tenant.plans.errors.load_failed');
+        this.error = this.translate.instant(`${this.responseErrorsTranslationKey}plans_load_failed`);
       }
     });
   }
