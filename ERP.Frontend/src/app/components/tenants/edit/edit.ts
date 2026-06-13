@@ -71,7 +71,6 @@ export class EditTenantComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log("reached edit component");
     this.tenantIdFromRoute = this.route.snapshot.paramMap.get('id');
 
     if (!this.tenantIdFromRoute) {
@@ -85,16 +84,13 @@ export class EditTenantComponent implements OnInit, OnDestroy {
 
   private buildForms(): void {
     this.tenantForm = this.fb.group({
-      // Company
       name:           ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       email:          ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
       phone:          ['', [Validators.required, Validators.pattern(RegexPatterns.phone)]],
       address:        ['', [ Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       logoUrl:        ['', [Validators.maxLength(500)]],
-      // Branding
       primaryColor:   ['', [Validators.pattern(RegexPatterns.hexColor)]],
       secondaryColor: ['', [Validators.pattern(RegexPatterns.hexColor)]],
-      // Regional
       currency: [CurrencyEnum.TND, Validators.required],
       locale: [LocaleEnum.FR, Validators.required],
       timezone: [TimeZoneEnum.AFRICA_TUNIS, Validators.required],
@@ -122,12 +118,11 @@ export class EditTenantComponent implements OnInit, OnDestroy {
 
           this.populateFormFromTenant(tenant);
           this.loading = false;
-
           this.cdr.markForCheck();
         },
         error: (err) => {
           this.loading = false;
-          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.LOAD_FAILED');
+          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('tenants.responses.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -135,8 +130,6 @@ export class EditTenantComponent implements OnInit, OnDestroy {
   }
 
   private populateFormFromTenant(tenant: TenantResponseDto): void {
-    console.log(tenant);
-
     if (tenant.subscription?.plan?.id) {
       this.subscriptionForm.patchValue({
         subscriptionPlanId: tenant.subscription.plan.id,
@@ -153,16 +146,8 @@ export class EditTenantComponent implements OnInit, OnDestroy {
       timezone: tenant.timezone || TimeZoneEnum.AFRICA_TUNIS,
     });
 
-
     this.tenantForm.markAsPristine();
     this.subscriptionForm.markAsPristine();
-  }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  getPlanLabel(planId: string): string {
-    const plan = this.subscriptionPlans.find(p => p.id === planId);
-    return plan ? `${plan.name} (${plan.code})` : '';
   }
 
   getPlanPrice(planId: string, period: SubscriptionPeriod): string {
@@ -173,32 +158,27 @@ export class EditTenantComponent implements OnInit, OnDestroy {
   }
 
   get canSubmit(): boolean {
-    if (this.tenantForm.invalid) return false;
-    if (this.isValidating) return false;
-    return true;
+    return this.tenantForm.valid && !this.isValidating;
   }
 
   getSubmitButtonTooltip(): string {
-    if (this.isValidating) return this.translate.instant('COMMON.PROCESSING');
-    if (this.tenantForm.invalid) return this.translate.instant('VALIDATION.REQUIRED');
+    if (this.isValidating) return this.translate.instant('common.processing');
+    if (this.tenantForm.invalid) return this.translate.instant('validation.required');
     return '';
   }
 
-  // ── CRUD actions ───────────────────────────────────────────────────────────
-
   updateTenant(): void {
     if (this.tenantForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
 
     if (!this.selectedTenant) {
-      this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+      this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
       return;
     }
 
     this.isValidating = true;
-
     const formValue = this.tenantForm.value;
 
     const updateDto: UpdateTenantRequestDto = {
@@ -216,30 +196,24 @@ export class EditTenantComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updated) => {
           this.selectedTenant = updated;
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.UPDATED'));
-
+          this.flash('success', this.translate.instant('tenants.responses.success.updated'));
           setTimeout(() => {
             this.isValidating = false;
             this.cancel();
           }, 2000);
         },
-        error: (err) => {
-          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.UPDATE_FAILED');
-          this.flash('error', errorMsg);
-          this.isValidating = false;
-          this.cdr.markForCheck();
-        }
+        error: (err) => this.handleApiError(err)
       });
   }
 
   assignSubscription(): void {
     if (this.subscriptionForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
 
     if (!this.selectedTenant) {
-      this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
+      this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
       return;
     }
 
@@ -257,21 +231,15 @@ export class EditTenantComponent implements OnInit, OnDestroy {
     this.tenantService.assignSubscription(this.selectedTenant.id, assignDto)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_ASSIGNED'));
+        next: () => {
+          this.flash('success', this.translate.instant('tenants.responses.success.subscription_assigned'));
           this.subscriptionForm.markAsPristine();
-
           setTimeout(() => {
             this.isValidating = false;
             this.reload();
           }, 2000);
         },
-        error: (err) => {
-          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.ASSIGN_SUBSCRIPTION_FAILED');
-          this.flash('error', errorMsg);
-          this.isValidating = false;
-          this.cdr.markForCheck();
-        }
+        error: (err) => this.handleApiError(err)
       });
   }
 
@@ -283,9 +251,9 @@ export class EditTenantComponent implements OnInit, OnDestroy {
       data: {
         icon: 'delete',
         iconColor: 'warn',
-        title: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_CONFIRM', { name: this.selectedTenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.REMOVE_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.remove_subscription_title'),
+        message: this.translate.instant('tenants.list.dialog.remove_subscription_confirm', { name: this.selectedTenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.remove_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -295,28 +263,31 @@ export class EditTenantComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
 
       this.isValidating = true;
-
       this.tenantService.removeSubscription(this.selectedTenant!.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_REMOVED'));
+            this.flash('success', this.translate.instant('tenants.responses.success.subscription_removed'));
             setTimeout(() => {
               this.isValidating = false;
               this.reload();
             }, 2000);
           },
-          error: (err) => {
-            const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.REMOVE_SUBSCRIPTION_FAILED');
-            this.flash('error', errorMsg);
-            this.isValidating = false;
-            this.cdr.markForCheck();
-          }
+          error: (err) => this.handleApiError(err)
         });
     });
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  private handleApiError(error: any): void {
+    const errorCode = error?.error?.code;
+    if (errorCode && this.translate.instant(`tenants.responses.errors.${errorCode}`) !== `tenants.responses.errors.${errorCode}`) {
+      this.flash('error', this.translate.instant(`tenants.responses.errors.${errorCode}`, error?.error?.params || {}));
+    } else {
+      this.flash('error', this.translate.instant('tenants.responses.errors.update_failed'));
+    }
+    this.isValidating = false;
+    this.cdr.markForCheck();
+  }
 
   flash(type: 'success' | 'error', msg: string): void {
     if (type === 'success') {
