@@ -39,7 +39,6 @@ namespace ERP.AuthService.Application.Services
 
         }
 
-
         public async Task<List<RoleResponseDto>> GetAllAsync()
         {
             List<Role> items = await _roleRepository.GetAllAsync();
@@ -56,9 +55,9 @@ namespace ERP.AuthService.Application.Services
 
         public async Task<RoleResponseDto> CreateRole(RoleCreateDto dto, Guid performedById)
         {
-            Role? existing = await _roleRepository.GetByLibelleAsync(dto.Libelle);
-            if (existing is not null)
-                throw new RoleAlreadyExistException(dto.Libelle);
+            if (await _roleRepository.DuplicateExists(dto.Libelle))
+                throw new DuplicateKeyException($"Role.Libelle: {dto.Libelle}");
+
             Role role = new Role(dto.Libelle, _tenantContext.TenantId);
 
             await _roleRepository.AddAsync(role);
@@ -75,6 +74,9 @@ namespace ERP.AuthService.Application.Services
         {
             Role role = await _roleRepository.GetByIdAsync(id) ?? throw new RoleNotFoundException(id);
             string before = role.Libelle.ToString();
+
+            if (await _roleRepository.DuplicateExists(dto.Libelle, id))
+                throw new DuplicateKeyException($"Role.Libelle: {dto.Libelle}");
 
             role.UpdateRole(dto.Libelle);
             await _roleRepository.UpdateAsync(role);
