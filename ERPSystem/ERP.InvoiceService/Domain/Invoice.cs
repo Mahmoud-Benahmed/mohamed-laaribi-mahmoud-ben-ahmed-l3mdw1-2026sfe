@@ -75,34 +75,42 @@ namespace InvoiceService.Domain
             if (Status != InvoiceStatus.UNPAID)
                 throw new InvoiceDomainException("Penalty invoices can only be created for UNPAID invoices.");
 
-            int daysOverdue = Math.Min((int)(DateTime.UtcNow - DueDate).TotalDays, duePeriod);
+            // Penalty is calculated on the fixed period duration, not the actual days elapsed
+            // duePeriod = 30 means: charge 10% annual rate for 30 days
+            int daysForCalculation = duePeriod > 0 ? duePeriod : 30; // fallback to 30 if period is 0
 
             decimal penaltyAmount = Math.Round(
-                TotalTTC * (annualRate / 365m) * daysOverdue,
+                TotalTTC * (annualRate / 365m) * daysForCalculation,
                 2, MidpointRounding.AwayFromZero);
+
+            // Guard: never create a zero-value penalty
+            if (penaltyAmount <= 0)
+                throw new InvoiceDomainException(
+                    $"Penalty amount is zero for invoice {InvoiceNumber}. " +
+                    $"TotalTTC={TotalTTC}, annualRate={annualRate}, days={daysForCalculation}");
 
             Invoice penalty = new Invoice(
                 invoiceNumber,
                 DateTime.UtcNow,
-                DateTime.UtcNow.AddDays(duePeriod),
+                DateTime.UtcNow.AddDays(duePeriod > 0 ? duePeriod : 30),
                 TaxCalculationMode,
                 0,
                 ClientId,
                 ClientFullName,
                 ClientAddress,
-                $"Penalty invoice for overdue invoice {InvoiceNumber}",
+                $"Penalty invoice for overdue invoice {OriginalInvoiceNumber ?? InvoiceNumber}",
                 tenantId);
-            
-            penalty.OriginalInvoiceNumber = InvoiceNumber;
+
+            penalty.OriginalInvoiceNumber = OriginalInvoiceNumber ?? InvoiceNumber; // always root
 
             penalty.AddItem(new InvoiceItem(
                 penalty.Id,
-                Guid.Empty,              // no article — penalty line
-                $"Late payment penalty ({annualRate * 100}%) on {InvoiceNumber}",
-                "PENALTY",                    // no barcode
+                Guid.Empty,
+                $"Late payment penalty ({annualRate * 100}%) on {OriginalInvoiceNumber ?? InvoiceNumber}",
+                "PENALTY",
                 1,
                 penaltyAmount,
-                0));                     // no tax on penalty
+                0));
 
             penalty.CalculateTotals();
             penalty.FinalizeInvoice();
@@ -147,7 +155,7 @@ namespace InvoiceService.Domain
         {
             // Each item recalculates using the invoice-level discount
             foreach (InvoiceItem item in _items)
-                item.CalculateSubtotal(DiscountRate);  // ← discount flows from invoice to items
+                item.CalculateSubtotal(DiscountRate);
 
             TotalHT = _items.Sum(i => i.TotalHT);
 
