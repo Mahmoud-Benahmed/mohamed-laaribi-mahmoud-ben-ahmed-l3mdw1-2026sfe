@@ -29,6 +29,10 @@ public class FournisseurService : IFournisseurService
             dto.Email,
             dto.TaxNumber, 
             _tenantContext.TenantId);
+
+        if (await _repo.DuplicateExists(dto.Email, dto.TaxNumber, dto.RIB))
+            throw new DuplicateKeyException($"Fournisseur.RIB: {dto.RIB} | Fournisseur.Email: {dto.Email} | Fournisseur.TaxNumber: {dto.TaxNumber}");
+
         await _repo.AddAsync(f);
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
@@ -42,7 +46,12 @@ public class FournisseurService : IFournisseurService
     public async Task<FournisseurResponseDto> UpdateAsync(Guid id, UpdateFournisseurRequestDto dto)
     {
         Fournisseur f = await _repo.GetByIdAsync(id) ?? throw new FournisseurNotFoundException(id);
+
+        if (await _repo.DuplicateExists(dto.Email, dto.TaxNumber, dto.RIB, id))
+            throw new DuplicateKeyException($"Fournisseur.RIB: {dto.RIB} | Fournisseur.Email: {dto.Email} | Fournisseur.TaxNumber: {dto.TaxNumber}");
+
         f.Update(dto.Name, dto.Address, dto.Phone, dto.RIB, dto.Email, dto.TaxNumber);
+        
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
         await _eventPublisher.PublishAsync(FournisseurTopics.Updated, res);
