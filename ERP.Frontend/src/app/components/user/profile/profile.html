@@ -50,7 +50,7 @@
               <mat-icon>lock_reset</mat-icon>
               {{ `${templateTranslationKey}actions.change_password` | translate }}
             </a>
-            <a mat-stroked-button class="settings-btn" *ngIf="isSystemAdmin" routerLink="/system-settings">
+            <a mat-stroked-button class="settings-btn" *ngIf="isSystemAdmin && isOwnProfile" routerLink="/system-settings">
               <mat-icon>settings</mat-icon>
               {{ `${templateTranslationKey}actions.system_settings` | translate }}
             </a>
