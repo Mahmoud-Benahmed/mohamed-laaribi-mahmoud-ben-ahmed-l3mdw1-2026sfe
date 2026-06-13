@@ -20,9 +20,10 @@ public sealed class Fournisseur
     private Fournisseur() { }
 
     // ---------------- CREATE ----------------
+    // Fournisseur.cs
     public static Fournisseur Create(
         string name, string address, string phone,
-        string rib, string? email = null, string? taxNumber= null, Guid? tenantId = null)
+        string rib, string? email = null, string? taxNumber = null, Guid? tenantId = null)
     {
         ValidateArgs(name, address, phone, taxNumber, rib, email);
 
@@ -33,17 +34,16 @@ public sealed class Fournisseur
             Name = name.Trim(),
             Address = address.Trim(),
             Phone = phone.Trim(),
-            TaxNumber = taxNumber?.Trim(),
+            TaxNumber = string.IsNullOrWhiteSpace(taxNumber) ? null : taxNumber.Trim(),
             RIB = rib.Trim(),
-            Email = email?.Trim(),
+            Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim(),
             CreatedAt = DateTime.UtcNow,
         };
     }
 
-    // ---------------- UPDATE ----------------
     public void Update(
-        string name, string address, string phone, string rib, string? email = null,
-        string? taxNumber = null)
+        string name, string address, string phone, string rib,
+        string? email = null, string? taxNumber = null)
     {
         GuardNotDeleted();
         ValidateArgs(name, address, phone, taxNumber, rib, email);
@@ -51,9 +51,9 @@ public sealed class Fournisseur
         Name = name.Trim();
         Address = address.Trim();
         Phone = phone.Trim();
-        TaxNumber = taxNumber?.Trim();
+        TaxNumber = string.IsNullOrWhiteSpace(taxNumber) ? null : taxNumber.Trim();
         RIB = rib.Trim();
-        Email = email?.Trim();
+        Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
     }
 
     // ---------------- BLOCK / UNBLOCK ----------------
