@@ -397,7 +397,7 @@
         <mat-icon>history</mat-icon> <span>{{ 'nav.auth.audit_log' | translate }}</span>
       </a>
     </nav>
-    
+
     <!-- Footer -->
     <div class="sidebar__footer">
       <div class="sidebar__user" [routerLink]="['/profile']" style="cursor:pointer;">
@@ -458,7 +458,7 @@
         </div>
 
        <button class="shell-topbar__theme-btn" (click)="userSettings.toggleTheme()" type="button"
-          [title]="'common.change_theme_to' | translate : {
+          [matTooltip]="'common.change_theme_to' | translate : {
             theme: (('common.' + (userSettings.isDark ? THEME.light : THEME.dark)) | translate)
           }">
           <svg *ngIf="!userSettings.isDark" width="17" height="17" viewBox="0 0 24 24"
