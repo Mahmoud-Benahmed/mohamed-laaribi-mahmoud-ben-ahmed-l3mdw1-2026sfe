@@ -134,7 +134,7 @@ export class FournisseurComponent implements OnInit {
     }
   }
 
-  get sortedData(): FournisseurResponse[] {
+  get sortedData() {
     const data = [...this.dataSource.filteredData];
     if (!this.sortColumn) return data;
 
@@ -144,6 +144,7 @@ export class FournisseurComponent implements OnInit {
 
       if (valA == null) return 1;
       if (valB == null) return -1;
+
       if (typeof valA === 'string') valA = valA.toLowerCase();
       if (typeof valB === 'string') valB = valB.toLowerCase();
 
@@ -176,7 +177,7 @@ export class FournisseurComponent implements OnInit {
 
   // ── Data loading ───────────────────────────────────────────────────────────
   load(): void {
-    this.service.getFournisseurs().subscribe({
+    this.service.getFournisseurs(this.pageNumber(), this.pageSize()).subscribe({
       next: (res) => {
         this.dataSource.data = res.items.filter(f => !f.isDeleted && !f.isBlocked);
         this.totalCount = res.totalCount;
