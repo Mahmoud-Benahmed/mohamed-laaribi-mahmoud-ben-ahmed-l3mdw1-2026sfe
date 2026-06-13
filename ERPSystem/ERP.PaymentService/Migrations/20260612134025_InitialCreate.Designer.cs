@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.PaymentService.Migrations
 {
     [DbContext(typeof(PaymentDbContext))]
-    [Migration("20260526221932_InitialCreate")]
+    [Migration("20260612134025_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
