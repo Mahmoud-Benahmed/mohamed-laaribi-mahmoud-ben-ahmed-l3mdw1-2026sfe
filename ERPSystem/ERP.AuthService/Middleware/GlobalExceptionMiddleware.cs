@@ -103,6 +103,7 @@ public class GlobalExceptionMiddleware
             ArgumentException => ((int)HttpStatusCode.BadRequest, "AUTH_013", "AUTH_013"),
             InvalidOperationException => ((int)HttpStatusCode.BadRequest, "AUTH_014", "AUTH_014"),
             LoginAlreadyExsistException => ((int)HttpStatusCode.Conflict, "AUTH_015", "AUTH_015"),
+            DuplicateKeyException ex => ((int)HttpStatusCode.Conflict, "DUPLICATE_ENTRY",ex.Message),
             FluentValidation.ValidationException vex => ((int)HttpStatusCode.BadRequest, "AUTH_016", string.Join(", ", vex.Errors.Select(e => e.ErrorMessage))),
             MongoWriteException mwx when mwx.WriteError?.Code == 11000 =>
                                                                             ((int)HttpStatusCode.Conflict, "AUTH_017", "AUTH_017"),
