@@ -44,3 +44,5 @@ public class CategoryAssignedToUsersException : InvalidOperationException
     public CategoryAssignedToUsersException(string message)
         : base(message) { }
 }
+
+public class DuplicateKeyException(string key) : Exception(key);
