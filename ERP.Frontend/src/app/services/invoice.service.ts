@@ -297,8 +297,8 @@ export class InvoiceService {
         currentUsage: currentOutstanding,
         remainingCredit,
         message: hasSufficientCredit
-          ? this.t('INVOICES.ERRORS.HAS_SUFFICIENT_CREDIT', { remainingCredit: remainingCredit.toFixed(2) })
-          : this.t('INVOICES.ERRORS.INSUFFICIENT_CREDIT', {
+          ? this.t('invoices.responses.errors.HAS_SUFFICIENT_CREDIT', { remainingCredit: remainingCredit.toFixed(2) })
+          : this.t('invoices.responses.errors.insufficient_credit', {
         creditLimit: client.creditLimit.toFixed(2),
         currentOutstanding: currentOutstanding.toFixed(2),
         invoiceTotal: invoiceTotalTTC.toFixed(2)
@@ -316,12 +316,12 @@ export class InvoiceService {
 
     // Only UI-level guards — backend will re-validate everything securely
     if (client.isBlocked) {
-      errors.push(this.t('INVOICES.ERRORS.CLIENT_BLOCKED', {client: client.name}));
+      errors.push(this.t('invoices.responses.errors.CLIENT_BLOCKED', {client: client.name}));
       return { isValid: false, errors, warnings };
     }
 
     if (client.isDeleted) {
-      errors.push(this.t('INVOICES.ERRORS.CLIENT_DELETED', {client: client.name}));
+      errors.push(this.t('invoices.responses.errors.CLIENT_DELETED', {client: client.name}));
       return { isValid: false, errors, warnings };
     }
 
