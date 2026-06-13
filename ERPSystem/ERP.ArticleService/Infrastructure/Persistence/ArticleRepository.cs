@@ -56,6 +56,19 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                 .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantContext.TenantId);
         }
 
+        public async Task<bool> DuplicateExists(string code, Guid? excludeId = null)
+        {
+            var query = BaseQuery().Where(a =>
+                a.BarCode.ToLower() == code.ToLower() ||
+                a.CodeRef.ToLower() == code.ToLower()
+            );
+
+            if (excludeId.HasValue)
+                query = query.Where(a => a.Id != excludeId.Value);
+
+            return await query.AnyAsync();
+        }
+
         // =========================
         // READ - BY CODE
         // =========================
