@@ -16,6 +16,7 @@ import { ArticleCategoryResponseDto } from '../../../services/articles/categorie
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { RegexPatterns } from '../../../interfaces/RegexPatterns';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type ViewMode = 'list' | 'create' | 'edit' | 'view' | 'list-deleted' | 'list-inactive';
 
@@ -201,9 +202,9 @@ export class ClientCategoriesComponent implements OnInit {
         this.loading = false;
         this.cdr.markForCheck();
       },
-      error: () => {
-        this.flash('error', this.translate.instant('clients.categories.responses.errors.load_failed'));
-        this.loading = false;
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);this.loading = false;
       },
     });
   }
@@ -215,14 +216,20 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_deleted_failed')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);this.loading = false;
+      },
     });
   }
 
   loadStats(): void {
     this.categoriesService.getStats().subscribe({
       next: (res) => { this.stats = res; this.cdr.markForCheck(); },
-      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_stats_failed')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);this.loading = false;
+      },
     });
   }
 
@@ -233,7 +240,10 @@ export class ClientCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('clients.categories.responses.errors.load_failed')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);this.loading = false;
+      },
     });
     this.cdr.markForCheck();
   }
@@ -350,7 +360,10 @@ export class ClientCategoriesComponent implements OnInit {
       };
       this.categoriesService.create(dto).subscribe({
         next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.categories.responses.success.category_created')); },
-        error: () => this.flash('error', this.translate.instant('errors.unknown')),
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);this.loading = false;
+        },
       });
     } else if (this.isEdit() && this.selectedCategory) {
       const dto: UpdateCategoryRequestDto = {
@@ -364,7 +377,10 @@ export class ClientCategoriesComponent implements OnInit {
       };
       this.categoriesService.update(this.selectedCategory.id, dto).subscribe({
         next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.categories.responses.success.category_updated')); },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);this.loading = false;
+        },
       });
     }
   }
@@ -392,9 +408,9 @@ export class ClientCategoriesComponent implements OnInit {
             this.flash('success', this.translate.instant('clients.categories.responses.success.category_deleted'));
             this.reload();
           },
-          error: (error) => {
-            const err= error.error as HttpError;
-            this.flash('error', this.translateError(err.code));
+          error: (err: HttpErrorResponse) => {
+            const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+            this.flash('error', msg);this.loading = false;
           },
         });
       });
@@ -407,10 +423,10 @@ export class ClientCategoriesComponent implements OnInit {
         this.reload();
         if(this.isView()) this.cancel();
       },
-      error: (error) => {
-        const err= error.error as HttpError;
-        this.flash('error', this.translateError(err.code));
-      }
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);this.loading = false;
+      },
     });
   }
 
@@ -446,8 +462,10 @@ export class ClientCategoriesComponent implements OnInit {
             if (this.selectedCategory?.id === category.id) this.selectedCategory = updated;
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('errors.unknown')),
-        });
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);this.loading = false;
+        },        });
       });
   }
 
