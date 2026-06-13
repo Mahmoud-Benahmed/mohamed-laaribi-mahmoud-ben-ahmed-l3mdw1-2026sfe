@@ -164,14 +164,14 @@
         </table>
       </div>
 
-      <app-pagination
-        [pageNumber]="pageNumber()"
-        [totalPages]="totalPages"
-        [pageSize]="pageSize()"
-        [pageSizeOptions]="pageSizeOptions"
-        (pageChange)="pageNumber.set($event); reload()"
-        (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
-      </app-pagination>
+        <app-pagination
+          [pageNumber]="pageNumber()"
+          [totalPages]="totalPages"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageChange)="pageNumber.set($event); reload()"
+          (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+        </app-pagination>
     </div>
   </ng-container>
 
@@ -183,10 +183,6 @@
     </div>
     <div class="panel__body">
       <div class="detail-grid">
-        <div class="detail-item">
-          <span class="detail-label">{{ 'articles.categories.details.id' | translate }}</span>
-          <span class="detail-value detail-value--mono">{{ selectedCategory.id }}</span>
-        </div>
         <div class="detail-item">
           <span class="detail-label">{{ 'articles.categories.details.name' | translate }}</span>
           <span class="detail-value">{{ selectedCategory.name }}</span>
