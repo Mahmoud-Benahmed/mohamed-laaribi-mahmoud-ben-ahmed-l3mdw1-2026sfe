@@ -168,7 +168,7 @@
                     <div class="alert alert-danger mt-2"
                         *ngIf="!creditLimitInfo.hasSufficientCredit && selectedClientForValidation.creditLimit">
                       <i class="fas fa-exclamation-triangle me-2"></i>
-                      {{ 'invoices.errors.credit_limit_exceeded' | translate }}
+                      {{ 'invoices.responses.errors.credit_limit_exceeded' | translate }}
                     </div>
                     <div class="info-row">
                       <span>{{ 'invoices.form.bulk_pricing_label' | translate }}</span>
@@ -236,7 +236,7 @@
               <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
               <div>
                 <h2 class="panel__title">{{ 'invoices.form.line_items' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'invoices.form.items_count' | translate:{ht: (pendingTotalHT | number:'1.2-2'), ttc: (pendingTotalTTC | number:'1.2-2') } }}</p>
+                <p class="panel__subtitle">{{ 'invoices.form.items_count' | translate:{count: pendingItems.length } }}</p>
               </div>
             </div>
             <button class="btn-add" (click)="openInlineItemAdd()" *ngIf="!inlineItemOpen"
@@ -350,7 +350,7 @@
                       class="form__input"
                       [class.form__input--error]="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched"
                       [min]="getQuantityMin(getSelectedArticle()?.unit)"
-                      [max]="getQuantityMax()"
+                      [max]="getSelectedArticle()?.quantity ?? 0"
                       [step]="getQuantityStep(getSelectedArticle()?.unit)"
                     />
 
@@ -417,7 +417,6 @@
                         <th>{{ 'invoices.details.article_label' | translate }}</th>
                         <th class="text-center">{{ 'invoices.details.qty' | translate }}</th>
                         <th class="text-center">{{ 'invoices.details.unit_ht' | translate }}</th>
-                        <th class="text-center">{{ 'invoices.details.total_ht_col' | translate }}</th>
                         <th class="text-center">{{ 'invoices.details.total_ttc_col' | translate }}</th>
                         <th class="text-center">{{ 'common.actions' | translate }}</th>
                       </tr>
@@ -427,7 +426,6 @@
                         <td class="td--barCode role-badge--clickable" [routerLink]="['/articles', item.articleId]">{{ getArticleLabel(item.articleId) }}</td>
                         <td class="text-center">{{ item.quantity | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.uniPriceHT | number:'1.2-2' }}</td>
-                        <td class="td--price text-center">{{ item.totalHT | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.totalTTC | number:'1.2-2' }}</td>
                         <td class="td--actions">
                           <button class="icon-btn icon-btn--edit" [matTooltip]="'common.edit' | translate"
@@ -443,7 +441,7 @@
                     </tbody>
                     <tfoot>
                       <tr class="totals-row" *ngIf="!discountInfo.applies || discountInfo.rate === 0">
-                        <td colspan="3" class="totals-label">{{ 'invoices.details.totals' | translate }}</td>
+                        <td colspan="2" class="totals-label">{{ 'invoices.details.totals' | translate }}</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalTTC | number:'1.2-2' }} TND</td>
                         <td></td>
@@ -451,13 +449,13 @@
 
                       <ng-container *ngIf="discountInfo.applies && discountInfo.rate > 0">
                         <tr class="totals-row">
-                          <td colspan="3" class="totals-label">{{ 'invoices.form.original_total' | translate }}</td>
+                          <td colspan="2" class="totals-label">{{ 'invoices.form.original_total' | translate }}</td>
                           <td class="td--price text-center">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                           <td class="td--price text-center">{{ discountInfo.originalTotal | number:'1.2-2' }} TND</td>
                           <td></td>
                         </tr>
                         <tr class="discount-row">
-                          <td colspan="3" class="totals-label discount-label">
+                          <td colspan="2" class="totals-label discount-label">
                             {{ 'invoices.form.discount_row' | translate: { rate: discountInfo.rate } }}
                           </td>
                           <td class="td--price text-center discount-amount">- {{ discountInfo.discountAmountHT | number:'1.2-2' }} TND</td>
@@ -465,7 +463,7 @@
                           <td></td>
                         </tr>
                         <tr class="totals-row final-totals">
-                          <td colspan="3" class="totals-label final-label">
+                          <td colspan="2" class="totals-label final-label">
                             <strong>{{ 'invoices.form.final_totals' | translate }}</strong>
                           </td>
                           <td class="td--price text-center totals-value final-value">
