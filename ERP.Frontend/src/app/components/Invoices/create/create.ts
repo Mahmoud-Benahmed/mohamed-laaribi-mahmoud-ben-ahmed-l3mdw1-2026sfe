@@ -1,19 +1,18 @@
-import { CommonModule, Location, ViewportScroller } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectorRef, Component, computed, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ClientResponseDto, ClientsService } from '../../../services/clients/clients.service';
+import { ClientResponseDto} from '../../../services/clients/clients.service';
 import { StockItem, StockService } from '../../../services/stock.service';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subject } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
 import { CreateInvoiceDto, InvoiceService, TaxCalculationMode } from '../../../services/invoice.service';
-import { ArticleResponseDto, ArticleService, UnitEnum } from '../../../services/articles/articles.service';
+import { ArticleResponseDto, UnitEnum } from '../../../services/articles/articles.service';
 import { HttpError } from '../../../interfaces/HttpError';
-import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface PendingItem {
@@ -77,7 +76,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   private masterArticles: StockItem[] = [];
   articles: StockItem[] = [];
   clients: ClientResponseDto[] = [];
-  filteredClients: ClientResponseDto[] = [];
   clientSearchQuery = '';
   pendingItems: PendingItem[] = [];
 
@@ -120,7 +118,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   articlesLoading = false;
   hasMoreArticles = true;
   selectedArticleLabel = '';
-  private articleSearchSubject$ = new Subject<string>();
 
   // ── Alerts ────────────────────────────────────────────────────────────────
   errors: string[] = [];
@@ -239,15 +236,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
 
-  invoiceTotalTTC = computed(() => {
-    if (this.discountInfo.applies && this.discountInfo.discountedTotal > 0) {
-      return this.discountInfo.discountedTotal;
-    }
-    return this.pendingTotalTTC;
-  });
-
-
-
   private syncArticles(): void {
     const consumed = new Map<string, number>();
     for (const item of this.pendingItems) {
@@ -279,17 +267,8 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     return 'stock-normal';
   }
 
-  isLowStock(stock: number): boolean { return stock > 0 && stock <= 10; }
-  isCriticalStock(stock: number): boolean { return stock > 0 && stock <= 5; }
-  isOutOfStock(stock: number): boolean { return stock === 0; }
-
   getAddButtonTooltip(): string {
     return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
-  }
-
-  checkArticleStock(articleId: string, _requestedQuantity: number): void {
-    const article = this.articles.find(a => a.id === articleId);
-    this.updateQuantityValidator(article?.quantity ?? 0);
   }
 
   getQuantityMax(): number {
@@ -299,26 +278,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   getUnitTranslation(): string {
     const unit = this._selectedArticle?.unit;
     if (!unit) return '';
-    return this.translate.instant(`unit.${unit.toUpperCase()}`);
-  }
-
-  getAvailableStock(articleId: string): number {
-    return this.articles.find(a => a.id === articleId)?.quantity || 0;
-  }
-  onArticleSelectChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    const article = this.articles.find(a => a.id === id);
-    this.onArticleSelected(article);
-  }
-
-  onArticleSelected(article: StockItem | undefined): void {
-    if (!article) return;
-    this._selectedArticle = article;
-    this.itemForm.patchValue({
-      uniPriceHT: article.prix ?? 0,
-      taxRate: article.tva ?? 19,
-    });
-    this.updateQuantityValidator(article.quantity ?? 0);
+    return this.translate.instant(`common.unit.${unit.toUpperCase()}`);
   }
 
   openInlineItemAdd(): void {
@@ -536,20 +496,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     });
   }
 
-  filterClients(query: string): void {
-    if (!query || query.length < 2) { this.filteredClients = []; return; }
-    const q = query.toLowerCase();
-    this.filteredClients = this.clients
-      .filter(c => c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q))
-      .slice(0, 8);
-  }
-
-
-  onClientSelectChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    const client = this.clients.find(c => c.id === id);
-    if (client) this.selectClient(client);
-  }
   calculateDueDate(invoiceDate: string | Date | null | undefined, paymentPeriod: number | null | undefined): string {
     const daysToAdd = paymentPeriod || 30;
     const date = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -595,7 +541,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     if (this.isValidating) return this.translate.instant('common.processing');
     if (this.invoiceForm.invalid) return this.translate.instant('validation.required');
     if (this.pendingItems.length === 0) return this.translate.instant('invoices.form.no_items_yet');
-    if (this.creditWarning) return this.translate.instant('invoices.errors.credit_limit_exceeded');
+    if (this.creditWarning) return this.translate.instant('invoices.responses.errors.credit_limit_exceeded');
     return '';
   }
 
@@ -644,17 +590,17 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     const formValue = this.invoiceForm.value;
     const selectedClient = this.clients.find(c => c.id === formValue.clientId);
     if (!selectedClient) {
-      this.flash('error', this.translate.instant('invoices.errors.client_not_found'));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_not_found'));
       return;
     }
 
     // ── UI-level guards only ──────────────────────────────────────────────
     if (selectedClient.isBlocked) {
-      this.flash('error', this.translate.instant('invoices.errors.client_blocked', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_blocked', {client: selectedClient.name}));
       return;
     }
     if (selectedClient.isDeleted) {
-      this.flash('error', this.translate.instant('invoices.errors.client_deleted', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_deleted', {client: selectedClient.name}));
       return;
     }
 
@@ -678,7 +624,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     };
     this.invoiceService.create(dto).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('invoices.success.created'));
+        this.flash('success', this.translate.instant('invoices.responses.success.created'));
         setTimeout(() => {
           document.getElementById('top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 0);
@@ -689,7 +635,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
       },
       error: (err) => {
         const errorMsg = (err.error as HttpError)?.message
-          || this.translate.instant('invoices.errors.create_failed');
+          || this.translate.instant('invoices.responses.errors.create_failed');
         this.flash('error', errorMsg);
         this.isValidating = false;
       },
@@ -733,12 +679,13 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     return Math.round((this.pendingTotalHT + this.pendingTotalTVA) * 100) / 100;
   }
 
-  trackById(_: number, item: { id: string }) { return item.id; }
   trackByLocalId(_: number, item: PendingItem) { return item._localId; }
 
 
   onClientSearch(query: string): void {
-    this.clientSearchSubject$.next(query);
+    this.clientSearchQuery = query;
+    this.clientPage = 1;
+    this.loadClients(1, false);
   }
 
   loadMoreClients(): void {
@@ -769,22 +716,12 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     this.invoiceForm.markAsDirty();
 
     this.clientSearchQuery = client.name;
-    this.filteredClients = [];
 
     this.checkClientLimitsAndDiscount();
+    this.loadArticlesForDropdown(true);
+
     this.cdr.markForCheck();
   }
-
-  private restoreClientLabel(): void {
-    const clientId = this.invoiceForm.get('clientId')?.value;
-    if (!clientId) return;
-    const found = this.clients.find(c => c.id === clientId);
-    if (found) {
-      this.selectedClientLabel = `${found.name} - ${found.email}`;
-      this.cdr.markForCheck();
-    }
-  }
-
 
   toggleClientDropdown(): void {
     this.clientDropdownOpen = !this.clientDropdownOpen;
@@ -795,26 +732,31 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   loadArticlesForDropdown(resetPage = true): void {
-    if (resetPage) {
-      this.articlePage = 1;
-    }
+      if (resetPage) {
+        this.articlePage = 1;
+      }
 
-    // Filter articles based on search query
-    let filtered = this.articles.filter(a =>
-      a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase())
-    );
+      const creditLimit = this.selectedClientForValidation?.creditLimit;
 
-    this.articleTotalCount = filtered.length;
-    this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+      let filtered = this.articles.filter(a => {
+        const matchesSearch =
+          a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase());
 
-    // Paginate
-    const start = (this.articlePage - 1) * this.articlePageSize;
-    const end = start + this.articlePageSize;
-    this.articleDropdownItems = filtered.slice(start, end);
+        const withinCreditLimit = creditLimit == null || a.prix <= creditLimit;
 
-    this.cdr.markForCheck();
+        return matchesSearch && withinCreditLimit;
+      });
+
+      this.articleTotalCount = filtered.length;
+      this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+
+      const start = (this.articlePage - 1) * this.articlePageSize;
+      const end = start + this.articlePageSize;
+      this.articleDropdownItems = filtered.slice(start, end);
+
+      this.cdr.markForCheck();
   }
 
 
@@ -850,11 +792,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   onArticleSearch(query: string): void {
     this.articleSearchQuery = query;
     this.loadArticlesForDropdown(true);  // reset to first page
-  }
-
-  getArticleMaxQty(articleId: string): number {
-    const a = this.articles.find(x => x.id === articleId);
-    return (a as any)?._maxQty ?? Infinity;
   }
 
   getArticleQtyStep(): number {
