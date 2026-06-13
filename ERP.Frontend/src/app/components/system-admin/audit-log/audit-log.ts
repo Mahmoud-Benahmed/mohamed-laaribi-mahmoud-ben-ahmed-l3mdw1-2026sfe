@@ -112,7 +112,6 @@ export class AuditLogComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private auditLogService: AuditLogService,
-    private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private router: Router
