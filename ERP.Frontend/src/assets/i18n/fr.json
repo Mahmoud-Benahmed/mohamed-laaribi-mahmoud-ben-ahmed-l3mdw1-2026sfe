@@ -1,0 +1,1845 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "auth": {
+      "main": "Authentification",
+      "list": "Utilisateurs",
+      "deactivated": "Désactivés",
+      "deleted": "Supprimés",
+      "register": "Inscrire",
+      "controles": "Contrôles",
+      "roles": "Rôles",
+      "permissions": "Permissions",
+      "audit_log": "Journal d'audit"
+    },
+    "articles": {
+      "main": "Articles",
+      "list": "Articles",
+      "categories": "Catégories"
+    },
+    "clients": {
+      "main": "Clients",
+      "list": "Clients",
+      "categories": "Catégories"
+    },
+    "stock": {
+      "main": "Stock",
+      "bons": "Bons",
+      "suppliers": "Fournisseurs"
+    },
+    "invoices": {
+      "main": "Factures"
+    },
+    "payments": {
+      "main": "Paiements",
+      "list": "Paiements",
+      "refunds": "Remboursements"
+    },
+    "audit_log": {
+      "main": "Journal d'audit"
+    },
+    "tenants": {
+      "main": "Locataires"
+    }
+  },
+  "common": {
+    "unit": {
+      "PIECE": "Pièce",
+      "GRAM": "Gramme",
+      "KILOGRAM": "Kilogramme",
+      "MILLIGRAM": "Milligramme",
+      "TON": "Tonne",
+      "MILLILITER": "Millilitre",
+      "LITER": "Litre",
+      "CUBICMETER": "Mètre cube",
+      "MILLIMETER": "Millimètre",
+      "CENTIMETER": "Centimètre",
+      "METER": "Mètre",
+      "KILOMETER": "Kilomètre",
+      "HOUR": "Heure",
+      "DAY": "Jour"
+    },
+    "actions": "Actions",
+    "ok": "OK",
+    "view": "Voir",
+    "edit": "Modifier",
+    "restore": "Restaurer",
+    "delete": "Supprimer",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "block": "Bloquer",
+    "unblock": "Débloquer",
+    "remove": "Retirer",
+    "no_results": "Aucun résultat trouvé",
+    "no_login": "Jamais connecté",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "add": "Ajouter",
+    "back": "Retour",
+    "generate_password": "Générer un mot de passe",
+    "logout": "Déconnexion",
+    "change_language_to": "Changer la langue en {{language}}",
+    "change_theme_to": "Changer le thème en {{theme}}",
+    "en": "Anglais",
+    "fr": "Français",
+    "light": "Clair",
+    "dark": "Sombre",
+    "loading": "Chargement",
+    "processing": "Traitement",
+    "success": "Succès",
+    "error": "Erreur",
+    "optional": "optionnel",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "blocked": "Bloqué",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "days": "jours",
+    "days_count": "{{count}} jours",
+    "load_more": "Charger plus",
+    "search": "Rechercher",
+    "save_changes": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "complete": "Terminé",
+    "select": "— Sélectionner —",
+    "toggle_theme": "Basculer le thème vers {{theme}}"
+  },
+  "home": {
+    "title": "Bon retour, {{username}}",
+    "last_login": "Dernière connexion : {{date}}",
+    "quick_access": {
+      "my_profile": "Mon profil",
+      "system_settings": "Paramètres système",
+      "manage_users": "Gérer les utilisateurs",
+      "register_user": "Inscrire un utilisateur",
+      "deactivated_users": "Utilisateurs désactivés",
+      "deleted_users": "Utilisateurs supprimés",
+      "controles": "Contrôles",
+      "roles": "Rôles",
+      "permissions": "Permissions",
+      "articles": "Articles",
+      "clients": "Clients",
+      "stock": "Stock",
+      "suppliers": "Fournisseurs",
+      "receipts": "Bons de réception",
+      "invoices": "Factures",
+      "payments": "Paiements",
+      "audit_log": "Journal d'audit",
+      "tenants": "Locataires"
+    }
+  },
+  "pagination": {
+    "page_of": "Page {{current}} sur {{total}}",
+    "items_per_page": "{{size}} / page",
+    "previous": "‹ Précédent",
+    "next": "Suivant ›"
+  },
+  "auth": {
+    "list": {
+      "breadcrumb": "Gestion des utilisateurs",
+      "title": "Utilisateurs actifs",
+      "stats": {
+        "active": "Actifs",
+        "inactive": "Inactifs"
+      },
+      "search_placeholder": "Rechercher par nom, email, rôle…",
+      "table": {
+        "head": {
+          "fullname": "Nom complet",
+          "email": "Adresse email",
+          "role": "Rôle",
+          "last_login": "Dernière connexion",
+          "actions": "Actions"
+        }
+      }
+    },
+    "deactivated": {
+      "breadcrumb": "Utilisateurs désactivés",
+      "title": "Comptes désactivés",
+      "stats": {
+        "active": "Actifs",
+        "deactivated": "Désactivés"
+      },
+      "search_placeholder": "Rechercher par nom, email ou rôle…",
+      "table": {
+        "head": {
+          "fullname": "Nom complet",
+          "email": "Adresse email",
+          "role": "Rôle",
+          "last_login": "Dernière connexion",
+          "actions": "Actions"
+        }
+      }
+    },
+    "deleted": {
+      "breadcrumb": "Utilisateurs supprimés",
+      "title": "Comptes supprimés",
+      "stats": {
+        "active": "Actifs",
+        "deactivated": "Désactivés",
+        "deleted": "Supprimés"
+      },
+      "search_placeholder": "Rechercher par nom, email ou rôle…",
+      "buttons": {
+        "table": {
+          "restore": "Restaurer",
+          "view": "Voir"
+        }
+      },
+      "table": {
+        "head": {
+          "fullname": "Nom complet",
+          "email": "Adresse email",
+          "role": "Rôle",
+          "last_login": "Dernière connexion",
+          "actions": "Actions"
+        }
+      }
+    },
+    "controles": {
+      "breadcrumb": "Contrôles d'accès",
+      "title": "Contrôles",
+      "search_placeholder": "Rechercher par catégorie, libellé ou description…",
+      "table": {
+        "head": {
+          "category": "Catégorie",
+          "libelle": "Libellé",
+          "description": "Description",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "category": "Catégorie",
+        "category_placeholder": "Ex. : Gestion des utilisateurs",
+        "libelle": "Libellé",
+        "libelle_placeholder": "Ex. : Voir les utilisateurs",
+        "description": "Description",
+        "description_placeholder": "Décrivez l'objectif du contrôle…"
+      },
+      "title_list": "Contrôles",
+      "title_details": "Détails du contrôle",
+      "title_add": "Ajouter un contrôle",
+      "title_edit": "Modifier le contrôle"
+    },
+    "roles": {
+      "breadcrumb": "Gestion des rôles",
+      "title": "Rôles",
+      "search_placeholder": "Rechercher par nom de rôle…",
+      "table": {
+        "head": {
+          "libelle": "Nom du rôle",
+          "id": "ID",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "libelle": "Nom du rôle",
+        "libelle_placeholder": "ex. : Gestionnaire"
+      },
+      "title_list": "Rôles",
+      "title_details": "Détails du rôle",
+      "title_add": "Ajouter un rôle",
+      "title_edit": "Modifier le rôle"
+    },
+    "register": {
+      "roles": {
+        "ACCOUNTANT": "Comptable",
+        "SYSTEM_ADMIN": "Administrateur système",
+        "STOCK_MANAGER": "Gestionnaire de stock",
+        "SALES_MANAGER": "Responsable commercial"
+      },
+      "breadcrumb": "Inscription d'utilisateur",
+      "title": "Inscrire un nouvel utilisateur",
+      "title_panel": "Créer un compte",
+      "subtitle": "Remplissez les informations pour créer un compte utilisateur",
+      "full_name": "Nom complet",
+      "full_name_placeholder": "Jean Dupont",
+      "login": "Identifiant",
+      "login_placeholder": "jdupont",
+      "email": "Email",
+      "email_placeholder": "jean.dupont@exemple.com",
+      "role": "Rôle",
+      "select_role": "-- Sélectionner un rôle --",
+      "password": "Mot de passe",
+      "password_placeholder": "Entrez un mot de passe fort",
+      "generate_password": "Générer un mot de passe",
+      "register_button": "Inscrire l'utilisateur",
+      "creating": "Création…",
+      "validation": {
+        "required": "Ce champ est requis.",
+        "min_length": "{{min}} caractères minimum requis.",
+        "max_length": "{{max}} caractères maximum autorisés.",
+        "invalid_email": "Veuillez saisir une adresse email valide (ex. : nom@exemple.com).",
+        "invalid_login": "L'identifiant ne peut contenir que des lettres minuscules a‑z, chiffres 0‑9 et underscores (_). Pas d'espaces ni de majuscules.",
+        "name_required": "Le nom est requis (2 à 200 caractères, lettres/chiffres/espaces/quelques signes de ponctuation).",
+        "password_required": "Le mot de passe est requis.",
+        "pattern_invalid": "Format invalide.",
+        "integer_only": "Seuls les nombres entiers sont autorisés.",
+        "decimal_only": "Seuls les nombres décimaux sont autorisés.",
+        "alphanumeric": "Seules les lettres, chiffres et espaces sont autorisés.",
+        "alpha_only": "Seules les lettres et espaces sont autorisés.",
+        "password_strength": {
+          "weak": "Faible",
+          "fair": "Moyen",
+          "good": "Bon",
+          "strong": "Fort"
+        }
+      }
+    },
+    "login": {
+      "title": "Heureux de vous revoir !",
+      "login": "Identifiant",
+      "login_placeholder": "jdupont",
+      "login_required": "L'identifiant est requis.",
+      "password": "Mot de passe",
+      "password_placeholder": "Entrez votre mot de passe",
+      "password_required": "Le mot de passe est requis.",
+      "sign_in": "Se connecter",
+      "connecting": "Connexion…"
+    },
+    "audit_log": {
+      "breadcrumb": "Journal d'audit",
+      "title": "Journal d'audit",
+      "refresh": "Actualiser",
+      "clear": "Effacer les journaux",
+      "filter_user": "Filtrer par ID utilisateur…",
+      "all": "Tous",
+      "success": "Succès",
+      "failed": "Échec",
+      "no_logs": "Aucun journal d'audit trouvé.",
+      "action": "Action",
+      "performed_by": "Effectué par",
+      "target": "Cible",
+      "ip_address": "Adresse IP",
+      "timestamp": "Horodatage",
+      "actions": {
+        "Login": "Connexion",
+        "Logout": "Déconnexion",
+        "TokenRefreshed": "Jeton rafraîchi",
+        "TokenRevoked": "Jeton révoqué",
+        "TokenValidated": "Jeton validé",
+        "TokenValidationFailed": "Échec de validation du jeton",
+        "UserRegistered": "Utilisateur inscrit",
+        "PasswordChanged": "Mot de passe changé",
+        "PasswordChangedByAdmin": "Mot de passe changé par l'administrateur",
+        "ProfileUpdated": "Profil mis à jour",
+        "UserActivated": "Utilisateur activé",
+        "UserDeactivated": "Utilisateur désactivé",
+        "UserDeleted": "Utilisateur supprimé",
+        "UserRestored": "Utilisateur restauré",
+        "RoleCreated": "Rôle créé",
+        "RoleUpdated": "Rôle mis à jour",
+        "RoleDeleted": "Rôle supprimé",
+        "ControleCreated": "Contrôle créé",
+        "ControleUpdated": "Contrôle mis à jour",
+        "ControleDeleted": "Contrôle supprimé",
+        "Unauthorized": "Accès non autorisé",
+        "UserNotFound": "Utilisateur non trouvé",
+        "UnhandledError": "Erreur non gérée"
+      },
+      "details": {
+        "metadata": "Métadonnées",
+        "user_agent": "Navigateur",
+        "close": "Fermer"
+      },
+      "confirmations": {
+        "clear_logs": "Tous les journaux d'audit seront définitivement supprimés. Voulez-vous continuer ?"
+      },
+      "responses": {
+        "errors": {
+          "internal_error": "Une erreur interne s'est produite. Veuillez réessayer plus tard."
+        },
+        "success": {
+          "logs_cleared": "Journaux d'audit effacés avec succès."
+        }
+      }
+    },
+    "changePassword": {
+      "breadcrumb": "Changer le mot de passe",
+      "title": "Changer le mot de passe",
+      "title_panel": "Changer le mot de passe",
+      "subtitle": "Définir un nouveau mot de passe pour l'utilisateur",
+      "new_password": "Nouveau mot de passe",
+      "new_password_placeholder": "Entrez un nouveau mot de passe",
+      "admin_notice": "Vous changez le mot de passe d'un autre utilisateur. Celui-ci sera invité à le modifier lors de sa prochaine connexion.",
+      "back": "Retour",
+      "generate": "Générer",
+      "change_button": "Changer le mot de passe",
+      "saving": "Enregistrement…",
+      "validation": {
+        "password_required": "Le mot de passe est requis.",
+        "min_length": "{{min}} caractères minimum requis."
+      }
+    },
+    "profile": {
+      "changePassword": {
+        "breadcrumb": "Changer le mot de passe",
+        "title_required": "Changement de mot de passe requis",
+        "title_change": "Changer le mot de passe",
+        "subtitle_required": "Pour des raisons de sécurité, vous devez changer votre mot de passe avant de continuer.",
+        "subtitle_change": "Choisissez un mot de passe fort que vous n'utilisez pas ailleurs.",
+        "current_password": "Mot de passe actuel",
+        "current_password_placeholder": "Entrez votre mot de passe actuel",
+        "new_password": "Nouveau mot de passe",
+        "new_password_placeholder": "Entrez un nouveau mot de passe",
+        "generate": "Générer",
+        "change_button": "Changer le mot de passe",
+        "saving": "Enregistrement…",
+        "success_dialog": {
+          "title": "Mot de passe changé",
+          "message": "Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page d'accueil.",
+          "button": "Compris"
+        },
+        "validation": {
+          "password_required": "Le mot de passe est requis.",
+          "password_same": "Le nouveau mot de passe ne peut pas être identique à l'ancien.",
+          "min_length": "{{min}} caractères minimum requis."
+        },
+        "errors": {
+          "change_failed": "Échec du changement de mot de passe. Vérifiez votre mot de passe actuel et réessayez.",
+          "invalid_current_password": "Le mot de passe actuel est incorrect.",
+          "password_too_weak": "Le mot de passe est trop faible. Veuillez en choisir un plus fort.",
+          "password_same_as_old": "Le nouveau mot de passe ne peut pas être identique à l'ancien."
+        }
+      },
+      "breadcrumb": "Profil utilisateur",
+      "title_own": "Mon profil",
+      "title_other": "Profil utilisateur",
+      "hero": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "role": "Rôle"
+      },
+      "actions": {
+        "edit_profile": "Modifier le profil",
+        "change_password": "Changer le mot de passe",
+        "system_settings": "Paramètres système"
+      },
+      "personal_info": {
+        "title": "Informations personnelles",
+        "full_name": "Nom complet",
+        "login": "Identifiant",
+        "email": "Adresse email",
+        "member_since": "Membre depuis",
+        "last_updated": "Dernière mise à jour"
+      },
+      "account_details": {
+        "title": "Détails du compte",
+        "auth_id": "ID d'authentification",
+        "status": "Statut",
+        "last_login": "Dernière connexion"
+      },
+      "edit_profile": {
+        "title": "Modifier le profil",
+        "full_name": "Nom complet",
+        "email": "Email",
+        "no_changes": "Aucune modification à enregistrer",
+        "cancel": "Annuler",
+        "save": "Enregistrer les modifications",
+        "saving": "Enregistrement…",
+        "validation": {
+          "required": "Ce champ est requis.",
+          "name_max": "100 caractères maximum autorisés.",
+          "alpha_only": "Seules les lettres et les espaces sont autorisés.",
+          "email_invalid": "Veuillez saisir une adresse email valide.",
+          "email_max": "L'email ne peut pas dépasser 255 caractères."
+        }
+      },
+      "notifications": {
+        "profile_updated": "Votre profil a été mis à jour avec succès.",
+        "update_failed": "Échec de la mise à jour du profil. Veuillez réessayer.",
+        "load_failed": "Impossible de charger le profil utilisateur. Veuillez réessayer plus tard."
+      },
+      "settings": {
+        "breadcrumb": "Paramètres système",
+        "title": "Paramètres système",
+        "edit": "Modifier",
+        "undo": "Annuler",
+        "save_changes": "Enregistrer les modifications",
+        "saving": "Enregistrement",
+        "processing": "Traitement",
+        "tenant_details": "Détails du locataire",
+        "edit_tenant_info": "Modifier les informations du locataire",
+        "form": {
+          "name": "Nom du locataire",
+          "name_placeholder": "Entrez le nom du locataire",
+          "email": "Adresse email",
+          "email_placeholder": "admin@locataire.com",
+          "phone": "Numéro de téléphone",
+          "phone_placeholder": "+216 12 345 678",
+          "address": "Adresse",
+          "address_placeholder": "Rue, ville, code postal",
+          "currency": "Devise",
+          "locale": "Paramètres régionaux",
+          "timezone": "Fuseau horaire",
+          "logo_url": "URL du logo (optionnel)",
+          "logo_url_placeholder": "https://acme.com/logo.png",
+          "primary_color": "Couleur principale",
+          "secondary_color": "Couleur secondaire"
+        },
+        "currencies": {
+          "TND": "Dinar tunisien",
+          "EUR": "Euro",
+          "USD": "Dollar américain"
+        },
+        "locales": {
+          "EN": "Anglais",
+          "FR": "Français",
+          "AR": "Arabe"
+        },
+        "timezones": {
+          "UTC": "UTC",
+          "AFRICA_TUNIS": "Afrique/Tunis (UTC+1)",
+          "EUROPE_PARIS": "Europe/Paris (UTC+1)",
+          "EUROPE_LONDON": "Europe/Londres (UTC)"
+        },
+        "validation": {
+          "required": "Ce champ est requis.",
+          "min_length": "{{min}} caractères minimum requis.",
+          "max_length": "{{max}} caractères maximum autorisés.",
+          "invalid_email": "Veuillez saisir une adresse email valide (ex. : nom@exemple.com).",
+          "invalid_phone": "Le numéro de téléphone doit contenir 8 à 15 chiffres et peut commencer par '+'. Pas d'espaces, de tirets ni de parenthèses.",
+          "invalid_hex_color": "Entrez un code couleur hexadécimal valide (ex. : #4e7cff – exactement 6 chiffres hexadécimaux après #).",
+          "invalid_url": "Entrez une URL valide commençant par https:// (ex. : https://exemple.com).",
+          "alpha_only": "Seules les lettres et les espaces sont autorisés."
+        },
+        "responses": {
+          "errors": {
+            "update_failed": "Échec de la mise à jour des paramètres système.",
+            "TENANT_001": "Locataire non trouvé.",
+            "TENANT_002": "Abonnement du locataire non trouvé.",
+            "TENANT_003": "Sous‑domaine invalide.",
+            "TENANT_009": "Email invalide.",
+            "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+            "VALIDATION_ERROR": "Erreur de validation. Veuillez vérifier les données fournies.",
+            "INVALID_ARGUMENT": "Argument invalide fourni.",
+            "UNAUTHORIZED": "Accès non autorisé.",
+            "INTERNAL_SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard."
+          },
+          "success": {
+            "update_success": "Paramètres système mis à jour."
+          }
+        }
+      }
+    },
+    "responses": {
+      "errors": {
+        "AUTH_001": "L'email existe déjà.",
+        "AUTH_002": "Identifiants invalides.",
+        "AUTH_003": "Votre compte est inactif. Veuillez contacter le support.",
+        "AUTH_004": "Compte déjà actif.",
+        "AUTH_005": "Jeton déjà révoqué.",
+        "AUTH_006": "Accès non autorisé.",
+        "AUTH_007": "Vous n'êtes pas autorisé à effectuer cette opération sur votre propre compte.",
+        "AUTH_008": "Violation de sécurité.",
+        "AUTH_009": "Utilisateur non trouvé.",
+        "AUTH_013": "Argument invalide fourni.",
+        "AUTH_014": "Opération non autorisée dans l'état actuel.",
+        "AUTH_015": "L'identifiant existe déjà.",
+        "AUTH_016": "Erreur de validation.",
+        "AUTH_017": "Un enregistrement avec cette clé existe déjà.",
+        "AUTH_018": "Jeton d'actualisation invalide.",
+        "AUTH_019": "Votre session a expiré. Veuillez vous reconnecter.",
+        "RATE_LIMIT": "Trop de requêtes. Veuillez ralentir.",
+        "SERVER_UNREACHABLE": "Serveur inaccessible.",
+        "ACCESS_DENIED": "Accès refusé.",
+        "AUTH_003_TITLE": "Compte désactivé.",
+        "SERVER_UNREACHABLE_MSG": "Impossible de se connecter au serveur. Vérifiez votre connexion ou réessayez plus tard.",
+        "SERVICE_UNAVAILABLE": "Service indisponible.",
+        "SERVICE_UNAVAILABLE_MSG": "Le service demandé est temporairement indisponible. Veuillez réessayer plus tard.",
+        "RATE_LIMIT_TENANTS": "Trop de tentatives d'inscription. Veuillez attendre 10 minutes avant de réessayer.",
+        "RATE_LIMIT_LOGIN": "Trop de tentatives de connexion. Veuillez attendre {{seconds}} secondes avant de réessayer.",
+        "RATE_LIMIT_FALLBACK": "quelques minutes",
+        "TENANT_USER_LIMIT_REACHED": "La limite d'utilisateurs de votre abonnement est atteinte. Veuillez mettre à niveau votre abonnement.",
+        "AUTH_000": "Une erreur inconnue s'est produite.",
+        "INTERNAL_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "AUTH_010": "Rôle non trouvé.",
+        "AUTH_011": "Contrôle non trouvé.",
+        "AUTH_012": "Privilège non trouvé.",
+        "reset_failed": "Échec du changement de mot de passe. Veuillez réessayer plus tard.",
+        "update_failed": "Échec de la mise à jour du profil.",
+        "load_failed": "Impossible de charger le profil utilisateur. Veuillez réessayer plus tard.",
+        "login_exists": "L'identifiant existe déjà.",
+        "email_exists": "L'email existe déjà."
+      },
+      "success": {
+        "password_changed": "Mot de passe changé avec succès.",
+        "user_deactivated": "L'utilisateur {{fullname}} a été désactivé avec succès.",
+        "user_activated": "L'utilisateur {{fullname}} a été activé avec succès.",
+        "user_registered": "L'utilisateur {{fullname}} a été inscrit avec succès.",
+        "user_deleted": "L'utilisateur {{fullname}} a été supprimé avec succès.",
+        "user_restored": "L'utilisateur {{fullname}} a été restauré avec succès.",
+        "controle_created": "Le contrôle \"{{name}}\" a été créé avec succès.",
+        "controle_updated": "Le contrôle \"{{name}}\" a été mis à jour avec succès.",
+        "controle_deleted": "Le contrôle \"{{name}}\" a été supprimé avec succès.",
+        "role_created": "Le rôle \"{{name}}\" a été créé avec succès.",
+        "role_updated": "Le rôle \"{{name}}\" a été mis à jour avec succès.",
+        "role_deleted": "Le rôle \"{{name}}\" a été supprimé avec succès.",
+        "reset_success_title": "Mot de passe changé",
+        "reset_success_message": "Le mot de passe a été mis à jour avec succès.",
+        "got_it": "Compris",
+        "profile_updated": "Profil mis à jour avec succès.",
+        "privilege_updated": "Privilège mis à jour avec succès."
+      }
+    },
+    "permissions": {
+      "breadcrumb": "Permissions",
+      "title_list": "Matrice des permissions",
+      "roles": "Rôles",
+      "controls": "Contrôles",
+      "services": "Services",
+      "grant_tooltip": "Accorder \"{{controle}}\" à {{role}}",
+      "revoke_tooltip": "Révoquer \"{{controle}}\" de {{role}}",
+      "errors": {
+        "load_matrix_failed": "Échec du chargement de la matrice des permissions. Veuillez réessayer.",
+        "load_privileges_failed": "Échec du chargement des privilèges. Veuillez réessayer.",
+        "operation_failed": "Échec de l'opération. Veuillez réessayer."
+      }
+    },
+    "confirmations": {
+      "login_change_warning": {
+        "title": "L'identifiant va être modifié",
+        "message": "L'identifiant sera changé en {{login}}, car l'identifiant ne peut pas contenir d'espaces ni de majuscules. Voulez-vous continuer avec ce nom d'utilisateur ?",
+        "confirm_text": "Continuer"
+      },
+      "delete_role": {
+        "title": "Supprimer le rôle ?",
+        "message": "Le rôle \"{{name}}\" sera définitivement supprimé. Voulez-vous continuer ?",
+        "confirm_text": "Supprimer"
+      },
+      "delete_controle": {
+        "title": "Supprimer le contrôle ?",
+        "message": "Le contrôle \"{{name}}\" sera définitivement supprimé. Voulez-vous continuer ?",
+        "confirm_text": "Supprimer"
+      },
+      "deactivate_user": {
+        "title": "Désactivation de l'utilisateur",
+        "message": "L'utilisateur `{{fullname}}` sera désactivé, ce qui signifie qu'il ne pourra plus se connecter ni accéder à son compte tant qu'il n'est pas réactivé.",
+        "confirm_text": "Désactiver quand même"
+      },
+      "delete_user": {
+        "title": "Suppression de l'utilisateur",
+        "message": "L'utilisateur `{{fullname}}` sera supprimé.",
+        "confirm_text": "Supprimer quand même"
+      },
+      "restore_user": {
+        "title": "Restaurer l'utilisateur supprimé",
+        "message": "L'utilisateur `{{fullname}}` a été supprimé et il sera restauré.",
+        "confirm_text": "Restaurer"
+      }
+    }
+  },
+  "tenants": {
+    "list": {
+      "breadcrumb": "Gestion des locataires",
+      "breadcrumb_analytics": "Analyse des locataires",
+      "title_list": "Locataires",
+      "title_edit": "Modifier le locataire",
+      "title_details": "Détails du locataire",
+      "title_analytics": "Analyse du locataire",
+      "search_placeholder": "Rechercher par nom, email, sous‑domaine…",
+      "no_plan": "Aucun abonnement",
+      "tabs": {
+        "active": "Actifs",
+        "deleted": "Supprimés",
+        "suspended": "Suspendus",
+        "analytics": "Analyse"
+      },
+      "stats": {
+        "total": "Total",
+        "active": "Actifs",
+        "suspended": "Suspendus",
+        "deleted": "Supprimés",
+        "total_mrr": "Revenu mensuel total (MRR)",
+        "status_breakdown": "Répartition par statut",
+        "all_tenants_by_status": "Tous les locataires par statut",
+        "top_plans": "Meilleurs abonnements",
+        "by_revenue": "Par revenu",
+        "revenue_by_plan": "Revenu par abonnement",
+        "annual_projection": "Projection annuelle",
+        "loading": "Chargement des statistiques…",
+        "no_data": "Aucune donnée disponible."
+      },
+      "table": {
+        "name": "Nom",
+        "email": "Email",
+        "plan": "Abonnement",
+        "subscription_date": "Date d'abonnement",
+        "actions": "Actions",
+        "rank": "Rang",
+        "tenants": "Locataires",
+        "revenue": "Revenu (TND)"
+      },
+      "status": {
+        "active": "Actif",
+        "suspended": "Suspendu",
+        "deleted": "Supprimé"
+      },
+      "actions": {
+        "view": "Voir",
+        "edit": "Modifier",
+        "suspend": "Suspendre",
+        "activate": "Activer",
+        "delete": "Supprimer",
+        "restore": "Restaurer"
+      },
+      "currencies": {
+        "TND": "Dinar tunisien",
+        "EUR": "Euro",
+        "USD": "Dollar américain"
+      },
+      "locales": {
+        "EN": "Anglais",
+        "FR": "Français",
+        "AR": "Arabe"
+      },
+      "periods": {
+        "MONTH": "Mensuel",
+        "YEAR": "Annuel"
+      },
+      "dialog": {
+        "suspend_tenant_title": "Suspendre le locataire ?",
+        "suspend_tenant_message": "Le locataire \"{{name}}\" sera suspendu et les utilisateurs perdront l'accès. Voulez-vous continuer ?",
+        "suspend_confirm": "Suspendre",
+        "activate_tenant_title": "Activer le locataire ?",
+        "activate_tenant_message": "Le locataire \"{{name}}\" sera réactivé. Voulez-vous continuer ?",
+        "activate_confirm": "Activer",
+        "delete_tenant_title": "Supprimer le locataire ?",
+        "delete_tenant_message": "Le locataire \"{{name}}\" sera définitivement supprimé. Voulez-vous continuer ?",
+        "delete_confirm": "Supprimer",
+        "remove_subscription_title": "Supprimer l'abonnement ?",
+        "remove_subscription_confirm": "L'abonnement de \"{{name}}\" sera supprimé. Voulez-vous continuer ?",
+        "remove_confirm": "Supprimer"
+      }
+    },
+    "view": {
+      "tenant_info": "Informations du locataire",
+      "subscription_info": "Informations d'abonnement",
+      "plan_details": "Détails de l'abonnement",
+      "name": "Nom",
+      "subdomain": "Sous‑domaine",
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "currency": "Devise",
+      "locale": "Paramètres régionaux",
+      "timezone": "Fuseau horaire",
+      "status": "Statut",
+      "created": "Créé le",
+      "plan_name": "Nom de l'abonnement",
+      "plan_code": "Code abonnement",
+      "code": "Code",
+      "start_date": "Date de début",
+      "end_date": "Date de fin",
+      "period": "Période de facturation",
+      "monthly_price": "Prix mensuel",
+      "yearly_price": "Prix annuel",
+      "max_users": "Nombre maximal d'utilisateurs",
+      "max_storage": "Stockage maximal",
+      "users": "utilisateurs"
+    },
+    "edit": {
+      "tenant_details": "Détails du locataire",
+      "edit_tenant_info": "Modifier les informations du locataire",
+      "name": "Nom",
+      "name_placeholder": "Ex. : Acme Corporation",
+      "email": "Adresse email",
+      "email_placeholder": "admin@acme.com",
+      "phone": "Numéro de téléphone",
+      "phone_placeholder": "+216 12 345 678",
+      "address": "Adresse",
+      "address_placeholder": "Rue, ville, code postal",
+      "currency": "Devise",
+      "locale": "Paramètres régionaux",
+      "timezone": "Fuseau horaire",
+      "subscription": "Abonnement",
+      "manage_subscription": "Gérer l'abonnement du locataire",
+      "current_subscription": "Abonnement actuel",
+      "no_subscription": "Aucun abonnement assigné.",
+      "select_plan": "Sélectionner un abonnement",
+      "billing_period": "Période de facturation",
+      "assign_subscription": "Assigner un abonnement",
+      "update_subscription": "Mettre à jour l'abonnement",
+      "remove_subscription": "Supprimer l'abonnement"
+    },
+    "subscription": {
+      "expiry_notice": "Votre abonnement a expiré. Veuillez renouveler pour continuer à utiliser la plateforme.",
+      "renew_title": "Renouveler votre abonnement",
+      "renew_subtitle": "Choisissez un abonnement pour restaurer l'accès à votre espace de travail.",
+      "renew_with": "Continuer avec {{name}}",
+      "select_to_renew": "Sélectionnez un abonnement à renouveler",
+      "renewed_success": "Votre abonnement a été renouvelé avec succès. Redirection…"
+    },
+    "plans": {
+      "already_have_account": "Déjà un compte ?",
+      "sign_in": "Se connecter",
+      "title": "Choisissez votre abonnement",
+      "subtitle": "Commencez gratuitement, évoluez au fur et à mesure. Pas de frais cachés.",
+      "select_plan": "Sélectionner",
+      "continue_with": "Continuer avec {{name}}",
+      "continue_default": "Sélectionnez un abonnement pour continuer",
+      "month": "Mensuel",
+      "year": "Annuel",
+      "popular": "Populaire",
+      "save_badge": "Économisez {{percent}}%",
+      "starter_desc": "Parfait pour les petites équipes qui débutent.",
+      "pro_desc": "Pour les entreprises en croissance qui ont besoin de plus de puissance.",
+      "enterprise_desc": "Solutions personnalisées pour les grandes organisations.",
+      "users": "Jusqu'à {{count}} utilisateurs",
+      "storage": "{{size}} de stockage",
+      "feature_erp": "Accès complet à la suite ERP",
+      "feature_isolation": "Isolation dédiée par locataire",
+      "feature_support": "Support prioritaire",
+      "selected": "Sélectionné",
+      "select": "Choisir",
+      "get_started": "Commencer",
+      "contact_support": "Contacter le support"
+    },
+    "onboarding": {
+      "title": "Configurez votre espace de travail",
+      "subtitle": "Donnez‑nous quelques informations sur votre entreprise pour commencer.",
+      "plan_label": "Abonnement : {{name}}",
+      "company_name": "Nom de l'entreprise",
+      "company_name_placeholder": "Acme Corporation",
+      "business_email": "Email professionnel",
+      "business_email_placeholder": "admin@acme.com",
+      "phone": "Numéro de téléphone",
+      "phone_placeholder": "+216 12 345 678",
+      "subdomain": "Sous‑domaine",
+      "subdomain_placeholder": "acme",
+      "subdomain_suffix": ".erpsuite.app",
+      "subdomain_hint": "Uniquement lettres minuscules, chiffres et traits d'union. Ne peut pas commencer ni finir par un trait d'union.",
+      "address": "Adresse",
+      "address_placeholder": "Rue, ville, code postal",
+      "address_hint": "Optionnel — utilisé pour les factures et documents.",
+      "logo_url": "URL du logo (optionnel)",
+      "logo_url_placeholder": "https://acme.com/logo.png",
+      "section_branding": "Personnalisation",
+      "primary_color": "Couleur principale",
+      "secondary_color": "Couleur secondaire",
+      "section_regional": "Paramètres régionaux",
+      "currency": "Devise",
+      "locale": "Paramètres régionaux",
+      "timezone": "Fuseau horaire",
+      "back_to_plans": "← Retour aux abonnements",
+      "create_workspace": "Créer l'espace de travail",
+      "success_title": "Votre espace de travail est prêt !",
+      "success_body": "Votre abonnement a été créé avec succès. Vous serez redirigé vers la page de connexion dans quelques secondes.",
+      "success_label": "Redirection vers la connexion…",
+      "errors": {
+        "load_failed": "Échec du chargement des données d'onboarding. Veuillez réessayer."
+      }
+    },
+    "responses": {
+      "errors": {
+        "plans_load_failed": "Échec du chargement des abonnements. Veuillez réessayer.",
+        "teants_load_failed": "Échec du chargement des locataires. Veuillez réessayer.",
+        "load_analytics_failed": "Échec du chargement des analyses. Veuillez réessayer.",
+        "update_failed": "Échec de la mise à jour du locataire. Veuillez réessayer.",
+        "delete_failed": "Échec de la suppression du locataire. Veuillez réessayer.",
+        "restore_failed": "Échec de la restauration du locataire. Veuillez réessayer.",
+        "suspend_failed": "Échec de la suspension du locataire. Veuillez réessayer.",
+        "activate_failed": "Échec de l'activation du locataire. Veuillez réessayer.",
+        "assign_subscription_failed": "Échec de l'assignation de l'abonnement. Veuillez réessayer.",
+        "remove_subscription_failed": "Échec de la suppression de l'abonnement. Veuillez réessayer.",
+        "TENANT_001": "Locataire non trouvé.",
+        "TENANT_002": "Aucun abonnement actif trouvé pour ce locataire.",
+        "TENANT_003": "Sous‑domaine invalide.",
+        "TENANT_004": "Un locataire avec ce {{field}} existe déjà.",
+        "TENANT_005": "Ce locataire a un abonnement actif et ne peut pas être supprimé.",
+        "TENANT_006": "Le locataire est déjà actif.",
+        "TENANT_007": "Le locataire est déjà supprimé.",
+        "TENANT_008": "Impossible de supprimer ou suspendre un locataire avec un abonnement actif.",
+        "TENANT_009": "Email invalide.",
+        "PLAN_001": "Abonnement non trouvé.",
+        "PLAN_002": "Un abonnement avec ce code existe déjà.",
+        "PLAN_003": "Cet abonnement est actuellement assigné à {{count}} locataire(s) et ne peut pas être supprimé.",
+        "PLAN_004": "Cet abonnement est inactif et ne peut pas être assigné.",
+        "SUBSCRIPTION_001": "Le locataire a déjà un abonnement actif.",
+        "SUBSCRIPTION_002": "Échec de l'assignation de l'abonnement. Veuillez vérifier le plan et réessayer.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "VALIDATION_ERROR": "Erreur de validation. Veuillez vérifier les données fournies.",
+        "INVALID_ARGUMENT": "Argument invalide fourni.",
+        "UNAUTHORIZED": "Vous n'êtes pas autorisé à effectuer cette action.",
+        "INTERNAL_SERVER_ERROR": "Une erreur interne du serveur s'est produite. Veuillez réessayer plus tard."
+      },
+      "success": {
+        "updated": "Locataire mis à jour avec succès.",
+        "deleted": "Locataire supprimé avec succès.",
+        "restored": "Locataire restauré avec succès.",
+        "suspended": "Locataire suspendu avec succès.",
+        "activated": "Locataire activé avec succès.",
+        "subscription_assigned": "Abonnement assigné avec succès.",
+        "subscription_removed": "Abonnement supprimé avec succès."
+      }
+    }
+  },
+  "articles": {
+    "breadcrumb": "Gestion des articles",
+    "title_list": "Articles actifs",
+    "title_deleted": "Articles supprimés",
+    "title_add": "Ajouter un article",
+    "title_edit": "Modifier l'article",
+    "title_details": "Détails de l'article",
+    "search_placeholder": "Rechercher par référence, nom, catégorie…",
+    "add_button": "Ajouter un article",
+    "stats": {
+      "articles": "Articles",
+      "deleted": "Supprimés",
+      "categories": "Catégories"
+    },
+    "table": {
+      "code_ref": "Référence",
+      "name": "Nom",
+      "category": "Catégorie",
+      "price": "Prix unitaire",
+      "actions": "Actions"
+    },
+    "details": {
+      "code": "Référence",
+      "name": "Nom",
+      "category": "Catégorie",
+      "unit_price": "Prix unitaire",
+      "unit": "Unité",
+      "tva": "TVA (%)",
+      "bar_code": "Code‑barres",
+      "created_at": "Créé le",
+      "updated_at": "Dernière mise à jour"
+    },
+    "form": {
+      "add_title": "Ajouter un article",
+      "edit_title": "Modifier l'article",
+      "article_name": "Nom de l'article",
+      "name_placeholder": "Ex. : Papier A4",
+      "unit_price": "Prix unitaire",
+      "unit_price_placeholder": "Ex. : 12,50",
+      "unit": "Unité de mesure",
+      "select_unit": "— Sélectionner une unité —",
+      "tva": "TVA (%)",
+      "tva_placeholder": "Ex. : 19",
+      "bar_code": "Code‑barres",
+      "barcode_placeholder": "Code‑barres à 8 ou 13 chiffres",
+      "category": "Catégorie",
+      "select_category": "— Sélectionner une catégorie —"
+    },
+    "confirmations": {
+      "delete_article": {
+        "title": "Supprimer l'article ?",
+        "message": "L'article `{{name}}` sera définitivement supprimé. Voulez-vous continuer ?",
+        "confirm_text": "Supprimer"
+      }
+    },
+    "responses": {
+      "errors": {
+        "ART_001": "Article non trouvé.",
+        "ART_002": "Un article avec cette référence ou ce code‑barres existe déjà.",
+        "ART_003": "L'article est déjà actif.",
+        "ART_004": "L'article est déjà inactif.",
+        "CAT_001": "Catégorie non trouvée.",
+        "CAT_002": "Une catégorie avec ce nom existe déjà.",
+        "ARTICLE_CATEGORY_DELETE_FAIL": "Cette catégorie ne peut pas être supprimée car elle est assignée à un ou plusieurs articles.",
+        "DUPLICATE_ARTICLE_CODE": "Un article avec cette référence existe déjà.",
+        "DUPLICATE_ARTICLE_BARCODE": "Un article avec ce code‑barres existe déjà.",
+        "DUPLICATE_CATEGORY_NAME": "Une catégorie avec ce nom existe déjà.",
+        "DUPLICATE_ENTRY": "Une clé en double a été détectée : {{key}}",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "OUT_OF_RANGE": "La valeur fournie est en dehors de la plage autorisée.",
+        "NULL_ARGUMENT": "Une valeur requise n'a pas été fournie.",
+        "BAD_ARGUMENT": "Argument invalide fourni.",
+        "INVALID_OP": "Cette opération n'est pas autorisée dans l'état actuel.",
+        "UNAUTHORIZED": "Accès non autorisé.",
+        "SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "DATABASE_ERROR": "Une erreur de base de données s'est produite. Veuillez réessayer plus tard."
+      },
+      "success": {
+        "article_created": "L'article \"{{name}}\" a été créé avec succès.",
+        "article_updated": "L'article \"{{name}}\" a été mis à jour avec succès.",
+        "article_deleted": "L'article \"{{name}}\" a été supprimé avec succès.",
+        "article_restored": "L'article \"{{name}}\" a été restauré avec succès."
+      }
+    },
+    "categories": {
+      "breadcrumb": "Catégories d'articles",
+      "title_list": "Catégories d'articles",
+      "title_deleted": "Catégories supprimées",
+      "title_add": "Ajouter une catégorie",
+      "title_edit": "Modifier la catégorie",
+      "title_details": "Détails de la catégorie",
+      "search_placeholder": "Rechercher par nom…",
+      "add_button": "Ajouter une catégorie",
+      "stats": {
+        "active": "Actives",
+        "deleted": "Supprimées"
+      },
+      "table": {
+        "name": "Nom",
+        "tva": "TVA (%)",
+        "actions": "Actions"
+      },
+      "details": {
+        "id": "ID",
+        "name": "Nom",
+        "tva": "TVA (%)"
+      },
+      "form": {
+        "add_title": "Ajouter une catégorie",
+        "edit_title": "Modifier la catégorie",
+        "name": "Nom de la catégorie",
+        "name_placeholder": "Ex. : Électronique",
+        "tva": "TVA (%)",
+        "tva_placeholder": "Ex. : 19"
+      },
+      "confirmations": {
+        "delete_category": {
+          "title": "Supprimer la catégorie ?",
+          "message": "La catégorie \"{{name}}\" sera définitivement supprimée. Voulez-vous continuer ?",
+          "confirm_text": "Supprimer"
+        }
+      },
+      "responses": {
+        "errors": {
+          "load_failed": "Échec du chargement des catégories. Veuillez réessayer.",
+          "load_deleted_failed": "Échec du chargement des catégories supprimées. Veuillez réessayer.",
+          "load_stats_failed": "Échec du chargement des statistiques des catégories. Veuillez réessayer."
+        },
+        "success": {
+          "category_created": "La catégorie \"{{name}}\" a été créée avec succès.",
+          "category_updated": "Catégorie mise à jour avec succès.",
+          "category_deleted": "La catégorie \"{{name}}\" a été supprimée avec succès.",
+          "category_restored": "La catégorie \"{{name}}\" a été restaurée avec succès."
+        }
+      }
+    }
+  },
+  "clients": {
+    "breadcrumb": "Gestion des clients",
+    "title_list": "Clients actifs",
+    "title_deleted": "Clients supprimés",
+    "title_blocked": "Clients bloqués",
+    "title_add": "Ajouter un client",
+    "title_edit": "Modifier le client",
+    "title_details": "Détails du client",
+    "keyword": "Client",
+    "search_placeholder": "Rechercher par nom, email, adresse…",
+    "add_button": "Ajouter un client",
+    "stats": {
+      "active": "Actifs",
+      "blocked": "Bloqués",
+      "deleted": "Supprimés"
+    },
+    "table": {
+      "name": "Nom",
+      "email": "Adresse email",
+      "credit_limit": "Limite de crédit",
+      "actions": "Actions"
+    },
+    "details": {
+      "name": "Nom",
+      "email": "Adresse email",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "tax_number": "Numéro fiscal",
+      "discount_rate": "Taux de remise",
+      "credit_limit": "Limite de crédit",
+      "outstanding_balance": "Solde impayé",
+      "remaining_credit": "Crédit restant",
+      "due_payment_period": "Délai de paiement",
+      "delai_retour": "Délai de retour",
+      "status": "Statut",
+      "created_at": "Créé le",
+      "updated_at": "Dernière mise à jour",
+      "assigned_categories": "Catégories assignées",
+      "no_categories": "Aucune catégorie assignée à ce client.",
+      "select_category": "— Sélectionner une catégorie —"
+    },
+    "form": {
+      "add_title": "Ajouter un client",
+      "edit_title": "Modifier le client",
+      "full_name": "Nom complet",
+      "name_placeholder": "Ex. : Acme Corporation",
+      "email": "Adresse email",
+      "email_placeholder": "contact@acme.com",
+      "address": "Adresse",
+      "address_placeholder": "Rue, ville, code postal",
+      "phone": "Numéro de téléphone",
+      "phone_placeholder": "+216 12 345 678",
+      "tax_number": "Numéro fiscal",
+      "tax_number_placeholder": "Ex. : 1234567A",
+      "credit_limit": "Limite de crédit",
+      "credit_limit_placeholder": "Ex. : 5000",
+      "due_payment_period": "Délai de paiement (jours)",
+      "due_payment_period_placeholder": "Ex. : 30",
+      "delai_retour": "Délai de retour (jours)",
+      "delai_retour_placeholder": "Ex. : 14"
+    },
+    "confirmations": {
+      "delete_client": {
+        "title": "Supprimer le client ?",
+        "message": "Le client \"{{name}}\" sera définitivement supprimé. Voulez-vous continuer ?",
+        "confirm_text": "Supprimer"
+      },
+      "restore_client": {
+        "title": "Restaurer le client ?",
+        "message": "Le client \"{{name}}\" sera restauré et rendu actif à nouveau. Voulez-vous continuer ?",
+        "confirm_text": "Restaurer"
+      },
+      "block_client": {
+        "title": "Bloquer le client ?",
+        "message": "Le client \"{{name}}\" sera bloqué et ne pourra plus effectuer de transactions. Voulez-vous continuer ?",
+        "confirm_text": "Bloquer"
+      },
+      "unblock_client": {
+        "title": "Débloquer le client ?",
+        "message": "Le client \"{{name}}\" sera débloqué. Voulez-vous continuer ?",
+        "confirm_text": "Débloquer"
+      },
+      "remove_category": {
+        "title": "Retirer la catégorie",
+        "message": "La catégorie \"{{name}}\" sera retirée de ce client. Voulez-vous continuer ?",
+        "confirm_text": "Retirer"
+      }
+    },
+    "responses": {
+      "errors": {
+        "CLIENT_NOT_FOUND": "Client non trouvé.",
+        "CATEGORY_NOT_FOUND": "Catégorie non trouvée.",
+        "CLIENT_CATEGORY_DELETE_FAIL": "Cette catégorie ne peut pas être supprimée car elle est assignée à un ou plusieurs clients.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "BUSINESS_RULE_VIOLATION": "Cette opération viole une règle métier.",
+        "INVALID_RANGE": "La valeur fournie est en dehors de la plage autorisée.",
+        "VALIDATION_ERROR": "Erreur de validation. Veuillez vérifier les données fournies.",
+        "DUPLICATE_ENTRY": "Une clé en double a été détectée : {{key}}",
+        "DUPLICATE_CLIENT_EMAIL": "Un client avec cette adresse email existe déjà.",
+        "DUPLICATE_CLIENT_NAME": "Un client avec ce nom existe déjà.",
+        "DUPLICATE_CATEGORY_CODE": "Une catégorie avec ce code existe déjà.",
+        "DATABASE_ERROR": "Une erreur de base de données s'est produite. Veuillez réessayer plus tard.",
+        "INTERNAL_SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "load_failed": "Échec du chargement des clients. Veuillez réessayer."
+      },
+      "success": {
+        "client_created": "Le client \"{{name}}\" a été créé avec succès.",
+        "client_updated": "Le client \"{{name}}\" a été mis à jour avec succès.",
+        "client_deleted": "Le client \"{{name}}\" a été supprimé avec succès.",
+        "client_restored": "Le client \"{{name}}\" a été restauré avec succès.",
+        "client_blocked": "Le client \"{{name}}\" a été bloqué avec succès.",
+        "client_unblocked": "Le client \"{{name}}\" a été débloqué avec succès.",
+        "client_category_added": "Catégorie ajoutée au client avec succès.",
+        "client_category_removed": "La catégorie \"{{name}}\" a été retirée du client avec succès."
+      }
+    },
+    "categories": {
+      "breadcrumb": "Catégories de clients",
+      "title_list": "Catégories de clients",
+      "title_details": "Détails de la catégorie",
+      "title_add": "Ajouter une catégorie",
+      "title_edit": "Modifier la catégorie",
+      "search_placeholder": "Rechercher par code, nom…",
+      "add_button": "Ajouter une catégorie",
+      "stats": {
+        "active": "Actives",
+        "inactive": "Inactives",
+        "deleted": "Supprimées"
+      },
+      "table": {
+        "code": "Code",
+        "name": "Nom",
+        "delai_retour": "Délai de retour",
+        "discount": "Remise",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "details": {
+        "code": "Code",
+        "name": "Nom",
+        "due_payment_period": "Délai de paiement",
+        "delai_retour": "Délai de retour",
+        "discount_rate": "Taux de remise",
+        "credit_limit_multiplier": "Multiplicateur de limite de crédit",
+        "bulk_pricing": "Tarification en gros",
+        "status": "Statut",
+        "created_at": "Créé le",
+        "updated_at": "Dernière mise à jour"
+      },
+      "form": {
+        "add_title": "Ajouter une catégorie",
+        "edit_title": "Modifier la catégorie",
+        "name": "Nom de la catégorie",
+        "name_placeholder": "Ex. : Premium",
+        "code": "Code",
+        "code_placeholder": "Ex. : CAT-A",
+        "delai_retour": "Délai de retour (jours)",
+        "delai_retour_placeholder": "Ex. : 30",
+        "due_payment_period": "Délai de paiement (jours)",
+        "due_payment_period_placeholder": "Ex. : 30",
+        "discount_rate": "Taux de remise (%)",
+        "discount_rate_placeholder": "Ex. : 10",
+        "credit_limit_multiplier": "Multiplicateur de limite de crédit",
+        "credit_limit_placeholder": "Ex. : 1,5",
+        "bulk_pricing": "Tarification en gros : {{value}}"
+      },
+      "confirmations": {
+        "delete_category": {
+          "title": "Supprimer la catégorie ?",
+          "message": "La catégorie \"{{name}}\" sera supprimée. Voulez-vous continuer ?",
+          "confirm_text": "Supprimer"
+        },
+        "deactivate_category": {
+          "title": "Désactiver la catégorie ?",
+          "message": "La catégorie \"{{name}}\" sera désactivée. Voulez-vous continuer ?",
+          "confirm_text": "Désactiver"
+        },
+        "activate_category": {
+          "title": "Activer la catégorie ?",
+          "message": "La catégorie \"{{name}}\" sera activée. Voulez-vous continuer ?",
+          "confirm_text": "Activer"
+        }
+      },
+      "responses": {
+        "errors": {
+          "load_failed": "Échec du chargement des catégories. Veuillez réessayer.",
+          "load_deleted_failed": "Échec du chargement des catégories supprimées. Veuillez réessayer.",
+          "load_stats_failed": "Échec du chargement des statistiques des catégories. Veuillez réessayer."
+        },
+        "success": {
+          "category_created": "Catégorie créée avec succès.",
+          "category_updated": "Catégorie mise à jour avec succès.",
+          "category_deleted": "Catégorie supprimée avec succès.",
+          "category_restored": "Catégorie restaurée avec succès.",
+          "category_activated": "Statut de la catégorie mis à jour avec succès."
+        }
+      }
+    }
+  },
+  "validation": {
+    "required": "Ce champ est requis.",
+    "min_length": "{{min}} caractères minimum requis.",
+    "max_length": "{{max}} caractères maximum autorisés.",
+    "invalid_email": "Veuillez saisir une adresse email valide (ex. : nom@exemple.com).",
+    "invalid_phone": "Le numéro de téléphone doit contenir 8 à 15 chiffres et peut commencer par '+'. Pas d'espaces, de tirets ni de parenthèses.",
+    "invalid_hex_color": "Entrez un code couleur hexadécimal valide (ex. : #4e7cff – exactement 6 chiffres hexadécimaux après #).",
+    "invalid_url": "Entrez une URL valide commençant par https:// (ex. : https://exemple.com).",
+    "invalid_slug": "Uniquement lettres minuscules, chiffres et traits d'union. Ne peut pas commencer ni finir par un trait d'union.",
+    "alpha_only": "Seules les lettres et espaces sont autorisés.",
+    "alphanumeric": "Seules les lettres, chiffres et espaces sont autorisés.",
+    "integer_only": "Seuls les nombres entiers sont autorisés.",
+    "decimal_only": "Seuls les nombres décimaux sont autorisés.",
+    "name_min": "Minimum 2 caractères requis.",
+    "name_max": "Maximum 200 caractères autorisés.",
+    "address_min": "L'adresse doit comporter au moins 5 caractères.",
+    "address_pattern": "L'adresse contient des caractères invalides.",
+    "tax_number_invalid": "Le numéro fiscal ne peut contenir que des lettres et des chiffres.",
+    "tax_number_max": "Le numéro fiscal ne peut pas dépasser 50 caractères.",
+    "credit_limit_invalid": "La limite de crédit doit être au moins de 1000.",
+    "due_payment_period_invalid": "Le délai de paiement doit être compris entre 7 et 180 jours.",
+    "delai_retour_invalid": "Le délai de retour doit être compris entre 7 et 270 jours.",
+    "client_categories_empty": "Veuillez créer au moins une catégorie client avant d'ajouter des clients.",
+    "code_min": "Minimum 2 caractères requis.",
+    "code_max": "Maximum 50 caractères autorisés.",
+    "invalid": "Format invalide.",
+    "discount_rate_invalid": "Le taux de remise doit être compris entre 0 et 100.",
+    "multiplier_invalid": "Le multiplicateur de limite de crédit doit être compris entre 1 et 2.",
+    "tva_invalid": "La TVA doit être comprise entre 0 et 100.",
+    "price_invalid": "Le prix doit être supérieur à 0.",
+    "barcode_invalid": "Le code‑barres doit comporter 8 ou 13 chiffres.",
+    "article_categories_empty": "Veuillez créer au moins une catégorie d'article avant d'ajouter des articles.",
+    "min_value": "La valeur doit être au moins {{min}}.",
+    "notes_max": "Les notes ne peuvent pas dépasser {{max}} caractères."
+  },
+  "errors": {
+    "no_plan_selected": "Aucun abonnement sélectionné. Veuillez revenir en arrière et choisir un abonnement.",
+    "unknown": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "internal_error": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+    "article_not_found": "Article non trouvé."
+  },
+  "stock": {
+    "breadcrumb": "Gestion du stock",
+    "fournisseurs": {
+      "title": "Fournisseurs",
+      "title_details": "Détails du fournisseur",
+      "search_placeholder": "Rechercher par nom, téléphone, numéro fiscal…",
+      "add_button": "Ajouter un fournisseur",
+      "edit_button": "Modifier le fournisseur",
+      "stats": {
+        "active": "Fournisseurs actifs",
+        "blocked": "Fournisseurs bloqués",
+        "deleted": "Fournisseurs supprimés"
+      },
+      "table": {
+        "name": "Nom du fournisseur",
+        "phone": "Téléphone",
+        "partnership_date": "Date de partenariat",
+        "actions": "Actions"
+      },
+      "details": {
+        "name": "Nom du fournisseur",
+        "address": "Adresse",
+        "phone": "Téléphone",
+        "email": "Email",
+        "tax_number": "Numéro fiscal",
+        "rib": "RIB",
+        "status": "Statut",
+        "created_at": "Créé le",
+        "updated_at": "Dernière mise à jour"
+      },
+      "status": {
+        "active": "Actif",
+        "blocked": "Bloqué",
+        "deleted": "Supprimé"
+      },
+      "form": {
+        "add_title": "Ajouter un fournisseur",
+        "edit_title": "Modifier le fournisseur",
+        "full_name": "Nom complet",
+        "name_placeholder": "Ex. : Acme Fournitures",
+        "phone": "Numéro de téléphone",
+        "phone_placeholder": "+216 12 345 678",
+        "address": "Adresse",
+        "address_placeholder": "Rue, ville, code postal",
+        "tax_number": "Numéro fiscal",
+        "tax_number_placeholder": "Ex. : 1234567A",
+        "rib": "RIB",
+        "rib_placeholder": "Numéro de compte bancaire",
+        "email": "Adresse email",
+        "email_placeholder": "contact@acme.com"
+      },
+      "confirmations": {
+        "delete_fournisseur": {
+          "title": "Supprimer le fournisseur ?",
+          "message": "Le fournisseur \"{{name}}\" sera définitivement supprimé. Voulez-vous continuer ?"
+        },
+        "block_fournisseur": {
+          "title": "Bloquer le fournisseur ?",
+          "message": "Le fournisseur \"{{name}}\" sera bloqué et ne pourra plus effectuer de transactions. Voulez-vous continuer ?"
+        },
+        "unblock_fournisseur": {
+          "title": "Débloquer le fournisseur ?",
+          "message": "Le fournisseur \"{{name}}\" sera débloqué. Voulez-vous continuer ?"
+        }
+      },
+      "validation": {
+        "name_min": "Minimum 2 caractères requis.",
+        "name_max": "Maximum 200 caractères autorisés.",
+        "address_min": "L'adresse doit comporter au moins 5 caractères.",
+        "address_pattern": "L'adresse contient des caractères invalides.",
+        "rib_invalid": "Le RIB ne doit contenir que des lettres et des chiffres (10 à 34 caractères).",
+        "tax_number_invalid": "Le numéro fiscal ne peut contenir que des lettres et des chiffres.",
+        "tax_number_max": "Le numéro fiscal ne peut pas dépasser 50 caractères."
+      }
+    },
+    "responses": {
+      "errors": {
+        "STOCK_001": "Stock insuffisant pour effectuer cette opération.",
+        "STOCK_002": "Bon d'entrée en stock non trouvé.",
+        "STOCK_003": "Bon de sortie de stock non trouvé.",
+        "STOCK_004": "Bon de retour de stock non trouvé.",
+        "STOCK_006": "Article non trouvé.",
+        "STOCK_007": "Client non trouvé.",
+        "STOCK_008": "Cet article ne faisait pas partie du bon d'origine.",
+        "STOCK_009": "La quantité retournée dépasse la quantité du bon source.",
+        "EXTERNAL_SERVICE_ERROR": "Un service externe est actuellement indisponible. Veuillez réessayer plus tard.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "BUSINESS_RULE_VIOLATION": "Cette opération viole une règle métier.",
+        "INVALID_RANGE": "La valeur fournie est en dehors de la plage autorisée.",
+        "VALIDATION_ERROR": "Erreur de validation. Veuillez vérifier les données fournies.",
+        "DATABASE_ERROR": "Une erreur de base de données s'est produite. Veuillez réessayer plus tard.",
+        "INTERNAL_SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "FOURNISSEUR_NOT_FOUND": "Fournisseur non trouvé.",
+        "FOURNISSEUR_BLOCKED": "Ce fournisseur est bloqué et ne peut pas être utilisé.",
+        "LOAD_FOURNISSEURS_FAILED": "Échec du chargement des fournisseurs. Veuillez réessayer.",
+        "LOAD_DELETED_FOURNISSEURS_FAILED": "Échec du chargement des fournisseurs supprimés. Veuillez réessayer.",
+        "LOAD_BLOCKED_FOURNISSEURS_FAILED": "Échec du chargement des fournisseurs bloqués. Veuillez réessayer.",
+        "LOAD_FOURNISSEUR_STATS_FAILED": "Échec du chargement des statistiques des fournisseurs. Veuillez réessayer.",
+        "CREATE_FOURNISSEUR_FAILED": "Échec de la création du fournisseur. Veuillez réessayer.",
+        "UPDATE_FOURNISSEUR_FAILED": "Échec de la mise à jour du fournisseur. Veuillez réessayer.",
+        "DELETE_FOURNISSEUR_FAILED": "Échec de la suppression du fournisseur. Veuillez réessayer.",
+        "RESTORE_FOURNISSEUR_FAILED": "Échec de la restauration du fournisseur. Veuillez réessayer.",
+        "BLOCK_FOURNISSEUR_FAILED": "Échec du blocage du fournisseur. Veuillez réessayer.",
+        "UNBLOCK_FOURNISSEUR_FAILED": "Échec du déblocage du fournisseur. Veuillez réessayer.",
+        "INSUFFICIENT_STOCK": "Stock insuffisant. Maximum disponible : {{max}}, mais vous avez demandé {{requested}}.",
+        "MERGED_QUANTITY_EXCEEDS_STOCK": "La quantité totale pour \"{{article}}\" serait de {{total}}, dépassant le stock disponible ({{max}}).",
+        "FOURNISSEURS_NOT_FOUND": "Aucun fournisseur disponible. Veuillez d'abord ajouter un fournisseur.",
+        "ARTICLES_NOT_FOUND": "Aucun article disponible. Veuillez d'abord ajouter des articles avec du stock.",
+        "CLIENTS_NOT_FOUND": "Aucun client disponible. Veuillez d'abord ajouter un client.",
+        "QUANTITY_EXCEEDS_STOCK": "La quantité demandée dépasse le stock disponible.",
+        "INSUFFICIENT_STOCK_DETAIL": "Stock insuffisant pour cette opération.",
+        "fournisseurs_not_found": "Aucun fournisseur trouvé. Veuillez ajouter au moins un fournisseur pour pouvoir réceptionner des articles."
+      },
+      "success": {
+        "fournisseur_created": "Le fournisseur \"{{name}}\" a été créé avec succès.",
+        "fournisseur_updated": "Le fournisseur \"{{name}}\" a été mis à jour avec succès.",
+        "fournisseur_deleted": "Le fournisseur \"{{name}}\" a été supprimé avec succès.",
+        "fournisseur_restored": "Fournisseur restauré avec succès.",
+        "fournisseur_blocked": "Le fournisseur \"{{name}}\" a été bloqué avec succès.",
+        "fournisseur_unblocked": "Le fournisseur \"{{name}}\" a été débloqué avec succès."
+      }
+    },
+    "bons": {
+      "title_entre": "Bons d'entrée en stock",
+      "title_sortie": "Bons de sortie de stock",
+      "title_retour": "Bons de retour de stock",
+      "tab_entre": "Entrées",
+      "tab_sortie": "Sorties",
+      "tab_retour": "Retours",
+      "new_bon": "Nouveau bon",
+      "edit_bon": "Modifier le bon",
+      "create_bon": "Créer un bon",
+      "save_changes": "Enregistrer les modifications",
+      "add_ligne": "Ajouter une ligne",
+      "edit_ligne": "Modifier la ligne",
+      "remove_ligne": "Retirer la ligne",
+      "no_lignes": "Aucune ligne ajoutée",
+      "lignes": "Lignes",
+      "ligne_count": "{{count}} ligne(s)",
+      "ligne_required": "(au moins une ligne requise)",
+      "search_placeholder": "Rechercher par numéro, observation…",
+      "stats": {
+        "total": "Total des bons"
+      },
+      "table": {
+        "numero": "Numéro du bon",
+        "observation": "Observation",
+        "total": "Montant total",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "details": {
+        "numero": "Numéro du bon",
+        "fournisseur": "Fournisseur",
+        "client": "Client",
+        "source_type": "Type de source",
+        "source_id": "ID source",
+        "motif": "Motif",
+        "observation": "Observation",
+        "total": "Total",
+        "created_at": "Créé le",
+        "updated_at": "Dernière mise à jour"
+      },
+      "ligne_table": {
+        "article_id": "Référence article",
+        "article": "Article",
+        "qty": "Quantité",
+        "price": "Prix unitaire",
+        "total": "Total",
+        "remarque": "Remarque",
+        "actions": "Actions"
+      },
+      "form": {
+        "fournisseur": "Fournisseur",
+        "client": "Client",
+        "select_fournisseur": "Sélectionner un fournisseur",
+        "select_client": "Sélectionner un client",
+        "source_bon": "Bon source",
+        "select_source": "Sélectionner un bon source",
+        "motif": "Motif du retour",
+        "motif_placeholder": "Pourquoi cet article est‑il retourné ?",
+        "observation": "Observation",
+        "observation_placeholder": "Notes complémentaires",
+        "article": "Article",
+        "select_article": "Sélectionner un article",
+        "quantity": "Quantité",
+        "price": "Prix unitaire",
+        "remarque": "Remarque",
+        "remarque_placeholder": "Remarque optionnelle pour cette ligne",
+        "source_required": "Veuillez d'abord sélectionner un bon source.",
+        "motif_required": "Veuillez fournir un motif pour le retour.",
+        "lignes_required": "Veuillez ajouter au moins une ligne."
+      },
+      "confirmations": {
+        "delete_bon": {
+          "title": "Supprimer le bon ?",
+          "message": "Le bon \"{{numero}}\" sera définitivement supprimé. Voulez-vous continuer ?"
+        },
+        "validation": {
+          "min_value": "La valeur doit être au moins {{min}}.",
+          "max_quantity": "La quantité maximale autorisée est {{max}}.",
+          "invalid_price": "Veuillez saisir un prix valide."
+        }
+      },
+      "errors": {
+        "load_failed": "Échec du chargement des bons. Veuillez réessayer.",
+        "load_source_bons_failed": "Échec du chargement des bons sources. Veuillez réessayer.",
+        "load_source_bon_lignes_failed": "Échec du chargement des lignes du bon source. Veuillez réessayer.",
+        "load_articles_failed": "Échec du chargement des articles. Veuillez réessayer.",
+        "date_filter_failed": "Échec du filtrage par plage de dates. Veuillez réessayer.",
+        "no_lignes": "Veuillez ajouter au moins une ligne avant d'enregistrer.",
+        "operation_failed": "Échec de l'opération. Veuillez réessayer.",
+        "delete_failed": "Échec de la suppression du bon. Veuillez réessayer.",
+        "article_not_found": "Article non trouvé."
+      },
+      "success": {
+        "created": "Bon créé avec succès.",
+        "updated": "Bon mis à jour avec succès.",
+        "deleted": "Bon \"{{numero}}\" supprimé avec succès."
+      }
+    },
+    "labels": {
+      "available_stock": "Stock disponible",
+      "units": "unités"
+    }
+  },
+  "invoices": {
+    "breadcrumb": "Gestion des factures",
+    "breadcrumb_new": "Nouvelle facture",
+    "breadcrumb_analytics": "Analyse",
+    "title_list": "Factures",
+    "title_new": "Créer une facture",
+    "title_edit": "Modifier la facture",
+    "title_details": "Détails de la facture",
+    "title_analytics": "Analyse des factures",
+    "new_button": "Nouvelle facture",
+    "search_placeholder": "Rechercher par numéro, client, statut…",
+    "no_results": "Aucune facture trouvée.",
+    "overdue_tooltip": "Cette facture est en retard.",
+    "status": {
+      "DRAFT": "Brouillon",
+      "UNPAID": "Impayée",
+      "PAID": "Payée",
+      "CANCELLED": "Annulée",
+      "DELETED": "Supprimée"
+    },
+    "tabs": {
+      "active": "Actives",
+      "deleted": "Supprimées",
+      "analytics": "Analyse"
+    },
+    "stats": {
+      "total": "Total",
+      "total_invoices": "Factures totales",
+      "draft": "Brouillons",
+      "unpaid": "Impayées",
+      "paid": "Payées",
+      "cancelled": "Annulées",
+      "outstanding": "Impayé",
+      "overdue": "Retard",
+      "revenue_ttc": "Chiffre d'affaires (TTC)",
+      "avg_invoice_ht": "Facture moyenne (HT)",
+      "avg_payment_days": "Délai de paiement moyen (jours)",
+      "loading": "Chargement des statistiques…",
+      "status_breakdown": "Répartition par statut",
+      "all_invoices_by_status": "Toutes les factures par statut",
+      "month_breakdown": "Répartition mensuelle",
+      "current_year_issued_vs_paid": "Année en cours — Émises vs Payées",
+      "top_clients": "Meilleurs clients",
+      "by_paid_revenue": "Par revenu payé",
+      "no_paid_invoices": "Aucune facture payée pour le moment."
+    },
+    "table": {
+      "invoice_number": "Numéro de facture",
+      "client": "Client",
+      "due_date": "Date d'échéance",
+      "total_ttc": "Total (TTC)",
+      "status": "Statut",
+      "actions": "Actions",
+      "invoices": "Factures",
+      "rank": "Rang",
+      "revenue_ttc": "Chiffre d'affaires (TTC)",
+      "date": "Date de facture"
+    },
+    "actions": {
+      "finalize": "Finaliser",
+      "mark_as_paid": "Marquer comme payée",
+      "cancel": "Annuler",
+      "restore": "Restaurer",
+      "preview": "Aperçu",
+      "print": "Télécharger",
+      "view": "Voir",
+      "delete": "Supprimer"
+    },
+    "details": {
+      "invoice_info": "Informations facture",
+      "client_info": "Informations client",
+      "invoice_number": "Numéro de facture",
+      "status": "Statut",
+      "invoice_date": "Date de facture",
+      "due_date": "Date d'échéance",
+      "total_ht": "Total (HT)",
+      "total_tva": "Total TVA",
+      "total_ttc": "Total (TTC)",
+      "amount_to_pay": "Montant à payer",
+      "amount_paid": "Montant payé",
+      "notes": "Notes",
+      "name": "Nom",
+      "address": "Adresse",
+      "created": "Créé le",
+      "updated": "Dernière mise à jour",
+      "line_items": "Lignes de facture",
+      "items_count": "{{count}} article(s)",
+      "article": "Article",
+      "article_label": "Article",
+      "bar_code": "Code‑barres",
+      "qty": "Qté",
+      "unit_ht": "Prix unitaire (HT)",
+      "tax": "TVA",
+      "total_ht_col": "Total HT",
+      "total_ttc_col": "Total TTC",
+      "no_items": "Aucune ligne sur cette facture.",
+      "totals": "Totaux"
+    },
+    "form": {
+      "create_invoice": "Créer une facture",
+      "invoice_details": "Détails de la facture",
+      "fill_invoice_client_info": "Remplissez les informations du client et de la facture",
+      "edit_invoice_info": "Modifier les informations de la facture",
+      "selected_client": "Client sélectionné",
+      "client_name_label": "Client",
+      "client_address": "Adresse client",
+      "client_address_placeholder": "Remplie automatiquement",
+      "invoice_date": "Date de facture",
+      "due_date": "Date d'échéance",
+      "due_date_hint": "Auto‑calculé selon les conditions de paiement du client.",
+      "due_date_auto_tooltip": "Défini automatiquement en fonction du délai de paiement du client.",
+      "additional_notes": "Notes complémentaires",
+      "additional_notes_placeholder": "Notes optionnelles pour cette facture…",
+      "line_items": "Lignes",
+      "items_count": "{{count}} article(s)",
+      "no_items_yet": "Aucun article ajouté pour l'instant. Utilisez le formulaire ci‑dessous pour ajouter des articles.",
+      "article": "Article",
+      "quantity": "Quantité",
+      "unit_price_ht": "Prix unitaire (HT)",
+      "tax_rate": "TVA (%)",
+      "tax_per_line": "Taxe par ligne",
+      "tax_per_line_label": "TVA appliquée par ligne",
+      "tax_per_invoice": "Taxe sur la facture",
+      "tax_per_invoice_label": "TVA appliquée au total de la facture",
+      "discount_row": "Remise",
+      "bulk_pricing_label": "Tarification en gros",
+      "bulk_eligible": "Éligible à la remise en gros",
+      "bulk_not_eligible": "Non éligible à la remise en gros",
+      "bulk_discount_applied": "Remise en gros appliquée",
+      "you_save": "Vous économisez {{amount}} TND",
+      "original_total": "Total original",
+      "credit_limit_label": "Limite de crédit",
+      "credit_limit_current_usage": "Utilisation actuelle",
+      "credit_limit_remaining": "Crédit restant",
+      "credit_limit_warning": "Cette facture dépasse la limite de crédit restante du client.",
+      "final_totals": "Totaux finaux",
+      "final_total_ttc": "Total TTC",
+      "preview": "Aperçu",
+      "add_item": "Ajouter un article",
+      "update_item": "Mettre à jour l'article",
+      "whole_numbers_only": "Nombres entiers uniquement (ex. 1, 2, 3).",
+      "decimals_allowed": "Décimaux autorisés (ex. 1,5 2,75)."
+    },
+    "dialog": {
+      "cancel_invoice_title": "Annuler la facture ?",
+      "cancel_invoice_message": "La facture \"{{number}}\" sera annulée. Cette action est irréversible. Voulez-vous continuer ?",
+      "cancel_confirm": "Annuler la facture",
+      "delete_invoice_title": "Supprimer la facture ?",
+      "delete_invoice_message": "La facture \"{{number}}\" sera définitivement supprimée. Voulez-vous continuer ?",
+      "delete_confirm": "Supprimer",
+      "go_back": "Retour"
+    },
+    "responses": {
+      "errors": {
+        "DUPLICATE_INVOICE_NUMBER": "Une facture avec ce numéro existe déjà pour ce locataire.",
+        "VALIDATION_ERROR": "Erreur de validation. Veuillez vérifier les données fournies.",
+        "UNAUTHORIZED": "Vous n'êtes pas autorisé à effectuer cette action.",
+        "INVOICE_NOT_FOUND": "Facture non trouvée.",
+        "INVOICE_ALREADY_EXISTS": "Une facture avec cette référence existe déjà.",
+        "INVOICE_INVALID_OPERATION": "Cette opération n'est pas autorisée dans l'état actuel de la facture.",
+        "INVOICE_DOMAIN_ERROR": "Une violation de règle métier s'est produite. Veuillez vérifier les données de la facture.",
+        "CLIENT_BLOCKED": "Ce client est actuellement bloqué et ne peut pas être facturé.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "INTERNAL_SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "load_failed": "Échec du chargement des factures. Veuillez réessayer.",
+        "load_stats_failed": "Échec du chargement des statistiques des factures. Veuillez réessayer.",
+        "create_failed": "Échec de la création de la facture. Veuillez réessayer.",
+        "update_failed": "Échec de la mise à jour de la facture. Veuillez réessayer.",
+        "delete_failed": "Échec de la suppression de la facture. Veuillez réessayer.",
+        "restore_failed": "Échec de la restauration de la facture. Veuillez réessayer.",
+        "finalize_failed": "Échec de la finalisation de la facture. Veuillez réessayer.",
+        "cancel_failed": "Échec de l'annulation de la facture. Veuillez réessayer.",
+        "client_not_found": "Client non trouvé.",
+        "client_blocked": "Ce client est actuellement bloqué et ne peut pas être facturé.",
+        "client_deleted": "Ce client a été supprimé et ne peut pas être facturé.",
+        "credit_limit_exceeded": "Cette facture dépasse la limite de crédit du client.",
+        "credit_limit_exceeded_articles": "L'ajout de cet article dépasserait la limite de crédit du client.",
+        "insufficient_credit": "Crédit client insuffisant pour créer cette facture.",
+        "pdf_preview_failed": "L'aperçu PDF a échoué. Veuillez réessayer.",
+        "pdf_download_failed": "La génération du PDF a échoué. Veuillez réessayer.",
+        "load_clients_failed": "Échec du chargement des clients. Veuillez réessayer."
+      },
+      "success": {
+        "created": "Facture créée avec succès.",
+        "updated": "Facture mise à jour avec succès.",
+        "deleted": "Facture supprimée avec succès.",
+        "restored": "Facture restaurée avec succès.",
+        "finalized": "Facture finalisée avec succès.",
+        "cancelled": "Facture annulée avec succès."
+      }
+    }
+  },
+  "payments": {
+    "breadcrumb": "Gestion des paiements",
+    "title_list": "Paiements",
+    "title_details": "Détails du paiement",
+    "new_button": "Nouveau paiement",
+    "search_placeholder": "Rechercher par numéro…",
+    "no_results": "Aucun paiement trouvé.",
+    "stats": {
+      "done": "Effectués",
+      "cancelled": "Annulés"
+    },
+    "tabs": {
+      "done": "Effectués",
+      "cancelled": "Annulés"
+    },
+    "table": {
+      "number": "Numéro de paiement",
+      "total_amount": "Montant total",
+      "date": "Date de paiement",
+      "method": "Moyen",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "Voir",
+      "correct": "Corriger les détails",
+      "cancel": "Annuler le paiement",
+      "full_payment": "Paiement complet"
+    },
+    "status": {
+      "DONE": "Effectué",
+      "CANCELLED": "Annulé"
+    },
+    "details": {
+      "number": "Numéro de paiement",
+      "date": "Date de paiement",
+      "status": "Statut",
+      "cancelled_at": "Annulé le",
+      "total_amount": "Montant total",
+      "method": "Moyen",
+      "external_ref": "Référence externe",
+      "notes": "Notes",
+      "allocations": "Allocations aux factures"
+    },
+    "form": {
+      "title": "Enregistrer un paiement",
+      "total_amount": "Montant total",
+      "method": "Moyen de paiement",
+      "select_method": "— Sélectionner un moyen —",
+      "payment_date": "Date de paiement",
+      "external_reference": "Référence externe",
+      "notes": "Notes",
+      "allocate_amounts": "Allouer les montants",
+      "add_line": "Ajouter une ligne",
+      "select_client_first": "Veuillez d'abord sélectionner un client pour voir les factures disponibles.",
+      "invoice": "Facture",
+      "select_invoice": "Sélectionner une facture",
+      "remaining": "Restant dû",
+      "amount": "Montant"
+    },
+    "method": {
+      "ESPECE": "Espèces",
+      "CHEQUE": "Chèque",
+      "VIREMENT": "Virement bancaire",
+      "CARTE_BANCAIRE": "Carte bancaire",
+      "MOBILE_PAYMENT": "Paiement mobile",
+      "AUTRE": "Autre"
+    },
+    "tooltips": {
+      "total_amount": "Calculé automatiquement à partir des montants alloués."
+    },
+    "validation": {
+      "total_amount": "Le montant total doit être supérieur à 0.",
+      "allocated_amount": "Veuillez saisir un montant valide.",
+      "exceeds_remaining": "Le montant ne peut pas dépasser le solde restant de {{max}} TND."
+    },
+    "responses": {
+      "errors": {
+        "DUPLICATE_PAYMENT_NUMBER": "Un paiement avec ce numéro existe déjà.",
+        "DUPLICATE_EXTERNAL_REFERENCE": "Un paiement avec cette référence externe existe déjà.",
+        "DUPLICATE_ENTRY": "Une clé en double a été détectée : {{key}}",
+        "PAYMENT_NOT_FOUND": "Paiement non trouvé.",
+        "INVOICE_NOT_FOUND": "Facture non trouvée.",
+        "PAYMENT_ALREADY_CANCELLED": "Ce paiement a déjà été annulé.",
+        "INVOICE_ALREADY_PAID": "Cette facture a déjà été entièrement payée.",
+        "INVOICE_ALREADY_CANCELLED": "Cette facture a déjà été annulée.",
+        "PAYMENT_DOMAIN_ERROR": "Une règle de paiement a été violée. Veuillez vérifier les données.",
+        "INVALID_ARGUMENT": "Argument invalide fourni.",
+        "INVALID_OPERATION": "Cette opération n'est pas autorisée dans l'état actuel.",
+        "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+        "INTERNAL_SERVER_ERROR": "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+        "load_failed": "Échec du chargement des paiements. Veuillez réessayer.",
+        "create_failed": "Échec de l'enregistrement du paiement. Veuillez réessayer.",
+        "cancel_failed": "Échec de l'annulation du paiement. Veuillez réessayer.",
+        "unpaid_invoices_not_found": "Aucune facture impayée disponible."
+      },
+      "success": {
+        "created": "Paiement enregistré avec succès.",
+        "cancelled": "Paiement annulé avec succès."
+      }
+    },
+    "refunds": {
+      "breadcrumb": "Remboursements",
+      "title_list": "Remboursements",
+      "search_placeholder": "Rechercher par ID ou client…",
+      "no_results": "Aucun remboursement trouvé.",
+      "stats": {
+        "total": "Total",
+        "pending": "En attente",
+        "completed": "Terminés"
+      },
+      "tabs": {
+        "all": "Tous",
+        "pending": "En attente",
+        "completed": "Terminés"
+      },
+      "table": {
+        "id": "ID",
+        "client": "Client",
+        "invoice": "Facture",
+        "status": "Statut",
+        "lines": "Lignes",
+        "total_amount": "Montant total",
+        "actions": "Actions"
+      },
+      "status": {
+        "PENDING": "En attente",
+        "COMPLETED": "Terminé"
+      },
+      "actions": {
+        "view": "Voir",
+        "complete": "Confirmer le remboursement"
+      },
+      "view": {
+        "title": "Détails du remboursement",
+        "refund_info": "Informations sur le remboursement",
+        "refund_id": "ID du remboursement",
+        "status": "Statut",
+        "total_amount": "Montant total",
+        "line_count": "Lignes",
+        "client_info": "Informations client",
+        "client_not_found": "Client non trouvé.",
+        "invoice_info": "Informations facture",
+        "invoice_not_found": "Facture non trouvée.",
+        "lines": "Lignes de remboursement",
+        "lines_subtitle": "ligne(s)",
+        "total": "Total",
+        "no_lines": "Aucune ligne sur ce remboursement.",
+        "table": {
+          "payment_number": "Numéro de paiement",
+          "payment_date": "Date de paiement",
+          "method": "Moyen",
+          "amount": "Montant",
+          "payment_link": "Paiement",
+          "view_payment": "Voir le paiement"
+        }
+      },
+      "form": {
+        "title": "Confirmer le remboursement"
+      },
+      "complete": {
+        "reason_label": "Motif du remboursement",
+        "reason_placeholder": "Saisissez le motif ou la référence du remboursement…"
+      },
+      "errors": {
+        "load_failed": "Échec du chargement des remboursements. Veuillez réessayer.",
+        "complete_failed": "Échec de la finalisation du remboursement. Veuillez réessayer."
+      },
+      "success": {
+        "completed": "Remboursement effectué avec succès."
+      }
+    }
+  }
+}
