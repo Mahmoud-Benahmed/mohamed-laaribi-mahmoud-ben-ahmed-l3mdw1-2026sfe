@@ -48,7 +48,18 @@ public class CategoryRepository : ICategoryRepository
                         .ThenInclude(cc => cc.Client)
                         .OrderBy(c => c.Name)
                         .ToListAsync();
+    public async Task<bool> DuplicateExists(string code, Guid? excludeId = null) {
 
+        var query = _context.Categories.Where(cat =>
+            cat.Code.ToLower() == code.ToLower()
+        );
+
+        if (excludeId.HasValue)
+            query = query.Where(c => c.Id != excludeId);
+
+        return await query.AnyAsync();
+    }
+    
     public async Task<(List<Category> Items, int TotalCount)> GetAllPagedAsync(
         int pageNumber, int pageSize)
     {
