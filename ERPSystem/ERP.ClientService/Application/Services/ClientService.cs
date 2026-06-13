@@ -32,9 +32,9 @@ public class ClientService : IClientService
     // =========================
     public async Task<ClientResponseDto> CreateAsync(CreateClientRequestDto request)
     {
-        Client? existing = await _clientRepository.GetByEmailAsync(request.Email);
-        if (existing is not null)
-            throw new ClientAlreadyExistsException(request.Email);
+        if (await _clientRepository.DuplicateExists(request.Email, request.Phone))
+            throw new DuplicateKeyException($"Client.Email: {request.Email} | Client.Phone: {request.Phone}");
+
 
         Client client = Client.Create(
             name: request.Name,
@@ -72,12 +72,8 @@ public class ClientService : IClientService
         Client client = await _clientRepository.GetByIdAsync(id) ?? throw new ClientNotFoundException(id);
 
         string normalised = request.Email.Trim().ToLowerInvariant();
-        if (client.Email != normalised)
-        {
-            Client? existing = await _clientRepository.GetByEmailAsync(request.Email);
-            if (existing is not null)
-                throw new ClientAlreadyExistsException(request.Email);
-        }
+        if (await _clientRepository.DuplicateExists(request.Email, request.Phone, id))
+            throw new DuplicateKeyException($"Client.Email: {request.Email} | Client.Phone: {request.Phone}");
 
         client.Update(request.Name, request.Email, request.Address,
             request.Phone, request.TaxNumber);
