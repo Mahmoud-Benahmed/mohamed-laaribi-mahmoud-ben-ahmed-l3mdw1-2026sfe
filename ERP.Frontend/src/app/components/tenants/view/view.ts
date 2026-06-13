@@ -120,7 +120,7 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.loading = false;
           const errorMsg = (err.error as HttpError)?.message
-            ?? this.translate.instant('TENANTS.ERRORS.LOAD_FAILED');
+            ?? this.translate.instant('tenants.responses.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -137,9 +137,9 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       data: {
         icon: 'pause_circle',
         iconColor: 'warn',
-        title: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.SUSPEND_TENANT_MESSAGE', { name: tenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.SUSPEND_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.suspend_tenant_title'),
+        message: this.translate.instant('tenants.list.dialog.suspend_tenant_message', { name: tenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.suspend_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -148,10 +148,10 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.tenantService.suspendTenant(tenant.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUSPENDED'));
+          this.flash('success', this.translate.instant('tenants.responses.success.suspended'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.SUSPEND_FAILED')),
+        error: () => this.flash('error', this.translate.instant('tenants.responses.errors.suspend_failed')),
       });
     });
   }
@@ -162,9 +162,9 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       data: {
         icon: 'play_circle',
         iconColor: 'success',
-        title: this.translate.instant('TENANTS.DIALOG.ACTIVATE_TENANT_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.ACTIVATE_TENANT_MESSAGE', { name: tenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.ACTIVATE_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.activate_tenant_title'),
+        message: this.translate.instant('tenants.list.dialog.activate_tenant_message', { name: tenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.activate_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -173,10 +173,10 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.tenantService.activateTenant(tenant.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.ACTIVATED'));
+          this.flash('success', this.translate.instant('tenants.responses.success.activated'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.ACTIVATE_FAILED')),
+        error: () => this.flash('error', this.translate.instant('tenants.responses.errors.activate_failed')),
       });
     });
   }
@@ -187,9 +187,9 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       data: {
         icon: 'delete',
         iconColor: 'warn',
-        title: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_TITLE'),
-        message: this.translate.instant('TENANTS.DIALOG.DELETE_TENANT_MESSAGE', { name: tenant.name }),
-        confirmText: this.translate.instant('TENANTS.DIALOG.DELETE_CONFIRM'),
+        title: this.translate.instant('tenants.list.dialog.delete_tenant_title'),
+        message: this.translate.instant('tenants.list.dialog.delete_tenant_message', { name: tenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.delete_confirm'),
         cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
@@ -198,12 +198,12 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.tenantService.deleteTenant(tenant.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('TENANTS.SUCCESS.DELETED'));
+          this.flash('success', this.translate.instant('tenants.responses.success.deleted'));
           setTimeout(() => {
             this.cancel();
           }, 2000);
         },
-        error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.DELETE_FAILED')),
+        error: () => this.flash('error', this.translate.instant('tenants.responses.errors.delete_failed')),
       });
     });
   }
@@ -211,99 +211,99 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
   restore(tenant: TenantResponseDto): void {
     this.tenantService.restoreTenant(tenant.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('TENANTS.SUCCESS.RESTORED'));
+        this.flash('success', this.translate.instant('tenants.responses.success.restored'));
         setTimeout(() => {
           this.cancel();
         }, 2000);
       },
-      error: () => this.flash('error', this.translate.instant('TENANTS.ERRORS.RESTORE_FAILED')),
+      error: () => this.flash('error', this.translate.instant('tenants.responses.errors.restore_failed')),
     });
   }
 
   // subscription
-    assignSubscription(): void {
-      if (this.subscriptionForm.invalid) {
-        this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
-        return;
-      }
+  assignSubscription(): void {
+    if (this.subscriptionForm.invalid) {
+      this.flash('error', this.translate.instant('validation.required'));
+      return;
+    }
 
-      if (!this.selectedTenant) {
-        this.flash('error', this.translate.instant('TENANTS.ERRORS.LOAD_FAILED'));
-        return;
-      }
+    if (!this.selectedTenant) {
+      this.flash('error', this.translate.instant('tenants.responses.errors.load_failed'));
+      return;
+    }
+
+    this.isValidating = true;
+
+    const formValue = this.subscriptionForm.value;
+    const startDate = new Date().toISOString().split('T')[0];
+
+    const assignDto: AssignSubscriptionRequestDto = {
+      subscriptionPlanId: formValue.subscriptionPlanId,
+      startDate,
+      period: formValue.period,
+    };
+
+    this.tenantService.assignSubscription(this.selectedTenant.id, assignDto)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.flash('success', this.translate.instant('tenants.responses.success.subscription_assigned'));
+          this.subscriptionForm.markAsPristine();
+
+          setTimeout(() => {
+            this.isValidating = false;
+            this.reload();
+          }, 2000);
+        },
+        error: (err) => {
+          const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('tenants.responses.errors.assign_subscription_failed');
+          this.flash('error', errorMsg);
+          this.isValidating = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  removeSubscription(): void {
+    if (!this.selectedTenant) return;
+
+    const dialogRef = this.dialog.open(ModalComponent, {
+      width: '420px',
+      data: {
+        icon: 'delete',
+        iconColor: 'warn',
+        title: this.translate.instant('tenants.list.dialog.remove_subscription_title'),
+        message: this.translate.instant('tenants.list.dialog.remove_subscription_confirm', { name: this.selectedTenant.name }),
+        confirmText: this.translate.instant('tenants.list.dialog.remove_confirm'),
+        cancelText: this.translate.instant('common.cancel'),
+        showCancel: true,
+      },
+    });
+
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(confirmed => {
+      if (!confirmed) return;
 
       this.isValidating = true;
 
-      const formValue = this.subscriptionForm.value;
-      const startDate = new Date().toISOString().split('T')[0];
-
-      const assignDto: AssignSubscriptionRequestDto = {
-        subscriptionPlanId: formValue.subscriptionPlanId,
-        startDate,
-        period: formValue.period,
-      };
-
-      this.tenantService.assignSubscription(this.selectedTenant.id, assignDto)
+      this.tenantService.removeSubscription(this.selectedTenant!.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: (response) => {
-            this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_ASSIGNED'));
-            this.subscriptionForm.markAsPristine();
-
+          next: () => {
+            this.flash('success', this.translate.instant('tenants.responses.success.subscription_removed'));
             setTimeout(() => {
               this.isValidating = false;
               this.reload();
             }, 2000);
           },
           error: (err) => {
-            const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.ASSIGN_SUBSCRIPTION_FAILED');
+            const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('tenants.responses.errors.remove_subscription_failed');
             this.flash('error', errorMsg);
             this.isValidating = false;
             this.cdr.markForCheck();
           }
         });
-    }
-
-    removeSubscription(): void {
-      if (!this.selectedTenant) return;
-
-      const dialogRef = this.dialog.open(ModalComponent, {
-        width: '420px',
-        data: {
-          icon: 'delete',
-          iconColor: 'warn',
-          title: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_TITLE'),
-          message: this.translate.instant('TENANTS.DIALOG.REMOVE_SUBSCRIPTION_CONFIRM', { name: this.selectedTenant.name }),
-          confirmText: this.translate.instant('TENANTS.DIALOG.REMOVE_CONFIRM'),
-          cancelText: this.translate.instant('common.cancel'),
-          showCancel: true,
-        },
-      });
-
-      dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(confirmed => {
-        if (!confirmed) return;
-
-        this.isValidating = true;
-
-        this.tenantService.removeSubscription(this.selectedTenant!.id)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: () => {
-              this.flash('success', this.translate.instant('TENANTS.SUCCESS.SUBSCRIPTION_REMOVED'));
-              setTimeout(() => {
-                this.isValidating = false;
-                this.reload();
-              }, 2000);
-            },
-            error: (err) => {
-              const errorMsg = (err.error as HttpError)?.message ?? this.translate.instant('TENANTS.ERRORS.REMOVE_SUBSCRIPTION_FAILED');
-              this.flash('error', errorMsg);
-              this.isValidating = false;
-              this.cdr.markForCheck();
-            }
-          });
-      });
-    }
+    });
+  }
 
   statusClass(tenant: TenantResponseDto): Record<string, boolean> {
     return {
@@ -314,8 +314,8 @@ export class ViewTenantComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(tenant: TenantResponseDto): string {
-    if (tenant.isDeleted) return 'TENANTS.STATUS.DELETED';
-    return tenant.isActive ? 'TENANTS.STATUS.ACTIVE' : 'TENANTS.STATUS.SUSPENDED';
+    if (tenant.isDeleted) return 'tenants.list.status.deleted';
+    return tenant.isActive ? 'tenants.list.status.active' : 'tenants.list.status.suspended';
   }
 
   getPlanPrice(planId: string, period: SubscriptionPeriod): string {
