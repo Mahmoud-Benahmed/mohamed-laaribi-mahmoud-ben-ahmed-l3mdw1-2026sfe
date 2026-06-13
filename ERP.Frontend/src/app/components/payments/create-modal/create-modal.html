@@ -253,8 +253,8 @@
                                         class="icon-btn icon-btn--complete"
                                         (click)="completeLine(i)"
                                         [disabled]="!getAllocationLine(i).get('invoiceId')?.value"
-                                        [matTooltip]="'common.complete' | translate">
-                                    <mat-icon style="font-size:24px;width:24px;height:24px;">check</mat-icon>
+                                        [matTooltip]="'payments.actions.full_payment' | translate">
+                                    <mat-icon style="font-size:24px;width:24px;height:24px;">check_circle</mat-icon>
                                 </button>
                                 <button type="button"
                                         class="icon-btn icon-btn--delete"
@@ -282,6 +282,6 @@
           [class.disabled]="form.invalid || isSubmitting"
           (click)="onSubmit()">
     <span *ngIf="!isSubmitting">{{ 'common.add' | translate }}</span>
-    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}...</span>
+    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}</span>
   </button>
 </mat-dialog-actions>
