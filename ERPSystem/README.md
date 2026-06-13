@@ -9,9 +9,109 @@ This project is a modular ERP system designed using modern distributed systems p
 ### Key Features
 
 - **Microservices Architecture**: Independent, deployable services for each business domain
-- **Event-Driven Communication**: Apache Kafka for asynchronous service-to-service communication
-- **Database per Service**: Each service maintains its own data store (SQL Server or MongoDB)
-- **API Gateway**: Centralized entry point with YARP (Yet Another Reverse Proxy)
+- **Event-Driven Communication**: Apache K# Enterprise ERP Microservices System
+
+This backend ecosystem is a production-grade, event‑driven ERP platform built on .NET 10, designed for multi‑tenant SaaS deployment. It decouples core business domains (authentication, clients, articles, stock, invoicing, payments, suppliers, tenants) into independently scalable microservices that communicate asynchronously via Apache Kafka. The system features a unified API Gateway with JWT authentication, fine‑grained RBAC, and fully containerized deployment (Docker Compose / Kubernetes) to ensure reliability and operational agility.
+
+## 🏗️ System Architecture & Services Breakdown
+
+| Service Name | Primary Responsibility | Database / Storage | Key Technologies |
+|--------------|------------------------|--------------------|------------------|
+| **TenantService** | Multi‑tenant lifecycle management, subscription plans, tenant provisioning | SQL Server | .NET 10, EF Core, Kafka (publisher) |
+| **AuthService** | User authentication, JWT/refresh tokens, role & privilege management (RBAC) | MongoDB | .NET 10, JWT, Identity PasswordHasher, Kafka (publisher/consumer) |
+| **Gateway** (YARP) | Single entry point: JWT validation, rate limiting, tenant resolution, reverse proxy | Redis (tenant cache) | YARP, JWT Bearer, StackExchange.Redis, Kafka (consumer) |
+| **ArticleService** | Product catalog, article & category management, unique article code generation | SQL Server | .NET 10, EF Core, Kafka (publisher) |
+| **ClientService** | Customer registry, client categories, credit limits, return windows | SQL Server | .NET 10, EF Core, Kafka (publisher) |
+| **FournisseurService** | Supplier management (CRUD, block/unblock) | SQL Server | .NET 10, EF Core, Kafka (publisher) |
+| **StockService** | Inventory movements (receipts, issues, returns), stock journal, real‑time stock levels | SQL Server | .NET 10, EF Core, Kafka (consumer for Article/Client/Fournisseur/Invoice events) |
+| **InvoiceService** | Invoice lifecycle (draft → unpaid → paid/cancelled), line‑item management, PDF generation | SQL Server | .NET 10, EF Core, QuestPDF, Kafka (publisher & consumer) |
+| **PaymentService** | Payment registration, allocation to invoices, partial payments, refund processing | SQL Server | .NET 10, EF Core, Kafka (publisher & consumer) |
+
+## 🔄 Inter-Service Communication & Event-Driven Flows
+
+All asynchronous communication is built on **Apache Kafka (KRaft mode)**. Services publish domain events to specific topics, and consumers react independently – ensuring loose coupling and eventual consistency.
+
+### 1. Tenant Provisioning Flow
+
+When a new organization is created, the system automatically initialises its isolated security environment.
+
+1. Admin calls `POST /tenants` → **TenantService** persists tenant & subscription.
+2. **TenantService** publishes `tenant.created` event (contains `TenantId`, `Slug`, branding, etc.) to Kafka.
+3. **AuthService** (`TenantLifecycleConsumer`) consumes the event and:
+   - Provisions default roles (`SYSTEM_ADMIN`, `SALES_MANAGER`, `STOCK_MANAGER`, `ACCOUNTANT`).
+   - Seeds all required fine‑grained privileges (see `PrivilegeRegistry`).
+   - Creates default tenant users (`admin_<slug>`, `sales_<slug>`, etc.).
+   - Upserts tenant cache into its MongoDB collection.
+4. **Gateway** (`TenantLifecycleConsumer`) also consumes `tenant.created` and updates its Redis cache for tenant resolution.
+5. Other services (Article, Client, Stock, Invoice, Payment) listen to `tenant.deleted` to cascade cleanup, but do **not** pre‑provision – they rely on cache‑sync from AuthService or lazy creation.
+
+### 2. Invoice Creation → Stock Reservation
+
+When a sales invoice is finalized, stock levels must be reduced accordingly.
+
+1. **User** creates an invoice via `POST /invoices` → **InvoiceService** creates a `DRAFT` invoice (no stock movement yet).
+2. **User** calls `PUT /invoices/{id}/finalize` → **InvoiceService**:
+   - Validates stock availability by calling **StockService** synchronously (HTTP).
+   - Changes invoice status to `UNPAID`.
+   - Publishes `invoice.created` event to Kafka with the full invoice details.
+3. **StockService** (`InvoiceEventConsumer`) consumes `invoice.created` and:
+   - Automatically creates a `BonSortie` (issue document) that deducts the invoice quantities from stock.
+   - Records the movement in `JournalStock` (before/after quantities).
+   - Stores an `InvoiceBonSortieMapping` for future cancellation.
+4. If the invoice is later cancelled, **InvoiceService** publishes `invoice.cancelled` → **StockService** consumes it and creates a `BonRetour` to reverse the stock deduction.
+
+## 🔐 Cross-Cutting Concerns
+
+### Multi‑Tenancy
+
+- **Tenant Resolution Pipeline:**
+  1. **Gateway** (`TenantResolutionMiddleware`) extracts tenant from subdomain (e.g. `acme.erp.local`) or JWT claim `tenantId`.
+  2. Gateway caches tenant metadata in **Redis** (keys `tenant:id:{id}` and `tenant:slug:{slug}`) and injects headers `X-Tenant-Id` and `X-Tenant-Slug` into proxied requests.
+  3. Each microservice implements `ITenantContext` which reads these headers (or falls back to JWT claim) and exposes the current `TenantId`.
+  4. **Entity Framework Core** uses global query filters automatically appended by `DbContext` to scope all queries to the resolved `TenantId` (e.g. `HasQueryFilter(e => !e.IsDeleted && (_tenantId == null || e.TenantId == _tenantId))`).
+  5. **MongoDB** repositories in AuthService use a `BaseRepository` that injects `{ TenantId }` filters into every operation.
+
+### Security & Authentication
+
+- **AuthService** issues JWT access tokens (15 min lifetime) and opaque refresh tokens (7 days, stored hashed in MongoDB). Tokens contain claims: `sub` (userId), `login`, `role`, `privilege` (list of granular permissions), and `tenantId`.
+- **Gateway** validates every incoming JWT (issuer, audience, signature, expiration) using `Microsoft.AspNetCore.Authentication.JwtBearer`.
+- **Authorization Policies** in Gateway map to privilege codes (e.g. `CREATE_ARTICLE`, `VIEW_PAYMENTS`). Each YARP route declares an `AuthorizationPolicy` – the Gateway enforces it before forwarding the request.
+- **Downstream services** optionally double‑check privileges via `User.HasClaim("privilege", ...)` inside controllers, but the primary enforcement layer is the Gateway.
+- **Audit Logging** (`AuditLogger`) in AuthService records all security‑sensitive actions (login, role changes, user activation) into MongoDB.
+
+### Resilience
+
+- **GlobalExceptionMiddleware** in every service catches unhandled exceptions, logs them, and returns a uniform JSON error response with a `code` and `message` (e.g. `{ "code": "ART_001", "message": "Article not found", "statusCode": 404 }`).
+- **Health Checks** (`/health`, `/health/live`, `/health/ready`) verify database connectivity, Kafka availability, and basic service liveness – used by container orchestrators.
+- **Kafka Consumers** are configured with `EnableAutoCommit = false` and commit offsets only after successful processing, preventing message loss.
+- **Idempotent Event Handling** – services check for existing cache records before applying updates (e.g. `ArticleCacheService.SyncCreatedAsync` ignores duplicate events).
+
+## 🚀 Local Development & Containerization
+
+The system is fully containerized and can be run in two modes:
+
+### Docker Compose (Full Stack)
+
+- `docker-compose.yaml` defines all services, plus:
+  - **SQL Server** (one instance, but each service uses its own logical database)
+  - **MongoDB** (AuthService)
+  - **Redis** (Gateway tenant cache)
+  - **Kafka** (KRaft mode, single node)
+  - **Nginx** (reverse proxy for subdomain routing)
+- Environment variables are loaded from `.env` (template provided).
+- All services use `depends_on` with health checks to guarantee startup order.
+- **Local development alternative:** `docker-compose.local.yaml` starts only infrastructure (Kafka, SQL Server, MongoDB, Redis) – services run from Visual Studio for debugging.
+
+### Kubernetes (Minikube)
+
+- Full set of manifests under `/k8s`:
+  - **StatefulSets** for SQL Server, MongoDB, Kafka (with persistent volumes).
+  - **Deployments** for each microservice, including `initContainers` that wait for dependencies.
+  - **Secrets** generated via `create-secrets.ps1` (JWT secret, DB passwords, internal API keys).
+  - **Ingress** (`nginx`) routes subdomains (`*.erp.local`) to the Gateway service.
+  - **NodePort** exposes the Gateway inside the cluster.
+- One‑command setup: `./k8s/setup.ps1` (Windows) builds all Docker images inside Minikube’s Docker daemon, applies secrets, and deploys everything.
+- All services expose `/health` endpoints for readiness/liveness probes. with YARP (Yet Another Reverse Proxy)
 - **JWT Authentication**: Secure token-based authentication with refresh token support
 - **Domain-Driven Design**: Business logic encapsulated in domain models
 - **Containerized Deployment**: Full Docker support with Docker Compose orchestration
