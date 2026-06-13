@@ -6,6 +6,7 @@ public interface IFournisseurRepository
 {
     Task AddAsync(Fournisseur f);
     Task SaveChangesAsync();
+    Task<bool> DuplicateExists(string email, string taxNum, string rib, Guid? excludeId=null);
     Task<Fournisseur?> GetByIdAsync(Guid id);
     Task<Fournisseur?> GetByIdDeletedAsync(Guid id);
     Task<(List<Fournisseur> Items, int TotalCount)> GetPagedByNameAsync(
