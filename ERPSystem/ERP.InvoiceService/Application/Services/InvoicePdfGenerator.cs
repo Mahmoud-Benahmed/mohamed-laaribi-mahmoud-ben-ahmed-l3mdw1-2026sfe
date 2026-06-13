@@ -59,7 +59,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
             if (tenant.LogoUrl.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
             {
                 // Convert SVG to PNG
-                logoBytes = await ConvertSvgToPngBytesAsync(tenant.LogoUrl, 150, 80);
+                logoBytes = await ConvertSvgToPngBytesAsync(tenant.LogoUrl, 200, 180);
             }
             else
             {
@@ -67,6 +67,8 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                 logoBytes = await DownloadLogoAsync(tenant.LogoUrl);
             }
         }
+
+        Console.WriteLine("logoBytes: {0}", logoBytes);
 
         Document document = Document.Create(container =>
         {
@@ -87,7 +89,7 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                             // Row: logo (left) + company details (right)
                             colLeft.Item().Row(logoRow =>
                             {
-                                logoRow.ConstantItem(100).Height(80).Image(logoBytes).FitArea();
+                                logoRow.ConstantItem(100).Height(90).Image(logoBytes).FitArea();
                                 logoRow.ConstantItem(10);
                                 logoRow.RelativeItem().Column(companyCol =>
                                 {
@@ -207,32 +209,13 @@ public class InvoicePdfGenerator : IInvoicePdfGenerator
                     {
                         // Original subtotal (before discount)
                         decimal originalTotalHT = invoice.Items.Sum(i => i.Quantity * i.UniPriceHT);
+
                         totals.Item().Row(r =>
                         {
-                            r.RelativeItem().Text("Subtotal (HT):").Bold();
-                            r.ConstantItem(110).AlignRight().Text($"{originalTotalHT:N2} {CurrencySymbol}");
+                            r.RelativeItem().Text("TOTAL HT:").Bold();
+                            r.ConstantItem(110).AlignRight().Text($"{invoice.TotalHT:N2} {CurrencySymbol}");
                         });
-
-                        // Discount line (if applicable)
-                        if (invoice.DiscountRate > 0)
-                        {
-                            decimal discountAmountHT = originalTotalHT - invoice.TotalHT;
-                            totals.Item().Row(r =>
-                            {
-                                r.RelativeItem().Text($"Discount ({invoice.DiscountRate:F0}%):").Bold()
-                                    .FontColor(Colors.Green.Darken1);
-                                r.ConstantItem(110).AlignRight()
-                                    .Text($"- {discountAmountHT:N2} {CurrencySymbol}")
-                                    .FontColor(Colors.Green.Darken1);
-                            });
-
-                            totals.Item().Row(r =>
-                            {
-                                r.RelativeItem().Text("Net HT after discount:").Bold();
-                                r.ConstantItem(110).AlignRight().Text($"{invoice.TotalHT:N2} {CurrencySymbol}");
-                            });
-                        }
-
+                        
                         // TVA breakdown
                         if (invoice.TaxMode == TaxCalculationMode.INVOICE)
                         {
