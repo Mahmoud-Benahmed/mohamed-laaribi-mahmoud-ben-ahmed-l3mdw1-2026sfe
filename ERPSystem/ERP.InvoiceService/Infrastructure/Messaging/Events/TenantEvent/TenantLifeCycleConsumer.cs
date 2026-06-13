@@ -5,6 +5,8 @@ using ERP.InvoiceService.Domain.LocalCache.Tenant;
 using ERP.InvoiceService.Infrastructure.Persistence;
 using InvoiceService.Application.Interfaces;
 using InvoiceService.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Text.Json;
 
 namespace ERP.InvoiceService.Infrastructure.Messaging.Events.TenantEvent;
@@ -90,9 +92,6 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         var repo = scope.ServiceProvider.GetRequiredService<ITenantCacheRepository>();
         await repo.AddAsync(TenantCache.Create(evt));
         await repo.SaveChangesAsync();
-
-        var invoiceNumberRepo = scope.ServiceProvider.GetRequiredService<IInvoiceNumberGenerator>();
-        await invoiceNumberRepo.GenerateNextInvoiceNumberAsync(evt.TenantId);
 
         _logger.LogInformation("Tenant created: {TenantId}", evt.TenantId);
     }
