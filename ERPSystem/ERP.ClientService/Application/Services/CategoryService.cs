@@ -24,9 +24,8 @@ public class CategoryService : ICategoryService
     // =========================
     public async Task<CategoryResponseDto> CreateAsync(CreateCategoryRequestDto request)
     {
-        Category? existing = await _categoryRepository.GetByCodeAsync(request.Code);
-        if (existing is not null)
-            throw new CategoryAlreadyExistsException(request.Code);
+        if(await _categoryRepository.DuplicateExists(request.Code))
+            throw new DuplicateKeyException($"Category.Code: {request.Code}");
 
         if (!request.UseBulkPricing && request.DiscountRate != null)
             throw new ArgumentException("Discount not allowed without bulk pricing");
@@ -65,12 +64,8 @@ public class CategoryService : ICategoryService
             throw new CategoryNotFoundException(id);
 
         string normalised = request.Code.Trim().ToUpperInvariant();
-        if (category.Code != normalised)
-        {
-            Category? existing = await _categoryRepository.GetByCodeAsync(request.Code);
-            if (existing is not null)
-                throw new CategoryAlreadyExistsException(request.Code);
-        }
+        if (await _categoryRepository.DuplicateExists(normalised, id))
+            throw new DuplicateKeyException($"Category.Code: {normalised}");
 
         category.Update(
             request.Name, request.Code, request.DelaiRetour, request.DuePaymentPeriod,
