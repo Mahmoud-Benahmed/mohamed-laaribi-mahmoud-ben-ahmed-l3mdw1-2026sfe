@@ -34,6 +34,11 @@ export class OnboardingComponent implements OnInit , OnDestroy{
   ];
   currencies = ['TND', 'EUR', 'USD', 'GBP', 'MAD', 'DZD'];
   locales    = ['fr-TN', 'en-US', 'fr-FR', 'ar-TN'];
+
+  readonly templateTranslationKey= `tenants.onboarding.`;
+  readonly responseSuccessTranslationKey="tenants.responses.success.";
+  readonly responseErrorsTranslationKey="tenants.responses.errors.";
+
   constructor(
     private fb: FormBuilder,
     private tenantService: TenantService,
@@ -58,8 +63,8 @@ export class OnboardingComponent implements OnInit , OnDestroy{
       address:        ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       logoUrl:        ['', [Validators.maxLength(500)]],
       // Branding
-      primaryColor:   ['', [Validators.pattern(RegexPatterns.hexColor)]],
-      secondaryColor: ['', [Validators.pattern(RegexPatterns.hexColor)]],
+      primaryColor:   ['#4e7cff', [Validators.pattern(RegexPatterns.hexColor)]],
+      secondaryColor: ['#a0b4ff', [Validators.pattern(RegexPatterns.hexColor)]],
       // Regional
       currency:       ['TND',          Validators.required],
       locale:         ['fr-TN',        Validators.required],
@@ -68,7 +73,7 @@ export class OnboardingComponent implements OnInit , OnDestroy{
 
     ['primaryColor', 'secondaryColor'].forEach(name => {
       this.form.get(name)?.valueChanges
-        .pipe(takeUntilDestroyed(this.destroyRef)) // ← prevent leak
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.syncColorPickers());
     });
   }
