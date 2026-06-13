@@ -13,6 +13,18 @@ public class RoleRepository : BaseRepository<Role>, IRoleRepository
     public async Task<Role?> GetByIdAsync(Guid id)
         => await _collection.Find(WithTenant(x => x.Id == id)).FirstOrDefaultAsync();
 
+    public async Task<bool> DuplicateExists(string libelle, Guid? excludeId = null)
+    {
+        var filter = WithTenant(x =>
+            x.Libelle.ToLower() == libelle.ToLower()
+        );
+
+        if (excludeId.HasValue)
+            filter = Builders<Role>.Filter.And(filter, Builders<Role>.Filter.Ne(x => x.Id, excludeId.Value));
+
+        return await _collection.Find(filter).AnyAsync();
+    }
+
     public async Task<Role?> GetByLibelleAsync(string libelle)
     {
         var filter = Builders<Role>.Filter.And(
