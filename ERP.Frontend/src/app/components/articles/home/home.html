@@ -266,7 +266,7 @@
         <div class="detail-item">
           <span class="detail-label">{{ 'articles.details.unit' | translate }}</span>
           <span class="detail-value">
-            {{ 'unit.' + (selectedArticle.unit.toLocaleString().toUpperCase()) | translate }}
+            {{ 'common.unit.' + (selectedArticle.unit.toLocaleString().toUpperCase()) | translate }}
           </span>
         </div>
         <div class="detail-item">
@@ -371,7 +371,7 @@
             >
               <option value="" selected disabled>{{'articles.form.select_unit' | translate}}</option>
               <option *ngFor="let unit of units; let i= index; trackBy: trackByIndex" [value]="unit.value">
-                {{ 'unit.' + unit.label.toUpperCase() | translate }}
+                {{ 'common.unit.' + unit.label.toUpperCase() | translate }}
               </option>
             </select>
             <span class="field__error" *ngIf="articleForm.get('unit') as ctrl">
