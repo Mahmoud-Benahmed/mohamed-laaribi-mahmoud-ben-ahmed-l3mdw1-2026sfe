@@ -28,6 +28,20 @@ public class FournisseurRepository : IFournisseurRepository
     public async Task<Fournisseur?> GetByIdAsync(Guid id) =>
         await _context.Fournisseurs.FirstOrDefaultAsync(f => f.Id == id && !f.IsDeleted);
 
+    public async Task<bool> DuplicateExists(string email, string taxNum, string rib, Guid? excludeId = null)
+    {
+        var query = _context.Fournisseurs.Where(f =>
+            (!string.IsNullOrEmpty(rib) && f.RIB.ToLower() == rib.ToLower())
+            || (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(f.Email) && f.Email.ToLower() == email.ToLower())
+            || (!string.IsNullOrEmpty(taxNum) && !string.IsNullOrEmpty(f.TaxNumber) && f.TaxNumber.ToLower() == taxNum.ToLower())
+        );
+
+        if (excludeId.HasValue)
+            query = query.Where(f => f.Id != excludeId.Value);
+
+        return await query.AnyAsync();
+    }
+
     public async Task<Fournisseur?> GetByIdDeletedAsync(Guid id) =>
         await _context.Fournisseurs.IgnoreQueryFilters().FirstOrDefaultAsync(f => f.Id == id && f.IsDeleted && f.TenantId == _tenantContext.TenantId);
 
