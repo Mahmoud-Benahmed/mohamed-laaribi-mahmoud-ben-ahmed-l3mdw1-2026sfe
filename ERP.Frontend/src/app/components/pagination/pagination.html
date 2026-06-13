@@ -1,17 +1,18 @@
 <div class="pagination">
 
-  <!-- Page size selector always visible -->
-  <select class="page-btn page-size-select"
-          [ngModel]="pageSize"
-          (ngModelChange)="onSizeChange($event)">
-    <option *ngFor="let size of pageSizeOptions" [value]="size">{{ 'pagination.items_per_page' | translate : { size: size } }}</option>
-  </select>
+  <ng-container>
+    <span class="page-info" *ngIf="totalPages > 1">{{ 'pagination.page_of' | translate : { current: pageNumber, total: totalPages } }}</span>
 
-  <!-- Navigation only when more than 1 page -->
-  <ng-container *ngIf="totalPages > 1">
-    <button class="page-btn" (click)="prev()" [disabled]="pageNumber === 1">{{ 'pagination.previous' | translate }}</button>
-    <span class="page-info">{{ 'pagination.page_of' | translate : { current: pageNumber, total: totalPages } }}</span>
-    <button class="page-btn" (click)="next()" [disabled]="pageNumber === totalPages">{{ 'pagination.next' | translate }}</button>
+    <!-- Navigation only when more than 1 page -->
+    <button class="page-btn" *ngIf="totalPages > 1" (click)="prev()" [disabled]="pageNumber === 1">{{ 'pagination.previous' | translate }}</button>
+    <!-- Page size selector always visible -->
+    <select class="page-btn page-size-select"
+            [ngModel]="pageSize"
+            (ngModelChange)="onSizeChange($event)">
+      <option *ngFor="let size of pageSizeOptions" [value]="size">{{ 'pagination.items_per_page' | translate : { size: size } }}</option>
+    </select>
+
+    <button class="page-btn" *ngIf="totalPages > 1" (click)="next()" [disabled]="pageNumber === totalPages">{{ 'pagination.next' | translate }}</button>
   </ng-container>
 
 </div>
