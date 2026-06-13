@@ -136,7 +136,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
         if (error.status === 403) {
-          this.showErrorDialog('ACCESS_DENIED', error);
+          const code = error.error?.code ?? 'ACCESS_DENIED';
+          this.showErrorDialog(code, error);
           return;
         }
         if (error.status === 429) {
