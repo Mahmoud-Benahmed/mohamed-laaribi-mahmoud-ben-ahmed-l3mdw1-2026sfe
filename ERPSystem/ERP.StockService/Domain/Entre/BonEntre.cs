@@ -24,7 +24,7 @@ public sealed class BonEntre : PieceStock
             Numero = numero.Trim(),
             FournisseurId = fournisseurId,
             Observation = observation?.Trim(),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
         };
     }
 
@@ -52,7 +52,7 @@ public sealed class BonEntre : PieceStock
         }
         ;
 
-        LigneEntre ligne = LigneEntre.Create(Id, articleId, qty, price);
+        LigneEntre ligne = LigneEntre.Create(Id, articleId, qty, price, tenantId: TenantId);
         _lignes.Add(ligne);
 
         return ligne;
