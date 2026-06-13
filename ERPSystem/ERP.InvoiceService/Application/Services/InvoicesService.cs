@@ -344,6 +344,7 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
 
             return invoice.ToDto();
         }
+
         public async Task<InvoiceDto> MarkAsPaidAsync(Guid id, decimal? paidAmount = null, DateTime? paidAt = null)
         {
             // ──── GET INVOICE ────
@@ -573,6 +574,11 @@ namespace ERP.InvoiceService.Application.Services.LocalCache.ArticleCache
 
         private void ValidateStockAvailability(List<CreateInvoiceItemDto> items, StockStatusResponse stockStatus)
         {
+            _logger.LogInformation("IN_STOCK: {Items}",
+                string.Join(", ", stockStatus.IN_STOCK.Select(s => $"{s.ArticleId}={s.Quantity}")));
+            _logger.LogInformation("OUT_STOCK: {Items}",
+                string.Join(", ", stockStatus.OUT_STOCK.Select(s => $"{s.ArticleId}={s.Quantity}")));
+
             List<string> errors = new List<string>();
 
             // Create lookup dictionary for O(1) access
