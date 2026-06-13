@@ -37,13 +37,17 @@ export class SubscriptionExpiryComponent implements OnInit {
   isSubmitting = false;
   success = false;
 
+  readonly templateTranslationKey='tenants.subscription';
+  readonly plansTranslationKey='tenants.plans';
+  readonly responseTranslationKey='tenants.responses';
+
   ngOnInit(): void {
     this.tenantService.getTenantBranding(this.authService.Slug!).pipe(take(1)).subscribe(settings => {
       if (settings?.isActive) {
         this.router.navigate(['/home']);
         return;
       }
-      
+
       this.planService.getAllPlans(1, 3).pipe(take(1)).subscribe({
         next: (res) => this.plans = res.items,
         error: () => this.error = 'Failed to load plans. Please try again.'
