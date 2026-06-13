@@ -77,14 +77,24 @@ export class ControleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.reload();
+    this.load();
   }
 
   // ── Pagination ────────────────────────────────────────────────────────────
 
   get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize()); }
 
-  onPageSizeChange(): void { this.pageNumber.set(1); this.reload(); }
+  onPageChange(page: number): void {
+    this.pageNumber.set(page);
+    this.load();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
 
   // ── Search ────────────────────────────────────────────────────────────────
 
@@ -105,10 +115,10 @@ export class ControleComponent implements OnInit {
   }
 
   get sortedData(): ControleResponseDto[] {
-    const filtered = [...this.dataSource.filteredData];
+    const data = [...this.dataSource.filteredData];
+    if(!this.sortColumn) return data;
 
-    if (this.sortColumn) {
-      filtered.sort((a, b) => {
+    return data.sort((a, b) => {
         let valA = (a as any)[this.sortColumn];
         let valB = (b as any)[this.sortColumn];
 
@@ -120,11 +130,6 @@ export class ControleComponent implements OnInit {
 
         return (valA < valB ? -1 : valA > valB ? 1 : 0) * (this.sortDirection === 'asc' ? 1 : -1);
       });
-    }
-
-    // client-side pagination slice
-    const start = (this.pageNumber() - 1) * this.pageSize();
-    return filtered.slice(start, start + this.pageSize());
   }
 
   // ── Load ──────────────────────────────────────────────────────────────────
@@ -132,10 +137,10 @@ export class ControleComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.errors = [];
-    this.controleService.getAll().subscribe({
-      next: (res: ControleResponseDto[]) => {
-        this.dataSource.data = res;
-        this.totalCount = res.length;
+    this.controleService.getAllPaged(this.pageNumber(), this.pageSize()).subscribe({
+      next: (res) => {
+        this.dataSource.data = res.items;
+        this.totalCount = res.totalCount;
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -144,11 +149,6 @@ export class ControleComponent implements OnInit {
         this.flash('error', errorMessage);
       }
     });
-  }
-
-  reload(): void {
-    this.load();
-    this.cdr.markForCheck();
   }
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ export class ControleComponent implements OnInit {
     if (this.viewMode === 'create') {
       this.controleService.create(val).subscribe({
         next: () => {
-          this.reload();
+          this.load();
           this.cancel();
           this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_created`, { name: val.libelle }));
         },
@@ -202,7 +202,7 @@ export class ControleComponent implements OnInit {
       this.controleService.update(this.selectedControle.id, val).subscribe({
         next: () => {
           this.cancel();
-          this.reload();
+          this.load();
           this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_updated`, { name: val.libelle }));
         },
         error: (err: HttpErrorResponse) => {
@@ -235,7 +235,7 @@ export class ControleComponent implements OnInit {
           next: () => {
             if (this.viewMode === 'view') this.cancel();
             this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}controle_deleted`, { name: controle.libelle }));
-            this.reload();
+            this.load();
           },
           error: (err: HttpErrorResponse) => {
             const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
