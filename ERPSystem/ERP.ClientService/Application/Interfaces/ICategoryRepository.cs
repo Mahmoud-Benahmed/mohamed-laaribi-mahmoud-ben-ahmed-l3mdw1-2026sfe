@@ -13,6 +13,8 @@ namespace ERP.ClientService.Application.Interfaces
         Task<Category?> GetByIdAsync(Guid id);
         Task<Category?> GetByIdDeletedAsync(Guid id);
         Task<Category?> GetByCodeAsync(string code);
+        Task<bool> DuplicateExists(string code, Guid? excludeId= null);
+
 
         // ── Paging & filtering ────────────────────────────────────────────────────
 
