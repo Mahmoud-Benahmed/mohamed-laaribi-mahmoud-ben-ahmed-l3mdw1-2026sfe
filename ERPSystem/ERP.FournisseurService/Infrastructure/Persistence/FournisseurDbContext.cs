@@ -41,7 +41,9 @@ internal sealed class FournisseurConfiguration : IEntityTypeConfiguration<Fourni
         b.Property(f => f.Address).IsRequired().HasMaxLength(500);
         b.Property(f => f.Phone).IsRequired().HasMaxLength(50);
         b.Property(f => f.Email).HasMaxLength(200);
-        b.Property(f => f.TaxNumber).IsRequired().HasMaxLength(50);
+        b.Property(f => f.TaxNumber)
+            .IsRequired(false)   // ← was IsRequired()
+            .HasMaxLength(50);
         b.Property(f => f.RIB).IsRequired().HasMaxLength(50);
         b.Property(f => f.IsDeleted).IsRequired();
         b.Property(f => f.IsBlocked).IsRequired();
@@ -51,10 +53,9 @@ internal sealed class FournisseurConfiguration : IEntityTypeConfiguration<Fourni
                  .ValueGeneratedNever();
 
         b.HasIndex(f => new { f.TaxNumber, f.TenantId })
-         .IsUnique()
-         .HasDatabaseName("IX_Fournisseurs_TaxNumber")
-         .HasFilter("[IsDeleted] = 0");
-
+            .IsUnique()
+            .HasDatabaseName("IX_Fournisseurs_TaxNumber")
+            .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL"); // ← add IS NOT NULL
 
         b.HasQueryFilter(f => !f.IsDeleted);
     }
