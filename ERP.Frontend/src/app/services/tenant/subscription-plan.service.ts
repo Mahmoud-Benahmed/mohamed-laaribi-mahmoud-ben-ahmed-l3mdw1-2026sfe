@@ -68,7 +68,6 @@ export class SubscriptionPlanService {
   }
 
   private handleError(error: any): Observable<never> {
-    console.error('SubscriptionPlanService error:', error);
     return throwError(() => error);
   }
 }
