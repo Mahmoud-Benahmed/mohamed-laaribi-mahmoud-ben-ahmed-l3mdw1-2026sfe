@@ -1,48 +1,151 @@
 ﻿using ERP.FournisseurService.Application.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Text.Json;
 
 namespace ERP.FournisseurService.Middleware;
 
-public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+public class GlobalExceptionMiddleware
 {
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+
+    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await next(context);
+            await _next(context);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+            _logger.LogError(ex, "An unhandled exception occurred.");
             await HandleExceptionAsync(context, ex);
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        (HttpStatusCode statusCode, string? message) = ex switch
+        ErrorResponse response = exception switch
         {
-            FournisseurNotFoundException e => (HttpStatusCode.NotFound, e.Message),
-            FournisseurBlockedException e => (HttpStatusCode.Conflict, e.Message),
-            KeyNotFoundException e => (HttpStatusCode.NotFound, e.Message),
-            ArgumentOutOfRangeException e => (HttpStatusCode.BadRequest, e.Message),
-            ArgumentException e => (HttpStatusCode.BadRequest, e.Message),
-            InvalidOperationException e => (HttpStatusCode.Conflict, e.Message),
-            _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred.")
+            FournisseurNotFoundException ex => new ErrorResponse
+            {
+                Code = "FOURNISSEUR_NOT_FOUND",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.NotFound
+            },
+
+            FournisseurBlockedException ex => new ErrorResponse
+            {
+                Code = "FOURNISSEUR_BLOCKED",   // Add this key to frontend
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict
+            },
+
+            KeyNotFoundException ex => new ErrorResponse
+            {
+                Code = "NOT_FOUND",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.NotFound
+            },
+
+            ArgumentOutOfRangeException ex => new ErrorResponse
+            {
+                Code = "INVALID_RANGE",         // ← changed
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.BadRequest
+            },
+
+            ArgumentNullException ex => new ErrorResponse
+            {
+                Code = "VALIDATION_ERROR",      // ← changed
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.BadRequest
+            },
+
+            ArgumentException ex => new ErrorResponse
+            {
+                Code = "BAD_ARGUMENT",          // keep or change to VALIDATION_ERROR
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.BadRequest
+            },
+
+            InvalidOperationException ex => new ErrorResponse
+            {
+                Code = "BUSINESS_RULE_VIOLATION", // ← changed
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict
+            },
+
+            DuplicateKeyException ex => new ErrorResponse
+            {
+                Code = "DUPLICATE_ENTRY",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict
+            },
+
+            DbUpdateException ex when
+                ex.InnerException?.Message.Contains("unique index") == true ||
+                ex.InnerException?.Message.Contains("duplicate key") == true =>
+                new ErrorResponse
+                {
+                    Code = "DUPLICATE_ENTRY",    // ← use generic key
+                    Message = ExtractDuplicateMessage(ex.InnerException!.Message),
+                    StatusCode = (int)HttpStatusCode.Conflict
+                },
+
+            DbUpdateException ex => new ErrorResponse
+            {
+                Code = "DATABASE_ERROR",
+                Message = "A database error occurred. Please try again later.",
+                StatusCode = (int)HttpStatusCode.InternalServerError
+            },
+
+            UnauthorizedAccessException ex => new ErrorResponse
+            {
+                Code = "UNAUTHORIZED",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Unauthorized
+            },
+
+            _ => new ErrorResponse
+            {
+                Code = "INTERNAL_SERVER_ERROR",  // ← changed
+                Message = "An internal error occurred. Please try again later.",
+                StatusCode = (int)HttpStatusCode.InternalServerError
+            }
         };
 
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)statusCode;
+        context.Response.StatusCode = response.StatusCode;
 
-        string body = JsonSerializer.Serialize(new
-        {
-            status = (int)statusCode,
-            error = statusCode.ToString(),
-            message,
-            path = context.Request.Path.Value
-        });
-
-        return context.Response.WriteAsync(body);
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response,
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
     }
+
+    private static string ExtractDuplicateMessage(string innerMessage)
+    {
+        if (innerMessage.Contains("IX_Suppliers_Name"))
+            return "A supplier with this name already exists.";
+        if (innerMessage.Contains("IX_Suppliers_Email"))
+            return "A supplier with this email already exists.";
+        if (innerMessage.Contains("IX_Suppliers_TaxNumber"))
+            return "A supplier with this tax number already exists.";
+        if (innerMessage.Contains("IX_Suppliers_Phone"))
+            return "A supplier with this phone number already exists.";
+        return "A duplicate entry was detected.";
+    }
+}
+
+// Reusable error response DTO (you can move it to a shared project if needed)
+internal class ErrorResponse
+{
+    public string Code { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public int StatusCode { get; set; }
 }
