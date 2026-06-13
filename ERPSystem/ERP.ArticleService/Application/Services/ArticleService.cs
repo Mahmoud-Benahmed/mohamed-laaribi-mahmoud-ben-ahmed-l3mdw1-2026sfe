@@ -40,9 +40,8 @@ namespace ERP.ArticleService.Application.Services
                 ?? throw new KeyNotFoundException(
                     $"Category with id '{request.CategoryId}' was not found.");
 
-            Article? existing = await _articleRepository.GetByBarCodeAsync(request.BarCode);
-            if (existing is not null)
-                throw new ArticleAlreadyExistsException(existing.BarCode);
+            if(await _articleRepository.DuplicateExists(request.BarCode))
+                throw new DuplicateKeyException($"Article.BarCode: {request.BarCode}");
 
             string code = await _articleCodeService.GenerateArticleCodeAsync();
 
@@ -83,6 +82,9 @@ namespace ERP.ArticleService.Application.Services
 
             if (article is null || article.IsDeleted)
                 throw new ArticleNotFoundException(id);
+
+            if (await _articleRepository.DuplicateExists(request.BarCode, id))
+                throw new DuplicateKeyException($"Article.BarCode: {request.BarCode}");
 
             Category category = await _categoryRepository.GetByIdAsync(request.CategoryId)
                 ?? throw new CategoryNotFoundException(request.CategoryId);
