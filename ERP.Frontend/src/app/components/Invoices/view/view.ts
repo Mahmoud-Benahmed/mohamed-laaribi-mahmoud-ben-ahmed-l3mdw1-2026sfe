@@ -99,7 +99,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           const errorMsg = (err.error as HttpError)?.message
-            ?? this.translate.instant('invoices.errors.load_failed');
+            ?? this.translate.instant('invoices.responses.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -109,10 +109,10 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
   finalize(invoice: InvoiceDto): void {
     this.invoiceService.finalize(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('invoices.success.finalized'));
+        this.flash('success', this.translate.instant('invoices.responses.success.finalized'));
         this.reload(); // ← handles everything
       },
-      error: () => this.flash('error', this.translate.instant('invoices.errors.finalize_failed')),
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.finalize_failed')),
     });
   }
 
@@ -132,10 +132,10 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.cancel(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('invoices.success.cancelled'));
+          this.flash('success', this.translate.instant('invoices.responses.success.cancelled'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('invoices.errors.cancel_failed')),
+        error: () => this.flash('error', this.translate.instant('invoices.responses.errors.cancel_failed')),
       });
     });
   }
@@ -156,12 +156,12 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.delete(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('invoices.success.deleted'));
+          this.flash('success', this.translate.instant('invoices.responses.success.deleted'));
           setTimeout(()=>{
             this.cancel();
           }, 2000);
         },
-        error: () => this.flash('error', this.translate.instant('invoices.errors.delete_failed')),
+        error: () => this.flash('error', this.translate.instant('invoices.responses.errors.delete_failed')),
       });
     });
   }
@@ -169,13 +169,13 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
   restore(invoice: InvoiceDto): void {
     this.invoiceService.restore(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('invoices.success.restored'));
-        this.flash('success', this.translate.instant('invoices.success.created'));
+        this.flash('success', this.translate.instant('invoices.responses.success.restored'));
+        this.flash('success', this.translate.instant('invoices.responses.success.created'));
         setTimeout(()=>{
             this.cancel();
           }, 2000);
       },
-      error: () => this.flash('error', this.translate.instant('invoices.errors.restore_failed')),
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.restore_failed')),
     });
   }
 
@@ -187,7 +187,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         // optional: revoke after a delay to free memory
         setTimeout(() => window.URL.revokeObjectURL(url), 10000);
       },
-      error: () => this.flash('error', this.translate.instant('invoices.errors.pdf_preview_failed'))
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.pdf_preview_failed'))
     });
   }
 
@@ -201,7 +201,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: () => this.flash('error', this.translate.instant('invoices.errors.pdf_download_failed'))
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.pdf_download_failed'))
     });
   }
 
