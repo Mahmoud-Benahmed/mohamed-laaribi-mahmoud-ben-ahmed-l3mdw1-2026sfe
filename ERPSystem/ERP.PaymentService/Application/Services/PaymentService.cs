@@ -4,15 +4,12 @@ using ERP.PaymentService.Application.Interfaces;
 using ERP.PaymentService.Application.Interfaces.LocalCache;
 using ERP.PaymentService.Domain;
 using ERP.PaymentService.Infrastructure.Messaging;
-using ERP.PaymentService.Infrastructure.Persistence.Repositories;
-using System.ComponentModel.Design;
 
 namespace ERP.PaymentService.Application.Services;
 
 public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository;
-    private readonly IPaymentInvoiceRepository _paymentInvoiceRepo;
 
     private readonly IInvoiceCacheRepository _invoiceCacheRepository;
     private readonly IPaymentNumberGenerator _numberGenerator;
@@ -34,7 +31,6 @@ public class PaymentService : IPaymentService
         _invoiceCacheRepository = invoiceCacheRepository;
         _logger = logger;
         _eventPublisher = eventPublisher;
-        _paymentInvoiceRepo = paymentInvoiceRepo;
         _tenantContext = tenantContext;
     }
 
