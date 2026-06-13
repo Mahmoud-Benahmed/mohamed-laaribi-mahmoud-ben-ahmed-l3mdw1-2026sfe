@@ -57,7 +57,8 @@
                 SourceService = sourceService,
                 SourceOperation = sourceOperation,
                 CreatedAt = DateTime.UtcNow,
-                PerformedBy = performedBy
+                PerformedBy = performedBy,
+                TenantId= tenantId
             };
         }
     }
