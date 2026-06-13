@@ -106,7 +106,8 @@ public class BonRetourService : IBonRetourService
                     stockBefore,
                     StockMovementType.BonRetour,
                     "StockService",
-                    "CreateBonRetour"
+                    "CreateBonRetour",
+                    tenantId: bon.TenantId
                 );
 
                 await _journalStockRepository.AddAsync(journal);
@@ -161,7 +162,8 @@ public class BonRetourService : IBonRetourService
                     stockBefore,
                     StockMovementType.BonRetour,
                     "StockService",
-                    "DeleteBonRetour"
+                    "DeleteBonRetour",
+                    tenantId: bon.TenantId
                 );
                 await _journalStockRepository.AddAsync(reversal);
             }
