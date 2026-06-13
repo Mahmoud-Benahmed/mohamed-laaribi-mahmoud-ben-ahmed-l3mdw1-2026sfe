@@ -187,7 +187,7 @@ export class CreatePaymentModal implements OnInit{
       },
       error: (err) => {
         this.invoicesLoading = false;
-        const msg = err?.error?.message ?? this.translate.instant('invoices.errors.load_failed');
+        const msg = err?.error?.message ?? this.translate.instant('invoices.responses.errors.load_failed');
         this.flash('error', msg);
         this.cdr.markForCheck();
       }
@@ -232,8 +232,6 @@ export class CreatePaymentModal implements OnInit{
           const unpaidClientIds = new Set(
             unpaidResult.items.map(inv => inv.clientId)
           );
-          console.log('unpaid result', unpaidResult, 'unpaidClientIds', unpaidClientIds);
-
           if (unpaidClientIds.size === 0) {
             // No unpaid invoices — no clients to show
             return of({ items: [], totalCount: 0, unpaidClientIds });
@@ -268,7 +266,7 @@ export class CreatePaymentModal implements OnInit{
         },
         error: (err) => {
           this.clientsLoading = false;
-          const msg = err?.error?.message ?? this.translate.instant('invoices.errors.load_clients_failed');
+          const msg = err?.error?.message ?? this.translate.instant('clients.responses.errors.load_failed');
           this.flash('error', msg);
           this.cdr.markForCheck();
         }
@@ -429,10 +427,10 @@ export class CreatePaymentModal implements OnInit{
         .subscribe({
           next: (payment) => {
             this.isSubmitting = false;
-            this.flash('success', this.translate.instant('payments.success.created'));
+            this.flash('success', this.translate.instant('payments.responses.success.created'));
             setTimeout(() =>
               this.dialogRef.close(payment), 1500
-            ); // ← let user see success
+            );
           },
           error: (err) => {
             this.isSubmitting = false;
