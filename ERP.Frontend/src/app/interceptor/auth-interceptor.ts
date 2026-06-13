@@ -85,24 +85,26 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
       // ── Forbidden ──────────────────────────────────────────────────────
       if (error.status === 403) {
+        console.log('AuthInterceptor 403 branch hit')
         const code = error.error?.code;
         if (code === 'TENANT_INACTIVE') return throwError(() => error);
         if (code === 'TENANT_USER_LIMIT_REACHED') return throwError(() => error);
 
 
         const isInactive = code === 'AUTH_003';
+
+        console.log('error.error:', error.error, 'code:', error.error?.code);
+
         dialog.open(ModalComponent, {
           width: '540px',
           data: {
             title:       isInactive ? e('AUTH_003_TITLE') : e('ACCESS_DENIED'),
-            message:     error.error?.message ?? e('AUTH_006'),
+            message:     code ? e(code) : e('AUTH_006'),
             confirmText: t('common.confirm'),
             showCancel:  false,
             icon:        isInactive ? 'person_off' : 'block',
             iconColor:   'danger'
           }
-        }).afterClosed().subscribe(() => {
-          isInactive ? auth.logout() : router.navigate(['/home']);
         });
         return throwError(() => error);
       }
