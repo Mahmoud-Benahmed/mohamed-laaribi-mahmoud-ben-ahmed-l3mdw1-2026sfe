@@ -13,20 +13,20 @@
       <!-- Expiry notice banner -->
       <div class="expiry-notice">
         <mat-icon>schedule</mat-icon>
-        {{ 'SUBSCRIPTION.EXPIRY_NOTICE' | translate }}
+        {{ `${templateTranslationKey}.expiry_notice` | translate }}
       </div>
 
-      <h1>{{ 'SUBSCRIPTION.RENEW_TITLE' | translate }}</h1>
-      <p class="header-sub">{{ 'SUBSCRIPTION.RENEW_SUBTITLE' | translate }}</p>
+      <h1>{{ `${templateTranslationKey}.renew_title` | translate }}</h1>
+      <p class="header-sub">{{ `${templateTranslationKey}.renew_subtitle` | translate }}</p>
 
       <div class="billing-toggle">
         <button class="toggle-option" [class.toggle-option--active]="!billingYearly"
                 (click)="billingYearly = false; period = SubscriptionPeriod.MONTH" type="button">
-          {{ 'PLANS.MONTH' | translate }}
+          {{ `${plansTranslationKey}.month` | translate }}
         </button>
         <button class="toggle-option" [class.toggle-option--active]="billingYearly"
                 (click)="billingYearly = true; period = SubscriptionPeriod.YEAR" type="button">
-          {{ 'PLANS.YEAR' | translate }}
+          {{ `${plansTranslationKey}.year` | translate }}
         </button>
       </div>
     </header>
@@ -38,7 +38,7 @@
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
         <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
-      {{ 'SUBSCRIPTION.RENEWED_SUCCESS' | translate }}
+      {{ `${templateTranslationKey}.renewed_success` | translate }}
     </div>
 
     <!-- Error -->
@@ -67,39 +67,39 @@
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              {{ 'PLANS.POPULAR' | translate }}
+              {{ `${plansTranslationKey}.popular` | translate }}
             </span>
             <span class="badge-discount" *ngIf="billingYearly">
-              {{ 'PLANS.SAVE_BADGE' | translate : { percent: getSavings(plan) } }}
+              {{ `${plansTranslationKey}.save_badge` | translate : { percent: getSavings(plan) } }}
             </span>
           </div>
           <div class="card-plan-name">{{ plan.name }}</div>
           <p class="card-plan-info">
-            <span *ngIf="plan.code === 'STARTER'">{{ 'PLANS.STARTER_DESC' | translate }}</span>
-            <span *ngIf="plan.code === 'PRO'">{{ 'PLANS.PRO_DESC' | translate }}</span>
-            <span *ngIf="plan.code === 'ENTERPRISE'">{{ 'PLANS.ENTERPRISE_DESC' | translate }}</span>
+            <span *ngIf="plan.code === 'STARTER'">{{ `${plansTranslationKey}.starter_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'PRO'">{{ `${plansTranslationKey}.pro_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'ENTERPRISE'">{{ `${plansTranslationKey}.enterprise_desc` | translate }}</span>
           </p>
           <div class="card-price">
             <span class="price-amount">TND {{ getPrice(plan) | number:'1.0-0' }}</span>
-            <span class="price-period">/{{ billingYearly ? ('PLANS.YEAR' | translate) : ('PLANS.MONTH' | translate) }}</span>
+            <span class="price-period">/{{ billingYearly ? (`${plansTranslationKey}.year` | translate) : (`${plansTranslationKey}.month` | translate) }}</span>
           </div>
         </div>
         <div class="card-features" [class.card-features--highlighted]="plan.code === 'PRO'">
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'PLANS.USERS' | translate : { count: plan.maxUsers } }}</span>
+            <span>{{ `${plansTranslationKey}.users` | translate : { count: plan.maxUsers } }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'PLANS.STORAGE' | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
+            <span>{{ `${plansTranslationKey}.storage` | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'PLANS.FEATURE_ERP' | translate }}</span>
+            <span>{{ `${plansTranslationKey}.feature_erp` | translate }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'PLANS.FEATURE_ISOLATION' | translate }}</span>
+            <span>{{ `${plansTranslationKey}.feature_isolation` | translate }}</span>
           </div>
         </div>
         <div class="card-footer" [class.card-footer--highlighted]="plan.code === 'PRO'">
@@ -113,8 +113,8 @@
               <path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ 'PLANS.SELECTED' | translate }}</ng-container>
-            <ng-container *ngIf="selectedPlan?.id !== plan.id">{{ 'PLANS.SELECT' | translate }}</ng-container>
+            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ `${plansTranslationKey}.selected` | translate }}</ng-container>
+            <ng-container *ngIf="selectedPlan?.id !== plan.id">{{ `${plansTranslationKey}.select` | translate }}</ng-container>
           </button>
         </div>
       </div>
@@ -124,10 +124,10 @@
     <div class="plans-action" *ngIf="!success">
       <button class="btn-proceed" [disabled]="!selectedPlan || isSubmitting" (click)="renew()">
         <span *ngIf="!isSubmitting && selectedPlan">
-          {{ 'SUBSCRIPTION.RENEW_WITH' | translate : { name: selectedPlan.name } }}
+          {{ `${templateTranslationKey}.renew_with` | translate : { name: selectedPlan.name } }}
         </span>
-        <span *ngIf="!isSubmitting && !selectedPlan">{{ 'SUBSCRIPTION.SELECT_TO_RENEW' | translate }}</span>
-        <span *ngIf="isSubmitting">{{ 'COMMON.PROCESSING' | translate }}...</span>
+        <span *ngIf="!isSubmitting && !selectedPlan">{{ `${templateTranslationKey}.select_to_renew` | translate }}</span>
+        <span *ngIf="isSubmitting">{{ 'common.processing' | translate }}...</span>
       </button>
     </div>
   </div>
