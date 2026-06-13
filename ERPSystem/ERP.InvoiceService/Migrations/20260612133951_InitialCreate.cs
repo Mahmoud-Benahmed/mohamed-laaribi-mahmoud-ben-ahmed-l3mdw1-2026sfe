@@ -96,7 +96,8 @@ namespace ERP.InvoiceService.Migrations
                     AdditionalNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OriginalInvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -201,7 +202,7 @@ namespace ERP.InvoiceService.Migrations
                     InvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ArticleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ArticleName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    ArticleBarCode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ArticleBarCode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Quantity = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
                     UniPriceHT = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
                     TaxRate = table.Column<decimal>(type: "decimal(5,3)", precision: 5, scale: 3, nullable: false),

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.InvoiceService.Migrations
 {
     [DbContext(typeof(InvoiceDbContext))]
-    [Migration("20260603012744_InitialCreate")]
+    [Migration("20260612133951_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -379,6 +379,9 @@ namespace ERP.InvoiceService.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("OriginalInvoiceNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -423,7 +426,6 @@ namespace ERP.InvoiceService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ArticleBarCode")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
