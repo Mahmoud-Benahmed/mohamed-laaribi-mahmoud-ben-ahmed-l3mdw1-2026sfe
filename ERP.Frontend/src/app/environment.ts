@@ -1,6 +1,5 @@
 export const environment = {
-  production: false,
-  docker: false,
+  production: true,
 
   apiUrl: 'http://erp.local',
 
