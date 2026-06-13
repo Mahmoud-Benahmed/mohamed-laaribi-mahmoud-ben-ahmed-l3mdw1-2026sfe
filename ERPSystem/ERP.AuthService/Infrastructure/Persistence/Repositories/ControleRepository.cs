@@ -26,6 +26,7 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
                 .Find(WithTenant(x => x.Libelle == libelle.Trim().ToUpper()))
                 .FirstOrDefaultAsync();
 
+
         public async Task<(List<Controle> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize)
         {
             return await GetPagedAsync(pageNumber, pageSize);
@@ -37,6 +38,17 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
                 .Find(ScopeFilter)
                 .SortBy(c => c.Libelle)
                 .ToListAsync();
+        }
+        public async Task<bool> DuplicateExists(string libelle, Guid? excludeId = null)
+        {
+            var filter = WithTenant(x =>
+                x.Libelle.ToLower() == libelle.ToLower()
+            );
+
+            if (excludeId.HasValue)
+                filter = Builders<Controle>.Filter.And(filter, Builders<Controle>.Filter.Ne(x => x.Id, excludeId.Value));
+
+            return await _collection.Find(filter).AnyAsync();
         }
 
         public async Task<(List<Controle> Items, int TotalCount)> GetByCategoryAsync(
