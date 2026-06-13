@@ -143,15 +143,19 @@
     </table>
 
     <!-- PAGINATION -->
-    <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
-      <button class="page-btn" (click)="prevPage()" [disabled]="pageNumber === 1">{{ 'pagination.previous' | translate }}</button>
-      <span class="page-info">{{ 'pagination.page_of' | translate : { current: pageNumber, total: totalPages } }}</span>
-      <button class="page-btn" (click)="nextPage()" [disabled]="pageNumber === totalPages">{{ 'pagination.next' | translate }}</button>
     </div>
 
-  </div>
+    <app-pagination
+      [pageNumber]="pageNumber()"
+      [totalPages]="totalPages"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      (pageChange)="pageNumber.set($event); load()"
+      (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+    </app-pagination>
 
-</div>
+  </div>
+  
 
 <!-- ── DETAIL DIALOG ── -->
 <ng-template #detailDialog let-log>
