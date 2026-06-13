@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using ERP.InvoiceService.Application.Services;
+using System.Text.Json;
 
 namespace ERP.InvoiceService.Infrastructure.Messaging;
 
@@ -6,15 +7,18 @@ public class StockServiceHttpClient : IStockServiceHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<StockServiceHttpClient>? _logger;
+    private readonly ITenantContext _tenantContext;
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNameCaseInsensitive = true
     };
 
-    public StockServiceHttpClient(HttpClient httpClient, ILogger<StockServiceHttpClient>? logger = null)
+    public StockServiceHttpClient(HttpClient httpClient,
+        ITenantContext tenantContext,
+        ILogger<StockServiceHttpClient>? logger = null)
     {
+        _tenantContext = tenantContext;
         _httpClient = httpClient;
         _logger = logger;
     }
@@ -26,15 +30,29 @@ public class StockServiceHttpClient : IStockServiceHttpClient
     {
         try
         {
-            HttpResponseMessage response;
+            var request = new HttpRequestMessage(HttpMethod.Get, "stock/articles");
 
-            response = await _httpClient.GetAsync("stock/articles");
+            // Use TenantId directly from ITenantContext
+            if (_tenantContext.TenantId.HasValue)
+            {
+                request.Headers.Add("X-Tenant-Id", _tenantContext.TenantId.Value.ToString());
+                _logger?.LogInformation("X-Tenant-Id forwarded: '{TenantId}'", _tenantContext.TenantId.Value);
+            }
+            else
+            {
+                _logger?.LogWarning("No TenantId available in context — stock call will be unscoped");
+            }
+
+            _logger?.LogInformation("Calling URL: {Url}", _httpClient.BaseAddress + "stock/articles");
+
+            HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             string json = await response.Content.ReadAsStringAsync();
-            StockStatusResponse? result = JsonSerializer.Deserialize<StockStatusResponse>(json, _jsonOptions);
+            _logger?.LogInformation("StockService raw JSON: {Json}", json);
 
-            return result ?? new StockStatusResponse();
+            return JsonSerializer.Deserialize<StockStatusResponse>(json, _jsonOptions)
+                   ?? new StockStatusResponse();
         }
         catch (Exception ex)
         {
