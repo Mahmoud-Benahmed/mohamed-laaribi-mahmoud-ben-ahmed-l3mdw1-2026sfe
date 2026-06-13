@@ -157,7 +157,11 @@ namespace ERP.AuthService.Application.Services
         // ===============================
         public async Task<AuthUserGetResponseDto> UpdateProfile(Guid id, UpdateProfileDto request)
         {
+            if (await _userRepository.DuplicateExists(request.Email, null, id))
+                throw new DuplicateKeyException($"User.Email: {request.Email}");
+
             AuthUser user = await _userRepository.GetByIdAsync(id) ?? throw new UserNotFoundException(id);
+
             user.UpdateProfile(request.FullName, request.Email);
             await _userRepository.UpdateAsync(user);
 
@@ -188,11 +192,9 @@ namespace ERP.AuthService.Application.Services
 
         public async Task<AuthUserGetResponseDto> RegisterAsync(RegisterRequestDto request, Guid performedById, Guid? tenantId)
         {
-            if (await _userRepository.ExistsByLoginAsync(request.Login))
-                throw new LoginAlreadyExsistException();
+            if (await _userRepository.DuplicateExists(request.Email, request.Login))
+                throw new DuplicateKeyException($"User.Email: {request.Email} - User.Login: {request.Login}");
 
-            if (await _userRepository.ExistsByEmailAsync(request.Email))
-                throw new EmailAlreadyExistsException();
 
             if (_tenantContext.TenantId is not null)
             {
@@ -536,6 +538,12 @@ namespace ERP.AuthService.Application.Services
 
             AuthUser user = await _userRepository.GetByIdAsync(authUserId)
                        ?? throw new UserNotFoundException(authUserId);
+
+            Role adminRole = await _roleRepository.GetByLibelleAsync(Roles.SystemAdmin) ?? throw new RoleNotFoundException($"Unable to find `{Roles.SystemAdmin}` role");
+            
+            if (await _userRepository.CountByRoleIdAsync(adminRole.Id) < 2)
+                throw new InvalidOperationException("Cannot Deactivate the only Admin of the system");
+
             if (!user.IsActive)
                 throw new UserInactiveException();
 
@@ -572,7 +580,7 @@ namespace ERP.AuthService.Application.Services
             {
                 int adminCount= await _userRepository.CountByRoleIdAsync(user.RoleId);
                 if (adminCount <= 1)
-                    throw new InvalidOperationException("Cannot delete the last system administrator.");
+                    throw new UnauthorizedOperationException("Cannot delete the last system administrator.");
             }
 
             if (user.IsDeleted) {
@@ -624,8 +632,7 @@ namespace ERP.AuthService.Application.Services
                         "Tenant '{TenantId}' has no active subscription plan",
                         _tenantContext.TenantId);
 
-                    throw new InvalidOperationException(
-                        "Unable to restore user: No active subscription plan found.");
+                    throw new SubscriptionPlanNotFoundException();
                 }
 
                 int currentUserCount = await _userRepository.CountByTenantIdAsync(_tenantContext.TenantId.Value);
@@ -638,8 +645,7 @@ namespace ERP.AuthService.Application.Services
                         currentUserCount,
                         subscription.Plan.MaxUsers);
 
-                    throw new InvalidOperationException(
-                        "Unable to restore user: Tenant user limit reached.");
+                    throw new TenantUserLimitReachedException();
                 }
             }
 
