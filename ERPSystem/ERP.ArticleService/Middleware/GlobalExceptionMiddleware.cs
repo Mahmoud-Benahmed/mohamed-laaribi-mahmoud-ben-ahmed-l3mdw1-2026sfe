@@ -83,6 +83,13 @@ namespace ERP.ArticleService.Middleware
                     StatusCode = (int)HttpStatusCode.Conflict
                 },
 
+                DuplicateKeyException ex => new ErrorResponse
+                {
+                    Code = "DUPLICATE_ENTRY",
+                    Message = ex.Message,
+                    StatusCode = (int)HttpStatusCode.Conflict
+                },
+
                 DbUpdateException ex when
                     ex.InnerException?.Message.Contains("unique index") == true ||
                     ex.InnerException?.Message.Contains("duplicate key") == true => new ErrorResponse
