@@ -2,36 +2,10 @@
   <div class="bg-canvas">
     <div class="aurora"></div>
   </div>
-  <!--Top bar-->
+  
   <div class="plans-topbar">
-    <div class="lang-toggle">
-      <button class="lang-btn" [class.lang-btn--active]="userSettings.isEn"
-              (click)="userSettings.toggleLanguage()" type="button" title="English">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
-          <mask id="mask-en-p"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
-          <g mask="url(#mask-en-p)">
-            <path fill="#0052b4" d="M512 0v512H0l16-34l-16-34V336l64-80l-64-80V68L68 0h108l80 64l80-64h108l34 16z"/>
-            <path fill="#eee" d="m0 0l8 22l-8 23v23l108 108H0v32l32 48l-32 48v32h108L0 444v68L512 0l-23 8l-22-8h-23L336 108V0h-32l-48 32l-48-32h-32v108L68 0z"/>
-            <path fill="#d80027" d="m208 304l96-96V0h-96v208H0v96zm128-128L512 0h-45L336 131Zm-160 0L0 0v45l131 131z"/>
-          </g>
-        </svg>
-        <span class="lang-label">EN</span>
-      </button>
-      <button class="lang-btn" [class.lang-btn--active]="!userSettings.isEn"
-              (click)="userSettings.toggleLanguage()" type="button" title="Français">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512">
-          <mask id="mask-fr-p"><circle cx="256" cy="256" r="256" fill="#fff"/></mask>
-          <g mask="url(#mask-fr-p)">
-            <path fill="#eee" d="M167 0h178l25.9 252.3L345 512H167l-29.8-253.4z"/>
-            <path fill="#0052b4" d="M0 0h167v512H0z"/>
-            <path fill="#d80027" d="M345 0h167v512H345z"/>
-          </g>
-        </svg>
-        <span class="lang-label">FR</span>
-      </button>
-    </div>
     <button class="theme-toggle-btn" (click)="userSettings.toggleTheme()" type="button"
-            [title]="userSettings.isDark ? ('toggle_theme.light' | translate) : ('toggle_theme.dark' | translate)">
+            [title]="('common.toggle_theme' | translate : {theme: userSettings.isDark ? ('common.light' | translate): ('common.dark'| translate)})">
       <svg *ngIf="userSettings.isDark" width="15" height="15" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
@@ -46,8 +20,8 @@
       </svg>
     </button>
     <a routerLink="/login" class="btn-signin-top">
-      {{ 'tenant.plans.already_have_account' | translate }}
-      <span>{{ 'tenant.plans.sign_in' | translate }}</span>
+      {{ `${templateTranslationKey}already_have_account` | translate }}
+      <span>{{ `${templateTranslationKey}sign_in` | translate }}</span>
     </a>
   </div>
   <div class="plans-container">
@@ -59,8 +33,8 @@
         </div>
         <span class="logo-text">ERPSuite</span>
       </div>
-      <h1>{{ 'tenant.plans.title' | translate }}</h1>
-      <p class="header-sub">{{ 'tenant.plans.subtitle' | translate }}</p>
+      <h1>{{ `${templateTranslationKey}title` | translate }}</h1>
+      <p class="header-sub">{{ `${templateTranslationKey}subtitle` | translate }}</p>
       <!--toggle yearly/monthly-->
       <div class="billing-toggle">
         <button
@@ -68,13 +42,13 @@
           [class.toggle-option--active]="!billingYearly"
           (click)="billingYearly = false"
           type="button"
-        >{{ 'tenant.plans.month' | translate }}</button>
+        >{{ `${templateTranslationKey}month` | translate }}</button>
         <button
           class="toggle-option"
           [class.toggle-option--active]="billingYearly"
           (click)="billingYearly = true"
           type="button"
-        >{{ 'tenant.plans.year' | translate }}</button>
+        >{{ `${templateTranslationKey}year` | translate }}</button>
       </div>
     </header>
     <!-- Error -->
@@ -104,25 +78,25 @@
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              {{ 'tenant.plans.popular' | translate }}
+              {{ `${templateTranslationKey}popular` | translate }}
             </span>
             <span class="badge-discount" *ngIf="billingYearly">
-              {{ 'tenant.plans.save_badge' | translate : { percent: getSavings(plan) } }}
+              {{ `${templateTranslationKey}save_badge` | translate : { percent: getSavings(plan) } }}
             </span>
           </div>
           <!--Plan name-->
           <div class="card-plan-name">{{ plan.name }}</div>
           <p class="card-plan-info">
-            <span *ngIf="plan.code === 'STARTER'">{{ 'tenant.plans.starter_desc' | translate }}</span>
-            <span *ngIf="plan.code === 'PRO'">{{ 'tenant.plans.pro_desc' | translate }}</span>
-            <span *ngIf="plan.code === 'ENTERPRISE'">{{ 'tenant.plans.enterprise_desc' | translate }}</span>
+            <span *ngIf="plan.code === 'STARTER'">{{ `${templateTranslationKey}starter_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'PRO'">{{ `${templateTranslationKey}pro_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'ENTERPRISE'">{{ `${templateTranslationKey}enterprise_desc` | translate }}</span>
             <span *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">Custom solution</span>
           </p>
           <!-- Price -->
           <div class="card-price">
             <span class="price-amount">TND {{ getPrice(plan) | number:'1.0-0' }}</span>
             <span class="price-period" *ngIf="plan.code !== 'FREE'">
-              /{{ billingYearly ? ('tenant.plans.year' | translate | lowercase) : ('tenant.plans.month' | translate | lowercase) }}
+              /{{ billingYearly ? (`${templateTranslationKey}year` | translate | lowercase) : (`${templateTranslationKey}month` | translate | lowercase) }}
             </span>
           </div>
         </div>
@@ -131,23 +105,23 @@
         <div class="card-features" [class.card-features--highlighted]="plan.code === 'PRO'">
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'tenant.plans.users' | translate : { count: plan.maxUsers } }}</span>
+            <span>{{ `${templateTranslationKey}users` | translate : { count: plan.maxUsers } }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'tenant.plans.storage' | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
+            <span>{{ `${templateTranslationKey}storage` | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'tenant.plans.feature_erp' | translate }}</span>
+            <span>{{ `${templateTranslationKey}feature_erp` | translate }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'tenant.plans.feature_isolation' | translate }}</span>
+            <span>{{ `${templateTranslationKey}feature_isolation` | translate }}</span>
           </div>
           <div class="feature-row">
             <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
-            <span>{{ 'tenant.plans.feature_support' | translate }}</span>
+            <span>{{ `${templateTranslationKey}feature_support` | translate }}</span>
           </div>
         </div>
         <!--End Features-->
@@ -162,12 +136,12 @@
             <svg *ngIf="selectedPlan?.id === plan.id" width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:middle;margin-right:5px;flex-shrink:0">
               <path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ 'tenant.plans.selected' | translate }}</ng-container>
+            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ `${templateTranslationKey}selected` | translate }}</ng-container>
             <ng-container *ngIf="selectedPlan?.id !== plan.id">
-              <ng-container *ngIf="plan.code === 'STARTER'">{{ 'tenant.plans.get_started' | translate }}</ng-container>
-              <ng-container *ngIf="plan.code === 'PRO'">{{ 'tenant.plans.get_started' | translate }}</ng-container>
-              <ng-container *ngIf="plan.code === 'ENTERPRISE'">{{ 'tenant.plans.contact_support' | translate }}</ng-container>
-              <ng-container *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">{{ 'tenant.plans.select_plan' | translate }}</ng-container>
+              <ng-container *ngIf="plan.code === 'STARTER'">{{ `${templateTranslationKey}get_started` | translate }}</ng-container>
+              <ng-container *ngIf="plan.code === 'PRO'">{{ `${templateTranslationKey}get_started` | translate }}</ng-container>
+              <ng-container *ngIf="plan.code === 'ENTERPRISE'">{{ `${templateTranslationKey}contact_support` | translate }}</ng-container>
+              <ng-container *ngIf="plan.code !== 'STARTER' && plan.code !== 'PRO' && plan.code !== 'ENTERPRISE'">{{ `${templateTranslationKey}select_plan` | translate }}</ng-container>
             </ng-container>
           </button>
         </div>
@@ -176,8 +150,8 @@
     <!-- Proceed action -->
     <div class="plans-action" *ngIf="!error">
       <button class="btn-proceed" [disabled]="!selectedPlan" (click)="proceed()">
-        <span *ngIf="selectedPlan">{{ 'tenant.plans.continue_with' | translate : { name: selectedPlan.name } }}</span>
-        <span *ngIf="!selectedPlan">{{ 'tenant.plans.continue_default' | translate }}</span>
+        <span *ngIf="selectedPlan">{{ `${templateTranslationKey}continue_with` | translate : { name: selectedPlan.name } }}</span>
+        <span *ngIf="!selectedPlan">{{ `${templateTranslationKey}continue_default` | translate }}</span>
       </button>
     </div>
   </div>
