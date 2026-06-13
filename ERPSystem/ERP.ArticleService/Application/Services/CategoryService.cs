@@ -14,9 +14,8 @@ public class CategoryService : ICategoryService
 
     public CategoryService(ICategoryRepository categoryRepository, 
                             IEventPublisher eventPublisher, 
-                            ITenantContext tenantContext            ,
+                            ITenantContext tenantContext,
                             IArticleRepository articleRepository
-
         )
     {
         _categoryRepository = categoryRepository;
@@ -30,10 +29,8 @@ public class CategoryService : ICategoryService
     // =========================
     public async Task<CategoryResponseDto> CreateAsync(CategoryRequestDto dto)
     {
-        Category? existing = await _categoryRepository.GetByNameAsync(dto.Name);
-
-        if (existing is not null)
-            throw new CategoryAlreadyExistsException(dto.Name);
+        if(await _categoryRepository.DuplicateExists(dto.Name))
+            throw new DuplicateKeyException($"Category.Name: {dto.Name}");
 
         Category category = new Category(dto.Name, dto.TVA, _tenantContext.TenantId);
         await _categoryRepository.AddAsync(category);
@@ -101,9 +98,8 @@ public class CategoryService : ICategoryService
     // =========================
     public async Task<CategoryResponseDto> UpdateAsync(Guid id, CategoryRequestDto dto)
     {
-        Category? existing = await _categoryRepository.GetByNameAsync(dto.Name);
-        if (existing is not null && existing.Id != id)
-            throw new CategoryAlreadyExistsException(dto.Name);
+        if(await _categoryRepository.DuplicateExists(dto.Name))
+            throw new DuplicateKeyException($"Category.Name: {dto.Name}");
 
         Category category = await _categoryRepository.GetByIdAsync(id) ?? throw new CategoryNotFoundException(id);
         category.Update(dto.Name, dto.TVA);
