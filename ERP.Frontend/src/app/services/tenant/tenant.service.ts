@@ -39,12 +39,10 @@ export class TenantService {
 
   loadTenantSettings(id: string): Observable<TenantSettingsDto | null> {
     if (!id) {
-      console.error('loadTenantSettings: id is null/empty, aborting');
       return of(null);
     }
 
     if (this._settings() !== null) {
-      console.log('loadTenantSettings: returning cached settings');
       return of(this._settings());
     }
 
@@ -53,7 +51,6 @@ export class TenantService {
         this._settings.set(dto);
       }),
       catchError(err => {
-        console.error('loadTenantSettings: HTTP error:', err.status, err.url);
         return of(null);
       })
     );
@@ -192,7 +189,6 @@ export class TenantService {
   }
 
   private handleError(error: any): Observable<never> {
-    console.error('TenantService error:', error);
     return throwError(() => error);
   }
 }
