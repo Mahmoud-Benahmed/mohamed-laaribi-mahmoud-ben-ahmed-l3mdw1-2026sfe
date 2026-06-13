@@ -11,13 +11,12 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
 
   const proceedWithChecks = () => {
     const mustChange= auth.getMustChangePassword();
-    
+
       // ── If password already changed, block access to must-change-password
     if (!mustChange && path === 'must-change-password') {
       return router.createUrlTree(['/home']);
     }
 
-    // ── Force password change
     if (mustChange && path !== 'must-change-password' && environment.production) {
       return router.createUrlTree(['/must-change-password']);
     }
@@ -56,7 +55,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     map(() => proceedWithChecks()),
     catchError(() => {
       auth.logout();
-      return of(router.createUrlTree(['/plans'])); // ← was '/login', now goes to plans
+      return of(router.createUrlTree(['/plans']));
     })
   );
 };
