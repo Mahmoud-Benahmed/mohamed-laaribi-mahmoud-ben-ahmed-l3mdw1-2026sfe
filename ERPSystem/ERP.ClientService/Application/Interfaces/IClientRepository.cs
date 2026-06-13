@@ -13,7 +13,7 @@ namespace ERP.ClientService.Application.Interfaces
         Task<Client?> GetByIdAsync(Guid id);
         Task<Client?> GetByIdDeletedAsync(Guid id);   // bypasses IsDeleted filter
         Task<Client?> GetByEmailAsync(string email);
-
+        Task<bool> DuplicateExists(string email, string phone, Guid? excludeId= null);
         // ── Paging & filtering ────────────────────────────────────────────────────
         Task<(List<Client> Items, int TotalCount)> GetAllAsync(
             int pageNumber, int pageSize);
