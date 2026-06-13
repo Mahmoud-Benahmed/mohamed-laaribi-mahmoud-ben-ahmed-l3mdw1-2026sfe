@@ -15,6 +15,7 @@ public class EmailAlreadyExistsException : Exception
     }
 }
 
+public class SubscriptionPlanNotFoundException() : Exception($"SubscriptionPlan was not found.");
 
 public class InvalidCredentialsException : Exception
 {
@@ -142,3 +143,5 @@ public class TenantUserLimitReachedException : Exception
     public TenantUserLimitReachedException()
         : base("Tenant user limit reached.") { }
 }
+
+public class DuplicateKeyException(string key) : Exception(key);
