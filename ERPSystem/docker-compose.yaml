@@ -79,7 +79,7 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${SQLSERVER__SA_PASSWORD}
     ports:
-      - "1433:1433"
+      - "1435:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
     networks:
