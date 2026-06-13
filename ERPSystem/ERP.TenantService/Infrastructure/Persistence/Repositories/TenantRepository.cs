@@ -16,6 +16,20 @@ public class TenantRepository : ITenantRepository
     }
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
         => await _context.Tenants.AnyAsync(t => t.Id == id, ct);
+    public async Task<bool> DuplicateExists(string email, string phone, string? slug=null, Guid? excludeId= null)
+    {
+        var query = _context.Tenants.Where(t =>
+            t.Email.ToLower() == email.ToLower() ||
+            t.Phone.ToLower() == phone.ToLower() ||
+            (!string.IsNullOrEmpty(slug) && t.Slug.ToLower() == slug.ToLower())
+        );
+
+
+        if (excludeId.HasValue)
+            query = query.Where(a => a.Id != excludeId.Value);
+
+        return await query.AnyAsync();
+    }
 
     public async Task<(List<Tenant> Items, int TotalCount)> GetAllAsync(
         int page,
@@ -117,6 +131,13 @@ public class TenantRepository : ITenantRepository
             .Include(t => t.Subscription)
             .ThenInclude(s => s!.Plan)
             .FirstOrDefaultAsync(t => t.Slug == slug, ct);
+    }
+
+    public async Task<Tenant?> GetByEmailAsync(string email, CancellationToken ct = default)
+    {
+        return await _context.Tenants
+            .FirstOrDefaultAsync(t => t.Email.ToLower() 
+                                    == email.ToLower(), ct);
     }
 
     public async Task<bool> SubdomainSlugExistsAsync(string slug, Guid? excludeId = null, CancellationToken ct = default)
