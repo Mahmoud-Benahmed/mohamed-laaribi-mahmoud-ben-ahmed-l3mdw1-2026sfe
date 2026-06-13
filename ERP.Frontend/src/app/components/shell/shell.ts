@@ -100,7 +100,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/change-password/')) {
       return [
         { label: t('nav.auth.list'), link: '/users' },
-        { label: t('USERS.CHANGE_PASSWORD.TITLE') } // or a dedicated key if exists
+        { label: t('auth.changePassword.title') } // Use lowercase key
       ];
     }
 
@@ -137,7 +137,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/users/')) {
       return [
         { label: t('nav.auth.list'), link: '/users' },
-        { label: t('USERS.PROFILE.EDIT_PROFILE') } // adjust as needed
+        { label: t('auth.profile.edit_profile.title') } // Use lowercase key from your JSON
       ];
     }
     if (url.startsWith('/users')) {
@@ -200,6 +200,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     }
 
     // Other top-level routes
+    if(url.startsWith('/subscription-expiry')) return [{label: t('tenants.subscription.renew_title')}];
     if (url.startsWith('/permissions')) return [{ label: t('nav.auth.permissions') }];
     if (url.startsWith('/audit-log')) return [{ label: t('nav.auth.audit_log') }];
     if (url.startsWith('/profile')) return [{ label: t('home.quick_access.my_profile') }];
@@ -207,7 +208,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/tenants')) return [{ label: t('nav.tenants.main') }];
     if (url.startsWith('/home')) return [{ label: t('nav.home') }];
 
-    return [{ label: t('COMMON.SELECT') }]; // fallback
+    return [{ label: t('common.select') }]; // fallback - lowercase
   }
 
   private resizeListener = () => {
