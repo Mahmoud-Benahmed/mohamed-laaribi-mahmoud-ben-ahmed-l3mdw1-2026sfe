@@ -2,6 +2,7 @@
 using ERP.StockService.Application.DTOs;
 using ERP.StockService.Domain;
 using ERP.StockService.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 public interface IBonNumeroRepository
@@ -21,6 +22,8 @@ public interface IBonNumeroRepository
 // IBonEntreRepository
 public interface IBonEntreRepository
 {
+    Task ReplaceLignesAsync(BonEntre bon, List<LigneRequestDto> newLignes);
+    Task<BonEntre?> GetByIdForUpdateAsync(Guid id);
     Task AddAsync(BonEntre b);
     Task SaveChangesAsync();
     Task DeleteByIdAsync(Guid id);
@@ -36,6 +39,8 @@ public interface IBonEntreRepository
 
 public interface IBonSortieRepository
 {
+    Task ReplaceLignesAsync(BonSortie bon, List<LigneRequestDto> newLignes);
+    Task<BonSortie?> GetByIdForUpdateAsync(Guid id);
     Task AddAsync(BonSortie b);
     Task SaveChangesAsync();
     Task DeleteByIdAsync(Guid id);
@@ -49,6 +54,8 @@ public interface IBonSortieRepository
 }
 public interface IBonRetourRepository
 {
+    Task ReplaceLignesAsync(BonRetour bon, List<LigneRequestDto> newLignes);
+    Task<BonRetour?> GetByIdForUpdateAsync(Guid id);
     Task AddAsync(BonRetour b);
     Task SaveChangesAsync();
     Task DeleteByIdAsync(Guid id);
