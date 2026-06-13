@@ -98,7 +98,7 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     FournisseurDbContext db = scope.ServiceProvider.GetRequiredService<FournisseurDbContext>();
-    await db.Database.MigrateAsync();
+   await db.Database.MigrateAsync();
 }
 
 // =========================
