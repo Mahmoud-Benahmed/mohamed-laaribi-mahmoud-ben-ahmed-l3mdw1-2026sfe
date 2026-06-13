@@ -107,7 +107,7 @@ internal class LigneEntreConfiguration : IEntityTypeConfiguration<LigneEntre>
     {
         b.ToTable("LigneEntres");
         b.HasKey(l => l.Id);
-        b.Property(l => l.Id).ValueGeneratedOnAdd();
+        b.Property(l => l.Id).ValueGeneratedNever();
         b.Property(l => l.ArticleId).IsRequired();
         b.Property(l => l.Quantity).IsRequired().HasPrecision(18, 4);
         b.Property(l => l.Price).IsRequired().HasPrecision(18, 4);
@@ -143,7 +143,7 @@ internal class LigneSortieConfiguration : IEntityTypeConfiguration<LigneSortie>
     {
         b.ToTable("LigneSorties");
         b.HasKey(l => l.Id);
-        b.Property(l => l.Id).ValueGeneratedOnAdd();
+        b.Property(l => l.Id).ValueGeneratedNever();
         b.Property(l => l.ArticleId).IsRequired();
         b.Property(l => l.Quantity).IsRequired().HasPrecision(18, 4);
         b.Property(l => l.Price).IsRequired().HasPrecision(18, 4);
@@ -181,7 +181,7 @@ internal class LigneRetourConfiguration : IEntityTypeConfiguration<LigneRetour>
     {
         b.ToTable("LigneRetours");
         b.HasKey(l => l.Id);
-        b.Property(l => l.Id).ValueGeneratedOnAdd();
+        b.Property(l => l.Id).ValueGeneratedNever();
         b.Property(l => l.ArticleId).IsRequired();
         b.Property(l => l.Quantity).IsRequired().HasPrecision(18, 4);
         b.Property(l => l.Price).IsRequired().HasPrecision(18, 4);
@@ -353,9 +353,7 @@ internal class FournisseurCacheConfiguration : IEntityTypeConfiguration<Fourniss
         entity.HasIndex(e => new { e.Name, e.TenantId })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
-        entity.HasIndex(e => new { e.TaxNumber, e.TenantId })
-            .IsUnique()
-            .HasFilter("[IsDeleted] = 0");
+
         entity.HasIndex(e => new { e.Email, e.TenantId })
             .HasFilter("[Email] IS NOT NULL AND [IsDeleted] = 0");
         entity.HasIndex(e => new { e.Phone, e.TenantId });
@@ -372,12 +370,19 @@ internal class FournisseurCacheConfiguration : IEntityTypeConfiguration<Fourniss
             .HasMaxLength(20);
         entity.Property(e => e.Email)
             .HasMaxLength(200);
-        entity.Property(e => e.TaxNumber)
-            .IsRequired()
+        entity.Property(f => f.TaxNumber)
+            .IsRequired(false)   // ← was IsRequired()
             .HasMaxLength(50);
+
+        entity.HasIndex(f => new { f.TaxNumber, f.TenantId })
+            .IsUnique()
+            .HasDatabaseName("IX_FournisseurCaches_TaxNumber")
+            .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
+
         entity.Property(e => e.RIB)
             .IsRequired()
             .HasMaxLength(50);
+
         entity.Property(e => e.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
