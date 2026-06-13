@@ -75,6 +75,8 @@ public class BonEntreService : IBonEntreService
             {
                 decimal stockBefore = stockMap.GetValueOrDefault(ligne.ArticleId, 0);
 
+                Console.WriteLine("Bon.TenantID: {0}", bon.TenantId.ToString());
+
                 await _journalStockRepository.AddAsync(JournalStock.Create(
                     articleId: ligne.ArticleId,
                     ligneId: ligne.Id,
@@ -83,7 +85,8 @@ public class BonEntreService : IBonEntreService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonEntre,
                     sourceService: "StockService",
-                    sourceOperation: "CreateBonEntre"
+                    sourceOperation: "CreateBonEntre",
+                    tenantId: bon.TenantId
                 ));
             }
 
@@ -107,7 +110,7 @@ public class BonEntreService : IBonEntreService
         _ = await _fournisseurCacheRepository.GetByIdAsync(dto.FournisseurId)
             ?? throw new KeyNotFoundException($"Fournisseur with Id:{dto.FournisseurId} not found.");
 
-        BonEntre bon = await _repo.GetByIdAsync(id)
+        BonEntre bon = await _repo.GetByIdForUpdateAsync(id)
             ?? throw new BonEntreNotFoundException(id);
 
         Dictionary<Guid, decimal> oldQtyMap = [];
@@ -125,14 +128,12 @@ public class BonEntreService : IBonEntreService
                 throw new InvalidOperationException(
                     $"Articles not found: {string.Join(", ", missingIds)}");
 
-            // Capture old quantities before clearing
             oldQtyMap = bon.Lignes
-                .GroupBy(l => l.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
+                        .GroupBy(l => l.ArticleId)
+                        .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
 
-            bon.ClearLignes();
-            foreach (LigneRequestDto l in dto.Lignes)
-                bon.AddLigne(l.ArticleId, l.Quantity, l.Price);
+            // ✅ ExecuteDelete + clear + re-add, all tracker-safe
+            await _repo.ReplaceLignesAsync(bon, dto.Lignes);
 
             bon.ValidateLignes();
         }
@@ -161,6 +162,8 @@ public class BonEntreService : IBonEntreService
                     decimal stockBefore = await _journalStockRepository
                         .GetCurrentStockAsync(ligne.ArticleId);
 
+                    Console.WriteLine("Bon.TenantID: {0}", bon.TenantId.ToString());
+
                     await _journalStockRepository.AddAsync(JournalStock.Create(
                         articleId: ligne.ArticleId,
                         ligneId: ligne.Id,
@@ -169,7 +172,8 @@ public class BonEntreService : IBonEntreService
                         stockBefore: stockBefore,
                         movementType: StockMovementType.BonEntre,
                         sourceService: "StockService",
-                        sourceOperation: "UpdateBonEntre"
+                        sourceOperation: "UpdateBonEntre",
+                    tenantId: bon.TenantId
                     ));
                 }
 
@@ -188,7 +192,8 @@ public class BonEntreService : IBonEntreService
                         stockBefore: stockBefore,
                         movementType: StockMovementType.BonEntre,
                         sourceService: "StockService",
-                        sourceOperation: "UpdateBonEntre_Reversal"
+                        sourceOperation: "UpdateBonEntre_Reversal",
+                    tenantId: bon.TenantId
                     ));
                 }
 
@@ -227,7 +232,8 @@ public class BonEntreService : IBonEntreService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonEntre,
                     sourceService: "StockService",
-                    sourceOperation: "DeleteBonEntre"
+                    sourceOperation: "DeleteBonEntre",
+                    tenantId: bon.TenantId
                 );
                 await _journalStockRepository.AddAsync(reversal);
             }
