@@ -41,9 +41,9 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
   private location = inject(Location);
 
   // Translation prefix
-  readonly templateTranslationKey = 'tenant.settings.';
-  readonly errorsTranslationKey = 'tenant.settings.responses.errors.';
-  readonly successTranslationKey = 'tenant.settings.responses.success.';
+  readonly templateTranslationKey = 'auth.profile.settings.';
+  readonly errorsTranslationKey = 'auth.profile.settings.responses.errors.';
+  readonly successTranslationKey = 'auth.profile.settings.responses.success.';
 
   // ── Forms ──────────────────────────────────────────────────────────────────
   tenantForm!: FormGroup;
@@ -70,10 +70,13 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     public tenantService: TenantService,
     private fb: FormBuilder,
-    private currencyConfig: CurrencyConfigService,
+    private currencyConfig: CurrencyConfigService
   ) {}
 
   ngOnInit(): void {
+    if(!this.authService.hasPrivilege(PRIVILEGES.USERS.EDIT_SYSTEM_SETTINGS)){
+      return this.location.back();
+    }
     this.isEdit = true;
     this.tenantId = this.authService.TenantId;
 
@@ -218,7 +221,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
             timezone: updated.timezone,
             logoUrl: updated.logoUrl
           };
-          this.flash('success', this.translate.instant(`${this.templateTranslationKey}update_success`));
+          this.flash('success', this.translate.instant(`${this.successTranslationKey}update_success`));
           this.currencyConfig.save(updated.currency, updated.locale);
           this.isEdit = false;
           setTimeout(() => {
@@ -228,7 +231,7 @@ export class SystemSettingsComponent implements OnInit, OnDestroy {
           }, 2000);
         },
         error: (err: HttpErrorResponse) => {
-          const errorMsg = err.error?.message || this.translate.instant(`${this.templateTranslationKey}update_failed`);
+          const errorMsg = err.error?.message || this.translate.instant(`${this.errorsTranslationKey}update_failed`);
           this.flash('error', errorMsg);
           this.isValidating = false;
           this.loading = false;
