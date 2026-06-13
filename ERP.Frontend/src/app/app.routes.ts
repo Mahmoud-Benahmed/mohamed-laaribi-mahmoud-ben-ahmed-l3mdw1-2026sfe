@@ -15,7 +15,7 @@ import { DeletedUsersComponent } from './components/system-admin/users/deleted/d
 import { ControleComponent } from './components/system-admin/controles/controles';
 import { RoleComponent } from './components/system-admin/roles/roles';
 import { ArticleCategoriesComponent } from './components/articles/categories/categories';
-import { PRIVILEGES } from './services/auth/auth.service';
+import { AuthService, PRIVILEGES } from './services/auth/auth.service';
 import { ClientsComponent } from './components/clients/home/home';
 import { ClientCategoriesComponent } from './components/clients/categories/categories';
 import { FournisseurComponent } from './components/stock/fournisseur/fournisseur';
