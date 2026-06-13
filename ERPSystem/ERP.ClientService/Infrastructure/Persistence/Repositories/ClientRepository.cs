@@ -40,6 +40,18 @@ public class ClientRepository : IClientRepository
         _context.Clients
                 .FirstOrDefaultAsync(c =>
                     c.Email == email.Trim().ToLowerInvariant());
+    public async Task<bool> DuplicateExists(string email, string phone, Guid? excludeId = null)
+    {
+        var query = _context.Clients.Where(c=>
+            c.Email.ToLower() == email.ToLower() ||
+            (!string.IsNullOrEmpty(c.Phone) && c.Phone == phone)
+        );
+
+        if (excludeId.HasValue)
+            query = query.Where(c => c.Id != excludeId);
+
+        return await query.AnyAsync();
+    }
 
     public async Task<(List<Client> Items, int TotalCount)> GetAllAsync(
         int pageNumber, int pageSize)
@@ -56,7 +68,6 @@ public class ClientRepository : IClientRepository
 
         return (items, total);
     }
-
     public async Task<(List<Client> Items, int TotalCount)> GetPagedByCategoryIdAsync(
         Guid categoryId, int pageNumber, int pageSize)
     {
