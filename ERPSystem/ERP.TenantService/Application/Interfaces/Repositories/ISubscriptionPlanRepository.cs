@@ -4,6 +4,7 @@ namespace ERP.TenantService.Application.Interfaces.Repositories;
 
 public interface ISubscriptionPlanRepository
 {
+    Task<bool> DuplicateExists(string code, Guid? excludeId = null);
     Task<(List<SubscriptionPlan> Items, int TotalCount)> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
     Task<(List<SubscriptionPlan> Items, int TotalCount)> GetActivePlansAsync(int page, int pageSize, CancellationToken ct = default);
     Task<SubscriptionPlan?> GetByIdAsync(Guid id, CancellationToken ct = default);
