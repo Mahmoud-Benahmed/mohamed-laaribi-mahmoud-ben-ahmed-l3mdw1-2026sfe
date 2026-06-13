@@ -154,7 +154,7 @@ namespace ERP.StockService.Migrations
                     Address = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    TaxNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TaxNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     RIB = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsBlocked = table.Column<bool>(type: "bit", nullable: false),
@@ -429,11 +429,11 @@ namespace ERP.StockService.Migrations
                 columns: new[] { "Phone", "TenantId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FournisseurCaches_TaxNumber_TenantId",
+                name: "IX_FournisseurCaches_TaxNumber",
                 table: "FournisseurCaches",
                 columns: new[] { "TaxNumber", "TenantId" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InvoiceBonSortieMappings_BonSortieId_TenantId",

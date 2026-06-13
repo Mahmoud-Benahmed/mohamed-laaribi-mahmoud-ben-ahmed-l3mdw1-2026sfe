@@ -263,7 +263,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("ERP.StockService.Domain.LigneEntre", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
@@ -582,7 +581,6 @@ namespace ERP.StockService.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TaxNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -605,7 +603,8 @@ namespace ERP.StockService.Migrations
 
                     b.HasIndex("TaxNumber", "TenantId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasDatabaseName("IX_FournisseurCaches_TaxNumber")
+                        .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
 
                     b.ToTable("FournisseurCaches");
                 });
@@ -613,7 +612,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("LigneRetour", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
@@ -647,7 +645,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("LigneSortie", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
