@@ -166,7 +166,7 @@
                                 && !creditLimitInfo.hasSufficientCredit
                                 && creditWarning">
                       <i class="fas fa-exclamation-triangle me-2"></i>
-                      {{ 'invoices.errors.credit_limit_exceeded' | translate }}
+                      {{ 'invoices.responses.errors.credit_limit_exceeded' | translate }}
                     </div>
                     <div class="info-row">
                       <span>{{ 'invoices.form.bulk_pricing_label' | translate }}</span>
@@ -286,7 +286,7 @@
               <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
               <div>
                 <h2 class="panel__title">{{ 'invoices.form.line_items' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'invoices.form.items_count' | translate:{ht: (pendingTotalHT | number:'1.2-2'), ttc: (pendingTotalTTC | number:'1.2-2') } }}</p>
+                <p class="panel__subtitle">{{ 'invoices.form.items_count' | translate:{ count: pendingItems.length  } }}</p>
               </div>
             </div>
             <!-- Add Item button — only shown when form is closed -->
@@ -294,7 +294,7 @@
               *ngIf="!inlineItemOpen"
               [disabled]="creditWarning"
               [matTooltip]="creditWarning
-                      ? ('invoices.errors.credit_limit_exceeded_articles' | translate)
+                      ? ('invoices.responses.errors.credit_limit_exceeded_articles' | translate)
                       : ''">
               {{ 'invoices.form.add_item' | translate }}
             </button>
@@ -404,9 +404,8 @@
                       class="form__input"
                       [class.form__input--error]="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched"
                       [min]="getArticleQtyStep()"
-                      [max]="getQuantityMax()"
-                      [step]="getArticleQtyStep()"
-                    />
+                      [max]="getSelectedArticle()?.quantity ?? 0"
+                      [step]="getArticleQtyStep()" />
 
                     <span class="field__error" *ngIf="itemForm.get('quantity') as ctrl">
                       <ng-container *ngIf="ctrl.invalid && ctrl.touched">
@@ -421,7 +420,8 @@
                 <div class="form__row form__row--2">
                   <div class="form__field">
                     <label class="form__label">{{ 'invoices.form.unit_price_ht' | translate }}</label>
-                    <input class="form__input" type="number" min="0" step="0.01" formControlName="uniPriceHT" />
+                    <input class="form__input" type="number" min="0" step="0.01"
+                    formControlName="uniPriceHT" />
                     <!-- Unit hint -->
                     <small class="form__hint" *ngIf="getSelectedArticle()">
                       {{ getUnitTranslation() }}
