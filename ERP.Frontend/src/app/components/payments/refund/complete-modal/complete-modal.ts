@@ -46,8 +46,6 @@ export class CompleteRefundModal implements OnInit{
 
 
   ngOnInit(): void {
-    console.log(this.data);
-
     this.completingRefund = this.data.refund;
     this.initForm();
   }
@@ -66,8 +64,6 @@ export class CompleteRefundModal implements OnInit{
       return;
     }
 
-    console.log(this.completingRefund);
-
     if (!this.completingRefund) {
       this.flash('error', this.translate.instant('payments.refunds.errors.complete_failed'));
       return;
@@ -76,7 +72,7 @@ export class CompleteRefundModal implements OnInit{
     this.isSubmitting = true;
 
     this.paymentService.completeRefund(this.completingRefund.id, {
-      externalReference: this.form.get('refundReason')?.value?.trim(), // ✅ fixed
+      externalReference: this.form.get('refundReason')?.value?.trim(),
     }).subscribe({
       next: () => {
         this.isSubmitting = false;
