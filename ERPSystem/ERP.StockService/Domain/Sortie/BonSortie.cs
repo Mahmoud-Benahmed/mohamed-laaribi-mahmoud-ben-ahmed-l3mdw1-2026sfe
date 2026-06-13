@@ -31,7 +31,7 @@ public sealed class BonSortie : PieceStock
         if (price < 0)
             throw new ArgumentException("Price cannot be negative");
 
-        LigneSortie l = LigneSortie.Create(Id, articleId, qty, price);
+        LigneSortie l = LigneSortie.Create(Id, articleId, qty, price, tenantId: TenantId);
         _lignes.Add(l);
         return l;
     }
