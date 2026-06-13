@@ -143,7 +143,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
           error: () => {
               this.invoices = [];
               this.cdr.markForCheck();
-              this.flash('error', this.translate.instant('invoices.errors.load_failed'));
+              this.flash('error', this.translate.instant('invoices.responses.errors.load_failed'));
           }
       });
   }
@@ -180,7 +180,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('invoices.errors.load_failed'));
+        this.flash('error', this.translate.instant('invoices.responses.errors.load_failed'));
       }
     });
   }
@@ -210,7 +210,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         this.invoices   = [];
         this.totalCount = 0;
         this.cdr.markForCheck();
-        this.flash('error', this.translate.instant('invoices.errors.load_failed'));
+        this.flash('error', this.translate.instant('invoices.responses.errors.load_failed'));
       },
     });
   }
@@ -233,7 +233,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
         setTimeout(() => this.renderStatusPieChart(), 100);
       },
       error: () => {
-        this.flash('error', this.translate.instant('invoices.errors.load_stats_failed'));
+        this.flash('error', this.translate.instant('invoices.responses.errors.load_stats_failed'));
         this.statsLoading = false;
       },
     });
@@ -314,10 +314,10 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.delete(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('invoices.success.deleted'));
+          this.flash('success', this.translate.instant('invoices.responses.success.deleted'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('invoices.errors.delete_failed')),
+        error: () => this.flash('error', this.translate.instant('invoices.responses.errors.delete_failed')),
       });
     });
   }
@@ -325,10 +325,10 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   restore(invoice: InvoiceDto): void {
     this.invoiceService.restore(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('invoices.success.restored'));
+        this.flash('success', this.translate.instant('invoices.responses.success.restored'));
         this.isDeletedList() ? this.loadDeletedInvoices() : this.reload();
       },
-      error: () => this.flash('error', this.translate.instant('invoices.errors.restore_failed')),
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.restore_failed')),
     });
   }
 
