@@ -5,10 +5,10 @@
       <div class="success-icon-wrap">
         <div class="success-check">🚀</div>
       </div>
-      <h2>{{ 'tenant.onboarding.success_title' | translate }}</h2>
-      <p>{{ 'tenant.onboarding.success_body' | translate }}</p>
+      <h2>{{ `${templateTranslationKey}success_title` | translate }}</h2>
+      <p>{{ `${templateTranslationKey}success_body` | translate }}</p>
       <div class="progress-bar"><div class="progress-fill"></div></div>
-      <p class="progress-label">{{ 'tenant.onboarding.success_label' | translate }}</p>
+      <p class="progress-label">{{ `${templateTranslationKey}success_label` | translate }}</p>
     </div>
     <!--Form-->
     <ng-container *ngIf="!success">
@@ -51,11 +51,11 @@
             <span class="logo-text">ERPSuite</span>
           </div>
           <div class="plan-chip" *ngIf="planName">
-            {{ 'tenant.onboarding.plan_label' | translate : { name: planName } }}
+            {{ `${templateTranslationKey}plan_label` | translate : { name: planName } }}
           </div>
         </div>
-        <h1>{{ 'tenant.onboarding.title' | translate }}</h1>
-        <p>{{ 'tenant.onboarding.subtitle' | translate }}</p>
+        <h1>{{ `${templateTranslationKey}title` | translate }}</h1>
+        <p>{{ `${templateTranslationKey}subtitle` | translate }}</p>
       </div>
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="form-body">
@@ -63,18 +63,18 @@
           <div class="form-section">
             <div class="form-grid">
               <div class="field full-width">
-                <label>{{ 'tenant.onboarding.company_name' | translate }}</label>
+                <label>{{ `${templateTranslationKey}company_name` | translate }}</label>
                 <input formControlName="name" type="text"
-                       [placeholder]="'tenant.onboarding.company_name_placeholder' | translate" />
+                       [placeholder]="`${templateTranslationKey}company_name_placeholder` | translate" />
                 <span class="field-error" *ngIf="form.get('name')?.touched && form.get('name')?.errors">
                   <ng-container *ngIf="form.get('name')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('name')?.errors?.['maxlength']">{{ 'validation.max_length' | translate : { max: form.get('name')?.errors?.['maxlength'].requiredLength } }}</ng-container>
                 </span>
               </div>
               <div class="field">
-                <label>{{ 'tenant.onboarding.business_email' | translate }}</label>
+                <label>{{ `${templateTranslationKey}business_email` | translate }}</label>
                 <input formControlName="email" type="email"
-                       [placeholder]="'tenant.onboarding.business_email_placeholder' | translate" />
+                       [placeholder]="`${templateTranslationKey}company_name_placeholder` | translate" />
                 <span class="field-error" *ngIf="form.get('email')?.touched && form.get('email')?.errors">
                   <ng-container *ngIf="form.get('email')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('email')?.errors?.['email']">{{ 'validation.invalid_email' | translate }}</ng-container>
@@ -82,22 +82,22 @@
                 </span>
               </div>
               <div class="field">
-                <label>{{ 'tenant.onboarding.phone' | translate }}</label>
+                <label>{{ `${templateTranslationKey}phone` | translate }}</label>
                 <input formControlName="phone" type="tel"
-                       [placeholder]="'tenant.onboarding.phone_placeholder' | translate" />
+                       [placeholder]="`${templateTranslationKey}phone_placeholder` | translate" />
                 <span class="field-error" *ngIf="form.get('phone')?.touched && form.get('phone')?.errors">
                   <ng-container *ngIf="form.get('phone')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('phone')?.errors?.['pattern']">{{ 'validation.invalid_phone' | translate }}</ng-container>
                 </span>
               </div>
               <div class="field full-width">
-                <label>{{ 'tenant.onboarding.subdomain' | translate }}</label>
+                <label>{{ `${templateTranslationKey}subdomain` | translate }}</label>
                 <div class="slug-input">
                   <input formControlName="subdomainSlug" type="text"
-                         [placeholder]="'tenant.onboarding.subdomain_placeholder' | translate" />
-                  <span class="slug-suffix">{{ 'tenant.onboarding.subdomain_suffix' | translate }}</span>
+                         [placeholder]="`${templateTranslationKey}subdomain_placeholder` | translate" />
+                  <span class="slug-suffix">{{ `${templateTranslationKey}subdomain_suffix` | translate }}</span>
                 </div>
-                <span class="field-hint">{{ 'tenant.onboarding.subdomain_hint' | translate }}</span>
+                <span class="field-hint">{{ `${templateTranslationKey}subdomain_hint` | translate }}</span>
                 <span class="field-error" *ngIf="form.get('subdomainSlug')?.touched && form.get('subdomainSlug')?.errors">
                   <ng-container *ngIf="form.get('subdomainSlug')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('subdomainSlug')?.errors?.['pattern']">{{ 'validation.invalid_slug' | translate }}</ng-container>
@@ -105,21 +105,21 @@
                 </span>
               </div>
               <div class="field full-width">
-                <label>{{ 'tenant.onboarding.address' | translate }}</label>
+                <label>{{ `${templateTranslationKey}address` | translate }}</label>
                 <div class="slug-input">
                   <input formControlName="address" type="text"
-                         [placeholder]="'tenant.onboarding.address_placeholder' | translate" />
+                         [placeholder]="`${templateTranslationKey}address_placeholder` | translate" />
                 </div>
-                <span class="field-hint">{{ 'tenant.onboarding.address_hint' | translate }}</span>
+                <span class="field-hint">{{ `${templateTranslationKey}address_hint` | translate }}</span>
                 <span class="field-error" *ngIf="form.get('address')?.touched && form.get('address')?.errors">
                   <ng-container *ngIf="form.get('address')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('address')?.errors?.['maxlength']">{{ 'validation.max_length' | translate : { max: form.get('address')?.errors?.['maxlength'].requiredLength } }}</ng-container>
                 </span>
               </div>
               <div class="field full-width">
-                <label>{{ 'tenant.onboarding.logo_url' | translate }}</label>
+                <label>{{ `${templateTranslationKey}logo_url` | translate }}</label>
                 <input formControlName="logoUrl" type="text"
-                       [placeholder]="'tenant.onboarding.logo_url_placeholder' | translate" />
+                       [placeholder]="`${templateTranslationKey}logo_url_placeholder` | translate" />
                 <span class="field-error" *ngIf="form.get('logoUrl')?.touched && form.get('logoUrl')?.errors">
                   <ng-container *ngIf="form.get('logoUrl')?.errors?.['pattern']">{{ 'validation.invalid_url' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('logoUrl')?.errors?.['maxlength']">{{ 'validation.max_length' | translate : { max: form.get('logoUrl')?.errors?.['maxlength'].requiredLength } }}</ng-container>
@@ -129,10 +129,10 @@
           </div>
           <!--Section Branding-->
           <div class="form-section">
-            <div class="section-label">{{ 'tenant.onboarding.section_branding' | translate }}</div>
+            <div class="section-label">{{ `${templateTranslationKey}section_branding` | translate }}</div>
             <div class="form-grid">
               <div class="field">
-                <label>{{ 'tenant.onboarding.primary_color' | translate }}</label>
+                <label>{{ `${templateTranslationKey}primary_color` | translate }}</label>
                 <div class="color-input-wrap">
                   <input formControlName="primaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"/>
                   <input formControlName="primaryColor" type="text" class="color-text" placeholder="#4e7cff" maxlength="7" (change)="fillColorInput($event)"/>
@@ -143,7 +143,7 @@
                 </span>
               </div>
               <div class="field">
-                <label>{{ 'tenant.onboarding.secondary_color' | translate }}</label>
+                <label>{{ `${templateTranslationKey}secondary_color` | translate }}</label>
                 <div class="color-input-wrap">
                   <input formControlName="secondaryColor" type="color" class="color-swatch" (change)="fillColorTextInput($event)"/>
                   <input formControlName="secondaryColor" type="text" class="color-text" placeholder="#a0b4ff" maxlength="7" (change)="fillColorInput($event)"  />
@@ -157,22 +157,22 @@
           </div>
           <!--Section Regional-->
           <div class="form-section">
-            <div class="section-label">{{ 'tenant.onboarding.section_regional' | translate }}</div>
+            <div class="section-label">{{ `${templateTranslationKey}section_regional` | translate }}</div>
             <div class="form-grid">
               <div class="field">
-                <label>{{ 'tenant.onboarding.currency' | translate }}</label>
+                <label>{{ `${templateTranslationKey}currency` | translate }}</label>
                 <select formControlName="currency">
                   <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
                 </select>
               </div>
               <div class="field">
-                <label>{{ 'tenant.onboarding.locale' | translate }}</label>
+                <label>{{ `${templateTranslationKey}locale` | translate }}</label>
                 <select formControlName="locale">
                   <option *ngFor="let l of locales" [value]="l">{{ l }}</option>
                 </select>
               </div>
               <div class="field full-width">
-                <label>{{ 'tenant.onboarding.timezone' | translate }}</label>
+                <label>{{ `${templateTranslationKey}timezone` | translate }}</label>
                 <select formControlName="timezone">
                   <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
                 </select>
@@ -184,10 +184,10 @@
           <!--Actions-->
           <div class="form-actions">
             <a routerLink="/plans" class="btn-back">
-              {{ 'tenant.onboarding.back_to_plans' | translate }}
+              {{ `${templateTranslationKey}back_to_plans` | translate }}
             </a>
             <button type="submit" class="btn-submit" [disabled]="form.invalid || loading">
-              <span *ngIf="!loading">{{ 'tenant.onboarding.create_workspace' | translate }}</span>
+              <span *ngIf="!loading">{{ `${templateTranslationKey}create_workspace` | translate }}</span>
               <span *ngIf="loading" class="spinner-inline"></span>
             </button>
           </div>
