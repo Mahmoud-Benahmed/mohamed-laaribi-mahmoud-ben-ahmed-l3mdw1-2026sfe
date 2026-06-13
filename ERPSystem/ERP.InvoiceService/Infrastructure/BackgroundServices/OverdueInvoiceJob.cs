@@ -61,6 +61,14 @@ public sealed class OverdueInvoiceJob : BackgroundService
                     if (client is null) continue;
 
                     int duePeriod = client.GetEffectiveDuePaymentPeriod();
+
+                    if (duePeriod <= 0)
+                    {
+                        _logger.LogWarning(
+                            "Skipping penalty for invoice {InvoiceNumber}: client {ClientId} has no due payment period configured.",
+                            invoice.InvoiceNumber, invoice.ClientId);
+                        continue;
+                    }
                     if (now < invoice.InvoiceDate.AddDays(duePeriod)) continue;
 
                     bool penaltyExistsForPeriod = await invoiceRepo
@@ -77,6 +85,7 @@ public sealed class OverdueInvoiceJob : BackgroundService
                         duePeriod: duePeriod, 
                         tenantId: tenantId);
                     await invoiceRepo.AddAsync(penaltyInvoice);
+                    await invoiceRepo.SaveChangesAsync(); // ← add this
 
                     InvoiceEventDto payload = new InvoiceEventDto(
                         Id: penaltyInvoice.Id,
