@@ -228,14 +228,14 @@
         </table>
       </div>
 
-      <app-pagination
-        [pageNumber]="pageNumber()"
-        [totalPages]="totalPages"
-        [pageSize]="pageSize()"
-        [pageSizeOptions]="pageSizeOptions"
-        (pageChange)="pageNumber.set($event); reload()"
-        (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
-      </app-pagination>
+        <app-pagination
+          [pageNumber]="pageNumber()"
+          [totalPages]="totalPages"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageChange)="pageNumber.set($event); reload()"
+          (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+        </app-pagination>
     </div>
 
   </ng-container>
