@@ -8,7 +8,7 @@ namespace ERP.ArticleService.Application.Interfaces
         Task AddAsync(Category category);
         Task<Category?> GetByIdAsync(Guid id);
         Task<Category?> GetByIdDeletedAsync(Guid id);
-
+        Task<bool> DuplicateExists(string name, Guid? excludeId = null);
         Task<Category?> GetByNameAsync(string name);
         Task<List<Category>> GetAllAsync();
         Task<CategoryStatsDto> GetStatsAsync();
