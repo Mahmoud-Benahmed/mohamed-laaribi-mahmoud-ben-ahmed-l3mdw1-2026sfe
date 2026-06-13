@@ -40,9 +40,14 @@ public class InvoiceNumberGenerator : IInvoiceNumberGenerator
                 await _context.Entry(sequence)
                               .ReloadAsync();
             }
+            
+            Console.WriteLine("Sequence Before GetNextNumber(): {0}", sequence.CurrentNumber);
 
             int nextNumber = sequence.GetNextNumber();
             string invoiceNumber = sequence.FormatInvoiceNumber();
+
+            Console.WriteLine("Sequence After GetNextNumber(): {0}", sequence.CurrentNumber);
+
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
