@@ -1036,7 +1036,6 @@ export class BonsComponent implements OnInit {
     if (this.articleDropdownOpen) {
       this.loadArticlesForDropdown(1, false);
     }
-    console.log(this.articles);
   }
 
   getArticleMaxQty(articleId: string): number {
@@ -1136,13 +1135,6 @@ export class BonsComponent implements OnInit {
     this.loadFournisseurs(this.fournisseurPage + 1, true);
   }
 
-  selectFournisseur(fournisseur: FournisseurResponse): void {
-    this.headerForm.patchValue({ fournisseurId: fournisseur.id });
-    this.selectedFournisseurLabel = `${fournisseur.name} — ${fournisseur.taxNumber}`;
-    this.fournisseurDropdownOpen = false;
-    this.cdr.markForCheck();
-  }
-
   toggleFournisseurDropdown(): void {
     this.fournisseurDropdownOpen = !this.fournisseurDropdownOpen;
     if (this.fournisseurDropdownOpen) {
@@ -1191,14 +1183,25 @@ export class BonsComponent implements OnInit {
     return '…'; // placeholder while loading
   }
 
-  private restoreFournisseurLabel(): void {
-    const id = this.headerForm.get('fournisseurId')?.value;
-    if (!id) return;
-    const found = this.fournisseurs.find(f => f.id === id);
-    if (found) {
-      this.selectedFournisseurLabel = `${found.name} — ${found.taxNumber}`;
+  selectFournisseur(fournisseur: FournisseurResponse): void {
+      this.headerForm.patchValue({ fournisseurId: fournisseur.id });
+      this.selectedFournisseurLabel = fournisseur.taxNumber
+          ? `${fournisseur.name} — ${fournisseur.taxNumber}`
+          : fournisseur.name;                                  // ← just name if no tax number
+      this.fournisseurDropdownOpen = false;
       this.cdr.markForCheck();
-    }
+  }
+
+  private restoreFournisseurLabel(): void {
+      const id = this.headerForm.get('fournisseurId')?.value;
+      if (!id) return;
+      const found = this.fournisseurs.find(f => f.id === id);
+      if (found) {
+          this.selectedFournisseurLabel = found.taxNumber
+              ? `${found.name} — ${found.taxNumber}`
+              : found.name;                                    // ← same here
+          this.cdr.markForCheck();
+      }
   }
 
   loadArticlesForDropdown(page: number, append = false): void {
