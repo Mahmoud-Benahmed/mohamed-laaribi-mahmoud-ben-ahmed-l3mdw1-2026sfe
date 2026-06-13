@@ -208,46 +208,117 @@ public class TenantProvisioningService : ITenantProvisioningService
     // =====================================================
     // PRIVILEGE RULES (UNCHANGED)
     // =====================================================
+    // =====================================================
+    // PRIVILEGE RULES (ALIGNED WITH ACADEMIC REPORT)
+    // =====================================================
+
+    private static readonly HashSet<string> SalesManagerPrivileges = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // ── Clients (Full Lifecycle except Deletion per business constraints)
+        Privileges.Clients.MANAGE_CLIENTS,
+        Privileges.Clients.VIEW_CLIENTS,
+        Privileges.Clients.CREATE_CLIENT,
+        Privileges.Clients.UPDATE_CLIENT,
+        Privileges.Clients.CREATE_CLIENT_CATEGORIES,
+        Privileges.Clients.UPDATE_CLIENT_CATEGORIES,
+
+        // ── Articles / Catalog (Creation & Modification access, no Deletion)
+        Privileges.Articles.VIEW_ARTICLES,
+        Privileges.Articles.CREATE_ARTICLE,
+        Privileges.Articles.UPDATE_ARTICLE,
+        Privileges.Articles.CREATE_ARTICLE_CATEGORIES,
+        Privileges.Articles.UPDATE_ARTICLE_CATEGORIES,
+
+        // ── Invoices / Sales Flow (Pipeline engagement, no core data drops)
+        Privileges.Invoices.MANAGE_INVOICES,
+        Privileges.Invoices.VIEW_INVOICES,
+        Privileges.Invoices.CREATE_INVOICE,
+        Privileges.Invoices.UPDATE_DRAFT_INVOICE,
+        Privileges.Invoices.CANCEL_INVOICE,
+
+        // ── Read-only Consultation Context boundaries
+        Privileges.Payments.VIEW_PAYMENTS,
+        Privileges.Stock.VIEW_STOCK,
+        Privileges.Reports.VIEW_REPORTS,
+        Privileges.Reports.EXPORT_REPORTS
+    };
+
+    private static readonly HashSet<string> StockManagerPrivileges = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // ── Articles Catalog (Complete CRUD lifecycle authority)
+        Privileges.Articles.MANAGE_ARTICLES,
+        Privileges.Articles.VIEW_ARTICLES,
+        Privileges.Articles.CREATE_ARTICLE,
+        Privileges.Articles.UPDATE_ARTICLE,
+        Privileges.Articles.DELETE_ARTICLE,
+        Privileges.Articles.RESTORE_ARTICLE,
+        Privileges.Articles.CREATE_ARTICLE_CATEGORIES,
+        Privileges.Articles.UPDATE_ARTICLE_CATEGORIES,
+        Privileges.Articles.DELETE_ARTICLE_CATEGORIES,
+        Privileges.Articles.RESTORE_ARTICLE_CATEGORIES,
+
+        // ── Stock Tracking & Logistics Data
+        Privileges.Stock.MANAGE_STOCK,
+        Privileges.Stock.VIEW_STOCK,
+        Privileges.Stock.UPDATE_STOCK,
+        Privileges.Stock.ADD_ENTRY,
+
+        // ── Fournisseurs / Procurement (Full CRUD lifecycle control)
+        Privileges.Fournisseurs.MANAGE_FOURNISSEURS,
+        Privileges.Fournisseurs.VIEW_FOURNISSEURS,
+        Privileges.Fournisseurs.CREATE_FOURNISSEUR,
+        Privileges.Fournisseurs.UPDATE_FOURNISSEUR,
+        Privileges.Fournisseurs.DELETE_FOURNISSEUR,
+        Privileges.Fournisseurs.RESTORE_FOURNISSEUR,
+        Privileges.Fournisseurs.BLOCK_FOURNISSEUR,
+        Privileges.Fournisseurs.UNBLOCK_FOURNISSEUR,
+
+        // ── General Operational Context Updates
+        Privileges.Reports.VIEW_REPORTS
+    };
+
+    private static readonly HashSet<string> AccountantPrivileges = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // ── Payments & Financial Operations (Full Transactional Ownership)
+        Privileges.Payments.MANAGE_PAYMENTS,
+        Privileges.Payments.VIEW_PAYMENTS,
+        Privileges.Payments.RECORD_PAYMENT,
+        Privileges.Payments.CANCEL_PAYMENT,
+
+        // ── Invoices Validation Lifecycle 
+        Privileges.Invoices.MANAGE_INVOICES,
+        Privileges.Invoices.VIEW_INVOICES,
+        Privileges.Invoices.MARK_INVOICE_PAID,
+
+        // ── Audit Ledger Consultations (Cross-service visibility, zero data alteration)
+        Privileges.Clients.VIEW_CLIENTS,
+        Privileges.Articles.VIEW_ARTICLES,
+        Privileges.Stock.VIEW_STOCK,
+        Privileges.Fournisseurs.VIEW_FOURNISSEURS,
+
+        // ── Financial Reporting
+        Privileges.Reports.MANAGE_REPORTS,
+        Privileges.Reports.VIEW_REPORTS,
+        Privileges.Reports.EXPORT_REPORTS
+    };
+
     private static bool RoleHasPrivilege(string role, string category, string code)
     {
-        if (role == Roles.SystemAdmin)
+        // Base case-insensitive short-circuit check for absolute Admin control
+        if (string.Equals(role, Roles.SystemAdmin, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        return role switch
-        {
-            Roles.SalesManager => SalesManagerHas(code),
-            Roles.StockManager => StockManagerHas(code),
-            Roles.Accountant => AccountantHas(code),
-            _ => false
-        };
+        if (string.Equals(role, Roles.SalesManager, StringComparison.OrdinalIgnoreCase))
+            return SalesManagerPrivileges.Contains(code);
+
+        if (string.Equals(role, Roles.StockManager, StringComparison.OrdinalIgnoreCase))
+            return StockManagerPrivileges.Contains(code);
+
+        if (string.Equals(role, Roles.Accountant, StringComparison.OrdinalIgnoreCase))
+            return AccountantPrivileges.Contains(code);
+
+        return false;
     }
-
-    private static bool SalesManagerHas(string code) => code switch
-    {
-        Privileges.Clients.MANAGE_CLIENTS => true,
-        Privileges.Clients.VIEW_CLIENTS => true,
-        Privileges.Articles.MANAGE_ARTICLES => true,
-        Privileges.Invoices.MANAGE_INVOICES => true,
-        Privileges.Reports.VIEW_REPORTS => true,
-        _ => false
-    };
-
-    private static bool StockManagerHas(string code) => code switch
-    {
-        Privileges.Articles.MANAGE_ARTICLES => true,
-        Privileges.Stock.MANAGE_STOCK => true,
-        Privileges.Reports.VIEW_REPORTS => true,
-        _ => false
-    };
-
-    private static bool AccountantHas(string code) => code switch
-    {
-        Privileges.Clients.VIEW_CLIENTS => true,
-        Privileges.Invoices.VIEW_INVOICES => true,
-        Privileges.Payments.MANAGE_PAYMENTS => true,
-        Privileges.Reports.VIEW_REPORTS => true,
-        _ => false
-    };
 
     // =====================================================
     // INDEXES
