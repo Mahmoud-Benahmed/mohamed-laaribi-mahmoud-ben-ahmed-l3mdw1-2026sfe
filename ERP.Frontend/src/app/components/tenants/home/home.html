@@ -23,8 +23,8 @@
 
     <div class="page-header">
       <div>
-        <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB' | translate }}</p>
-        <h1 class="page-title">{{ 'TENANTS.TITLE_LIST' | translate }}</h1>
+        <p class="breadcrumb">{{ 'tenants.list.breadcrumb' | translate }}</p>
+        <h1 class="page-title">{{ 'tenants.list.title_list' | translate }}</h1>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
           (click)="setStatusFilter('ALL')">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL' | translate }}</p>
+            <p class="stat-card__label">{{ 'tenants.list.stats.total' | translate }}</p>
             <p class="stat-card__value">{{ stats.total }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--gray"><mat-icon>business</mat-icon></div>
@@ -50,7 +50,7 @@
           (click)="setStatusFilter('ACTIVE')">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'TENANTS.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'tenants.list.stats.active' | translate }}</p>
             <p class="stat-card__value">{{ stats.active }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--green"><mat-icon>check_circle</mat-icon></div>
@@ -63,7 +63,7 @@
           (click)="setStatusFilter('SUSPENDED')">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'TENANTS.STATS.SUSPENDED' | translate }}</p>
+            <p class="stat-card__label">{{ 'tenants.list.stats.suspended' | translate }}</p>
             <p class="stat-card__value">{{ stats.suspended }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--amber"><mat-icon>pause_circle</mat-icon></div>
@@ -76,7 +76,7 @@
           (click)="setStatusFilter('DELETED')">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'TENANTS.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'tenants.list.stats.deleted' | translate }}</p>
             <p class="stat-card__value">{{ stats.deleted }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--blue"><mat-icon>archive</mat-icon></div>
@@ -94,7 +94,7 @@
           <rect x="3" y="3" width="18" height="18" rx="2"/>
           <line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>
         </svg>
-        {{ 'TENANTS.TABS.ACTIVE' | translate }}
+        {{ 'tenants.list.tabs.active' | translate }}
       </button>
 
       <button class="type-tab" [class.type-tab--active]="isDeletedList()"
@@ -104,7 +104,7 @@
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
         </svg>
-        {{ 'TENANTS.TABS.DELETED' | translate }}
+        {{ 'tenants.list.tabs.deleted' | translate }}
         <span *ngIf="stats.deleted > 0" class="tab-count">{{ stats.deleted }}</span>
       </button>
 
@@ -116,7 +116,7 @@
           <line x1="12" y1="20" x2="12" y2="4"/>
           <line x1="6"  y1="20" x2="6"  y2="14"/>
         </svg>
-        {{ 'TENANTS.TABS.SUSPENDED' | translate }}
+        {{ 'tenants.list.tabs.suspended' | translate }}
       </button>
 
       <button class="type-tab" [class.type-tab--active]="isStats()"
@@ -126,7 +126,7 @@
           <line x1="12" y1="20" x2="12" y2="4"/>
           <line x1="6"  y1="20" x2="6"  y2="14"/>
         </svg>
-        {{ 'TENANTS.TABS.ANALYTICS' | translate }}
+        {{ 'tenants.list.tabs.analytics' | translate }}
       </button>
 
     </div>
@@ -137,7 +137,7 @@
         <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input class="search-input" type="text" [placeholder]="'TENANTS.SEARCH_PLACEHOLDER' | translate"
+        <input class="search-input" type="text" [placeholder]="'tenants.list.search_placeholder' | translate"
                [(ngModel)]="searchQuery" />
       </div>
     </div>
@@ -149,27 +149,27 @@
           <thead>
             <tr>
               <th class="th--sortable" (click)="sortBy('name')">
-                {{ 'TENANTS.TABLE.NAME' | translate }}
+                {{ 'tenants.list.table.name' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'name' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
                 </span>
               </th>
-              <th>{{ 'TENANTS.TABLE.EMAIL' | translate }}</th>
-              <th>{{ 'TENANTS.TABLE.PLAN' | translate }}</th>
+              <th>{{ 'tenants.list.table.email' | translate }}</th>
+              <th>{{ 'tenants.list.table.plan' | translate }}</th>
               <th class="th--sortable text-center" (click)="sortBy('createdAt')">
-                {{ 'TENANTS.TABLE.SUBSCRIPTION_DATE' | translate }}
+                {{ 'tenants.list.table.subscription_date' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'createdAt' && sortDirection === 'asc' ? '1' : '0.25'"><polyline points="18 15 12 9 6 15"/></svg>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [style.opacity]="sortColumn === 'createdAt' && sortDirection === 'desc' ? '1' : '0.25'"><polyline points="6 9 12 15 18 9"/></svg>
                 </span>
               </th>
-              <th class="text-center">{{ 'TENANTS.TABLE.ACTIONS' | translate }}</th>
+              <th class="text-center">{{ 'tenants.list.table.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="sortedData.length === 0">
-              <td colspan="5" class="td--empty">{{ 'COMMON.NO_RESULTS' | translate }}</td>
+              <td colspan="5" class="td--empty">{{ 'common.no_results' | translate }}</td>
             </tr>
             <tr class="table__row" *ngFor="let tenant of sortedData; trackBy: trackById">
               <td class="td--name">{{ tenant.name }}</td>
@@ -177,30 +177,30 @@
               <td class="td--plan">{{ getPlanName(tenant) }}</td>
               <td class="date-cell">{{ tenant.createdAt | date:'dd/MM/yyyy' }}</td>
               <td class="td--actions">
-                <button class="icon-btn icon-btn--view" [matTooltip]="'TENANTS.ACTIONS.VIEW' | translate"
+                <button class="icon-btn icon-btn--view" [matTooltip]="'tenants.list.actions.view' | translate"
                       [routerLink]="['/tenants', tenant.id]" *ngIf="!isDeletedList()">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">visibility</mat-icon>
                 </button>
-                <button class="icon-btn icon-btn--edit" [matTooltip]="'TENANTS.ACTIONS.EDIT' | translate"
+                <button class="icon-btn icon-btn--edit" [matTooltip]="'tenants.list.actions.edit' | translate"
                       [routerLink]="['/tenants/edit', tenant.id]">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
                 </button>
-                <button class="icon-btn icon-btn--pause" [matTooltip]="'TENANTS.ACTIONS.SUSPEND' | translate"
+                <button class="icon-btn icon-btn--pause" [matTooltip]="'tenants.list.actions.suspend' | translate"
                         *ngIf="tenant.isActive && !tenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
                         (click)="suspend(tenant)">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">pause_circle</mat-icon>
                 </button>
-                <button class="icon-btn icon-btn--play" [matTooltip]="'TENANTS.ACTIONS.ACTIVATE' | translate"
+                <button class="icon-btn icon-btn--play" [matTooltip]="'tenants.list.actions.activate' | translate"
                         *ngIf="!tenant.isActive && !tenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
                         (click)="activate(tenant)">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">play_circle</mat-icon>
                 </button>
-                <button class="icon-btn icon-btn--delete" [matTooltip]="'TENANTS.ACTIONS.DELETE' | translate"
+                <button class="icon-btn icon-btn--delete" [matTooltip]="'tenants.list.actions.delete' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT) && !tenant.isDeleted"
                         (click)="delete(tenant)">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
                 </button>
-                <button class="icon-btn icon-btn--reactivate" [matTooltip]="'TENANTS.ACTIONS.RESTORE' | translate"
+                <button class="icon-btn icon-btn--reactivate" [matTooltip]="'tenants.list.actions.restore' | translate"
                         *ngIf="isDeletedList() && tenant.isDeleted"
                         (click)="restore(tenant)">
                   <mat-icon style="font-size:16px;width:16px;height:16px;">restore</mat-icon>
@@ -230,15 +230,15 @@
 
     <div class="page-header">
       <div>
-        <p class="breadcrumb">{{ 'TENANTS.BREADCRUMB_ANALYTICS' | translate }}</p>
-        <h1 class="page-title">{{ 'TENANTS.TITLE_ANALYTICS' | translate }}</h1>
+        <p class="breadcrumb">{{ 'tenants.list.breadcrumb_analytics' | translate }}</p>
+        <h1 class="page-title">{{ 'tenants.list.title_analytics' | translate }}</h1>
       </div>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
 
     <div class="stats-loading" *ngIf="statsLoading">
       <mat-icon class="spin">autorenew</mat-icon>
-      <p>{{ 'TENANTS.STATS.LOADING' | translate }}</p>
+      <p>{{ 'tenants.list.stats.loading' | translate }}</p>
     </div>
 
     <ng-container *ngIf="!statsLoading && tenantAnalytics">
@@ -248,7 +248,7 @@
         <div class="stat-card stat-card--gray">
           <div class="stat-card__body">
             <div>
-              <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL' | translate }}</p>
+              <p class="stat-card__label">{{ 'tenants.list.stats.total' | translate }}</p>
               <p class="stat-card__value">{{ tenantAnalytics.totalTenants }}</p>
             </div>
             <div class="stat-card__icon stat-card__icon--gray"><mat-icon>business</mat-icon></div>
@@ -258,7 +258,7 @@
         <div class="stat-card stat-card--green">
           <div class="stat-card__body">
             <div>
-              <p class="stat-card__label">{{ 'TENANTS.STATS.ACTIVE' | translate }}</p>
+              <p class="stat-card__label">{{ 'tenants.list.stats.active' | translate }}</p>
               <p class="stat-card__value">{{ tenantAnalytics.activeTenants }}</p>
               <p class="stat-card__sub">{{ (tenantAnalytics.activeTenants / tenantAnalytics.totalTenants * 100 | number:'1.0-0') }}%</p>
             </div>
@@ -269,7 +269,7 @@
         <div class="stat-card stat-card--amber">
           <div class="stat-card__body">
             <div>
-              <p class="stat-card__label">{{ 'TENANTS.STATS.SUSPENDED' | translate }}</p>
+              <p class="stat-card__label">{{ 'tenants.list.stats.suspended' | translate }}</p>
               <p class="stat-card__value">{{ tenantAnalytics.suspendedTenants }}</p>
               <p class="stat-card__sub">{{ (tenantAnalytics.suspendedTenants / tenantAnalytics.totalTenants * 100 | number:'1.0-0') }}%</p>
             </div>
@@ -280,7 +280,7 @@
         <div class="stat-card stat-card--blue">
           <div class="stat-card__body">
             <div>
-              <p class="stat-card__label">{{ 'TENANTS.STATS.TOTAL_MRR' | translate }}</p>
+              <p class="stat-card__label">{{ 'tenants.list.stats.total_mrr' | translate }}</p>
               <p class="stat-card__value">{{ tenantAnalytics.totalMRR | number:'1.2-2' }} TND</p>
               <p class="stat-card__sub">ARR: {{ tenantAnalytics.totalARR | number:'1.2-2' }} TND</p>
             </div>
@@ -297,23 +297,23 @@
             <div class="panel__title-wrap">
               <div class="panel__icon"><mat-icon>donut_large</mat-icon></div>
               <div>
-                <h2 class="panel__title">{{ 'TENANTS.STATS.STATUS_BREAKDOWN' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'TENANTS.STATS.ALL_TENANTS_BY_STATUS' | translate }}</p>
+                <h2 class="panel__title">{{ 'tenants.list.stats.status_breakdown' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'tenants.list.stats.all_tenants_by_status' | translate }}</p>
               </div>
             </div>
           </div>
           <div class="panel__body">
             <div class="stats-breakdown">
               <div class="stats-breakdown__row">
-                <span class="badge badge--green">{{ 'TENANTS.STATUS.ACTIVE' | translate }}</span>
+                <span class="badge badge--green">{{ 'tenants.list.status.active' | translate }}</span>
                 <span class="stats-breakdown__count">{{ tenantAnalytics.activeTenants }}</span>
               </div>
               <div class="stats-breakdown__row">
-                <span class="badge badge--amber">{{ 'TENANTS.STATUS.SUSPENDED' | translate }}</span>
+                <span class="badge badge--amber">{{ 'tenants.list.status.suspended' | translate }}</span>
                 <span class="stats-breakdown__count">{{ tenantAnalytics.suspendedTenants }}</span>
               </div>
               <div class="stats-breakdown__row stats-breakdown__row--muted">
-                <span class="badge badge--grey">{{ 'TENANTS.STATUS.DELETED' | translate }}</span>
+                <span class="badge badge--grey">{{ 'tenants.list.status.deleted' | translate }}</span>
                 <span class="stats-breakdown__count">{{ tenantAnalytics.deletedTenants }}</span>
               </div>
             </div>
@@ -325,8 +325,8 @@
             <div class="panel__title-wrap">
               <div class="panel__icon"><mat-icon>leaderboard</mat-icon></div>
               <div>
-                <h2 class="panel__title">{{ 'TENANTS.STATS.TOP_PLANS' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'TENANTS.STATS.BY_REVENUE' | translate }}</p>
+                <h2 class="panel__title">{{ 'tenants.list.stats.top_plans' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'tenants.list.stats.by_revenue' | translate }}</p>
               </div>
             </div>
           </div>
@@ -334,15 +334,15 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>{{ 'TENANTS.TABLE.RANK' | translate }}</th>
-                  <th>{{ 'TENANTS.TABLE.PLAN' | translate }}</th>
-                  <th class="text-center">{{ 'TENANTS.TABLE.TENANTS' | translate }}</th>
-                  <th class="text-center">{{ 'TENANTS.TABLE.REVENUE' | translate }}</th>
+                  <th>{{ 'tenants.list.table.rank' | translate }}</th>
+                  <th>{{ 'tenants.list.table.plan' | translate }}</th>
+                  <th class="text-center">{{ 'tenants.list.table.tenants' | translate }}</th>
+                  <th class="text-center">{{ 'tenants.list.table.revenue' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngIf="tenantAnalytics.topPlansByRevenue.length === 0">
-                  <td colspan="4" class="td--empty">{{ 'TENANTS.STATS.NO_DATA' | translate }}</td>
+                  <td colspan="4" class="td--empty">{{ 'tenants.list.stats.no_data' | translate }}</td>
                 </tr>
                 <tr class="table__row" *ngFor="let plan of tenantAnalytics.topPlansByRevenue; let i = index">
                   <td class="td--rank">{{ i + 1 }}</td>
@@ -362,8 +362,8 @@
           <div class="panel__title-wrap">
             <div class="panel__icon"><mat-icon>bar_chart</mat-icon></div>
             <div>
-              <h2 class="panel__title">{{ 'TENANTS.STATS.REVENUE_BY_PLAN' | translate }}</h2>
-              <p class="panel__subtitle">{{ 'TENANTS.STATS.ANNUAL_PROJECTION' | translate }}</p>
+              <h2 class="panel__title">{{ 'tenants.list.stats.revenue_by_plan' | translate }}</h2>
+              <p class="panel__subtitle">{{ 'tenants.list.stats.annual_projection' | translate }}</p>
             </div>
           </div>
         </div>
