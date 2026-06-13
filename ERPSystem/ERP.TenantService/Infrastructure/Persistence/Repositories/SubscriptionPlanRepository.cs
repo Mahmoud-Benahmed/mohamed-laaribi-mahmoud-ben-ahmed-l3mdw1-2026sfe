@@ -46,6 +46,18 @@ public class SubscriptionPlanRepository : ISubscriptionPlanRepository
         return (items, totalCount);
     }
 
+    public async Task<bool> DuplicateExists(string code, Guid? excludeId)
+    {
+        var query = _context.SubscriptionPlans.Where(p =>
+            p.Code.ToLower()== code.ToLower()
+        );
+
+        if (excludeId.HasValue)
+            query = query.Where(p => p.Id != excludeId);
+
+        return await query.AnyAsync();
+    }
+
     public async Task<SubscriptionPlan?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.SubscriptionPlans.FindAsync(id, ct);
