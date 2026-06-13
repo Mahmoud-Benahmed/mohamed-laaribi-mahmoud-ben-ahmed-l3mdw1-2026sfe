@@ -1,9 +1,11 @@
 using ERP.TenantService.Application.DTOs;
 using ERP.TenantService.Application.DTOs.SubscriptionPlan;
+using ERP.TenantService.Application.Exceptions;
 using ERP.TenantService.Application.Interfaces;
 using ERP.TenantService.Application.Interfaces.Repositories;
 using ERP.TenantService.Application.Interfaces.Services;
 using ERP.TenantService.Domain;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 
 namespace ERP.TenantService.Application.Services;
 
@@ -40,15 +42,14 @@ public class SubscriptionPlanService : ISubscriptionPlanService
 
     public async Task<SubscriptionPlanResponseDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
+        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new SubscriptionPlanNotFoundException(id);
         return MapToDto(plan);
     }
 
     public async Task<SubscriptionPlanResponseDto> CreateAsync(CreateSubscriptionPlanRequestDto dto, CancellationToken ct = default)
     {
-        var codeExists = await _repository.CodeExistsAsync(dto.Code, null, ct);
-        if (codeExists)
-            throw new InvalidOperationException($"SubscriptionPlan code '{dto.Code}' already exists.");
+        if(await _repository.DuplicateExists(dto.Code))
+            throw new DuplicateKeyException($"Plan.Code: {dto.Code}");
 
         var plan = SubscriptionPlan.Create(dto.Name, dto.Code,dto.MonthlyPrice, dto.YearlyPrice, dto.MaxUsers,dto.MaxStorageMb);
 
@@ -60,11 +61,10 @@ public class SubscriptionPlanService : ISubscriptionPlanService
 
     public async Task<SubscriptionPlanResponseDto> UpdateAsync(Guid id, UpdateSubscriptionPlanRequestDto dto, CancellationToken ct = default)
     {
-        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
+        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new SubscriptionPlanNotFoundException(id);
+        if (await _repository.DuplicateExists(dto.Code, id))
+                    throw new DuplicateKeyException($"Plan.Code: {dto.Code}");
 
-        var codeExists = await _repository.CodeExistsAsync(dto.Code, id, ct);
-        if (codeExists)
-            throw new InvalidOperationException($"SubscriptionPlan code '{dto.Code}' already exists.");
 
         plan.Update( dto.Name, dto.Code,dto.MonthlyPrice, dto.YearlyPrice, dto.MaxUsers, dto.MaxStorageMb);
 
@@ -76,7 +76,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
-        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
+        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new SubscriptionPlanNotFoundException(id);
 
         var tenantSubscriptions = await _tenantSubscriptionRepo.GetActiveBySubscriptionPlanIdAsync(id, DateTime.UtcNow, ct);
         if (tenantSubscriptions.Any())
@@ -88,7 +88,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
 
     public async Task ActivateAsync(Guid id, CancellationToken ct = default)
     {
-        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
+        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new SubscriptionPlanNotFoundException(id);
 
         plan.Activate();
         await _repository.UpdateAsync(plan);
@@ -97,7 +97,7 @@ public class SubscriptionPlanService : ISubscriptionPlanService
 
     public async Task DeactivateAsync(Guid id, CancellationToken ct = default)
     {
-        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new KeyNotFoundException($"SubscriptionPlan with id '{id}' not found.");
+        var plan = await _repository.GetByIdAsync(id, ct) ?? throw new SubscriptionPlanNotFoundException(id);
 
         plan.Suspend();
         await _repository.UpdateAsync(plan);
