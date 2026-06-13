@@ -87,7 +87,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore,
                     StockMovementType.BonSortie,
                     "StockService",
-                    "CreateBonSortie"
+                    "CreateBonSortie",
+                    tenantId: _tenantContext.TenantId
                 ));
             }
 
@@ -107,7 +108,7 @@ public class BonSortieService : IBonSortieService
     // =========================
     public async Task<BonSortieResponseDto> UpdateAsync(Guid id, UpdateBonSortieRequestDto dto)
     {
-        BonSortie bon = await _repo.GetByIdAsync(id) ?? throw new BonSortieNotFoundException(id);
+        BonSortie bon = await _repo.GetByIdForUpdateAsync(id) ?? throw new BonSortieNotFoundException(id);
         _ = await _clientCacheRepository.GetByIdAsync(dto.ClientId) ?? throw new KeyNotFoundException($"Client with Id {dto.ClientId} not found");
 
         Dictionary<Guid, decimal> oldQtyMap = [];
@@ -124,14 +125,13 @@ public class BonSortieService : IBonSortieService
                 throw new InvalidOperationException(
                     $"Articles not found: {string.Join(", ", missingIds)}");
 
-            // Capture BEFORE mutating
-            oldQtyMap = bon.Lignes
-                .GroupBy(l => l.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
 
-            bon.ClearLignes();
-            foreach (LigneRequestDto l in dto.Lignes)
-                bon.AddLigne(l.ArticleId, l.Quantity, l.Price);
+            oldQtyMap = bon.Lignes
+                        .GroupBy(l => l.ArticleId)
+                        .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
+
+            // ✅ ExecuteDelete + clear + re-add, all tracker-safe
+            await _repo.ReplaceLignesAsync(bon, dto.Lignes);
 
             bon.ValidateLignes();
         }
@@ -165,7 +165,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore,
                     StockMovementType.BonSortie,
                     "StockService",
-                    "UpdateBonSortie"
+                    "UpdateBonSortie",
+                    tenantId: _tenantContext.TenantId
                 ));
             }
 
@@ -184,7 +185,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonSortie,
                     sourceService: "StockService",
-                    sourceOperation: "UpdateBonSortie_Reversal"
+                    sourceOperation: "UpdateBonSortie_Reversal",
+                    tenantId: _tenantContext.TenantId
                 ));
 
             }
@@ -222,7 +224,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonSortie,
                     sourceService: "StockService",
-                    sourceOperation: "DeleteBonSortie"
+                    sourceOperation: "DeleteBonSortie",
+                    tenantId: _tenantContext.TenantId
                 );
                 await _journalStockRepository.AddAsync(reversal);
             }
