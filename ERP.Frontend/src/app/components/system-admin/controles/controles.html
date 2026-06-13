@@ -125,20 +125,19 @@
               </td>
             </tr>
             <tr *ngIf="sortedData.length === 0">
-              <td colspan="4" class="td--empty">{{ 'COMMON.NO_RESULTS' | translate }}</td>
+              <td colspan="4" class="td--empty">{{ 'common.no_results' | translate }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- PAGINATION -->
       <app-pagination
         [pageNumber]="pageNumber()"
         [totalPages]="totalPages"
         [pageSize]="pageSize()"
         [pageSizeOptions]="pageSizeOptions"
-        (pageChange)="pageNumber.set($event); reload()"
-        (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
       </app-pagination>
     </div>
   </ng-container>
@@ -147,7 +146,7 @@
   <div class="panel" *ngIf="viewMode === 'view' && selectedControle">
     <div class="panel__header">
       <h2 class="panel__title">{{ `${templateTranslationKey}title_details` | translate }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
@@ -169,8 +168,8 @@
         </div>
       </div>
       <div class="panel__actions">
-        <button class="btn-secondary" (click)="openEdit(selectedControle)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_CONTROLE)">{{ 'COMMON.EDIT' | translate }}</button>
-        <button class="btn-danger" (click)="delete(selectedControle)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_CONTROLE)">{{ 'COMMON.DELETE' | translate }}</button>
+        <button class="btn-secondary" (click)="openEdit(selectedControle)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_CONTROLE)">{{ 'common.edit' | translate }}</button>
+        <button class="btn-danger" (click)="delete(selectedControle)" *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_CONTROLE)">{{ 'common.delete' | translate }}</button>
       </div>
     </div>
   </div>
@@ -179,7 +178,7 @@
   <div class="panel" *ngIf="viewMode === 'create' || viewMode === 'edit'">
     <div class="panel__header">
       <h2 class="panel__title">{{ viewMode === 'create' ? (`${templateTranslationKey}title_add` | translate) : (`${templateTranslationKey}title_edit` | translate) }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <form [formGroup]="controleForm" (ngSubmit)="submit()" class="form">
