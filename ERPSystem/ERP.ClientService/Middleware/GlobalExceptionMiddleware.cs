@@ -61,6 +61,13 @@ public class GlobalExceptionMiddleware
                 StatusCode = (int)HttpStatusCode.NotFound
             },
 
+            DuplicateKeyException ex => new ErrorResponse
+            {
+                Code = "DUPLICATE_ENTRY",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict
+            },
+
             // ── Generic not-found ─────────────────────────────────────────────
             KeyNotFoundException ex => new ErrorResponse
             {
