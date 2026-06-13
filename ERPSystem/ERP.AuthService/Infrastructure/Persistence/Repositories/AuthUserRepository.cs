@@ -18,6 +18,18 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 
         public async Task<AuthUser?> GetByEmailAsync(string email)
             => await _collection.Find(WithTenant(x => x.Email == email && x.IsActive && !x.IsDeleted)).FirstOrDefaultAsync();
+        public async Task<bool> DuplicateExists(string email, string? login=null, Guid? excludeId = null)
+        {
+            var filter = WithTenant(x =>
+                x.Email.ToLower() == email.ToLower() ||
+                (!string.IsNullOrEmpty(login) && x.Login.ToLower() == login.ToLower())
+            );
+
+            if (excludeId.HasValue)
+                filter = Builders<AuthUser>.Filter.And(filter, Builders<AuthUser>.Filter.Ne(x => x.Id, excludeId.Value));
+
+            return await _collection.Find(filter).AnyAsync();
+        }
 
         public async Task<AuthUser?> GetByIdAsync(Guid id)
             => await _collection.Find(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
