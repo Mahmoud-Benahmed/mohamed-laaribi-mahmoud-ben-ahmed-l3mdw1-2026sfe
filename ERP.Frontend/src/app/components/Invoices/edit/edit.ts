@@ -204,7 +204,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     // Update derived data
     this.syncArticles();
-    this.checkClientLimitsAndDiscount();
+    this.refreshCreditAndDiscount();
 
     // Mark form as pristine initially (no unsaved changes)
     this.invoiceForm.markAsPristine();
@@ -321,9 +321,10 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   reload(): void {
     forkJoin({
       selectedInvoice: this.loadInvoice(this.invoiceIdFromRoute!),
-      articles: this.loadArticlesWithStock()
+      articles: this.loadArticlesWithStock(),
     }).subscribe({
-      next: () => {
+      next: (res) => {
+          this.loadClients(1, false);
           this.populateFormFromInvoice();
           this.cdr.markForCheck();
       },
@@ -349,35 +350,6 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     return this.pendingTotalTTC;
   });
 
-  loadCreditLimitInfo(): void {
-    if (!this.selectedClientForValidation?.id) return;
-
-    this.invoiceService.getClientOutstandingBalance(this.selectedClientForValidation.id).subscribe({
-      next: (currentOutstanding) => {
-        const client= this.selectedClientForValidation;
-        if(!client) return;
-        const result = this.invoiceService.validateCreditLimit(
-          client,
-          this.invoiceTotalTTC(),  // Note the parentheses for signal
-          currentOutstanding
-        );
-
-        this.creditLimitInfo = {
-          hasSufficientCredit: result.hasSufficientCredit,
-          currentUsage: result.currentUsage,
-          remainingCredit: result.remainingCredit
-        };
-      },
-      error: () => {
-        this.creditLimitInfo = {
-          hasSufficientCredit: false,
-          currentUsage: 0,
-          remainingCredit: 0
-        };
-      }
-    });
-  }
-
 
   private syncArticles(): void {
     const consumed = new Map<string, number>();
@@ -396,7 +368,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       .filter(a => a.quantity > 0 || a.id === editingId);
 
     this.cdr.markForCheck();
-    this.loadCreditLimitInfo();
+    this.refreshCreditAndDiscount();
   }
 
   // Form helpers
@@ -436,14 +408,10 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     return integerUnits.includes(unit as UnitEnum) ? 1 : 0.001;
   }
 
-  getQuantityMax(): number {
-    return this._selectedArticle?.quantity ?? Infinity;
-  }
-
   getUnitTranslation(): string {
     const unit = this._selectedArticle?.unit;
     if (!unit) return '';
-    return this.translate.instant(`unit.${unit.toUpperCase()}`);
+    return this.translate.instant(`common.unit.${unit.toUpperCase()}`);
   }
 
   getAvailableStock(articleId: string): number {
@@ -568,7 +536,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     this.invoiceForm.markAsDirty();
     this.closeInlineItem();
     this.syncArticles();
-    this.checkClientLimitsAndDiscount();
+    this.refreshCreditAndDiscount();
   }
 
   private calcLineAmounts(
@@ -584,48 +552,46 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     return { effectivePriceHT, totalHT, taxAmount, totalTTC };
   }
 
-  async checkClientLimitsAndDiscount(): Promise<void> {
-    if (!this.selectedClientForValidation || this.pendingItems.length === 0) {
-      this.creditWarning = null;
-      this.discountInfo = { applies: false, rate: 0, discountAmount: 0, discountAmountHT: 0, originalTotal: 0, discountedTotal: 0 };
-      return;
-    }
+  async refreshCreditAndDiscount(): Promise<void> {
+      const client = this.selectedClientForValidation;
+      if (!client || this.pendingItems.length === 0) {
+        this.creditWarning = null;
+        this.discountInfo = { applies: false, rate: 0, discountAmount: 0, discountAmountHT: 0, originalTotal: 0, discountedTotal: 0 };
+        this.creditLimitInfo = { hasSufficientCredit: true, currentUsage: 0, remainingCredit: Infinity };
+        return;
+      }
 
-    const { discountRate, applies } = this.invoiceService.calculateBulkDiscount(
-      this.selectedClientForValidation
-    );
+      const { discountRate, applies } = this.invoiceService.calculateBulkDiscount(client);
+      const originalTotalHT  = this.pendingItems.reduce((s, i) => s + i.quantity * i.uniPriceHT, 0);
+      const originalTotalTTC = this.pendingItems.reduce((s, i) => s + i.quantity * i.uniPriceHT * (1 + i.taxRate / 100), 0);
+      const discountMultiplier = 1 - discountRate / 100;
+      const discountedTotalHT  = originalTotalHT * discountMultiplier;
+      const discountedTotalTTC = originalTotalTTC * discountMultiplier;
 
-    const originalTotalHT  = this.pendingItems.reduce((s, i) => s + i.quantity * i.uniPriceHT, 0);
-    const originalTotalTTC = this.pendingItems.reduce(
-      (s, i) => s + i.quantity * i.uniPriceHT * (1 + i.taxRate / 100), 0
-    );
+      this.discountInfo = {
+        applies, rate: discountRate,
+        discountAmountHT: Math.round((originalTotalHT - discountedTotalHT) * 100) / 100,
+        discountAmount:   Math.round((originalTotalTTC - discountedTotalTTC) * 100) / 100,
+        originalTotal:    Math.round(originalTotalTTC * 100) / 100,
+        discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
+      };
 
-    const discountMultiplier  = 1 - discountRate / 100;
-    const discountedTotalHT   = originalTotalHT * discountMultiplier;
-    const discountedTotalTTC  = originalTotalTTC * discountMultiplier;
+      const finalTotal = applies ? discountedTotalTTC : originalTotalTTC;
 
-    this.discountInfo = {
-      applies,
-      rate: discountRate,
-      discountAmountHT: Math.round((originalTotalHT - discountedTotalHT) * 100) / 100,
-      discountAmount:   Math.round((originalTotalTTC - discountedTotalTTC) * 100) / 100,
-      originalTotal:    Math.round(originalTotalTTC * 100) / 100,
-      discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
-    };
+      try {
+        const outstanding = await firstValueFrom(this.invoiceService.getClientOutstandingBalance(client.id)); // ← ONE call
+        const creditCheck = this.invoiceService.validateCreditLimit(client, finalTotal, outstanding || 0);
 
-    try {
-      const outstanding = await firstValueFrom(
-        this.invoiceService.getClientOutstandingBalance(this.selectedClientForValidation.id)
-      );
-      const creditCheck = this.invoiceService.validateCreditLimit(
-        this.selectedClientForValidation,
-        applies ? discountedTotalTTC : originalTotalTTC,
-        outstanding || 0
-      );
-      this.creditWarning = creditCheck.hasSufficientCredit ? null : creditCheck.message;
-    } catch {
-      // silently ignore
-    }
+        this.creditLimitInfo = {
+          hasSufficientCredit: creditCheck.hasSufficientCredit,
+          currentUsage: creditCheck.currentUsage,
+          remainingCredit: creditCheck.remainingCredit,
+        };
+        this.creditWarning = creditCheck.hasSufficientCredit ? null : creditCheck.message;
+      } catch {
+        this.creditLimitInfo = { hasSufficientCredit: false, currentUsage: 0, remainingCredit: 0 };
+        this.creditWarning = 'Error while checking credit';
+      }
   }
 
   get duePaymentPeriodHint(): string {
@@ -643,12 +609,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       .slice(0, 8);
   }
 
-  onClientSelectChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    const client = this.clients.find(c => c.id === id);
-    if (client) this.selectClient(client);
-    this.loadCreditLimitInfo();
-  }
+
   calculateDueDate(invoiceDate: string | Date | null | undefined, paymentPeriod: number | null | undefined): string {
     const daysToAdd = paymentPeriod || 30;
     const date = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -676,7 +637,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     removePendingItem(localId: string): void {
       this.pendingItems = this.pendingItems.filter(i => i._localId !== localId);
       this.syncArticles();
-      this.checkClientLimitsAndDiscount();
+      this.refreshCreditAndDiscount();
     }
 
   get canSubmit(): boolean {
@@ -690,7 +651,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   }
 
   getSubmitButtonTooltip(): string {
-    if(!this.creditLimitInfo.hasSufficientCredit && this.selectedClientForValidation?.creditLimit) return this.translate.instant('invoices.errors.insufficient_credit', {
+    if(!this.creditLimitInfo.hasSufficientCredit && this.selectedClientForValidation?.creditLimit) return this.translate.instant('invoices.responses.errors.insufficient_credit', {
         creditLimit: this.selectedClientForValidation.creditLimit.toFixed(2),
         currentOutstanding: this.creditLimitInfo.currentUsage.toFixed(2),
         invoiceTotal: this.invoiceTotalTTC()
@@ -698,7 +659,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     if (this.isValidating) return this.translate.instant('common.processing');
     if (this.invoiceForm.invalid) return this.translate.instant('validation.required');
     if (this.pendingItems.length === 0) return this.translate.instant('invoices.form.no_items_yet');
-    if (this.creditWarning) return this.translate.instant('invoices.errors.credit_limit_exceeded');
+    if (this.creditWarning) return this.translate.instant('invoices.responses.errors.credit_limit_exceeded');
     return '';
   }
 
@@ -741,7 +702,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
           this.selectedInvoice = { ...updated }; // spread to trigger reference change
           this.cdr.markForCheck();
         }
-        this.flash('success', this.translate.instant('invoices.success.finalized'));
+        this.flash('success', this.translate.instant('invoices.responses.success.finalized'));
         setTimeout(() => {
           const el = document.getElementById('top');
           el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -755,7 +716,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       },
       error: (err) =>{
         const errorMsg = (err.error as HttpError)?.message
-          || this.translate.instant('invoices.errors.finalize_failed');
+          || this.translate.instant('invoices.responses.errors.finalize_failed');
         this.flash('error', errorMsg);
         this.isValidating = false;
 
@@ -797,7 +758,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     this.invoiceService.update(this.selectedInvoice!.id, updateDto).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('invoices.success.updated'));
+        this.flash('success', this.translate.instant('invoices.responses.success.updated'));
 
         setTimeout(() => {
           const el = document.getElementById('top');
@@ -811,7 +772,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       },
       error: (err) => {
         const errorMsg = (err.error as HttpError)?.message
-          || this.translate.instant('invoices.errors.update_failed');
+          || this.translate.instant('invoices.responses.errors.update_failed');
         this.flash('error', errorMsg);
         this.isValidating = false;
 
@@ -826,7 +787,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     // Toggle handler (add to component):
   setTaxCalculationMode(mode: TaxCalculationMode): void {
     this.taxCalculationMode = mode;
-    this.checkClientLimitsAndDiscount();
+    this.refreshCreditAndDiscount();
   }
 
   get pendingTotalHT(): number {
@@ -870,7 +831,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     this.clientSearchQuery = client.name;
     this.filteredClients = [];
-    this.checkClientLimitsAndDiscount();
+    this.refreshCreditAndDiscount();
 
 
 
@@ -897,8 +858,8 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
 
     this.clientSearchQuery = client.name;
     this.filteredClients = [];
-    this.loadCreditLimitInfo();
-    this.checkClientLimitsAndDiscount();
+    this.refreshCreditAndDiscount()
+    this.loadArticlesForDropdown(true);
     this.cdr.markForCheck();
   }
 
@@ -921,27 +882,33 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     }
   }
 
+
   loadArticlesForDropdown(resetPage = true): void {
-    if (resetPage) {
-      this.articlePage = 1;
-    }
+      if (resetPage) {
+        this.articlePage = 1;
+      }
 
-    // Filter articles based on search query
-    let filtered = this.articles.filter(a =>
-      a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase())
-    );
+      const creditLimit = this.selectedClientForValidation?.creditLimit;
 
-    this.articleTotalCount = filtered.length;
-    this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+      let filtered = this.articles.filter(a => {
+        const matchesSearch =
+          a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase());
 
-    // Paginate
-    const start = (this.articlePage - 1) * this.articlePageSize;
-    const end = start + this.articlePageSize;
-    this.articleDropdownItems = filtered.slice(start, end);
+        const withinCreditLimit = creditLimit == null || a.prix <= creditLimit;
 
-    this.cdr.markForCheck();
+        return matchesSearch && withinCreditLimit;
+      });
+
+      this.articleTotalCount = filtered.length;
+      this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+
+      const start = (this.articlePage - 1) * this.articlePageSize;
+      const end = start + this.articlePageSize;
+      this.articleDropdownItems = filtered.slice(start, end);
+
+      this.cdr.markForCheck();
   }
 
 
