@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "role",
         NameClaimType = "login",
 
-        ClockSkew = TimeSpan.FromMinutes(5),
+        ClockSkew = TimeSpan.FromMinutes(1),
     };
 
     options.Events = new JwtBearerEvents
