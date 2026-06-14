@@ -13,7 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class SubscriptionPlanService {
   private http    = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/plans`;
+  private baseUrl = `${environment.routes.plans}`;
 
   /** Get all plans (paginated) */
   getAllPlans(page = 1, pageSize = 10): Observable<PagedResultDto<SubscriptionPlanDto>> {

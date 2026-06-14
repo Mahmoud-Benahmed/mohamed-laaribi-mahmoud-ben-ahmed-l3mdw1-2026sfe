@@ -34,7 +34,7 @@ export interface PagedResultDto<T> {
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
-  private readonly base = `${environment.apiUrl}/articles/categories`;
+  private readonly base = `${environment.routes.articles}/categories`;
 
     private buildParams(paramsObj: Record<string, any>): HttpParams {
     let params = new HttpParams();

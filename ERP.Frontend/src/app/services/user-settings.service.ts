@@ -87,7 +87,7 @@ export class TenantThemeService {
     if (!slug) return of(null);
 
     return this.http.get<TenantBrandingDto>(
-      `${environment.apiUrl}/tenants/branding/${slug}`
+      `${environment.routes.tenants}/branding/${slug}`
     ).pipe(
       tap(branding => this.applyBranding(branding)),
       catchError(() => of(null))

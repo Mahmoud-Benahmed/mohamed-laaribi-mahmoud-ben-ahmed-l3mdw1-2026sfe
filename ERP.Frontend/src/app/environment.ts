@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
 
-  apiUrl: 'http://erp.local',
+  apiUrl: '/api',
 
   routes: {
     auth:        '/auth',
@@ -13,6 +13,8 @@ export const environment = {
     stock:       '/stock',
     fournisseurs:'/fournisseurs',
     invoices:    '/invoices',
+    payment:    '/payment',
     tenants:   '/tenants',
+    plans:   '/plans',
   },
 } as const;

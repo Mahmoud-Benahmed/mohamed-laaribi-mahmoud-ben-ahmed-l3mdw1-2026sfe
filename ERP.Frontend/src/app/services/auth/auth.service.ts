@@ -150,8 +150,8 @@ export class AuthService {
   private _onLogout$ = new Subject<void>();
   readonly onLogout$ = this._onLogout$.asObservable();
 
-  private readonly baseUrl = `${environment.apiUrl}${environment.routes.auth}`;
-  private readonly loginUrl = `${environment.apiUrl}/login`;
+  private readonly baseUrl = `${environment.routes.auth}`;
+  private readonly loginUrl = `/login`;
 
   constructor(private http: HttpClient,   private router: Router) {}
 

@@ -81,7 +81,7 @@ export interface PagedResultDto<T> {
   providedIn: 'root'
 })
 export class ClientsService {
-  private readonly baseUrl = `${environment.apiUrl}/clients`;
+  private readonly baseUrl = `${environment.routes.clients}`;
 
   private readonly endpoints = {
     deleted: `${this.baseUrl}/deleted`,

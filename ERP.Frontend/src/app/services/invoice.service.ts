@@ -118,7 +118,7 @@ export interface UpdateInvoiceDto extends CreateInvoiceDto{}
 })
 export class InvoiceService {
   // Uses the dedicated invoice microservice on port 5037
-  private readonly baseUrl = `${environment.apiUrl}${environment.routes.invoices}`;
+  private readonly baseUrl = `${environment.routes.invoices}`;
 
   constructor(private readonly http: HttpClient,
               private readonly translate: TranslateService) { }

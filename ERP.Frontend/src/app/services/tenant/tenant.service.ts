@@ -18,7 +18,7 @@ import { TenantBrandingDto } from '../user-settings.service';
 @Injectable({ providedIn: 'root' })
 export class TenantService {
   private http    = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/tenants`;
+  private baseUrl = `${environment.routes.tenants}`;
 
   private _settings = signal<TenantSettingsDto | null>(null);
 
