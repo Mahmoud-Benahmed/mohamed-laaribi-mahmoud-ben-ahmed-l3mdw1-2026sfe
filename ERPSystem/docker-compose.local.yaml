@@ -13,6 +13,9 @@ services:
       - "80:80"
     volumes:
       - ./nginx.local.conf:/etc/nginx/nginx.conf:ro
+      - /etc/nginx/conf.d
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
     networks: [erp-network]
 
   redis:

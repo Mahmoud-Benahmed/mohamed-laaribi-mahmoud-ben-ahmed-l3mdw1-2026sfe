@@ -67,8 +67,10 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - erp-frontend-html:/usr/share/nginx/html:ro
     depends_on:
       - gateway
+      - angular
     networks: [erp-network]
 
   sqlserver:
@@ -95,7 +97,7 @@ services:
     container_name: mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -316,6 +318,21 @@ services:
       retries: 3
 
 # ─────────────────────────────────────────────────────────────
+# FRONTEND APPLICATION COMPILATION (ANGULAR 21 ENGINE)
+# ─────────────────────────────────────────────────────────────
+  angular:
+    image: node:20-alpine
+    container_name: angular
+    restart: no
+    working_dir: /app
+    volumes:
+      - ./../ERP.Frontend:/app
+      - /app/node_modules
+      - erp-frontend-html:/app/dist/ERP.Frontend/browser
+    command: sh -c "npm install && npx ng build --configuration=development --watch"
+    networks: [erp-network]
+
+# ─────────────────────────────────────────────────────────────
 # NETWORKS & VOLUMES
 # ─────────────────────────────────────────────────────────────
 
@@ -328,3 +345,4 @@ volumes:
   sqlserver-data:
   mongo-data:
   kafka-data:
+  erp-frontend-html:
