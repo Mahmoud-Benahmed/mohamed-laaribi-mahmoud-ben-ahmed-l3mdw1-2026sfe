@@ -106,7 +106,7 @@ export class PermissionMatrixComponent implements OnInit {
 
   loadPrivileges(): void {
     const requests = this.roles.map((role) =>
-      this.http.get<PrivilegeDto[]>(`${this.baseUrl}/auth/privileges/${role.id}`)
+      this.http.get<PrivilegeDto[]>(`${environment.routes.privileges}/${role.id}`)
     );
 
     forkJoin(requests).subscribe({
@@ -166,7 +166,7 @@ export class PermissionMatrixComponent implements OnInit {
     cell.loading = true;
 
     const action = wasGranted ? 'deny' : 'allow';
-    const url = `${this.baseUrl}/auth/privileges/${roleId}/${controleId}/${action}`;
+    const url = `${environment.routes.privileges}/${roleId}/${controleId}/${action}`;
 
     this.http.patch(url, {}).subscribe({
       next: () => {
