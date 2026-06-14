@@ -42,7 +42,11 @@
     "@angular/compiler-cli": "^21.1.0",
     "@angular/material": "^21.2.4",
     "jsdom": "^27.1.0",
+    "material-icons": "^1.13.14",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.28.1"
   }
 }
