@@ -14,7 +14,7 @@
                     class="sidebar__logo-img" />
               </ng-container>
               <ng-template #fallback>
-                <span>{{ tenantService.name()?.charAt(0)?.toUpperCase() || 'E' }}</span>
+                <span>{{ tenantService.name().charAt(0).toUpperCase() || 'E' }}</span>
               </ng-template>
           </div>
         <span class="sidebar__logo-text">{{ tenantService.name() || 'ERPSuite' }}</span>
@@ -214,7 +214,7 @@
               [alt]="tenantService.name() || 'ERPSuite'"
               class="sidebar__logo-img" />
           <ng-template #fallback>
-            <span>{{ tenantService.name()?.charAt(0)?.toUpperCase() || 'E' }}</span>
+            <span>{{ tenantService.name().charAt(0).toUpperCase() || 'E' }}</span>
           </ng-template>
         </div>
       </div>

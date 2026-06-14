@@ -127,7 +127,7 @@
           {{ `${templateTranslationKey}.renew_with` | translate : { name: selectedPlan.name } }}
         </span>
         <span *ngIf="!isSubmitting && !selectedPlan">{{ `${templateTranslationKey}.select_to_renew` | translate }}</span>
-        <span *ngIf="isSubmitting">{{ 'common.processing' | translate }}...</span>
+        <span *ngIf="isSubmitting">{{ 'common.processing' | translate }}</span>
       </button>
     </div>
   </div>

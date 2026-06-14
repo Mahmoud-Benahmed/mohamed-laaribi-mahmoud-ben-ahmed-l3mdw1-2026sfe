@@ -49,6 +49,6 @@
           [class.disabled]="form.invalid || isSubmitting"
           (click)="onSubmit()">
     <span *ngIf="!isSubmitting">{{ 'common.save' | translate }}</span>
-    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}...</span>
+    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}</span>
   </button>
 </mat-dialog-actions>

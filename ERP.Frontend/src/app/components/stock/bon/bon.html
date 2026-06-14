@@ -177,7 +177,7 @@
                   <span *ngIf="asEntre(bon).observation">{{ asEntre(bon).observation }}</span>
                   <span class="td--empty-value" *ngIf="!asEntre(bon).observation">—</span>
                 </td>
-                <td class="td--price">{{ asEntre(bon).total | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                <td class="td--price">{{ asEntre(bon).total | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                 <td>{{ asEntre(bon).createdAt | date:'dd-MM-yyyy'}}</td>
                 <td class="td--actions">
                   <button class="icon-btn icon-btn--view" [title]="'common.view' | translate"
@@ -356,7 +356,7 @@
         </div>
         <div class="detail-item">
           <span class="detail-label">{{ 'stock.bons.details.total' | translate }}</span>
-          <span class="detail-value">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' }}</span>
+          <span class="detail-value">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">{{ 'stock.bons.details.created_at' | translate }}</span>
@@ -412,7 +412,7 @@
             <tfoot *ngIf="getLignes(selectedBon).length > 0">
               <tr>
                 <td colspan="3" class="td--total-label">{{ 'stock.bons.ligne_table.total' | translate }}</td>
-                <td class="td--price td--total">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                <td class="td--price td--total">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                 <td *ngIf="activeBonType === 'retour'"></td>
                 <td *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.UPDATE_STOCK)"></td>
               </tr>
@@ -714,7 +714,7 @@
                   <td class="td--truncate">{{ l.articleLabel }}</td>
                   <td>{{ l.quantity }}</td>
                   <td class="td--price">{{ l.price | number:'1.2-2' }}</td>
-                  <td class="td--price">{{ l.total | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                  <td class="td--price">{{ l.total | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                   <td *ngIf="activeBonType === 'retour'">{{ l.remarque ?? '—' }}</td>
                   <td class="td--actions">
                     <button class="icon-btn icon-btn--edit" [title]="'stock.bons.edit_ligne' | translate"
@@ -737,7 +737,7 @@
               <tfoot>
                 <tr>
                   <td colspan="3" class="td--total-label">{{ 'stock.bons.ligne_table.total' | translate }}</td>
-                  <td class="td--price td--total">{{ pendingTotal | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                  <td class="td--price td--total">{{ pendingTotal | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                   <td *ngIf="activeBonType === 'retour'"></td>
                   <td></td>
                 </tr>
@@ -777,8 +777,8 @@
                 <tr *ngFor="let l of editLignes">
                   <td class="td--mono td--truncate">{{ l.articleId }}</td>
                   <td>{{ l.quantity }}</td>
-                  <td class="td--price">{{ l.price | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
-                  <td class="td--price">{{ l.total | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                  <td class="td--price">{{ l.price | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
+                  <td class="td--price">{{ l.total | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                   <td *ngIf="activeBonType === 'retour'">{{ l.remarque ?? '—' }}</td>
                   <td class="td--actions">
                     <button class="icon-btn icon-btn--edit" [title]="'stock.bons.edit_ligne' | translate"
@@ -801,7 +801,7 @@
               <tfoot>
                 <tr>
                   <td colspan="3" class="td--total-label">{{ 'stock.bons.ligne_table.total' | translate }}</td>
-                  <td class="td--price td--total">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' }}</td>
+                  <td class="td--price td--total">{{ getTotal(selectedBon) | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</td>
                   <td *ngIf="activeBonType === 'retour'"></td>
                   <td></td>
                 </tr>
@@ -871,7 +871,7 @@
                       [class.client-dropdown__item--selected]="ligneForm.get('articleId')?.value === a.id"
                       (click)="selectArticleForLigne(a)">
                     <span class="client-dropdown__name">{{ a.codeRef }} — {{ a.libelle }}</span>
-                    <span class="client-dropdown__email">{{ a.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale}}</span>
+                    <span class="client-dropdown__email">{{ a.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
                   </li>
                   <li *ngIf="articlesLoading" class="client-dropdown__loading">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

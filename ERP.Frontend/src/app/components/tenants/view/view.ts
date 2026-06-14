@@ -1,6 +1,6 @@
 import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectorRef, Component, computed, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { TenantResponseDto, SubscriptionPlanDto, AssignSubscriptionRequestDto, SubscriptionPeriod } from '../../../interfaces/TenantDto';
-import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModalComponent } from '../../modal/modal';
@@ -16,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingOverlayComponent } from "../../loading-overlay/loading-overlay";
 import { SubscriptionPlanService } from '../../../services/tenant/subscription-plan.service';
 import { TenantService } from '../../../services/tenant/tenant.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-tenants-view',
@@ -29,8 +29,7 @@ import { TenantService } from '../../../services/tenant/tenant.service';
     MatTooltipModule,
     MatDialogModule,
     TranslatePipe,
-    RouterLink,
-    LoadingOverlayComponent
+    RouterLink
   ],
   templateUrl: './view.html',
   styleUrl: './view.scss',
