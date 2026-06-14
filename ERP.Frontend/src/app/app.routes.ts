@@ -1,43 +1,6 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login';
-import { HomeComponent } from './components/home/home';
-import { RegisterComponent } from './components/system-admin/users/register/register';
 import { authGuard } from './guard/auth.guard';
-import { UsersHomeComponent } from './components/system-admin/users/home/home';
-import { ShellComponent } from './components/shell/shell';
-import { ProfileComponent } from './components/user/profile/profile';
-import { DeactivatedComponent } from './components/system-admin/users/deactivated/deactivated';
-import { MustChangePasswordComponent } from './components/user/must-change-password/must-change-password';
-import { PermissionMatrixComponent } from './components/system-admin/permission-matrix/permission-matrix';
-import { ArticleComponent } from './components/articles/home/home';
-import { AuditLogComponent } from './components/system-admin/audit-log/audit-log';
-import { DeletedUsersComponent } from './components/system-admin/users/deleted/deleted';
-import { ControleComponent } from './components/system-admin/controles/controles';
-import { RoleComponent } from './components/system-admin/roles/roles';
-import { ArticleCategoriesComponent } from './components/articles/categories/categories';
-import { AuthService, PRIVILEGES } from './services/auth/auth.service';
-import { ClientsComponent } from './components/clients/home/home';
-import { ClientCategoriesComponent } from './components/clients/categories/categories';
-import { FournisseurComponent } from './components/stock/fournisseur/fournisseur';
-import { BonsComponent } from './components/stock/bon/bon';
-import { ChangePasswordComponent } from './components/system-admin/users/change-password/change-password';
-import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay';
-import { InvoicesComponent } from './components/invoices/invoices';
-import { EditInvoiceComponent } from './components/invoices/edit/edit';
-import { CreateInvoiceComponent } from './components/invoices/create/create';
-import { ViewInvoiceComponent } from './components/invoices/view/view';
-import { CreatePaymentModal } from './components/payments/create-modal/create-modal';
-import { PaymentComponent } from './components/payments/payments';
-import { ViewPaymentComponent } from './components/payments/view/view';
-import { RefundsComponent } from './components/payments/refund/refund';
-import { RefundViewComponent } from './components/payments/refund/view/view';
-import { PlansComponent } from './components/plans/plans';
-import { OnboardingComponent } from './components/onboarding/onboarding';
-import { TenantsComponent } from './components/tenants/home/home';
-import { ViewTenantComponent } from './components/tenants/view/view';
-import { EditTenantComponent } from './components/tenants/edit/edit';
-import { SystemSettingsComponent } from './components/system-admin/system-settings/system-settings';
-import { SubscriptionExpiryComponent } from './components/tenants/subscription-expiry/subscription-expiry';
+import { PRIVILEGES } from './services/auth/auth.service';
 
 function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
   return keys.map(k => PRIVILEGES[category][k as keyof typeof PRIVILEGES[typeof category]]);
@@ -45,83 +8,244 @@ function pickPrivileges(category: keyof typeof PRIVILEGES, keys: string[]) {
 
 export const routes: Routes = [
 
-  { path: '', component: PlansComponent },
-
-  // ── Public routes (no guard) ─────────────────────────────────────────────
-  { path: 'plans',       component: PlansComponent },
-  { path: 'onboarding',  component: OnboardingComponent },
-  { path: 'login',       component: LoginComponent },
-  { path: 'must-change-password', component: MustChangePasswordComponent, canActivate: [authGuard] },
+  // ── Public landing ───────────────────────────────────────────────────────
+  {
+    path: '',
+    loadComponent: () => import('./components/plans/plans').then(m => m.PlansComponent),
+  },
+  {
+    path: 'plans',
+    loadComponent: () => import('./components/plans/plans').then(m => m.PlansComponent),
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./components/onboarding/onboarding').then(m => m.OnboardingComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./components/login/login').then(m => m.LoginComponent),
+  },
+  {
+    path: 'must-change-password',
+    loadComponent: () => import('./components/user/must-change-password/must-change-password').then(m => m.MustChangePasswordComponent),
+    canActivate: [authGuard],
+  },
 
   // ── Authenticated shell ──────────────────────────────────────────────────
   {
-    path: '', component: ShellComponent, canActivate: [authGuard],
+    path: '',
+    loadComponent: () => import('./components/shell/shell').then(m => m.ShellComponent),
+    canActivate: [authGuard],
     children: [
-      { path: 'home', component: HomeComponent },
-      { path: 'profile', component: ProfileComponent },
-      { path: 'change-password', component: MustChangePasswordComponent },
-      { path: 'change-password/:authUserId', component: ChangePasswordComponent, data: { privileges: pickPrivileges('USERS', ['VIEW_USERS', 'UPDATE_USER']) } },
-      { path: 'audit-log', component: AuditLogComponent, data: { privileges: pickPrivileges('AUDIT', ['MANAGE_AUDITLOGS']) } },
-      { path: 'permissions', component: PermissionMatrixComponent, data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) } },
 
-      { path: 'users', component: UsersHomeComponent, data: { privileges: pickPrivileges('USERS', ['VIEW_USERS','CREATE_USER','UPDATE_USER','DELETE_USER','DEACTIVATE_USER']) } },
-      { path: 'users/register', component: RegisterComponent, data: { privileges: pickPrivileges('USERS', ['CREATE_USER']) } },
-      { path: 'users/deactivated', component: DeactivatedComponent, data: { privileges: pickPrivileges('USERS', ['ACTIVATE_USER','DEACTIVATE_USER']) } },
-      { path: 'users/deleted', component: DeletedUsersComponent, data: { privileges: pickPrivileges('USERS', ['RESTORE_USER']) } },
-      { path: 'users/controles', component: ControleComponent, data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) } },
-      { path: 'users/roles', component: RoleComponent, data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) } },
-      { path: 'users/:authUserId', component: ProfileComponent, data: { privileges: pickPrivileges('USERS', ['VIEW_USERS','UPDATE_USER']) } },
-
-      { path: 'articles/categories', component: ArticleCategoriesComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES','CREATE_ARTICLE','UPDATE_ARTICLE']) } },
-      { path: 'articles/:id', component: ArticleComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES']) } },
-      { path: 'articles', component: ArticleComponent, data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES','CREATE_ARTICLE','UPDATE_ARTICLE','DELETE_ARTICLE']) } },
-
-      { path: 'clients/categories', component: ClientCategoriesComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS','CREATE_CLIENT','UPDATE_CLIENT']) } },
-      { path: 'clients/categories/:id', component: ClientCategoriesComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS']) } },
-      { path: 'clients/:id', component: ClientsComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS','UPDATE_CLIENT','DELETE_CLIENT']) } },
-      { path: 'clients', component: ClientsComponent, data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS','CREATE_CLIENT','UPDATE_CLIENT','DELETE_CLIENT']) } },
-
-      { path: 'invoices/edit/:id', component: EditInvoiceComponent, data: { privileges: pickPrivileges('INVOICES', ['UPDATE_DRAFT_INVOICE']) } },
-      { path: 'invoices/create', component: CreateInvoiceComponent, data: { privileges: pickPrivileges('INVOICES', ['CREATE_INVOICE']) } },
-      { path: 'invoices/:id', component: ViewInvoiceComponent, data: { privileges: pickPrivileges('INVOICES', ['VIEW_INVOICES'])} },
-      { path: 'invoices', component: InvoicesComponent, data: { privileges: pickPrivileges('INVOICES', ['VIEW_INVOICES']) } },
-
-      { path: 'stock/fournisseurs/:id', component: FournisseurComponent, data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK']) } },
-      { path: 'stock/fournisseurs', component: FournisseurComponent, data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK','UPDATE_STOCK','ADD_ENTRY']) } },
-      { path: 'stock/bons', component: BonsComponent, data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK', 'UPDATE_STOCK', 'ADD_ENTRY']) } },
-
-      { path: 'payments/refunds/:id', component: RefundViewComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', "'MANAGE_PAYMENTS'"]) } },
-      { path: 'payments/refunds', component: RefundsComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', "'MANAGE_PAYMENTS'"]) } },
-      { path: 'payments/:id', component: ViewPaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS']) } },
-      { path: 'payments', component: PaymentComponent, data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'RECORD_PAYMENT', 'CANCEL_PAYMENT']) } },
-
-      { path: 'tenants/:id', component: ViewTenantComponent, data: { privileges: pickPrivileges('TENANTS', ['VIEW_TENANTS', 'MANAGE_SUBSCRIPTIONS','VIEW_BILLING'])} },
-      { path: 'tenants/edit/:id', component: EditTenantComponent, data: { privileges: pickPrivileges('TENANTS', ['UPDATE_TENANT', 'MANAGE_SUBSCRIPTIONS'])} },
-
-      { path: 'tenants', component: TenantsComponent, data: {
-            privileges: pickPrivileges('TENANTS',
-                ['VIEW_TENANTS',
-                  'CREATE_TENANT',
-                  'UPDATE_TENANT',
-                  'DELETE_TENANT',
-                  'RESTORE_TENANT',
-                  'MANAGE_SUBSCRIPTIONS',
-                  'VIEW_BILLING'
-                ])
-            }
+      // ── Home / Profile ─────────────────────────────────────────────────
+      {
+        path: 'home',
+        loadComponent: () => import('./components/home/home').then(m => m.HomeComponent),
       },
-      { path: 'system-settings', component: SystemSettingsComponent, data: { privileges: pickPrivileges('USERS', ['EDIT_SYSTEM_SETTINGS'])} },
+      {
+        path: 'profile',
+        loadComponent: () => import('./components/user/profile/profile').then(m => m.ProfileComponent),
+      },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./components/user/must-change-password/must-change-password').then(m => m.MustChangePasswordComponent),
+      },
+
+      // ── System admin ───────────────────────────────────────────────────
+      {
+        path: 'audit-log',
+        loadComponent: () => import('./components/system-admin/audit-log/audit-log').then(m => m.AuditLogComponent),
+        data: { privileges: pickPrivileges('AUDIT', ['MANAGE_AUDITLOGS']) },
+      },
+      {
+        path: 'permissions',
+        loadComponent: () => import('./components/system-admin/permission-matrix/permission-matrix').then(m => m.PermissionMatrixComponent),
+        data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) },
+      },
+      {
+        path: 'system-settings',
+        loadComponent: () => import('./components/system-admin/system-settings/system-settings').then(m => m.SystemSettingsComponent),
+        data: { privileges: pickPrivileges('USERS', ['EDIT_SYSTEM_SETTINGS']) },
+      },
+
+      // ── Users ──────────────────────────────────────────────────────────
+      {
+        path: 'users',
+        loadComponent: () => import('./components/system-admin/users/home/home').then(m => m.UsersHomeComponent),
+        data: { privileges: pickPrivileges('USERS', ['VIEW_USERS', 'CREATE_USER', 'UPDATE_USER', 'DELETE_USER', 'DEACTIVATE_USER']) },
+      },
+      {
+        path: 'users/register',
+        loadComponent: () => import('./components/system-admin/users/register/register').then(m => m.RegisterComponent),
+        data: { privileges: pickPrivileges('USERS', ['CREATE_USER']) },
+      },
+      {
+        path: 'users/deactivated',
+        loadComponent: () => import('./components/system-admin/users/deactivated/deactivated').then(m => m.DeactivatedComponent),
+        data: { privileges: pickPrivileges('USERS', ['ACTIVATE_USER', 'DEACTIVATE_USER']) },
+      },
+      {
+        path: 'users/deleted',
+        loadComponent: () => import('./components/system-admin/users/deleted/deleted').then(m => m.DeletedUsersComponent),
+        data: { privileges: pickPrivileges('USERS', ['RESTORE_USER']) },
+      },
+      {
+        path: 'users/controles',
+        loadComponent: () => import('./components/system-admin/controles/controles').then(m => m.ControleComponent),
+        data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) },
+      },
+      {
+        path: 'users/roles',
+        loadComponent: () => import('./components/system-admin/roles/roles').then(m => m.RoleComponent),
+        data: { privileges: pickPrivileges('USERS', ['ASSIGN_ROLES']) },
+      },
+      {
+        path: 'users/change-password/:authUserId',
+        loadComponent: () => import('./components/system-admin/users/change-password/change-password').then(m => m.ChangePasswordComponent),
+        data: { privileges: pickPrivileges('USERS', ['VIEW_USERS', 'UPDATE_USER']) },
+      },
+      {
+        path: 'users/:authUserId',
+        loadComponent: () => import('./components/user/profile/profile').then(m => m.ProfileComponent),
+        data: { privileges: pickPrivileges('USERS', ['VIEW_USERS', 'UPDATE_USER']) },
+      },
+
+      // ── Articles ───────────────────────────────────────────────────────
+      {
+        path: 'articles/categories',
+        loadComponent: () => import('./components/articles/categories/categories').then(m => m.ArticleCategoriesComponent),
+        data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES', 'CREATE_ARTICLE', 'UPDATE_ARTICLE']) },
+      },
+      {
+        path: 'articles/:id',
+        loadComponent: () => import('./components/articles/home/home').then(m => m.ArticleComponent),
+        data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES']) },
+      },
+      {
+        path: 'articles',
+        loadComponent: () => import('./components/articles/home/home').then(m => m.ArticleComponent),
+        data: { privileges: pickPrivileges('ARTICLES', ['VIEW_ARTICLES', 'CREATE_ARTICLE', 'UPDATE_ARTICLE', 'DELETE_ARTICLE']) },
+      },
+
+      // ── Clients ────────────────────────────────────────────────────────
+      {
+        path: 'clients/categories',
+        loadComponent: () => import('./components/clients/categories/categories').then(m => m.ClientCategoriesComponent),
+        data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS', 'CREATE_CLIENT', 'UPDATE_CLIENT']) },
+      },
+      {
+        path: 'clients/categories/:id',
+        loadComponent: () => import('./components/clients/categories/categories').then(m => m.ClientCategoriesComponent),
+        data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS']) },
+      },
+      {
+        path: 'clients/:id',
+        loadComponent: () => import('./components/clients/home/home').then(m => m.ClientsComponent),
+        data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS', 'UPDATE_CLIENT', 'DELETE_CLIENT']) },
+      },
+      {
+        path: 'clients',
+        loadComponent: () => import('./components/clients/home/home').then(m => m.ClientsComponent),
+        data: { privileges: pickPrivileges('CLIENTS', ['VIEW_CLIENTS', 'CREATE_CLIENT', 'UPDATE_CLIENT', 'DELETE_CLIENT']) },
+      },
+
+      // ── Invoices ───────────────────────────────────────────────────────
+      {
+        path: 'invoices/create',
+        loadComponent: () => import('./components/invoices/create/create').then(m => m.CreateInvoiceComponent),
+        data: { privileges: pickPrivileges('INVOICES', ['CREATE_INVOICE']) },
+      },
+      {
+        path: 'invoices/edit/:id',
+        loadComponent: () => import('./components/invoices/edit/edit').then(m => m.EditInvoiceComponent),
+        data: { privileges: pickPrivileges('INVOICES', ['UPDATE_DRAFT_INVOICE']) },
+      },
+      {
+        path: 'invoices/:id',
+        loadComponent: () => import('./components/invoices/view/view').then(m => m.ViewInvoiceComponent),
+        data: { privileges: pickPrivileges('INVOICES', ['VIEW_INVOICES']) },
+      },
+      {
+        path: 'invoices',
+        loadComponent: () => import('./components/invoices/invoices').then(m => m.InvoicesComponent),
+        data: { privileges: pickPrivileges('INVOICES', ['VIEW_INVOICES']) },
+      },
+
+      // ── Stock ──────────────────────────────────────────────────────────
+      {
+        path: 'stock/fournisseurs/:id',
+        loadComponent: () => import('./components/stock/fournisseur/fournisseur').then(m => m.FournisseurComponent),
+        data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK']) },
+      },
+      {
+        path: 'stock/fournisseurs',
+        loadComponent: () => import('./components/stock/fournisseur/fournisseur').then(m => m.FournisseurComponent),
+        data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK', 'UPDATE_STOCK', 'ADD_ENTRY']) },
+      },
+      {
+        path: 'stock/bons',
+        loadComponent: () => import('./components/stock/bon/bon').then(m => m.BonsComponent),
+        data: { privileges: pickPrivileges('STOCK', ['VIEW_STOCK', 'UPDATE_STOCK', 'ADD_ENTRY']) },
+      },
+
+      // ── Payments ───────────────────────────────────────────────────────
+      {
+        path: 'payments/refunds/:id',
+        loadComponent: () => import('./components/payments/refund/view/view').then(m => m.RefundViewComponent),
+        data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'MANAGE_PAYMENTS']) },
+      },
+      {
+        path: 'payments/refunds',
+        loadComponent: () => import('./components/payments/refund/refund').then(m => m.RefundsComponent),
+        data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'MANAGE_PAYMENTS']) },
+      },
+      {
+        path: 'payments/:id',
+        loadComponent: () => import('./components/payments/view/view').then(m => m.ViewPaymentComponent),
+        data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS']) },
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./components/payments/payments').then(m => m.PaymentComponent),
+        data: { privileges: pickPrivileges('PAYMENTS', ['VIEW_PAYMENTS', 'RECORD_PAYMENT', 'CANCEL_PAYMENT']) },
+      },
+
+      // ── Tenants ────────────────────────────────────────────────────────
+      // NOTE: 'tenants/edit/:id' must come before 'tenants/:id' to avoid
+      //       'edit' being matched as the :id param.
+      {
+        path: 'tenants/edit/:id',
+        loadComponent: () => import('./components/tenants/edit/edit').then(m => m.EditTenantComponent),
+        data: { privileges: pickPrivileges('TENANTS', ['UPDATE_TENANT', 'MANAGE_SUBSCRIPTIONS']) },
+      },
+      {
+        path: 'tenants/:id',
+        loadComponent: () => import('./components/tenants/view/view').then(m => m.ViewTenantComponent),
+        data: { privileges: pickPrivileges('TENANTS', ['VIEW_TENANTS', 'MANAGE_SUBSCRIPTIONS', 'VIEW_BILLING']) },
+      },
+      {
+        path: 'tenants',
+        loadComponent: () => import('./components/tenants/home/home').then(m => m.TenantsComponent),
+        data: {
+          privileges: pickPrivileges('TENANTS', [
+            'VIEW_TENANTS', 'CREATE_TENANT', 'UPDATE_TENANT',
+            'DELETE_TENANT', 'RESTORE_TENANT', 'MANAGE_SUBSCRIPTIONS', 'VIEW_BILLING',
+          ]),
+        },
+      },
+
+      // ── Subscription expiry ────────────────────────────────────────────
       {
         path: 'subscription-expiry',
-        component: SubscriptionExpiryComponent,
-        canActivate: [authGuard] // must be logged in to reach this page
+        loadComponent: () => import('./components/tenants/subscription-expiry/subscription-expiry').then(m => m.SubscriptionExpiryComponent),
       },
 
-      // Default shell child → home
+      // ── Default shell child ────────────────────────────────────────────
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-    ]
+    ],
   },
 
-  // ── Root redirect & fallback ─────────────────────────────────────────────
+  // ── Fallback ─────────────────────────────────────────────────────────────
   { path: '**', redirectTo: 'plans' },
 ];
