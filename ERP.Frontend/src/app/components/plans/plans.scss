@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@use 'sass:color';
 
 // ─── Shared var bridges (same tokens UserSettingsService sets on body) ──
 // These already flip between dark/light automatically — use them directly
@@ -431,7 +431,7 @@ $blue:      #4e7cff;
     border: 1px solid $blue;
     color: #fff;
     &:hover {
-      background: lighten(#4e7cff, 10%);
+      background: color.adjust(#4e7cff, $lightness: 10%);
       box-shadow: 0 4px 16px rgba(78,124,255,0.35);
     }
   }
@@ -457,8 +457,7 @@ $blue:      #4e7cff;
 
   svg { flex-shrink: 0; transition: transform 0.15s; }
   &:hover:not(:disabled) {
-    background: lighten(#4e7cff, 10%);
-    box-shadow: 0 4px 16px rgba(78,124,255,0.3);
+background: color.adjust(#4e7cff, $lightness: 10%);    box-shadow: 0 4px 16px rgba(78,124,255,0.3);
     svg { transform: translateX(3px); }
   }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
