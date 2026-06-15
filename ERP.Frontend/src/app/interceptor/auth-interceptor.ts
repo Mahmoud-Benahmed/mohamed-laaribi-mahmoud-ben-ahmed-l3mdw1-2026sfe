@@ -89,11 +89,9 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         const code = error.error?.code;
         if (code === 'TENANT_INACTIVE') return throwError(() => error);
         if (code === 'TENANT_USER_LIMIT_REACHED') return throwError(() => error);
-
+        if (code === 'AUTH_006') return throwError(() => error);
 
         const isInactive = code === 'AUTH_003';
-
-        console.log('error.error:', error.error, 'code:', error.error?.code);
 
         dialog.open(ModalComponent, {
           width: '540px',
