@@ -218,27 +218,26 @@ The application bootstraps through `bootstrapApplication(App, appConfig)` with a
 
 ```typescript
 // app.config.ts — abridged
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    provideHttpClient(
-      withInterceptors([
-        LoadingInterceptor,
-        errorTranslateInterceptor,
-        TenantInactiveInterceptor,
-        AuthInterceptor,
-      ])
-    ),
+    provideRouter(routes),provideHttpClient(withInterceptors([
+      apiInterceptor,
+      LoadingInterceptor,
+      errorTranslateInterceptor,
+      TenantInactiveInterceptor,
+      AuthInterceptor
+    ])),
     provideTranslateService({
       fallbackLang: 'en',
       loader: {
         provide: TranslateLoader,
         useFactory: (http: HttpClient) => new HttpTranslateLoader(http),
-        deps: [HttpClient],
-      },
-    }),
-  ],
+        deps: [HttpClient]
+      }
+    })
+  ]
 };
 ```
 
@@ -256,3 +255,45 @@ The **route table** in `app.routes.ts` is structured in three tiers:
 3. **Wildcard fallback** — `{ path: '**', redirectTo: 'plans' }` routes unknown paths back to the public landing page.
 
 Route-level privilege declarations use a typed `pickPrivileges(category, keys)` helper that selects values from the `PRIVILEGES` constant at module load time, providing type safety and preventing string typos in route data — the guard receives an already-resolved `string[]` of privilege identifiers rather than raw literals.
+
+---
+
+## 🐳 Local Development & Docker Deployment Notes
+
+### Local Development (without Docker)
+
+For local development using `ng serve` (or `npm start`), you must set the `production` flag in `src/app/environment.ts` to `false`:
+
+```ts
+export const environment = {
+  production: false,   // ← must be false
+  apiUrl: '/api',
+  // ... rest of config
+};
+```
+
+This disables production‑only behaviours such as forced password change redirections and enables development tools.
+
+### Docker Compose (Full Stack)
+
+When running the full stack with Docker Compose (`docker-compose.yaml`), the application is built inside a container and served by Nginx. The Nginx configuration expects the frontend to be reachable via the domain `erp.local` and its subdomains (e.g., `*.erp.local`). To make this work on your local machine, you **must** add the following entry to your operating system’s `hosts` file:
+
+```
+127.0.0.1   erp.local
+127.0.0.1   *.erp.local
+```
+
+> **Windows** (`C:\Windows\System32\drivers\etc\hosts`)
+> **Linux / macOS** (`/etc/hosts`)
+
+This ensures that any request to `erp.local` or `tenant.erp.local` resolves to your local Docker host, and Nginx can correctly proxy the request to the Gateway service.
+
+### Local Infrastructure Only (docker-compose.local.yaml)
+
+If you only want to run the supporting infrastructure (SQL Server, MongoDB, Kafka, Redis) and run the .NET microservices directly from Visual Studio or Rider, use the `docker-compose.local.yaml` file:
+
+```bash
+docker-compose -f docker-compose.local.yaml up -d
+```
+
+In this mode the frontend is **not** built inside Docker; you run `ng serve` locally. You must still set `production: false` in `environment.ts` and point your local Angular dev server to the correct API endpoint (usually `http://localhost:8080` via the Gateway, but the exact URL depends on your local setup).
