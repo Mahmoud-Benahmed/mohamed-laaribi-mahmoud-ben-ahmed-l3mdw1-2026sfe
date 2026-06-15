@@ -26,7 +26,8 @@ public record InvoiceDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     bool IsDeleted,
-    List<InvoiceItemDto> Items
+    List<InvoiceItemDto> Items,
+    Guid? TenantId
 );
 
 public record InvoiceItemDto(

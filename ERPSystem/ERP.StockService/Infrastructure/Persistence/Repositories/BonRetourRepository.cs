@@ -1,4 +1,5 @@
 ﻿using ERP.StockService.Application.DTOs;
+using ERP.StockService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -37,6 +38,10 @@ public class BonRetourRepository : IBonRetourRepository
         await _context.BonRetours
             .Include(b => b.Lignes)
             .FirstOrDefaultAsync(b => b.Id == id);
+    public async Task<BonRetour?> GetByIdForUpdateAsync(Guid id) =>
+    await _context.BonRetours
+        .Include(b => b.Lignes)
+        .FirstOrDefaultAsync(b => b.Id == id);
 
     public async Task<(List<BonRetour> Items, int TotalCount)> GetAllAsync(int page, int size)
     {
@@ -104,6 +109,30 @@ public class BonRetourRepository : IBonRetourRepository
             .ToListAsync();
 
         return (items, total);
+    }
+
+    public async Task ReplaceLignesAsync(BonRetour bon, List<LigneRequestDto> newLignes)
+    {
+        var trackedLignes = _context.ChangeTracker.Entries<LigneRetour>()
+            .Where(e => e.Entity.BonRetourId == bon.Id)
+            .ToList();
+        foreach (var entry in trackedLignes)
+            entry.State = EntityState.Detached;
+
+        await _context.LigneRetours
+            .IgnoreQueryFilters()
+            .Where(l => l.BonRetourId == bon.Id)
+            .ExecuteDeleteAsync();
+
+        bon.ClearLignes();
+
+        foreach (var l in newLignes)
+        {
+            var ligne = bon.AddLigne(l.ArticleId, l.Quantity, l.Price);
+
+            // ✅ Force EF to track it as Added — bypasses ValueGeneratedOnAdd confusion
+            _context.Entry(ligne).State = EntityState.Added;
+        }
     }
 
     public async Task<BonStatsDto> GetStatsAsync()

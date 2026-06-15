@@ -1,9 +1,14 @@
-using ERP.Gateway.AuthServiceClient;
+using ERP.Gateway.Cache;
+using ERP.Gateway.Infrastructure.BackgroundServices;
+using ERP.Gateway.Infrastructure.Messaging;
 using ERP.Gateway.Middleware;
 using ERP.Gateway.Properties;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,35 +16,38 @@ using System.Threading.RateLimiting;
 using Yarp.ReverseProxy.Transforms;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
 ConfigurationManager config = builder.Configuration;
-
-string GetAuthServiceAddress()
+string GetClusterAddress(string clusterName, string destinationName)
 {
-    // Read from ReverseProxy configuration
-    IConfigurationSection authCluster = config.GetSection("ReverseProxy:Clusters:authCluster");
-    IConfigurationSection destination = authCluster.GetSection("Destinations:authDestination");
-    string? address = destination["Address"];
+    var address = config[
+        $"ReverseProxy:Clusters:{clusterName}:Destinations:{destinationName}:Address"]
+        ?? throw new InvalidOperationException(
+            $"Cluster '{clusterName}' destination '{destinationName}' not found in ReverseProxy configuration.");
 
-    if (string.IsNullOrEmpty(address))
-    {
-        throw new InvalidOperationException("AuthService address not found in ReverseProxy configuration");
-    }
-
-    return address.TrimEnd('/'); // Remove trailing slash if present
+    return address.TrimEnd('/');
 }
 
-string authServiceUrl = GetAuthServiceAddress();
 
-builder.Services.AddHttpClient<IAuthServiceClient, AuthServiceClient>(client =>
-{
-    client.BaseAddress = new Uri(authServiceUrl);
-    client.Timeout = TimeSpan.FromSeconds(5);
-});
+/////////////////////////////////////////////////////////////
+// Health Checks
+/////////////////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy());
+builder.Services.AddHttpContextAccessor();
 
+var jwtSecret = config["JWT:Secret"] ?? throw new InvalidOperationException("JWT:Secret is not configured.");
+var jwtIssuer = config["JWT:Issuer"] ?? throw new InvalidOperationException("JWT:Issuer is not configured.");
+var jwtAudience = config["JWT:Audience"] ?? throw new InvalidOperationException("JWT:Audience is not configured.");
 
-//////////////////////////////////////////////////
-// JWT Authentication
-//////////////////////////////////////////////////
+builder.Services.AddHttpClient<ITenantDirectoryClient, TenantDirectoryClient>(
+    client =>
+    {
+        client.BaseAddress = new Uri(GetClusterAddress("tenantCluster", "tenantDestination"));
+
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
 
 builder.Services.AddAuthentication(options =>
 {
@@ -50,9 +58,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.MapInboundClaims = false;
 
-    SymmetricSecurityKey signingKey = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(config["JWT:Secret"]
-            ?? throw new InvalidOperationException("JWT:Secret is not configured.")));
+    var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
     signingKey.KeyId = "erp-key-1";
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -61,64 +67,67 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = config["JWT:Issuer"],
-        ValidAudience = config["JWT:Audience"],
+
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey,
+
         RoleClaimType = "role",
-        ClockSkew = TimeSpan.FromMinutes(5),
+        NameClaimType = "login",
+
+        ClockSkew = TimeSpan.FromMinutes(1),
     };
 
     options.Events = new JwtBearerEvents
     {
-        OnAuthenticationFailed = context =>
+        OnAuthenticationFailed = context => Task.CompletedTask,
+
+        // ✅ ONLY validates consistency — does NOT resolve tenant
+        OnTokenValidated = context =>
         {
+            var jwtTenantId = context.Principal?.FindFirstValue("tenantId");
+            var resolvedTenantId = context.HttpContext.Items["tenantId"]?.ToString();
+
+            // Both are now strings — comparison is safe
+            if (!string.IsNullOrEmpty(jwtTenantId) &&
+                !string.IsNullOrEmpty(resolvedTenantId) &&
+                !string.Equals(jwtTenantId, resolvedTenantId, StringComparison.OrdinalIgnoreCase))
+            {
+                context.Fail("Tenant mismatch: JWT tenantId does not match the resolved tenant.");
+            }
+
             return Task.CompletedTask;
         },
-        OnTokenValidated = async context =>
-        {
-            string? tokenString = context.Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
 
-            if (string.IsNullOrEmpty(tokenString))
-            {
-                context.Fail("No token provided");
-                return;
-            }
-
-            // Call AuthService to validate token and check user existence
-            IAuthServiceClient authServiceClient = context.HttpContext.RequestServices.GetRequiredService<IAuthServiceClient>();
-            TokenValidationResponse validationResult = await authServiceClient.ValidateTokenAsync(tokenString);
-            if (!validationResult.IsValid)
-            {
-                context.Fail(validationResult.Reason ?? "User validation failed");
-                return;
-            }
-
-            // Optionally: Add additional claims from the validation result
-            ClaimsIdentity? identity = context.Principal?.Identity as ClaimsIdentity;
-            if (identity != null && validationResult.User != null)
-            {
-                identity.AddClaim(new Claim("user_validated", "true"));
-                identity.AddClaim(new Claim("user_email", validationResult.User.Email ?? ""));
-                identity.AddClaim(new Claim("user_fullname", validationResult.User.FullName ?? ""));
-            }
-        },
         OnChallenge = async context =>
         {
             context.HandleResponse();
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(
-               """{"statusCode":401,"code":"AUTH_006","message":"Authentication required. Please log in."}""");
+            await context.Response.WriteAsJsonAsync(new
+            {
+                statusCode = 401,
+                code = "AUTH_006",
+                message = "Authentication required. Please log in."
+            });
         },
+
         OnForbidden = async context =>
         {
             context.Response.StatusCode = 403;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(
-                """{"statusCode":403,"code":"AUTH_007","message":"You do not have permission to access this resource."}""");
+            await context.Response.WriteAsJsonAsync(new
+            {
+                statusCode = 403,
+                code = "AUTH_006",
+                message = "You do not have permission to access this resource."
+            });
         }
     };
 });
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>(); 
+builder.Services.AddHostedService<TenantCacheWarmupService>();
 
 //////////////////////////////////////////////////
 // Authorization
@@ -130,30 +139,43 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 
-    options.AddPolicy("JwtPolicy", p => p.RequireAuthenticatedUser()); // ← single declaration
+    void Add(string policy, params string[] privileges) =>
+        options.AddPolicy(policy, p =>
+            p.RequireAuthenticatedUser()
+             .RequireAssertion(ctx =>
+                 privileges.Any(r => ctx.User.HasClaim("privilege", r))));
+
+    options.AddPolicy("JwtPolicy", p => p.RequireAuthenticatedUser());
 
     options.AddPolicy("AdminOnly", p =>
         p.RequireAuthenticatedUser()
          .RequireRole(Roles.SystemAdmin));
 
-    // ── Individual privilege policies ──────────────────────────────────────
+    // ── Individual tenant privileges (platform-scoped)
+    Add(TenantPrivileges.VIEW_TENANTS, TenantPrivileges.VIEW_TENANTS);
+    Add(TenantPrivileges.CREATE_TENANT, TenantPrivileges.CREATE_TENANT);
+    Add(TenantPrivileges.UPDATE_TENANT, TenantPrivileges.UPDATE_TENANT);
+    Add(TenantPrivileges.DELETE_TENANT, TenantPrivileges.DELETE_TENANT);
+    Add(TenantPrivileges.SUSPEND_TENANT, TenantPrivileges.SUSPEND_TENANT);
+    Add(TenantPrivileges.ACTIVATE_TENANT, TenantPrivileges.ACTIVATE_TENANT);
+    Add(TenantPrivileges.MANAGE_SUBSCRIPTIONS, TenantPrivileges.MANAGE_SUBSCRIPTIONS);
+    Add(TenantPrivileges.VIEW_BILLING, TenantPrivileges.VIEW_BILLING);
+
+    // ── Individual privilege policies (tenant-scoped, from registry)
     foreach (PrivilegeDefinition privilege in PrivilegeRegistry.All)
-    {
-        options.AddPolicy(privilege.Code, p =>
-            p.RequireAuthenticatedUser()
-             .RequireClaim("privilege", privilege.Code));
-    }
+        Add(privilege.Code, privilege.Code);
 
-    // ── MANAGE composite policies ──────────────────────────────────────────
-    void AddManagePolicy(string manageCode, params string[] related)
-    {
-        options.AddPolicy(manageCode, p =>
-            p.RequireAuthenticatedUser()
-             .RequireAssertion(ctx =>
-                 related.Any(r => ctx.User.HasClaim("privilege", r))));
-    }
+    // ── Composite policies
+    Add("ASSIGN_SUBSCRIPTION_OR_BUY",
+        TenantPrivileges.MANAGE_SUBSCRIPTIONS,
+        Privileges.Users.BUY_SUBSCRIPTION); ;
 
-    AddManagePolicy(Privileges.Users.MANAGE_USERS,
+    Add("EDIT_TENANT_SETTINGS", 
+        Privileges.Users.EDIT_SYSTEM_SETTINGS, 
+        TenantPrivileges.UPDATE_TENANT
+    );
+
+    Add(Privileges.Users.MANAGE_USERS,
         Privileges.Users.VIEW_USERS,
         Privileges.Users.CREATE_USER,
         Privileges.Users.UPDATE_USER,
@@ -163,17 +185,17 @@ builder.Services.AddAuthorization(options =>
         Privileges.Users.RESTORE_USER,
         Privileges.Users.ASSIGN_ROLES);
 
-    AddManagePolicy("MANAGE_ROLES",
+    Add("MANAGE_ROLES",
         Privileges.Users.CREATE_ROLE,
         Privileges.Users.UPDATE_ROLE,
         Privileges.Users.DELETE_ROLE);
 
-    AddManagePolicy("MANAGE_CONTROLES",
+    Add("MANAGE_CONTROLES",
         Privileges.Users.CREATE_CONTROLE,
         Privileges.Users.UPDATE_CONTROLE,
         Privileges.Users.DELETE_CONTROLE);
 
-    AddManagePolicy("MANAGE_CLIENTS",
+    Add("MANAGE_CLIENTS",
         Privileges.Clients.VIEW_CLIENTS,
         Privileges.Clients.CREATE_CLIENT,
         Privileges.Clients.UPDATE_CLIENT,
@@ -184,7 +206,7 @@ builder.Services.AddAuthorization(options =>
         Privileges.Clients.DELETE_CLIENT_CATEGORIES,
         Privileges.Clients.RESTORE_CLIENT_CATEGORIES);
 
-    AddManagePolicy("MANAGE_ARTICLES",
+    Add("MANAGE_ARTICLES",
         Privileges.Articles.VIEW_ARTICLES,
         Privileges.Articles.CREATE_ARTICLE,
         Privileges.Articles.UPDATE_ARTICLE,
@@ -195,7 +217,7 @@ builder.Services.AddAuthorization(options =>
         Privileges.Articles.DELETE_ARTICLE_CATEGORIES,
         Privileges.Articles.RESTORE_ARTICLE_CATEGORIES);
 
-    AddManagePolicy("MANAGE_INVOICES",
+    Add("MANAGE_INVOICES",
         Privileges.Invoices.VIEW_INVOICES,
         Privileges.Invoices.CREATE_INVOICE,
         Privileges.Invoices.UPDATE_DRAFT_INVOICE,
@@ -204,44 +226,38 @@ builder.Services.AddAuthorization(options =>
         Privileges.Invoices.DELETE_INVOICE,
         Privileges.Invoices.RESTORE_INVOICE);
 
-    AddManagePolicy("MANAGE_PAYMENTS",
+    Add("MANAGE_PAYMENTS",
         Privileges.Payments.VIEW_PAYMENTS,
         Privileges.Payments.RECORD_PAYMENT,
         Privileges.Payments.CANCEL_PAYMENT);
 
-    AddManagePolicy("MANAGE_STOCK",
+    Add("MANAGE_STOCK",
         Privileges.Stock.VIEW_STOCK,
         Privileges.Stock.UPDATE_STOCK,
         Privileges.Stock.ADD_ENTRY);
 
-    AddManagePolicy("MANAGE_FOURNISSEURS",
+    Add("MANAGE_FOURNISSEURS",
         Privileges.Fournisseurs.VIEW_FOURNISSEURS,
         Privileges.Fournisseurs.CREATE_FOURNISSEUR,
         Privileges.Fournisseurs.UPDATE_FOURNISSEUR,
         Privileges.Fournisseurs.DELETE_FOURNISSEUR,
         Privileges.Fournisseurs.RESTORE_FOURNISSEUR);
 
-    AddManagePolicy("MANAGE_REPORTS",
+    Add("MANAGE_REPORTS",
         Privileges.Reports.VIEW_REPORTS,
         Privileges.Reports.EXPORT_REPORTS);
 
-    options.AddPolicy("MANAGE_AUDITLOGS", p =>
-        p.RequireAuthenticatedUser()
-         .RequireClaim("privilege", Privileges.Audit.MANAGE_AUDITLOGS));
+    Add("MANAGE_CLIENTS_STOCK",
+        Privileges.Clients.VIEW_CLIENTS,
+        Privileges.Stock.VIEW_STOCK,
+        Privileges.Stock.ADD_ENTRY,
+        Privileges.Stock.UPDATE_STOCK);
 
-    options.AddPolicy("MANAGE_CLIENTS_STOCK", p =>
-    p.RequireAuthenticatedUser()
-     .RequireAssertion(context =>
-         context.User.Claims.Any(c =>
-             c.Type == "privilege" &&
-             (c.Value == Privileges.Clients.VIEW_CLIENTS ||
-             c.Value == Privileges.Stock.VIEW_STOCK ||
-              c.Value == Privileges.Stock.ADD_ENTRY ||
-              c.Value == Privileges.Stock.UPDATE_STOCK))));
+    Add("MANAGE_AUDITLOGS", Privileges.Audit.MANAGE_AUDITLOGS);
 });
 
 //////////////////////////////////////////////////
-// Rate Limiting  — unchanged
+// Rate Limiting
 //////////////////////////////////////////////////
 
 builder.Services.AddRateLimiter(options =>
@@ -259,11 +275,8 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("LoginPolicy", context =>
     {
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
         var userId = context.User?.FindFirst("sub")?.Value;
-
         var login = context.Request.Headers["X-Login"].FirstOrDefault();
-
         var identity = userId ?? login ?? ip;
 
         var userAgent = context.Request.Headers.UserAgent.ToString();
@@ -352,7 +365,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 //////////////////////////////////////////////////
-// CORS  — unchanged
+// CORS
 //////////////////////////////////////////////////
 
 builder.Services.AddCors(options =>
@@ -364,7 +377,7 @@ builder.Services.AddCors(options =>
 });
 
 //////////////////////////////////////////////////
-// YARP  — unchanged
+// YARP
 //////////////////////////////////////////////////
 
 builder.Services.AddReverseProxy()
@@ -384,8 +397,19 @@ builder.Services.AddReverseProxy()
             if (!string.IsNullOrEmpty(role))
                 transformContext.ProxyRequest.Headers
                     .TryAddWithoutValidation("X-User-Role", role);
+
+            await Task.CompletedTask;
         });
     });
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration =
+        builder.Configuration.GetConnectionString("REDIS");
+
+    return ConnectionMultiplexer.Connect(configuration);
+});
+builder.Services.AddSingleton<ITenantCache, RedisTenantCache>();
 
 //////////////////////////////////////////////////
 // Pipeline
@@ -394,7 +418,6 @@ builder.Services.AddReverseProxy()
 WebApplication app = builder.Build();
 
 app.UseCors("AllowFrontend");
-
 app.UseSecurityHeaders();
 
 if (!app.Environment.IsDevelopment())
@@ -402,9 +425,73 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseMiddleware<RequestLoggingMiddleware>();
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (HttpRequestException)
+    {
+        context.Response.StatusCode = 503;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 503,
+            code = "TENANT_SERVICE_UNAVAILABLE",
+            message = "Tenant service is unavailable."
+        });
+    }
+    catch (TaskCanceledException)
+    {
+        context.Response.StatusCode = 503;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 503,
+            code = "TENANT_SERVICE_TIMEOUT",
+            message = "Tenant service request timed out."
+        });
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 500,
+            code = "INTERNAL_ERROR",
+            message = $"{ex.Message}"
+            //message = "An unexpected error occurred."
+        });
+    }
+});
+
 app.UseRateLimiter();
+
+// ✅ STEP 4: Authentication — OnTokenValidated reads Items["tenantId"] set above
 app.UseAuthentication();
+
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.UseAuthorization();
+
+// ✅ STEP 6: YARP — transform reads Items["tenantId"], no re-resolution
 app.MapReverseProxy();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name != "self"
+});
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
 
 app.Run();

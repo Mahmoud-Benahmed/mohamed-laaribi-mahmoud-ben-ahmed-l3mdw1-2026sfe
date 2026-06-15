@@ -6,10 +6,14 @@ namespace ERP.ArticleService.Application.Interfaces
     public interface IArticleRepository
     {
         Task AddAsync(Article article);
+        Task<bool> DuplicateExists(string code, Guid? excludeId = null);
         Task<Article?> GetByIdAsync(Guid id);
         Task<Article?> GetByIdDeletedAsync(Guid id);
         Task<Article?> GetByCodeAsync(string code);
         Task<Article?> GetByBarCodeAsync(string barCode);
+
+        Task<bool> ExistsForCategoryAsync(Guid categoryId);
+        Task<bool> ExistsByIdAsync(Guid id);
 
         Task SaveChangesAsync();
 

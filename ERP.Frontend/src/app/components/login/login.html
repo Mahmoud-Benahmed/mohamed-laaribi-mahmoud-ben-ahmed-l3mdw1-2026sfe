@@ -1,13 +1,18 @@
 <div class="login-container" >
+  <div class="login-shape-mid"></div>
 
   <!-- Brand -->
   <div class="login-brand">
-    <div class="login-brand__icon"><img src="favicon.ico" alt=""></div>
-    <div class="login-brand__name">ERPSuite</div>
+    <div class="login-brand__row">
+      <div class="login-brand__icon"><img src="favicon.ico" alt=""></div>
+      <div class="login-brand__name">ERPSuite</div>
+    </div>
     <div class="login-brand__sub">Enterprise Resource Planning</div>
   </div>
 
 <div class="login-topbar">
+
+  <button class="btn-back" routerLink="/">{{ 'common.back' | translate }}</button>
 
   <!-- Language toggle -->
   <div class="lang-toggle">
@@ -39,7 +44,7 @@
 
   <!-- Theme toggle -->
   <button class="shell-topbar__theme-btn" (click)="userSettings.toggleTheme()" type="button"
-          [title]="userSettings.isDark ? ('TOGGLE_THEME.LIGHT' | translate) : ('TOGGLE_THEME.DARK' | translate)">
+          [title]="userSettings.isDark ? ('toggle_theme.light' | translate) : ('toggle_theme.dark' | translate)">
     <svg *ngIf="userSettings.isDark" width="17" height="17" viewBox="0 0 24 24"
          fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
@@ -58,13 +63,13 @@
 
   <!-- Card -->
   <div class="login-card">
-    <h1 class="login-card__title">{{ 'LOGIN.TITLE' | translate }}</h1>
+    <h1 class="login-card__title">{{ 'auth.login.title' | translate }}</h1>
 
     <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
 
       <!-- Login -->
       <div class="field">
-        <label class="field__label" for="login">{{ 'LOGIN.LOGIN' | translate }}</label>
+        <label class="field__label" for="login">{{ 'auth.login.login' | translate }}</label>
         <div class="field__wrapper">
           <span class="field__icon">
             <mat-icon>person_outline</mat-icon>
@@ -72,22 +77,21 @@
           <input
             id="login"
             type="text"
-            placeholder="{{ 'LOGIN.LOGIN_PLACEHOLDER' | translate }}"
+            placeholder="{{ 'auth.login.login_placeholder' | translate }}"
             required
-            [pattern]="loginPattern"
             formControlName="login"
             autocomplete="username"
             [class.form__input--error]="loginForm.get('login')?.invalid && loginForm.get('login')?.touched"
             />
         </div>
         <span class="field__error" *ngIf="loginForm.get('login')?.invalid && loginForm.get('login')?.touched">
-          {{ 'LOGIN.LOGIN_REQUIRED' | translate }}
+          {{ 'auth.login.login_required' | translate }}
         </span>
       </div>
 
       <!-- Password -->
       <div class="field">
-        <label class="field__label" for="password">{{ 'LOGIN.PASSWORD' | translate }}</label>
+        <label class="field__label" for="password">{{ 'auth.login.password' | translate }}</label>
         <div class="field__wrapper">
           <span class="field__icon">
             <mat-icon>lock_outline</mat-icon>
@@ -95,7 +99,7 @@
           <input
             id="password"
             [type]="showPassword ? 'text' : 'password'"
-            placeholder="{{ 'LOGIN.PASSWORD_PLACEHOLDER' | translate }}"
+            placeholder="{{ 'auth.login.password_placeholder' | translate }}"
             formControlName="password"
             required
             autocomplete="current-password"
@@ -105,7 +109,7 @@
           </button>
         </div>
         <span class="field__error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-          {{ 'LOGIN.PASSWORD_REQUIRED' | translate }}
+          {{ 'auth.login.password_required' | translate }}
         </span>
       </div>
 
@@ -118,12 +122,11 @@
         @if (isLoading) {
           <div class="btn-loading">
             <mat-progress-spinner diameter="18" mode="indeterminate" color="accent" />
-            {{ 'LOGIN.CONNECTING' | translate }}
+            {{ 'auth.login.connecting' | translate }}
           </div>
         } @else {
-          {{ 'LOGIN.SIGN_IN' | translate }}
+          {{ 'auth.login.sign_in' | translate }}
         }
-
       </button>
 
     </form>

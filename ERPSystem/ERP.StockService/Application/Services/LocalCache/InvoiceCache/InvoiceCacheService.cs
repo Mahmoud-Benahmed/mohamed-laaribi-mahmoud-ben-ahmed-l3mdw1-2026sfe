@@ -10,17 +10,20 @@ namespace ERP.StockService.Application.Services.LocalCache.InvoiceCache
         private readonly IBonRetourService _bonRetourService;
         private readonly IBonSortieService _bonSortieService;
         private readonly IInvoiceBonSortieMappingRepository _invoiceBonSortieMappingRepo;
+        private readonly ITenantContext _tenantContext;
 
         public InvoiceCacheService(
                                     IJournalStockRepository journalStockRepo,
                                     IBonRetourService bonRetourService,
                                     IBonSortieService bonSortieService,
-                                    IInvoiceBonSortieMappingRepository invoiceBonSortieMappingRepo)
+                                    IInvoiceBonSortieMappingRepository invoiceBonSortieMappingRepo,
+                                    ITenantContext tenantContext)
         {
             _journalStockRepo = journalStockRepo;
             _bonRetourService = bonRetourService;
             _bonSortieService = bonSortieService;
             _invoiceBonSortieMappingRepo = invoiceBonSortieMappingRepo;
+            _tenantContext = tenantContext;
         }
 
         public async Task SyncCreatedAsync(InvoiceDto invoiceDto)
@@ -43,7 +46,7 @@ namespace ERP.StockService.Application.Services.LocalCache.InvoiceCache
             );
 
             BonSortieResponseDto bonSortie = await _bonSortieService.CreateAsync(createBonSortieDto);
-            InvoiceBonSortieMapping mapping = new InvoiceBonSortieMapping(invoiceDto.Id, bonSortie.Id);
+            InvoiceBonSortieMapping mapping = new InvoiceBonSortieMapping(invoiceDto.Id, bonSortie.Id, _tenantContext.TenantId);
             await _invoiceBonSortieMappingRepo.AddAsync(mapping);
             await _invoiceBonSortieMappingRepo.SaveChangesAsync();
         }

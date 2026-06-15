@@ -7,10 +7,12 @@ public sealed class LigneEntre : LigneStock
 
     private LigneEntre() { }
 
-    internal static LigneEntre Create(Guid bonEntreId, Guid articleId, decimal qty, decimal price)
+    internal static LigneEntre Create(Guid bonEntreId, Guid articleId, decimal qty, decimal price, Guid? tenantId = null)
     {
         LigneEntre ligne = new LigneEntre
         {
+            Id= Guid.NewGuid(),
+            TenantId = tenantId,
             BonEntreId = bonEntreId,
             ArticleId = articleId,
             Quantity = qty,

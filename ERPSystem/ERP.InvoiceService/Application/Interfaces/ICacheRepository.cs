@@ -1,5 +1,6 @@
 ﻿using ERP.InvoiceService.Domain.LocalCache.Article;
 using ERP.InvoiceService.Domain.LocalCache.Client;
+using ERP.InvoiceService.Domain.LocalCache.Tenant;
 
 namespace ERP.InvoiceService.Application.Interfaces;
 
@@ -7,14 +8,15 @@ public interface IArticleCacheRepository
 {
     Task<List<ArticleCache>> GetByIdsAsync(List<Guid> ids);
     Task<ArticleCache?> GetByIdAsync(Guid id);
+    Task<ArticleCache?> GetByIdDeletedAsync(Guid id);
     Task<ArticleCache?> GetByBarCodeAsync(string barCode);
     Task<ArticleCache?> GetByCodeRefAsync(string codeRef);
     Task<List<ArticleCache>> GetAllAsync();
     Task<List<ArticleCache>> GetAllActiveAsync();
     Task<(List<ArticleCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null);
     Task AddAsync(ArticleCache article);
+    Task UpdateAsync(ArticleCache article);
     Task SaveChangesAsync();
-
     Task DeleteAsync(ArticleCache article);
 }
 
@@ -22,12 +24,13 @@ public interface IArticleCategoryCacheRepository
 {
     Task<bool> ExistsAsync(string name);
     Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByIdAsync(Guid id);
+    Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByIdDeletedAsync(Guid id);
     Task<Domain.LocalCache.Article.ArticleCategoryCache?> GetByNameAsync(string name);
     Task<List<Domain.LocalCache.Article.ArticleCategoryCache>> GetAllAsync();
     Task<List<Domain.LocalCache.Article.ArticleCategoryCache>> GetAllActiveAsync();
     Task<(List<Domain.LocalCache.Article.ArticleCategoryCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
     Task AddAsync(Domain.LocalCache.Article.ArticleCategoryCache category);
-    Task SaveChangesAsync();
+    Task SaveChangesAsync(); Task UpdateAsync(Domain.LocalCache.Article.ArticleCategoryCache article);
     Task DeleteAsync(Domain.LocalCache.Article.ArticleCategoryCache cache);
 }
 
@@ -35,6 +38,7 @@ public interface IArticleCategoryCacheRepository
 public interface IClientCacheRepository
 {
     Task<ClientCache?> GetByIdAsync(Guid id);
+    Task<ClientCache?> GetByIdDeletedAsync(Guid id);
     Task<ClientCache?> GetByNameAsync(string name);
     Task<ClientCache?> GetByEmailAsync(string email);
     Task<(List<ClientCache> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null);
@@ -50,6 +54,7 @@ public interface IClientCategoryCacheRepository
     // Read operations - Master data
     Task<Dictionary<Guid, int>> GetClientCountsByCategoryIdsAsync(List<Guid> categoryIds);
     Task<Domain.LocalCache.Client.CategoryCache?> GetByIdAsync(Guid id);
+    Task<Domain.LocalCache.Client.CategoryCache?> GetByIdDeletedAsync(Guid id);
     Task<Domain.LocalCache.Client.CategoryCache?> GetByCodeAsync(string code);
     Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientIdAsync(Guid clientId);
     Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientNameAsync(string clientName);
@@ -71,6 +76,17 @@ public interface IClientCategoryCacheRepository
     Task DeleteAllCategoriesForClientAsync(Guid clientId);
 
     // Save changes
+    Task UpdateAsync(CategoryCache category);
     Task SaveChangesAsync();
     Task DeleteAsync(Domain.LocalCache.Client.CategoryCache category);
+}
+
+public interface ITenantCacheRepository
+{
+    Task<TenantCache?> GetByIdAsync(Guid? id);
+    Task<TenantCache?> GetBySlugAsync(string slug);
+    Task<List<TenantCache>> GetAllAsync();
+    Task AddAsync(TenantCache tenant);
+    Task SaveChangesAsync();
+    Task DeleteAsync(TenantCache tenant);
 }

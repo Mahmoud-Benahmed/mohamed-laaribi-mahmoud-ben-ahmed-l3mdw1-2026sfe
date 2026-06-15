@@ -31,7 +31,7 @@ export interface PagedResultDto<T> {
 
 @Injectable({ providedIn: 'root' })
 export class RoleService {
-  private readonly baseUrl = environment.apiUrl + environment.routes.roles;
+  private readonly baseUrl = `${environment.routes.roles}`;
 
   constructor(private readonly http: HttpClient) {}
 

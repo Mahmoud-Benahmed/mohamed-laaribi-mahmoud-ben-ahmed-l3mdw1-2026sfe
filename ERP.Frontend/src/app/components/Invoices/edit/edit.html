@@ -1,17 +1,17 @@
-  <div class="page">
+<div class="page">
     <ng-container>
         <ng-container *ngIf="selectedInvoice; else loading">
           <div class="page-header" id="top">
             <div>
-              <p class="breadcrumb">{{ 'INVOICES.BREADCRUMB' | translate }} › {{ selectedInvoice.invoiceNumber }}</p>
-              <h1 class="page-title">{{ 'INVOICES.TITLE_EDIT' | translate }}: {{ selectedInvoice.invoiceNumber }}</h1>
+              <p class="breadcrumb">{{ 'invoices.breadcrumb' | translate }} › {{ selectedInvoice.invoiceNumber }}</p>
+              <h1 class="page-title">{{ 'invoices.title_edit' | translate }}: {{ selectedInvoice.invoiceNumber }}</h1>
             </div>
-            <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+            <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
           </div>
         </ng-container>
         <ng-template #loading>
-            <p class="breadcrumb">{{ 'INVOICES.BREADCRUMB' | translate }}</p>
-            <h1 class="page-title">{{ 'INVOICES.TITLE_EDIT' | translate }}...</h1>
+            <p class="breadcrumb">{{ 'invoices.breadcrumb' | translate }}</p>
+            <h1 class="page-title">{{ 'invoices.title_edit' | translate }}...</h1>
         </ng-template>
 
         <div *ngFor="let e of errors" class="alert alert--error">
@@ -32,8 +32,8 @@
             <div class="panel__title-wrap">
               <div class="panel__icon"><mat-icon>receipt_long</mat-icon></div>
               <div>
-                <h2 class="panel__title">{{ 'INVOICES.FORM.INVOICE_DETAILS' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'INVOICES.FORM.EDIT_INVOICE_INFO' | translate }}</p>
+                <h2 class="panel__title">{{ 'invoices.form.invoice_details' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'invoices.form.edit_invoice_info' | translate }}</p>
               </div>
             </div>
           </div>
@@ -42,21 +42,21 @@
               <button
                 [class.active]="taxCalculationMode === TaxModes.LINE"
                 (click)="setTaxCalculationMode(TaxModes.LINE)"
-                matTooltip="{{ 'INVOICES.FORM.TAX_PER_LINE' | translate }}">
-                {{ 'INVOICES.FORM.TAX_PER_LINE_LABEL' | translate }}
+                matTooltip="{{ 'invoices.form.tax_per_line' | translate }}">
+                {{ 'invoices.form.tax_per_line_label' | translate }}
               </button>
               <button
                 [class.active]="taxCalculationMode === TaxModes.INVOICE"
                 (click)="setTaxCalculationMode(TaxModes.INVOICE)"
-                matTooltip="{{ 'INVOICES.FORM.TAX_PER_INVOICE' | translate }}">
-                {{ 'INVOICES.FORM.TAX_PER_INVOICE_LABEL' | translate }}
+                matTooltip="{{ 'invoices.form.tax_per_invoice' | translate }}">
+                {{ 'invoices.form.tax_per_invoice_label' | translate }}
               </button>
             </div>
             <form [formGroup]="invoiceForm" class="form">
 
               <div class="form__field">
                 <div class="form__label">
-                  <label>{{ 'STOCK.BONS.FORM.CLIENT' | translate }}</label>
+                  <label>{{ 'stock.bons.form.client' | translate }}</label>
                   <mat-icon>person</mat-icon>
                 </div>
 
@@ -68,7 +68,7 @@
                           [class.form__input--error]="invoiceForm.get('clientId')?.invalid && invoiceForm.get('clientId')?.touched"
                           (click)="toggleClientDropdown()">
                     <span [class.client-dropdown__placeholder]="!selectedClientLabel">
-                      {{ selectedClientLabel || ('STOCK.BONS.FORM.SELECT_CLIENT' | translate) }}
+                      {{ selectedClientLabel || ('stock.bons.form.select_client' | translate) }}
                     </span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         [style.transform]="clientDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'"
@@ -84,7 +84,7 @@
                     <div class="client-dropdown__search">
                       <input type="text"
                             class="client-dropdown__search-input"
-                            [placeholder]="'COMMON.SEARCH' | translate"
+                            [placeholder]="'common.search' | translate"
                             [ngModel]="clientSearchQuery"
                             (ngModelChange)="onClientSearch($event)"
                             [ngModelOptions]="{standalone: true}"
@@ -109,7 +109,7 @@
                         </svg>
                       </li>
                       <li *ngIf="!clientsLoading && clients.length === 0" class="client-dropdown__empty">
-                        {{ 'COMMON.NO_RESULTS' | translate }}
+                        {{ 'common.no_results' | translate }}
                       </li>
                     </ul>
 
@@ -118,7 +118,7 @@
                       <button type="button"
                               class="client-dropdown__load-more-btn"
                               (click)="loadMoreClients(); $event.stopPropagation()">
-                        {{ 'COMMON.LOAD_MORE' | translate }}
+                        {{ 'common.load_more' | translate }}
                         <span class="client-dropdown__load-more-count">
                           ({{ clients.length }} / {{ clientTotalCount }})
                         </span>
@@ -141,25 +141,25 @@
                 <div *ngIf="selectedClientForValidation" class="client-info-card">
                   <div class="client-info-header">
                     <mat-icon>business</mat-icon>
-                    <span>{{ 'INVOICES.FORM.SELECTED_CLIENT' | translate }}</span>
+                    <span>{{ 'invoices.form.selected_client' | translate }}</span>
                   </div>
                   <div class="client-info-body">
                     <div class="info-row">
-                      <span>{{ 'INVOICES.FORM.CLIENT_NAME_LABEL' | translate }}</span>
+                      <span>{{ 'invoices.form.client_name_label' | translate }}</span>
                       <strong>{{ selectedClientForValidation.name }}</strong>
                     </div>
                     <div class="info-row" *ngIf="selectedClientForValidation.creditLimit">
-                      <span>{{ 'INVOICES.FORM.CREDIT_LIMIT_LABEL' | translate }}</span>
+                      <span>{{ 'invoices.form.credit_limit_label' | translate }}</span>
                       <strong>{{ selectedClientForValidation.creditLimit | number:'1.2-2' }} TND</strong>
                     </div>
                     <div class="info-row" *ngIf="selectedClientForValidation.creditLimit">
-                      <span>{{ 'INVOICES.FORM.CREDIT_LIMIT_CURRENT_USAGE' | translate }}</span>
+                      <span>{{ 'invoices.form.credit_limit_current_usage' | translate }}</span>
                       <strong [class.text-danger]="creditLimitInfo.currentUsage > 0">
                         {{ creditLimitInfo.currentUsage | number:'1.2-2' }} TND
                       </strong>
                     </div>
                     <div class="info-row" *ngIf="selectedClientForValidation.creditLimit">
-                      <span>{{ 'INVOICES.FORM.CREDIT_LIMIT_REMAINING' | translate }}</span>
+                      <span>{{ 'invoices.form.credit_limit_remaining' | translate }}</span>
                       <strong [class.text-success]="creditLimitInfo.remainingCredit > 0"
                               [class.text-danger]="creditLimitInfo.remainingCredit <= 0">
                         {{ creditLimitInfo.remainingCredit | number:'1.2-2' }} TND
@@ -168,14 +168,14 @@
                     <div class="alert alert-danger mt-2"
                         *ngIf="!creditLimitInfo.hasSufficientCredit && selectedClientForValidation.creditLimit">
                       <i class="fas fa-exclamation-triangle me-2"></i>
-                      {{ 'INVOICES.ERRORS.CREDIT_LIMIT_EXCEEDED' | translate }}
+                      {{ 'invoices.responses.errors.credit_limit_exceeded' | translate }}
                     </div>
                     <div class="info-row">
-                      <span>{{ 'INVOICES.FORM.BULK_PRICING_LABEL' | translate }}</span>
+                      <span>{{ 'invoices.form.bulk_pricing_label' | translate }}</span>
                       <strong [class.text-success]="selectedClientForValidation.categories.some(c => c.useBulkPricing)">
                         {{ selectedClientForValidation.categories.some(c => c.useBulkPricing)
-                            ? ('INVOICES.FORM.BULK_ELIGIBLE' | translate)
-                            : ('INVOICES.FORM.BULK_NOT_ELIGIBLE' | translate) }}
+                            ? ('invoices.form.bulk_eligible' | translate)
+                            : ('invoices.form.bulk_not_eligible' | translate) }}
                       </strong>
                     </div>
                   </div>
@@ -183,23 +183,23 @@
 
                 <div class="form__row form__row--2">
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.INVOICE_DATE' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.invoice_date' | translate }}</label>
                     <input class="form__input" type="date" formControlName="invoiceDate"
                           [class.form__input--error]="invoiceForm.get('invoiceDate')?.invalid && invoiceForm.get('invoiceDate')?.touched" />
                     <span class="form__error"
                           *ngIf="invoiceForm.get('invoiceDate')?.invalid && invoiceForm.get('invoiceDate')?.touched">
-                      {{ 'VALIDATION.REQUIRED' | translate }}
+                      {{ 'validation.required' | translate }}
                     </span>
                   </div>
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.DUE_DATE' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.due_date' | translate }}</label>
                     <input class="form__input" type="date" formControlName="dueDate"
                           [class.form__input--error]="invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched"
                           readonly
-                          [matTooltip]="'INVOICES.FORM.DUE_DATE_AUTO_TOOLTIP' | translate" />
+                          [matTooltip]="'invoices.form.due_date_auto_tooltip' | translate" />
                     <span class="form__error"
                           *ngIf="invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched">
-                      {{ 'VALIDATION.REQUIRED' | translate }}
+                      {{ 'validation.required' | translate }}
                     </span>
                     <small class="form__hint" *ngIf="selectedClientForValidation?.duePaymentPeriod">
                       {{ duePaymentPeriodHint }}
@@ -209,19 +209,19 @@
 
                 <div class="form__row">
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.CLIENT_ADDRESS' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.client_address' | translate }}</label>
                     <input class="form__input" formControlName="clientAddress"
-                          [placeholder]="'INVOICES.FORM.CLIENT_ADDRESS_PLACEHOLDER' | translate"
+                          [placeholder]="'invoices.form.client_address_placeholder' | translate"
                           [class.form__input--error]="invoiceForm.get('clientAddress')?.invalid && invoiceForm.get('clientAddress')?.touched" />
                     <span class="form__error"
                           *ngIf="invoiceForm.get('clientAddress')?.invalid && invoiceForm.get('clientAddress')?.touched">
-                      {{ 'VALIDATION.REQUIRED' | translate }}
+                      {{ 'validation.required' | translate }}
                     </span>
                   </div>
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.ADDITIONAL_NOTES' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.additional_notes' | translate }}</label>
                     <input class="form__input" formControlName="additionalNotes"
-                          [placeholder]="'INVOICES.FORM.ADDITIONAL_NOTES_PLACEHOLDER' | translate" />
+                          [placeholder]="'invoices.form.additional_notes_placeholder' | translate" />
                   </div>
                 </div>
               </div>
@@ -235,13 +235,13 @@
             <div class="panel__title-wrap">
               <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
               <div>
-                <h2 class="panel__title">{{ 'INVOICES.FORM.LINE_ITEMS' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'INVOICES.FORM.ITEMS_COUNT' | translate:{ht: (pendingTotalHT | number:'1.2-2'), ttc: (pendingTotalTTC | number:'1.2-2') } }}</p>
+                <h2 class="panel__title">{{ 'invoices.form.line_items' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'invoices.form.items_count' | translate:{count: pendingItems.length } }}</p>
               </div>
             </div>
             <button class="btn-add" (click)="openInlineItemAdd()" *ngIf="!inlineItemOpen"
                     [disabled]="!creditLimitInfo.hasSufficientCredit && selectedClientForValidation?.creditLimit">
-              {{ 'INVOICES.FORM.ADD_ITEM' | translate }}
+              {{ 'invoices.form.add_item' | translate }}
             </button>
           </div>
 
@@ -254,7 +254,7 @@
                     <div class="inline-ligne-form__body">
                       <!-- Article dropdown (inside inline-ligne-form) -->
                       <div class="form__field">
-                        <label class="form__label">{{ 'STOCK.BONS.FORM.ARTICLE' | translate }}</label>
+                        <label class="form__label">{{ 'stock.bons.form.article' | translate }}</label>
 
                         <div class="client-dropdown" [class.client-dropdown--open]="articleDropdownOpen">
                           <button type="button"
@@ -262,7 +262,7 @@
                                   [class.form__input--error]="itemForm.get('articleId')?.invalid && itemForm.get('articleId')?.touched"
                                   (click)="toggleArticleDropdown()">
                             <span [class.client-dropdown__placeholder]="!selectedArticleLabel">
-                              {{ selectedArticleLabel || ('STOCK.BONS.FORM.SELECT_ARTICLE' | translate) }}
+                              {{ selectedArticleLabel || ('stock.bons.form.select_article' | translate) }}
                             </span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 [style.transform]="articleDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'"
@@ -275,7 +275,7 @@
                             <div class="client-dropdown__search">
                               <input type="text"
                                     class="client-dropdown__search-input"
-                                    [placeholder]="'COMMON.SEARCH' | translate"
+                                    [placeholder]="'common.search' | translate"
                                     [ngModel]="articleSearchQuery"
                                     (ngModelChange)="onArticleSearch($event)"
                                     [ngModelOptions]="{standalone: true}"
@@ -289,7 +289,9 @@
                                   [class.client-dropdown__item--selected]="itemForm.get('articleId')?.value === a.id"
                                   (click)="selectArticleForLigne(a)">
                                 <span class="client-dropdown__name">{{ a.codeRef }} — {{ a.libelle }}</span>
-                                <span class="client-dropdown__email">{{ a.prix | number:'1.2-2' }} €</span>
+                                <span class="client-dropdown__email">
+                                  {{ a.prix | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}
+                                </span>
                               </li>
                               <li *ngIf="articlesLoading" class="client-dropdown__loading">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -298,7 +300,7 @@
                                 </svg>
                               </li>
                               <li *ngIf="!articlesLoading && articleDropdownItems.length === 0" class="client-dropdown__empty">
-                                {{ 'COMMON.NO_RESULTS' | translate }}
+                                {{ 'common.no_results' | translate }}
                               </li>
                             </ul>
 
@@ -306,7 +308,7 @@
                               <button type="button"
                                       class="client-dropdown__load-more-btn"
                                       (click)="loadMoreArticles(); $event.stopPropagation()">
-                                {{ 'COMMON.LOAD_MORE' | translate }}
+                                {{ 'common.load_more' | translate }}
                                 <span class="client-dropdown__load-more-count">
                                   ({{ articleDropdownItems.length }} / {{ articleTotalCount }})
                                 </span>
@@ -324,20 +326,20 @@
 
                         <span class="form__error"
                               *ngIf="itemForm.get('articleId')?.invalid && itemForm.get('articleId')?.touched">
-                          {{ 'VALIDATION.REQUIRED' | translate }}
+                          {{ 'validation.required' | translate }}
                         </span>
                       </div>
                     </div>
 
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.QUANTITY' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.quantity' | translate }}</label>
 
                     <!-- Stock badge — only shown once an article is selected -->
                     <div class="stock-info-badge" *ngIf="getSelectedArticle()">
                       <mat-icon>inventory_2</mat-icon>
-                      <span>{{ 'STOCK.LABELS.AVAILABLE_STOCK' | translate }}:
+                      <span>{{ 'stock.labels.available_stock' | translate }}:
                         <strong [ngClass]="getStockStatusClass(getSelectedArticle()!.quantity)">
-                          {{ getSelectedArticle()!.quantity | number:'1.2-2' }} {{ 'STOCK.LABELS.UNITS' | translate }}
+                          {{ getSelectedArticle()!.quantity | number:'1.2-2' }} {{ 'stock.labels.units' | translate }}
                         </strong>
                       </span>
                     </div>
@@ -348,41 +350,41 @@
                       class="form__input"
                       [class.form__input--error]="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched"
                       [min]="getQuantityMin(getSelectedArticle()?.unit)"
-                      [max]="getQuantityMax()"
+                      [max]="getSelectedArticle()?.quantity ?? 0"
                       [step]="getQuantityStep(getSelectedArticle()?.unit)"
                     />
 
                     <div *ngIf="itemForm.get('quantity')?.hasError('required') && itemForm.get('quantity')?.touched" class="form__error">
-                      {{ 'VALIDATION.REQUIRED' | translate }}
+                      {{ 'validation.required' | translate }}
                     </div>
                     <div *ngIf="itemForm.get('quantity')?.hasError('min') && itemForm.get('quantity')?.touched" class="form__error">
-                      {{ 'VALIDATION.MIN_VALUE' | translate: { min: getQuantityMin(getSelectedArticle()?.unit) } }}
+                      {{ 'validation.min_value' | translate: { min: getQuantityMin(getSelectedArticle()?.unit) } }}
                     </div>
                     <div *ngIf="itemForm.get('quantity')?.hasError('max') && itemForm.get('quantity')?.touched" class="form__error form__error--stock">
                       <mat-icon>error</mat-icon>
-    {{ 'STOCK.ERRORS.QUANTITY_EXCEEDS_STOCK' | translate: { stock: (getSelectedArticle()?.quantity ?? 0) | number:'1.2-2' } }}                </div>
+    {{ 'stock.responses.errors.QUANTITY_EXCEEDS_STOCK' | translate: { stock: (getSelectedArticle()?.quantity ?? 0) | number:'1.2-2' } }}                </div>
                   </div>
                 </div>
 
                 <div class="form__row form__row--2">
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.UNIT_PRICE_HT' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.unit_price_ht' | translate }}</label>
                     <input class="form__input" type="number" min="0" step="0.01" formControlName="uniPriceHT" />
                     <!-- Unit hint -->
                     <small class="form__hint" *ngIf="getSelectedArticle()">
                       {{ getUnitTranslation() }}
-                      <span *ngIf="getQuantityStep(getSelectedArticle()?.unit) === 1">— {{ 'INVOICES.FORM.WHOLE_NUMBERS_ONLY' | translate }}</span>
-                      <span *ngIf="getQuantityStep(getSelectedArticle()?.unit) === 0.1">— {{ 'INVOICES.FORM.DECIMALS_ALLOWED' | translate }}</span>
+                      <span *ngIf="getQuantityStep(getSelectedArticle()?.unit) === 1">— {{ 'invoices.form.whole_numbers_only' | translate }}</span>
+                      <span *ngIf="getQuantityStep(getSelectedArticle()?.unit) === 0.1">— {{ 'invoices.form.decimals_allowed' | translate }}</span>
                     </small>
                   </div>
 
                   <div class="form__field">
-                    <label class="form__label">{{ 'INVOICES.FORM.TAX_RATE' | translate }} (%)</label>
+                    <label class="form__label">{{ 'invoices.form.tax_rate' | translate }} (%)</label>
                     <input type="number" class="form__input" formControlName="taxRate" min="0" max="100" step="1" />
                   </div>
                   <div class="form__field item-calc-preview"
                       *ngIf="itemForm.get('quantity')?.value && itemForm.get('uniPriceHT')?.value">
-                    <label class="form__label">{{ 'INVOICES.FORM.PREVIEW' | translate }}</label>
+                    <label class="form__label">{{ 'invoices.form.preview' | translate }}</label>
                     <div class="calc-preview">
                       <span>HT: <strong>{{ (itemForm.get('quantity')!.value * itemForm.get('uniPriceHT')!.value) | number:'1.2-2' }}</strong></span>
                       <span>TTC: <strong>{{ (itemForm.get('quantity')!.value * itemForm.get('uniPriceHT')!.value * (1 + itemForm.get('taxRate')!.value / 100)) | number:'1.2-2' }}</strong></span>
@@ -391,9 +393,9 @@
                 </div>
 
                 <div class="form__actions">
-                  <button type="button" class="btn-secondary" (click)="closeInlineItem()">{{ 'COMMON.CANCEL' | translate }}</button>
+                  <button type="button" class="btn-secondary" (click)="closeInlineItem()">{{ 'common.cancel' | translate }}</button>
                   <button type="button" class="btn-add" (click)="submitInlineItem()" [disabled]="itemForm.invalid">
-                    {{ inlineItemLocalId ? ('INVOICES.FORM.UPDATE_ITEM' | translate) : ('INVOICES.FORM.ADD_ITEM' | translate) }}
+                    {{ inlineItemLocalId ? ('invoices.form.update_item' | translate) : ('invoices.form.add_item' | translate) }}
                   </button>
                 </div>
               </form>
@@ -404,7 +406,7 @@
 
               <div class="empty-items" *ngIf="pendingItems.length === 0">
                 <mat-icon>inbox</mat-icon>
-                <p>{{ 'INVOICES.FORM.NO_ITEMS_YET' | translate }}</p>
+                <p>{{ 'invoices.form.no_items_yet' | translate }}</p>
               </div>
 
               <div class="table-card" *ngIf="pendingItems.length > 0">
@@ -412,29 +414,25 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th>{{ 'INVOICES.DETAILS.BAR_CODE' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.QTY' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.UNIT_HT' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.TAX' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_HT_COL' | translate }}</th>
-                        <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_TTC_COL' | translate }}</th>
-                        <th class="text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+                        <th>{{ 'invoices.details.article_label' | translate }}</th>
+                        <th class="text-center">{{ 'invoices.details.qty' | translate }}</th>
+                        <th class="text-center">{{ 'invoices.details.unit_ht' | translate }}</th>
+                        <th class="text-center">{{ 'invoices.details.total_ttc_col' | translate }}</th>
+                        <th class="text-center">{{ 'common.actions' | translate }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr class="table__row" *ngFor="let item of pendingItems; trackBy: trackByLocalId">
-                        <td class="td--barCode">{{ item.articleBarCode }}</td>
+                        <td class="td--barCode role-badge--clickable" [routerLink]="['/articles', item.articleId]">{{ getArticleLabel(item.articleId) }}</td>
                         <td class="text-center">{{ item.quantity | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.uniPriceHT | number:'1.2-2' }}</td>
-                        <td class="text-center">{{ item.taxRate | number:'1.0-0' }}%</td>
-                        <td class="td--price text-center">{{ item.totalHT | number:'1.2-2' }}</td>
                         <td class="td--price text-center">{{ item.totalTTC | number:'1.2-2' }}</td>
                         <td class="td--actions">
-                          <button class="icon-btn icon-btn--edit" [matTooltip]="'COMMON.EDIT' | translate"
+                          <button class="icon-btn icon-btn--edit" [matTooltip]="'common.edit' | translate"
                                   (click)="openInlineItemEdit(item)">
                             <mat-icon style="font-size:15px;width:15px;height:15px;">edit</mat-icon>
                           </button>
-                          <button class="icon-btn icon-btn--delete" [matTooltip]="'COMMON.DELETE' | translate"
+                          <button class="icon-btn icon-btn--delete" [matTooltip]="'common.delete' | translate"
                                   (click)="removePendingItem(item._localId)">
                             <mat-icon style="font-size:15px;width:15px;height:15px;">delete_outline</mat-icon>
                           </button>
@@ -443,7 +441,7 @@
                     </tbody>
                     <tfoot>
                       <tr class="totals-row" *ngIf="!discountInfo.applies || discountInfo.rate === 0">
-                        <td colspan="4" class="totals-label">{{ 'INVOICES.DETAILS.TOTALS' | translate }}</td>
+                        <td colspan="2" class="totals-label">{{ 'invoices.details.totals' | translate }}</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                         <td class="td--price text-center totals-value">{{ pendingTotalTTC | number:'1.2-2' }} TND</td>
                         <td></td>
@@ -451,22 +449,22 @@
 
                       <ng-container *ngIf="discountInfo.applies && discountInfo.rate > 0">
                         <tr class="totals-row">
-                          <td colspan="4" class="totals-label">{{ 'INVOICES.FORM.ORIGINAL_TOTAL' | translate }}</td>
+                          <td colspan="2" class="totals-label">{{ 'invoices.form.original_total' | translate }}</td>
                           <td class="td--price text-center">{{ pendingTotalHT | number:'1.2-2' }} TND</td>
                           <td class="td--price text-center">{{ discountInfo.originalTotal | number:'1.2-2' }} TND</td>
                           <td></td>
                         </tr>
                         <tr class="discount-row">
-                          <td colspan="4" class="totals-label discount-label">
-                            {{ 'INVOICES.FORM.DISCOUNT_ROW' | translate: { rate: discountInfo.rate } }}
+                          <td colspan="2" class="totals-label discount-label">
+                            {{ 'invoices.form.discount_row' | translate: { rate: discountInfo.rate } }}
                           </td>
                           <td class="td--price text-center discount-amount">- {{ discountInfo.discountAmountHT | number:'1.2-2' }} TND</td>
                           <td class="td--price text-center discount-amount"> - {{ discountInfo.discountAmount | number:'1.2-2' }} TND</td>
                           <td></td>
                         </tr>
                         <tr class="totals-row final-totals">
-                          <td colspan="4" class="totals-label final-label">
-                            <strong>{{ 'INVOICES.FORM.FINAL_TOTALS' | translate }}</strong>
+                          <td colspan="2" class="totals-label final-label">
+                            <strong>{{ 'invoices.form.final_totals' | translate }}</strong>
                           </td>
                           <td class="td--price text-center totals-value final-value">
                             <strong>{{ (pendingTotalHT * (1 - discountInfo.rate / 100)) | number:'1.2-2' }} TND</strong>
@@ -483,14 +481,14 @@
               </div>
 
               <div class="panel__actions">
-                <button class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
                 <button class="btn-add"
                         [disabled]="!canSubmit"
                         [class.disabled]="!canSubmit"
                         [matTooltip]="getSubmitButtonTooltip()"
                         (click)="updateInvoice()">
-                  <span *ngIf="!isValidating">{{ 'COMMON.SAVE_CHANGES' | translate }}</span>
-                  <span *ngIf="isValidating">{{ 'COMMON.SAVING' | translate }}...</span>
+                  <span *ngIf="!isValidating">{{ 'common.save_changes' | translate }}</span>
+                  <span *ngIf="isValidating">{{ 'common.saving' | translate }}</span>
                 </button>
               </div>
 

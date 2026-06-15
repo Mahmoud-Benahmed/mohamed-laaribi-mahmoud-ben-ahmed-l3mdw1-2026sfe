@@ -107,14 +107,6 @@ public class GlobalExceptionMiddleware
                 Message = ex.Message,
                 StatusCode = (int)HttpStatusCode.NotFound
             },
-
-            InvalidOperationException ex => new ErrorResponse
-            {
-                Code = "BUSINESS_RULE_VIOLATION",
-                Message = ex.Message,
-                StatusCode = (int)HttpStatusCode.Conflict
-            },
-
             ArgumentOutOfRangeException ex => new ErrorResponse
             {
                 Code = "INVALID_RANGE",

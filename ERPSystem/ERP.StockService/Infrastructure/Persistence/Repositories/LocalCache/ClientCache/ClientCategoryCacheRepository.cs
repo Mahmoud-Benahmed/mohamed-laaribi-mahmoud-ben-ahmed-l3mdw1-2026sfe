@@ -1,5 +1,6 @@
 ﻿// Infrastructure/Persistence/Repositories/LocalCache/ClientCategoryCacheRepository.cs
 using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Application.Services;
 using ERP.StockService.Domain.LocalCache.Client;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,14 +10,18 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
 {
     private readonly StockDbContext _dbContext;
     private readonly ILogger<ClientCategoryCacheRepository> _logger;
+    private readonly ITenantContext _tenantContext;
 
     public ClientCategoryCacheRepository(
         StockDbContext dbContext,
-        ILogger<ClientCategoryCacheRepository> logger)
+        ILogger<ClientCategoryCacheRepository> logger,
+        ITenantContext tenantContext)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _tenantContext = tenantContext;
     }
+
 
     // =========================
     // READ OPERATIONS - Master Data
@@ -24,32 +29,33 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
 
     public async Task<Domain.LocalCache.Client.CategoryCache?> GetByIdAsync(Guid id)
     {
-        try
-        {
-            return await _dbContext.ClientCategoryMasterCaches
-                .FirstOrDefaultAsync(cc => cc.Id == id && !cc.IsDeleted);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting client category by ID {CategoryId}", id);
-            throw;
-        }
+
+        return await _dbContext.ClientCategoryMasterCaches
+            .FirstOrDefaultAsync(cc => cc.Id == id);
+ 
     }
+
+    public async Task<CategoryCache?> GetByIdDeletedAsync(Guid id)
+        => await _dbContext.ClientCategoryMasterCaches
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(cc => cc.Id == id && cc.TenantId == _tenantContext.TenantId);
 
     public async Task DeleteAsync(CategoryCache category)
     {
-        if (category == null)
-            throw new ArgumentNullException(nameof(category));
-
-        _dbContext.ClientCategoryMasterCaches.Remove(category);
+        category.Delete();
+        _dbContext.ClientCategoryMasterCaches.Update(category);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task<Dictionary<Guid, int>> GetClientCountsByCategoryIdsAsync(List<Guid> categoryIds)
     {
         return await _dbContext.ClientCategoryAssignments
-            .Where(cca => categoryIds.Contains(cca.CategoryId) && !cca.Client.IsDeleted)
-            .GroupBy(cca => cca.CategoryId)
+            .Where(cca => categoryIds.Contains(cca.CategoryId))
+            .Join(_dbContext.ClientCaches,
+                  cca => cca.ClientId,
+                  c => c.Id,
+                  (cca, c) => new { cca.CategoryId })
+            .GroupBy(x => x.CategoryId)
             .Select(g => new { CategoryId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
     }
@@ -59,7 +65,7 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
         try
         {
             return await _dbContext.ClientCategoryMasterCaches
-                .FirstOrDefaultAsync(cc => cc.Code == code && !cc.IsDeleted);
+                .FirstOrDefaultAsync(cc => cc.Code == code);
         }
         catch (Exception ex)
         {
@@ -68,41 +74,23 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
         }
     }
 
-    public async Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientIdAsync(Guid clientId)
-    {
-        try
-        {
-            // Get category IDs from junction table, then fetch master data
-            List<Guid> categoryIds = await _dbContext.ClientCategoryAssignments
-                .Where(ca => ca.ClientId == clientId)
-                .Select(ca => ca.CategoryId)
-                .ToListAsync();
-
-            return await _dbContext.ClientCategoryMasterCaches
-                .Where(c => categoryIds.Contains(c.Id) && !c.IsDeleted)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting categories for client {ClientId}", clientId);
-            throw;
-        }
-    }
+    public async Task<List<CategoryCache>> GetByClientIdAsync(Guid clientId)
+        => await _dbContext.ClientCategoryAssignments
+            .Where(ca => ca.ClientId == clientId)
+            .Select(ca => ca.Category)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
 
     public async Task<List<Domain.LocalCache.Client.CategoryCache>> GetByClientNameAsync(string clientName)
     {
         try
         {
-            // First find the client
-            Domain.LocalCache.Client.ClientCache? client = await _dbContext.ClientCaches
-                .FirstOrDefaultAsync(c => c.Name == clientName && !c.IsDeleted);
-
-            if (client == null)
-                return new List<Domain.LocalCache.Client.CategoryCache>();
-
             // Then get categories for that client
-            return await GetByClientIdAsync(client.Id);
+            return await _dbContext.ClientCategoryAssignments
+                    .Where(ca => ca.Client.Name == clientName)
+                    .Select(ca => ca.Category)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync();
         }
         catch (Exception ex)
         {
@@ -116,7 +104,6 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
         try
         {
             return await _dbContext.ClientCategoryMasterCaches
-                .Where(c => !c.IsDeleted)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
@@ -132,7 +119,7 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
         try
         {
             return await _dbContext.ClientCategoryMasterCaches
-                .AnyAsync(cc => cc.Id == id && !cc.IsDeleted);
+                .AnyAsync(cc => cc.Id == id);
         }
         catch (Exception ex)
         {
@@ -173,23 +160,6 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
     // =========================
     // JUNCTION TABLE OPERATIONS (Assignments)
     // =========================
-
-    public async Task AssignCategoryToClientAsync(Guid clientId, Guid categoryId)
-    {
-        try
-        {
-            ClientCategoryCache assignment = ClientCategoryCache.Create(clientId, categoryId);
-            await _dbContext.ClientCategoryAssignments.AddAsync(assignment);
-            _logger.LogDebug("Category {CategoryId} assigned to client {ClientId}",
-                categoryId, clientId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error assigning category {CategoryId} to client {ClientId}",
-                categoryId, clientId);
-            throw;
-        }
-    }
 
     public async Task UnassignCategoryFromClientAsync(Guid clientId, Guid categoryId)
     {
@@ -233,119 +203,55 @@ public class ClientCategoryCacheRepository : IClientCategoryCacheRepository
     // WRITE OPERATIONS - Master Data
     // =========================
 
-    public async Task AddCategoryAsync(Domain.LocalCache.Client.CategoryCache category)
+    public Task AssignCategoryToClientAsync(Guid clientId, Guid categoryId)
     {
-        try
-        {
-            if (category == null)
-                throw new ArgumentNullException(nameof(category));
-
-            await _dbContext.ClientCategoryMasterCaches.AddAsync(category);
-            _logger.LogDebug("Client category {CategoryName} added to master data", category.Name);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding client category {CategoryName}", category.Name);
-            throw;
-        }
+        _dbContext.ClientCategoryAssignments.Add(ClientCategoryCache.Create(clientId, categoryId));
+        return Task.CompletedTask;
     }
 
-    public async Task AddRangeCategoriesAsync(IEnumerable<Domain.LocalCache.Client.CategoryCache> categories)
+    public Task AddCategoryAsync(CategoryCache category)
     {
-        try
-        {
-            if (categories == null)
-                throw new ArgumentNullException(nameof(categories));
-
-            List<CategoryCache> categoryList = categories.ToList();
-            if (!categoryList.Any())
-                return;
-
-            await _dbContext.ClientCategoryMasterCaches.AddRangeAsync(categoryList);
-            _logger.LogDebug("Added {Count} client categories to master data", categoryList.Count);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding range of client categories");
-            throw;
-        }
+        if (category is null) throw new ArgumentNullException(nameof(category));
+        _dbContext.ClientCategoryMasterCaches.Add(category);
+        return Task.CompletedTask;
     }
 
-    public Task UpdateCategoryAsync(Domain.LocalCache.Client.CategoryCache category)
+    public Task AddRangeCategoriesAsync(IEnumerable<CategoryCache> categories)
     {
-        try
-        {
-            if (category == null)
-                throw new ArgumentNullException(nameof(category));
-
-            _dbContext.ClientCategoryMasterCaches.Update(category);
-            _logger.LogDebug("Client category {CategoryName} marked as updated", category.Name);
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating client category {CategoryName}", category.Name);
-            throw;
-        }
+        if (categories is null) throw new ArgumentNullException(nameof(categories));
+        _dbContext.ClientCategoryMasterCaches.AddRange(categories);
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteCategoryAsync(Guid id)
+    public Task UpdateAsync(Domain.LocalCache.Client.CategoryCache category)
     {
-        try
-        {
-            CategoryCache? category = await GetByIdAsync(id);
-            if (category != null)
-            {
-                category.Delete();
-                _dbContext.ClientCategoryMasterCaches.Update(category);
-                _logger.LogDebug("Client category {CategoryId} soft deleted", id);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting client category {CategoryId}", id);
-            throw;
-        }
+
+        if (category == null)
+            throw new ArgumentNullException(nameof(category));
+
+        _dbContext.ClientCategoryMasterCaches.Update(category);
+        _logger.LogDebug("Client category {CategoryName} marked as updated", category.Name);
+        return Task.CompletedTask;
     }
 
     public async Task DeleteAllCategoriesForClientAsync(Guid clientId)
     {
-        try
-        {
-            List<ClientCategoryCache> assignments = await _dbContext.ClientCategoryAssignments
-                .Where(ca => ca.ClientId == clientId)
-                .ToListAsync();
 
-            if (assignments.Any())
-            {
-                _dbContext.ClientCategoryAssignments.RemoveRange(assignments);
-                _logger.LogDebug("Removed {Count} category assignments for client {ClientId}",
-                    assignments.Count, clientId);
-            }
-        }
-        catch (Exception ex)
+        List<ClientCategoryCache> assignments = await _dbContext.ClientCategoryAssignments
+            .Where(ca => ca.ClientId == clientId)
+            .ToListAsync();
+
+        if (assignments.Any())
         {
-            _logger.LogError(ex, "Error deleting categories for client {ClientId}", clientId);
-            throw;
+            _dbContext.ClientCategoryAssignments.RemoveRange(assignments);
+            _logger.LogDebug("Removed {Count} category assignments for client {ClientId}",
+                assignments.Count, clientId);
         }
     }
 
     public async Task SaveChangesAsync()
     {
-        try
-        {
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDebug("Client category changes saved to database");
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(ex, "Database error while saving client category changes");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error saving client category changes");
-            throw;
-        }
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
     }
 }

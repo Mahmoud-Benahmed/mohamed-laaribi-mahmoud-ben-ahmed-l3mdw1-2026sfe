@@ -12,6 +12,7 @@
         bool IsActive,
         UserSettingsResponseDto Settings,
         DateTime CreatedAt,
+        Guid? TenantId,
         DateTime? UpdatedAt,
         DateTime? LastLoginAt
     );

@@ -13,19 +13,22 @@ namespace ERP.ArticleService.Application.Services
         private readonly IArticleCodeService _articleCodeService;
         private readonly IEventPublisher _eventPublisher;
         private readonly ILogger<ArticleService> logger;
+        private readonly ITenantContext _tenantContext;
 
         public ArticleService(
             IArticleRepository articleRepository,
             ICategoryRepository categoryRepository,
             IArticleCodeService articleCodeService,
             IEventPublisher eventPublisher,
-            ILogger<ArticleService> logger)
+            ILogger<ArticleService> _logger,
+            ITenantContext tenantContext)
         {
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _articleCodeService = articleCodeService;
             _eventPublisher = eventPublisher;
-            this.logger = logger;
+            logger = _logger;
+            _tenantContext = tenantContext;
         }
 
         // =========================
@@ -37,13 +40,12 @@ namespace ERP.ArticleService.Application.Services
                 ?? throw new KeyNotFoundException(
                     $"Category with id '{request.CategoryId}' was not found.");
 
-            Article? existing = await _articleRepository.GetByBarCodeAsync(request.BarCode);
-            if (existing is not null)
-                throw new ArticleAlreadyExistsException(existing.BarCode);
+            if(await _articleRepository.DuplicateExists(request.BarCode))
+                throw new DuplicateKeyException($"Article.BarCode: {request.BarCode}");
 
             string code = await _articleCodeService.GenerateArticleCodeAsync();
 
-            Article article = new Article(code, request.Libelle, request.Prix, request.Unit, category, request.BarCode, request.TVA);
+            Article article = new Article(code, request.Libelle, request.Prix, request.Unit, category, request.BarCode, request.TVA, _tenantContext.TenantId);
             await _articleRepository.AddAsync(article);
             await _articleRepository.SaveChangesAsync();
             ArticleResponseDto dto = MapToDto(article);
@@ -80,6 +82,9 @@ namespace ERP.ArticleService.Application.Services
 
             if (article is null || article.IsDeleted)
                 throw new ArticleNotFoundException(id);
+
+            if (await _articleRepository.DuplicateExists(request.BarCode, id))
+                throw new DuplicateKeyException($"Article.BarCode: {request.BarCode}");
 
             Category category = await _categoryRepository.GetByIdAsync(request.CategoryId)
                 ?? throw new CategoryNotFoundException(request.CategoryId);
@@ -202,7 +207,8 @@ namespace ERP.ArticleService.Application.Services
             TVA: cat.TVA,
             IsDeleted: cat.IsDeleted,
             CreatedAt: cat.CreatedAt,
-            UpdatedAt: cat.UpdatedAt
+            UpdatedAt: cat.UpdatedAt,
+            TenantId: cat.TenantId
             );
         private static ArticleResponseDto MapToDto(Article article) => new ArticleResponseDto(
             Id: article.Id,
@@ -215,7 +221,8 @@ namespace ERP.ArticleService.Application.Services
             TVA: article.TVA,
             IsDeleted: article.IsDeleted,
             CreatedAt: article.CreatedAt,
-            UpdatedAt: article.UpdatedAt
+            UpdatedAt: article.UpdatedAt,
+            TenantId: article.TenantId
             );
     }
 }

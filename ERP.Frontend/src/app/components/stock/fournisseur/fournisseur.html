@@ -3,8 +3,8 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'STOCK.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'STOCK.FOURNISSEURS.TITLE' | translate }}</h1>
+      <p class="breadcrumb">{{ 'stock.breadcrumb' | translate }}</p>
+      <h1 class="page-title">{{ 'stock.fournisseurs.title' | translate }}</h1>
     </div>
   </div>
 
@@ -40,7 +40,7 @@
            [class.stat-card--current]="isList()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'STOCK.FOURNISSEURS.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'stock.fournisseurs.stats.active' | translate }}</p>
             <p class="stat-card__value">{{ activeFournisseurs }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--green">
@@ -58,7 +58,7 @@
            [class.disabled]="blockedFournisseurs < 1">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'STOCK.FOURNISSEURS.STATS.BLOCKED' | translate }}</p>
+            <p class="stat-card__label">{{ 'stock.fournisseurs.stats.blocked' | translate }}</p>
             <p class="stat-card__value">{{ blockedFournisseurs }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--amber">
@@ -78,7 +78,7 @@
            [class.disabled]="deletedFournisseurs < 1">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'STOCK.FOURNISSEURS.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'stock.fournisseurs.stats.deleted' | translate }}</p>
             <p class="stat-card__value">{{ deletedFournisseurs }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--red">
@@ -104,7 +104,7 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'STOCK.FOURNISSEURS.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="'stock.fournisseurs.search_placeholder' | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
@@ -112,7 +112,7 @@
       <button class="btn-add"
               *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.CREATE_FOURNISSEUR) && isList()"
               (click)="openCreate()">
-        + {{ 'STOCK.FOURNISSEURS.ADD_BUTTON' | translate }}
+        + {{ 'stock.fournisseurs.add_button' | translate }}
       </button>
     </div>
 
@@ -123,7 +123,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('name')" class="th--sortable">
-                {{ 'STOCK.FOURNISSEURS.TABLE.NAME' | translate }}
+                {{ 'stock.fournisseurs.table.name' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                        [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -135,9 +135,9 @@
                   </svg>
                 </span>
               </th>
-              <th>{{ 'STOCK.FOURNISSEURS.TABLE.PHONE' | translate }}</th>
+              <th>{{ 'stock.fournisseurs.table.phone' | translate }}</th>
               <th (click)="sortBy('createdAt')" class="th--sortable">
-                {{ 'STOCK.FOURNISSEURS.TABLE.PARTNERSHIP_DATE' | translate }}
+                {{ 'stock.fournisseurs.table.partnership_date' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                        [style.opacity]="sortColumn === 'createdAt' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -149,7 +149,7 @@
                   </svg>
                 </span>
               </th>
-              <th class="text-center">{{ 'STOCK.FOURNISSEURS.TABLE.ACTIONS' | translate }}</th>
+              <th class="text-center">{{ 'stock.fournisseurs.table.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +161,7 @@
 
               <td class="td--actions">
                 <!-- View -->
-                <button class="icon-btn icon-btn--view" (click)="openView(f)" [title]="'COMMON.VIEW' | translate"
+                <button class="icon-btn icon-btn--view" (click)="openView(f)" [title]="'common.view' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.VIEW_FOURNISSEURS)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -170,7 +170,7 @@
                 </button>
 
                 <!-- Edit -->
-                <button class="icon-btn icon-btn--edit" (click)="openEdit(f)" [title]="'COMMON.EDIT' | translate"
+                <button class="icon-btn icon-btn--edit" (click)="openEdit(f)" [title]="'common.edit' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.UPDATE_FOURNISSEUR) && !f.isDeleted && !f.isBlocked">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -182,7 +182,7 @@
                 <button class="icon-btn"
                         [ngClass]="f.isBlocked ? 'icon-btn--unblock' : 'icon-btn--block'"
                         (click)="toggleBlock(f)"
-                        [title]="f.isBlocked ? ('COMMON.UNBLOCK' | translate) : ('COMMON.BLOCK' | translate)"
+                        [title]="f.isBlocked ? ('common.unblock' | translate) : ('common.block' | translate)"
                         *ngIf="(
                                 (authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.BLOCK_FOURNISSEUR) && !f.isBlocked)
                             ||  (authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.UNBLOCK_FOURNISSEUR) && f.isBlocked)
@@ -198,7 +198,7 @@
                 </button>
 
                 <!-- Delete -->
-                <button class="icon-btn icon-btn--delete" (click)="delete(f)" [title]="'COMMON.DELETE' | translate"
+                <button class="icon-btn icon-btn--delete" (click)="delete(f)" [title]="'common.delete' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.DELETE_FOURNISSEUR) && !f.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
@@ -209,33 +209,33 @@
                 </button>
 
                 <!-- Restore -->
-                <button class="icon-btn icon-btn--reactivate" (click)="restore(f.id)" [title]="'COMMON.RESTORE' | translate"
+                <button class="icon-btn icon-btn--reactivate" (click)="restore(f.id)" [title]="'common.restore' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.RESTORE_FOURNISSEUR) && f.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
                   </svg>
                 </button>
-               </td>
+                </td>
 
-             </tr>
+              </tr>
             <tr *ngIf="sortedData.length === 0">
               <td colspan="7" class="td--empty">
-                {{ 'COMMON.NO_RESULTS' | translate }}{{ searchQuery ? ' for "' + searchQuery + '"' : '' }}
-               </td>
-             </tr>
+                {{ 'common.no_results' | translate }}{{ searchQuery ? ' for "' + searchQuery + '"' : '' }}
+                </td>
+              </tr>
           </tbody>
         </table>
       </div>
 
-      <app-pagination
-        [pageNumber]="pageNumber()"
-        [totalPages]="totalPages"
-        [pageSize]="pageSize()"
-        [pageSizeOptions]="pageSizeOptions"
-        (pageChange)="pageNumber.set($event); reload()"
-        (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
-      </app-pagination>
+        <app-pagination
+          [pageNumber]="pageNumber()"
+          [totalPages]="totalPages"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageChange)="pageNumber.set($event); reload()"
+          (pageSizeChange)="pageSize.set($event); onPageSizeChange()">
+        </app-pagination>
     </div>
 
   </ng-container>
@@ -243,50 +243,50 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="isView() && selectedFournisseur">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'STOCK.FOURNISSEURS.TITLE_DETAILS' | translate }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ 'stock.fournisseurs.title_details' | translate }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.NAME' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.name' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.ADDRESS' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.address' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.address }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.PHONE' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.phone' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.phone }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.EMAIL' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.email' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.email ?? '—' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.TAX_NUMBER' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.tax_number' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedFournisseur.taxNumber }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.RIB' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.rib' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedFournisseur.rib }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.STATUS' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.status' | translate }}</span>
           <span class="badge"
                 [class.badge--active]="!selectedFournisseur.isBlocked && !selectedFournisseur.isDeleted"
                 [class.badge--blocked]="selectedFournisseur.isBlocked"
                 [class.badge--danger]="selectedFournisseur.isDeleted">
-            {{ selectedFournisseur.isDeleted ? ('STOCK.FOURNISSEURS.STATUS.DELETED' | translate) : selectedFournisseur.isBlocked ? ('STOCK.FOURNISSEURS.STATUS.BLOCKED' | translate) : ('STOCK.FOURNISSEURS.STATUS.ACTIVE' | translate) }}
+            {{ selectedFournisseur.isDeleted ? ('stock.fournisseurs.status.deleted' | translate) : selectedFournisseur.isBlocked ? ('stock.fournisseurs.status.blocked' | translate) : ('stock.fournisseurs.status.active' | translate) }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.CREATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.created_at' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.createdAt | date:'medium' }}</span>
         </div>
         <div class="detail-item" *ngIf="selectedFournisseur.updatedAt">
-          <span class="detail-label">{{ 'STOCK.FOURNISSEURS.DETAILS.UPDATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'stock.fournisseurs.details.updated_at' | translate }}</span>
           <span class="detail-value">{{ selectedFournisseur.updatedAt | date:'medium' }}</span>
         </div>
       </div>
@@ -294,24 +294,24 @@
       <div class="panel__actions">
         <button class="btn-secondary" (click)="openEdit(selectedFournisseur)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.UPDATE_FOURNISSEUR) && !selectedFournisseur.isDeleted">
-          {{ 'STOCK.FOURNISSEURS.EDIT_BUTTON' | translate }}
+          {{ 'stock.fournisseurs.edit_button' | translate }}
         </button>
         <button class="btn-warning" (click)="toggleBlock(selectedFournisseur)"
                 *ngIf="(
                           (authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.BLOCK_FOURNISSEUR) && !selectedFournisseur.isBlocked)
                       ||  (authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.UNBLOCK_FOURNISSEUR) && selectedFournisseur.isBlocked)
                         )  && !selectedFournisseur.isDeleted">
-          {{ selectedFournisseur.isBlocked ? ('COMMON.UNBLOCK' | translate) : ('COMMON.BLOCK' | translate) }} {{ 'STOCK.FOURNISSEURS.TITLE' | translate }}
+          {{ selectedFournisseur.isBlocked ? ('common.unblock' | translate) : ('common.block' | translate) }} {{ 'stock.fournisseurs.title' | translate }}
         </button>
         <button class="btn-danger" (click)="delete(selectedFournisseur)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.DELETE_FOURNISSEUR)
                        && !selectedFournisseur.isDeleted">
-          {{ 'COMMON.DELETE' | translate }}
+          {{ 'common.delete' | translate }}
         </button>
         <button class="btn-success" (click)="restore(selectedFournisseur.id)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.RESTORE_FOURNISSEUR)
                        && selectedFournisseur.isDeleted">
-          {{ 'COMMON.RESTORE' | translate }}
+          {{ 'common.restore' | translate }}
         </button>
       </div>
     </div>
@@ -321,8 +321,8 @@
   <div class="panel" *ngIf="(isCreate() && authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.CREATE_FOURNISSEUR))
                          || (isEdit()   && authService.hasPrivilege(PRIVILEGES.FOURNISSEURS.UPDATE_FOURNISSEUR))">
     <div class="panel__header">
-      <h2 class="panel__title">{{ isCreate() ? ('STOCK.FOURNISSEURS.FORM.ADD_TITLE' | translate) : ('STOCK.FOURNISSEURS.FORM.EDIT_TITLE' | translate) }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ isCreate() ? ('stock.fournisseurs.form.add_title' | translate) : ('stock.fournisseurs.form.edit_title' | translate) }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <form [formGroup]="fournisseurForm" (ngSubmit)="submit()" class="form">
@@ -330,37 +330,35 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'STOCK.FOURNISSEURS.FORM.FULL_NAME' | translate }}</label>
+              <label>{{ 'stock.fournisseurs.form.full_name' | translate }}</label>
               <mat-icon>business</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="name"
-                  [pattern]="namePattern"
-                  [placeholder]="'STOCK.FOURNISSEURS.FORM.NAME_PLACEHOLDER' | translate"
+                  [placeholder]="'stock.fournisseurs.form.name_placeholder' | translate"
                   [class.form__input--error]="fournisseurForm.get('name')?.invalid && fournisseurForm.get('name')?.touched"
                   />
             <span class="field__error" *ngIf="fournisseurForm.get('name') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['minlength']">{{ 'validation.name_min' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'validation.name_max' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.alpha_only' | translate }}</span>
               </ng-container>
             </span>
           </div>
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'STOCK.FOURNISSEURS.FORM.PHONE' | translate }}</label>
+              <label>{{ 'stock.fournisseurs.form.phone' | translate }}</label>
               <mat-icon>phone</mat-icon>
             </div>
             <input class="form__input" type="text" formControlName="phone"
-                  [pattern]="phonePattern"
-                  [placeholder]="'STOCK.FOURNISSEURS.FORM.PHONE_PLACEHOLDER' | translate"
+                  [placeholder]="'stock.fournisseurs.form.phone_placeholder' | translate"
                   [class.form__input--error]="fournisseurForm.get('phone')?.invalid && fournisseurForm.get('phone')?.touched"/>
             <span class="field__error" *ngIf="fournisseurForm.get('phone') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.PHONE_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.invalid_phone' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -368,17 +366,16 @@
 
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'STOCK.FOURNISSEURS.FORM.ADDRESS' | translate }}</label>
+            <label>{{ 'stock.fournisseurs.form.address' | translate }}</label>
             <mat-icon>location_on</mat-icon>
           </div>
-          <input class="form__input" type="text" formControlName="address" [placeholder]="'STOCK.FOURNISSEURS.FORM.ADDRESS_PLACEHOLDER' | translate"
-                [pattern]="addressPattern"
-                [class.form__input--error]="fournisseurForm.get('address')?.invalid && fournisseurForm.get('address')?.touched"/>
+          <input class="form__input" type="text" formControlName="address" [placeholder]="'stock.fournisseurs.form.address_placeholder' | translate"
+                [class.form__input--error]="fournisseurForm.get('address')?.invalid && fournisseurForm.get('address')?.touched" />
           <span class="field__error" *ngIf="fournisseurForm.get('address') as ctrl">
             <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-              <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-              <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.ADDRESS_MIN' | translate }}</span>
-              <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ADDRESS_PATTERN' | translate }}</span>
+              <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+              <span *ngIf="ctrl.errors?.['minlength']">{{ 'validation.address_min' | translate }}</span>
+              <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.address_pattern' | translate }}</span>
             </ng-container>
           </span>
         </div>
@@ -386,28 +383,25 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'STOCK.FOURNISSEURS.FORM.TAX_NUMBER' | translate }}</label>
+              <label>{{ 'stock.fournisseurs.form.tax_number' | translate }}  <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
               <mat-icon>receipt_long</mat-icon>
             </div>
-            <input class="form__input" type="text" formControlName="taxNumber" [placeholder]="'STOCK.FOURNISSEURS.FORM.TAX_NUMBER_PLACEHOLDER' | translate"
-                  [pattern]="taxNumberPattern"
+            <input class="form__input" type="text" formControlName="taxNumber" [placeholder]="'stock.fournisseurs.form.tax_number_placeholder' | translate"
                   [class.form__input--error]="fournisseurForm.get('taxNumber')?.invalid && fournisseurForm.get('taxNumber')?.touched"/>
             <span class="field__error" *ngIf="fournisseurForm.get('taxNumber') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.TAX_NUMBER_INVALID' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.TAX_NUMBER_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.tax_number_invalid' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'validation.tax_number_max' | translate }}</span>
               </ng-container>
             </span>
           </div>
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'STOCK.FOURNISSEURS.FORM.RIB' | translate }}</label>
+              <label>{{ 'stock.fournisseurs.form.rib' | translate }}</label>
               <mat-icon>account_balance</mat-icon>
             </div>
-            <input class="form__input" type="text" formControlName="rib" [placeholder]="'STOCK.FOURNISSEURS.FORM.RIB_PLACEHOLDER' | translate"
-                    [pattern]="ribPattern"
+            <input class="form__input" type="text" formControlName="rib" [placeholder]="'stock.fournisseurs.form.rib_placeholder' | translate"
                     [class.form__input--error]="fournisseurForm.get('rib')?.invalid && fournisseurForm.get('rib')?.touched"/>
             <span class="form__info"
                   *ngIf="fournisseurForm.get('rib')?.value?.length > 0"
@@ -416,8 +410,8 @@
             </span>
             <span class="field__error" *ngIf="fournisseurForm.get('rib') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.RIB_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.rib_invalid' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -425,27 +419,26 @@
 
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'STOCK.FOURNISSEURS.FORM.EMAIL' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+            <label>{{ 'stock.fournisseurs.form.email' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
             <mat-icon>email</mat-icon>
           </div>
-          <input class="form__input" type="email" formControlName="email" [placeholder]="'STOCK.FOURNISSEURS.FORM.EMAIL_PLACEHOLDER' | translate"
+          <input class="form__input" type="email" formControlName="email" [placeholder]="'stock.fournisseurs.form.email_placeholder' | translate"
                  [class.form__input--error]="fournisseurForm.get('email')?.invalid && fournisseurForm.get('email')?.touched"/>
           <span class="field__error" *ngIf="fournisseurForm.get('email') as ctrl">
             <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-              <span *ngIf="ctrl.errors?.['email']">{{ 'VALIDATION.EMAIL_INVALID' | translate }}</span>
+              <span *ngIf="ctrl.errors?.['email']">{{ 'validation.invalid_email' | translate }}</span>
             </ng-container>
           </span>
         </div>
 
         <div class="form__actions">
-          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="fournisseurForm.invalid">
-            {{ isCreate() ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
+            {{ isCreate() ? ('common.add' | translate) : ('common.save' | translate) }}
           </button>
         </div>
 
       </form>
     </div>
   </div>
-
 </div>

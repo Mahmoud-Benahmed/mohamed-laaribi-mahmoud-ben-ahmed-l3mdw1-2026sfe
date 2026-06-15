@@ -1,0 +1,490 @@
+// Shared var bridges
+$bg-page:    var(--bg-page);
+$bg-card:    var(--bg-card);
+$bg-card-hi: var(--bg-card-hi);
+$border:     var(--border);
+$border-hi:  var(--border-hi);
+$text-hi:    var(--text-hi);
+$text-mid:   var(--text-mid);
+$text-lo:    var(--text-lo);
+
+$font-sans: 'DM Sans', sans-serif;
+$blue:      #4e7cff;
+
+//Host
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+//Page
+.onboarding-page {
+  min-height: 100vh;
+  background: $bg-page;
+  font-family: $font-sans;
+  color: $text-hi;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.5rem 5rem;
+  position: relative;
+}
+
+
+//Container
+.onboarding-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620px;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+//Topbar
+.onboarding-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.85rem 1.5rem 0;
+}
+
+//Lang Toggle
+.lang-toggle { display: flex; gap: 0.3rem; }
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.27rem 0.58rem;
+  cursor: pointer;
+  color: $text-lo;
+  font-size: 0.77rem;
+  font-weight: 500;
+  font-family: $font-sans;
+  transition: all 0.15s;
+
+  &--active {
+    background: $bg-card-hi;
+    border-color: $border;
+    color: $text-hi;
+  }
+
+  &:hover:not(.lang-btn--active) { color: $text-mid; }
+}
+
+//Header
+.onboarding-header {
+  padding: 1.1rem 2rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid $border;
+
+  .logo-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    .logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 9px;
+      background: $bg-page;
+      border: 1px solid $border;
+      display: flex; align-items: center; justify-content: center;
+
+      img { border-radius: 5px; }
+    }
+
+    .logo-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: $text-hi;
+    }
+  }
+
+  .plan-chip {
+    display: inline-flex;
+    align-items: center;
+    background: $bg-page;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: $text-mid;
+  }
+
+  h1 {
+    font-family: $font-sans;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 0.4rem;
+    color: $text-hi;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $text-mid;
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+//Form body
+.form-body {
+  padding: 0 2rem 2rem;
+}
+
+//Sections
+.form-section {
+  padding-top: 1.75rem;
+
+  & + .form-section {
+    margin-top: 0.25rem;
+  }
+}
+
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $text-lo;
+  margin-bottom: 1.1rem;
+}
+
+//Grid
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  .full-width { grid-column: 1 / -1; }
+}
+
+//Field
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+
+  label {
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: $text-mid;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  input:not(.color-swatch):not(.color-text),
+  select {
+    background: $bg-page;
+    border: 1px solid $border;
+    border-radius: 8px;
+    color: $text-hi;
+    font-family: $font-sans;
+    font-size: 0.9rem;
+    padding: 0.62rem 0.82rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: $blue;
+      box-shadow: 0 0 0 3px rgba(78,124,255,0.1);
+    }
+
+    &::placeholder { color: $text-lo; }
+    option { background: var(--bg-card); color: var(--text-hi); }
+  }
+}
+
+//Slug input
+.slug-input {
+  display: flex;
+  align-items: stretch;
+  background: $bg-page;
+  border: 1px solid $border;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: $blue;
+    box-shadow: 0 0 0 3px rgba(78,124,255,0.1);
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 0;
+    padding: 0.62rem 0.82rem;
+    min-width: 0;
+
+    &:focus { box-shadow: none; border-color: transparent; }
+  }
+
+  .slug-suffix {
+    padding: 0 0.75rem;
+    color: $text-lo;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    border-left: 1px solid $border;
+    background: $bg-card-hi;
+    display: flex;
+    align-items: center;
+  }
+}
+
+//Color picker
+.color-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: $bg-page;
+  border: 1px solid $border;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: $blue;
+    box-shadow: 0 0 0 3px rgba(78,124,255,0.1);
+  }
+
+  .color-swatch {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-right: 1px solid $border;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 6px;
+    flex-shrink: 0;
+    border-radius: 0;
+
+    &::-webkit-color-swatch-wrapper { padding: 0; border-radius: 4px; }
+    &::-webkit-color-swatch { border: none; border-radius: 4px; }
+    &::-moz-color-swatch { border: none; border-radius: 4px; }
+  }
+
+  .color-text {
+    flex: 1;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0.62rem 0.82rem !important;
+    font-family: 'DM Mono', $font-sans;
+    font-size: 0.875rem !important;
+    color: $text-hi;
+    min-width: 0;
+
+    &:focus { outline: none; }
+    &::placeholder { color: $text-lo; }
+  }
+}
+
+//Field hints and errors
+.field-hint { font-size: 0.72rem; color: $text-lo; }
+.field-error {
+  font-size: 0.72rem;
+  color: #f08080;
+  min-height: 1rem;
+}
+
+//Error banner
+.error-msg {
+  background: rgba(239,68,68,0.07);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #f08080;
+  font-size: 0.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+
+//Actions
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+
+}
+
+.btn-back {
+  color: $text-mid;
+  font-size: 0.875rem;
+  font-family: $font-sans;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+  padding: 0;
+
+  &:hover { color: $text-hi; }
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: $blue;
+  color: #fff;
+  border: none;
+  padding: 0.72rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: $font-sans;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.18s;
+
+  span { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px rgba(78,124,255,0.3);
+    transform: translateY(-1px);
+  }
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+//Spinner
+.spinner-inline {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+//Success
+.success-state {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  animation: fadeInUp 0.45s ease;
+
+  .success-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.75rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, $blue, rgba(78,124,255,0.2), $blue);
+      animation: spin 3.5s linear infinite;
+      opacity: 0.4;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 50%;
+      background: $bg-card;
+    }
+
+    .success-check {
+      position: relative;
+      z-index: 1;
+      width: 82px; height: 82px;
+      border-radius: 50%;
+      background: $bg-card-hi;
+      border: 1px solid $border;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s both;
+    }
+  }
+
+  h2 {
+    font-family: $font-sans;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.6rem;
+    color: $text-hi;
+  }
+
+  p {
+    color: $text-mid;
+    font-size: 0.9rem;
+    margin-bottom: 2.25rem;
+    line-height: 1.65;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: $bg-card-hi;
+    border: 1px solid $border;
+    border-radius: 99px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: $blue;
+      border-radius: 99px;
+      animation: fillProgress 5s linear forwards;
+    }
+  }
+
+  .progress-label {
+    margin-top: 0.65rem;
+    font-size: 0.73rem;
+    color: $text-lo;
+    letter-spacing: 0.04em;
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { transform: scale(0.55); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes fillProgress {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+//Responsive
+@media (max-width: 640px) {
+  .onboarding-page    { padding: 1.5rem 1rem 4rem; align-items: flex-start; }
+  .onboarding-header  { padding: 1rem 1.25rem 1.25rem; }
+  .form-body          { padding: 0 1.25rem 1.75rem; }
+  .form-grid          { grid-template-columns: 1fr; }
+}

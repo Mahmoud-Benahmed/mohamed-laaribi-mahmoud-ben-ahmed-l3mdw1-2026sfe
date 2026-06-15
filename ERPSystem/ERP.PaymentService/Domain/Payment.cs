@@ -3,6 +3,7 @@ using ERP.PaymentService.Domain;
 public class Payment
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Number { get; private set; }
     public Guid ClientId { get; private set; }
     public decimal TotalAmount { get; private set; }
@@ -25,12 +26,14 @@ public class Payment
         string number, Guid clientId, decimal totalAmount,
         PaymentMethod method, DateTime paymentDate,
         string? externalReference = null,
-        string? notes = null)
+        string? notes = null,
+        Guid? tenantId= null)
     {
         Id = Guid.NewGuid();
         Number = number;
         ClientId = clientId;
         TotalAmount = Math.Round(totalAmount, 2, MidpointRounding.AwayFromZero); // ← round on creation
+        TenantId = tenantId;
         Method = method;
         PaymentDate = paymentDate;
         ExternalReference = externalReference;
@@ -40,22 +43,22 @@ public class Payment
 
     public void AllocateAmount(decimal amount, InvoiceCache cache)
     {
-        amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero); // ← round input first
+        amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
 
         if (amount <= 0)
             throw new PaymentDomainException("Le montant affecté doit être positif.");
 
         var remaining = GetRemainingAmount();
-        if (amount > remaining + 0.01m)  // ← tolerance for floating-point edge cases
+        if (amount > remaining + 0.01m)
             throw new PaymentDomainException(
                 $"Le montant affecté ({amount:F2}) dépasse le restant du règlement ({remaining:F2}).");
 
         var invoiceRemaining = Math.Round(cache.TotalTTC - cache.PaidAmount, 2, MidpointRounding.AwayFromZero);
-        if (amount > invoiceRemaining + 0.01m)  // ← same tolerance
+        if (amount > invoiceRemaining + 0.01m)
             throw new PaymentDomainException(
                 $"Le montant affecté ({amount:F2}) dépasse le restant de la facture ({invoiceRemaining:F2}).");
 
-        _allocations.Add(new PaymentInvoice(Id, cache.Id, amount));
+        _allocations.Add(new PaymentInvoice(Id, cache.Id, amount, TenantId)); // ← pass TenantId
     }
 
     public void CorrectDetails(

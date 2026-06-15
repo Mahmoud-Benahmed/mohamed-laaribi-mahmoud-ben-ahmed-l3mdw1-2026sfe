@@ -1,4 +1,6 @@
 ﻿using ERP.PaymentService.Application.Interfaces.LocalCache;
+using ERP.PaymentService.Application.Services;
+using ERP.PaymentService.Infrastructure.Messaging.TenantEvent;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.PaymentService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -6,9 +8,11 @@ namespace ERP.PaymentService.Infrastructure.Persistence.Repositories.LocalCache;
 public class InvoiceCacheRepository : IInvoiceCacheRepository
 {
     private readonly PaymentDbContext _context;
+    private readonly ITenantContext _tenantContext;
 
-    public InvoiceCacheRepository(PaymentDbContext context)
+    public InvoiceCacheRepository(PaymentDbContext context, ITenantContext tenantContext)
     {
+        _tenantContext = tenantContext;
         _context = context;
     }
 
@@ -68,20 +72,16 @@ public class InvoiceCacheRepository : IInvoiceCacheRepository
     public async Task AddAsync(InvoiceCache cache)
     {
         await _context.InvoiceCaches.AddAsync(cache);
-        await _context.SaveChangesAsync();
     }
 
-    public async Task SaveChangesAsync(InvoiceCache cache)
+    public Task UpdateAsync(InvoiceCache cache)
     {
-        var existing = await _context.InvoiceCaches.FindAsync(cache.Id);
-
-        if (existing is null)
-            throw new InvalidOperationException(
-                $"InvoiceCache with Id {cache.Id} not found. Use AddAsync to insert new entries.");
-
-        _context.Entry(existing).CurrentValues.SetValues(cache);
-        await _context.SaveChangesAsync();
+        _context.InvoiceCaches.Update(cache);
+        return Task.CompletedTask;
     }
+
+    public async Task SaveChangesAsync()
+        => await _context.SaveChangesAsync();
 
     public async Task<(List<InvoiceCache> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? search = null)
@@ -90,9 +90,7 @@ public class InvoiceCacheRepository : IInvoiceCacheRepository
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        IQueryable<InvoiceCache> query = _context.InvoiceCaches
-            .AsNoTracking()
-            .OrderByDescending(ic => ic.LastUpdated);
+        IQueryable<InvoiceCache> query = _context.InvoiceCaches.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -105,6 +103,7 @@ public class InvoiceCacheRepository : IInvoiceCacheRepository
         int totalCount = await query.CountAsync();
 
         List<InvoiceCache> items = await query
+            .OrderByDescending(ic => ic.LastUpdated)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

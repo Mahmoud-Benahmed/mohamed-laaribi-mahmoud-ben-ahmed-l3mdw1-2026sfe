@@ -7,6 +7,7 @@ namespace InvoiceService.Domain
         // ────────────────────────────────────────────────────────────────────────
 
         public Guid Id { get; private set; }
+        public Guid? TenantId { get; private set; }
         public string InvoiceNumber { get; private set; }
         public TaxCalculationMode TaxCalculationMode { get; private set; }
         public DateTime InvoiceDate { get; private set; }
@@ -23,6 +24,8 @@ namespace InvoiceService.Domain
         public bool IsDeleted { get; private set; } = false;
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
+        public string? OriginalInvoiceNumber { get; private set; }
+
         private readonly List<InvoiceItem> _items = new();
         public IReadOnlyCollection<InvoiceItem> Items => _items.AsReadOnly();
 
@@ -41,7 +44,9 @@ namespace InvoiceService.Domain
             Guid clientId,
             string clientFullName,
             string clientAddress,
-            string? additionalNotes = null)
+            string? additionalNotes = null,
+            Guid? tenantId = null
+            )
         {
             Id = Guid.NewGuid();
             InvoiceNumber = invoiceNumber;
@@ -53,10 +58,63 @@ namespace InvoiceService.Domain
             ClientFullName = clientFullName;
             ClientAddress = clientAddress;
             AdditionalNotes = additionalNotes;
+            TenantId = tenantId;
             Status = InvoiceStatus.DRAFT;
             IsDeleted = false;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        // In Invoice.cs
+        public Invoice CreatePenaltyInvoice(
+            string invoiceNumber,
+            int duePeriod,
+            decimal annualRate = 0.10m,
+            Guid? tenantId = null)
+        {
+            if (Status != InvoiceStatus.UNPAID)
+                throw new InvoiceDomainException("Penalty invoices can only be created for UNPAID invoices.");
+
+            // Penalty is calculated on the fixed period duration, not the actual days elapsed
+            // duePeriod = 30 means: charge 10% annual rate for 30 days
+            int daysForCalculation = duePeriod > 0 ? duePeriod : 30; // fallback to 30 if period is 0
+
+            decimal penaltyAmount = Math.Round(
+                TotalTTC * (annualRate / 365m) * daysForCalculation,
+                2, MidpointRounding.AwayFromZero);
+
+            // Guard: never create a zero-value penalty
+            if (penaltyAmount <= 0)
+                throw new InvoiceDomainException(
+                    $"Penalty amount is zero for invoice {InvoiceNumber}. " +
+                    $"TotalTTC={TotalTTC}, annualRate={annualRate}, days={daysForCalculation}");
+
+            Invoice penalty = new Invoice(
+                invoiceNumber,
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddDays(duePeriod > 0 ? duePeriod : 30),
+                TaxCalculationMode,
+                0,
+                ClientId,
+                ClientFullName,
+                ClientAddress,
+                $"Penalty invoice for overdue invoice {OriginalInvoiceNumber ?? InvoiceNumber}",
+                tenantId);
+
+            penalty.OriginalInvoiceNumber = OriginalInvoiceNumber ?? InvoiceNumber; // always root
+
+            penalty.AddItem(new InvoiceItem(
+                penalty.Id,
+                Guid.Empty,
+                $"Late payment penalty ({annualRate * 100}%) on {OriginalInvoiceNumber ?? InvoiceNumber}",
+                "PENALTY",
+                1,
+                penaltyAmount,
+                0));
+
+            penalty.CalculateTotals();
+            penalty.FinalizeInvoice();
+            return penalty;
         }
 
         // ────────────────────────────────────────────────────────────────────────
@@ -97,7 +155,7 @@ namespace InvoiceService.Domain
         {
             // Each item recalculates using the invoice-level discount
             foreach (InvoiceItem item in _items)
-                item.CalculateSubtotal(DiscountRate);  // ← discount flows from invoice to items
+                item.CalculateSubtotal(DiscountRate);
 
             TotalHT = _items.Sum(i => i.TotalHT);
 

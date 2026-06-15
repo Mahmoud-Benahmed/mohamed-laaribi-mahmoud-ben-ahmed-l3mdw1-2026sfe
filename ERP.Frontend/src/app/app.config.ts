@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './interceptor/auth-interceptor';
 import { LoadingInterceptor } from './interceptor/loading-interceptor';
 import { registerLocaleData } from '@angular/common';
@@ -12,6 +12,9 @@ import localeFrFR from '@angular/common/locales/fr';
 import localeEnGB from '@angular/common/locales/en-GB';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { TenantInactiveInterceptor } from './interceptor/tenant-inactive-interceptor';
+import { errorTranslateInterceptor } from './interceptor/error-Translate.interceptor';
+import { apiInterceptor } from './interceptor/api-interceptor.interceptor';
 
 registerLocaleData(localeFrMA);
 registerLocaleData(localeFrTN);
@@ -30,8 +33,13 @@ class HttpTranslateLoader implements TranslateLoader {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    provideHttpClient(withInterceptors([LoadingInterceptor, AuthInterceptor])),
+    provideRouter(routes),provideHttpClient(withInterceptors([
+      apiInterceptor,
+      LoadingInterceptor,
+      errorTranslateInterceptor,
+      TenantInactiveInterceptor,
+      AuthInterceptor
+    ])),
     provideTranslateService({
       fallbackLang: 'en',
       loader: {

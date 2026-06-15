@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -9,14 +9,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
+  InvoiceCacheDto,
   PaymentService,
   RefundRequestDto,
   RefundStatsDto,
 } from './../../../services/payment.service';
 import { ClientResponseDto, ClientsService } from './../../../services/clients/clients.service';
 import { AuthService, PRIVILEGES } from './../../../services/auth/auth.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 import { CompleteRefundModal } from './complete-modal/complete-modal';
+import { InvoiceDto, InvoiceService } from '../../../services/invoice.service';
 
 @Component({
   selector: 'app-refunds',
@@ -42,6 +44,9 @@ export class RefundsComponent implements OnInit {
   // ── Alerts ────────────────────────────────────────────────────────────────
   errors: string[] = [];
   successMessage: string | null = null;
+
+  private invoiceCache = new Map<string, InvoiceDto>();
+  invoiceMap = signal<Map<string, InvoiceDto>>(new Map());
 
   // ── Data ──────────────────────────────────────────────────────────────────
   refunds: RefundRequestDto[] = [];
@@ -106,6 +111,7 @@ export class RefundsComponent implements OnInit {
     private paymentService: PaymentService,
     private translate: TranslateService,
     private fb: FormBuilder,
+    private invoiceService: InvoiceService
   ) {}
 
   ngOnInit(): void {
@@ -124,7 +130,7 @@ export class RefundsComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('REFUNDS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('payments.refunds.errors.load_failed'));
         this.cdr.markForCheck();
       },
     });
@@ -143,7 +149,7 @@ export class RefundsComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('REFUNDS.ERRORS.LOAD_FAILED'));
+        this.flash('error', this.translate.instant('payments.refunds.errors.load_failed'));
         this.cdr.markForCheck();
       },
     });
@@ -197,6 +203,26 @@ export class RefundsComponent implements OnInit {
 
   getTotalRefundAmount(refund: RefundRequestDto): number {
     return refund.lines.reduce((sum, l) => sum + l.amount, 0);
+  }
+
+  getInvoiceById(id: string): InvoiceDto | null {
+    if (this.invoiceCache.has(id)) {
+      return this.invoiceCache.get(id)!;
+    }
+
+    this.invoiceService.getById(id)
+      .pipe(take(1))
+      .subscribe({
+        next: (invoice) => {
+          this.invoiceCache.set(id, invoice);
+          this.invoiceMap.set(new Map(this.invoiceCache));
+        },
+        error: () => {
+          this.invoiceCache.set(id, null!); // prevent retrying on every render
+        }
+      });
+
+    return null; // placeholder while loading
   }
 
   statusClass(status: string): Record<string, boolean> {

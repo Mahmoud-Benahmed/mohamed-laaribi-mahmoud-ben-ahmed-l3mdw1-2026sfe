@@ -1,4 +1,5 @@
 ﻿// InvoiceService.Infrastructure.Persistence/InvoiceNumberGenerator.cs
+using InvoiceService.Application.Interfaces;
 using InvoiceService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -15,7 +16,7 @@ public class InvoiceNumberGenerator : IInvoiceNumberGenerator
         _context = context;
     }
 
-    public async Task<string> GenerateNextInvoiceNumberAsync()
+    public async Task<string> GenerateNextInvoiceNumberAsync(Guid? tenantId)
     {
         int currentYear = DateTime.UtcNow.Year;
 
@@ -26,24 +27,27 @@ public class InvoiceNumberGenerator : IInvoiceNumberGenerator
         {
             // Get or create sequence with a lock
             InvoiceSequence? sequence = await _context.InvoiceSequences
-                .FirstOrDefaultAsync(s => s.Year == currentYear);
+                .FirstOrDefaultAsync(s => s.TenantId == tenantId);
 
             if (sequence == null)
             {
-                sequence = new InvoiceSequence(currentYear);
+                sequence = new InvoiceSequence(currentYear, tenantId);
                 _context.InvoiceSequences.Add(sequence);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                // Reload with lock (EF Core 5+)
                 await _context.Entry(sequence)
-                    .ReloadAsync();
+                              .ReloadAsync();
             }
+            
+            Console.WriteLine("Sequence Before GetNextNumber(): {0}", sequence.CurrentNumber);
 
-            // Generate number
             int nextNumber = sequence.GetNextNumber();
             string invoiceNumber = sequence.FormatInvoiceNumber();
+
+            Console.WriteLine("Sequence After GetNextNumber(): {0}", sequence.CurrentNumber);
+
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -54,7 +58,7 @@ public class InvoiceNumberGenerator : IInvoiceNumberGenerator
         {
             await transaction.RollbackAsync();
             // Retry once on concurrency conflict
-            return await GenerateNextInvoiceNumberAsync();
+            return await GenerateNextInvoiceNumberAsync(tenantId);
         }
         catch
         {

@@ -4,69 +4,94 @@ using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class ControleRepository : IControleRepository
+    public class ControleRepository : BaseRepository<Controle>, IControleRepository
     {
-        private readonly IMongoCollection<Controle> _collection;
-
         public ControleRepository(MongoDbContext context)
-        {
-            _collection = context.Controles;
-        }
+            : base(context, CollectionNames.Controles) { }
+
         public async Task<List<Controle>> GetByIdsAsync(IEnumerable<Guid> ids)
         {
-            FilterDefinition<Controle> filter = Builders<Controle>.Filter.In(x => x.Id, ids);
+            var filter = Builders<Controle>.Filter.And(
+                ScopeFilter,
+                Builders<Controle>.Filter.In(x => x.Id, ids)
+            );
             return await _collection.Find(filter).ToListAsync();
         }
 
         public async Task<Controle?> GetByIdAsync(Guid id)
-            => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            => await _collection.Find(WithTenant(x => x.Id == id)).FirstOrDefaultAsync();
 
         public async Task<Controle?> GetByLibelleAsync(string libelle)
             => await _collection
-                .Find(x => x.Libelle == libelle.Trim().ToUpper())
+                .Find(WithTenant(x => x.Libelle == libelle.Trim().ToUpper()))
                 .FirstOrDefaultAsync();
 
-        public Task<(List<Controle> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize)
+
+        public async Task<(List<Controle> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize)
         {
-            return GetPagedAsync(pageNumber, pageSize);
+            return await GetPagedAsync(pageNumber, pageSize);
         }
 
         public async Task<List<Controle>> GetAllAsync()
         {
-            return await _collection.Find(FilterDefinition<Controle>.Empty).ToListAsync();
+            return await _collection
+                .Find(ScopeFilter)
+                .SortBy(c => c.Libelle)
+                .ToListAsync();
+        }
+        public async Task<bool> DuplicateExists(string libelle, Guid? excludeId = null)
+        {
+            var filter = WithTenant(x =>
+                x.Libelle.ToLower() == libelle.ToLower()
+            );
+
+            if (excludeId.HasValue)
+                filter = Builders<Controle>.Filter.And(filter, Builders<Controle>.Filter.Ne(x => x.Id, excludeId.Value));
+
+            return await _collection.Find(filter).AnyAsync();
         }
 
-        public async Task<(List<Controle> Items, int TotalCount)> GetByCategoryAsync(string category, int pageNum, int pageSize)
+        public async Task<(List<Controle> Items, int TotalCount)> GetByCategoryAsync(
+            string category,
+            int pageNum,
+            int pageSize)
         {
-            FilterDefinition<Controle> filter = Builders<Controle>.Filter.Eq(x => x.Category, category);
+            var categoryFilter = Builders<Controle>.Filter.Eq(x => x.Category, category);
+            var filter = Builders<Controle>.Filter.And(ScopeFilter, categoryFilter);
 
-            return await GetPagedAsync(pageNum, pageSize, filter, collation: new Collation("en", strength: CollationStrength.Secondary));
+            return await GetPagedAsync(pageNum, pageSize, filter,
+                collation: new Collation("en", strength: CollationStrength.Secondary));
         }
 
         public async Task AddAsync(Controle controle)
             => await _collection.InsertOneAsync(controle);
 
         public async Task UpdateAsync(Controle controle)
-            => await _collection.ReplaceOneAsync(x => x.Id == controle.Id, controle);
+        {
+            var filter = WithTenant(x => x.Id == controle.Id);
+            await _collection.ReplaceOneAsync(filter, controle);
+        }
 
         public async Task DeleteAsync(Guid id)
-            => await _collection.DeleteOneAsync(x => x.Id == id);
+        {
+            var filter = WithTenant(x => x.Id == id);
+            await _collection.DeleteOneAsync(filter);
+        }
 
         public async Task DeleteAllAsync()
         {
-            await _collection.DeleteManyAsync(FilterDefinition<Controle>.Empty);
+            await _collection.DeleteManyAsync(TenantFilter);
         }
 
         public async Task<int> CountAsync()
         {
-            return (int)await _collection.CountDocumentsAsync(FilterDefinition<Controle>.Empty);
+            return (int)await _collection.CountDocumentsAsync(ScopeFilter);
         }
-
 
         private async Task<(List<Controle> Items, int TotalCount)> GetPagedAsync(
             int pageNumber,
             int pageSize,
-            FilterDefinition<Controle>? filter = null,
+            FilterDefinition<Controle>? customFilter = null,
             SortDefinition<Controle>? sort = null,
             Collation? collation = null
         )
@@ -74,24 +99,22 @@ namespace ERP.AuthService.Infrastructure.Persistence.Repositories
             pageNumber = Math.Max(pageNumber, 1);
             pageSize = Math.Max(pageSize, 1);
 
-            List<FilterDefinition<Controle>> filters = new List<FilterDefinition<Controle>>();
+            // ✅ Start with ScopeFilter as base
+            var filters = new List<FilterDefinition<Controle>> { ScopeFilter };
 
-            // custom filter
-            if (filter != null)
-                filters.Add(filter);
+            if (customFilter != null)
+                filters.Add(customFilter);
 
-            FilterDefinition<Controle> finalFilter = filters.Count > 0
-                                    ? Builders<Controle>.Filter.And(filters)
-                                    : Builders<Controle>.Filter.Empty;
+            var finalFilter = filters.Count > 0
+                ? Builders<Controle>.Filter.And(filters)
+                : Builders<Controle>.Filter.Empty;
 
             sort ??= Builders<Controle>.Sort.Ascending(c => c.Libelle);
 
-            FindOptions findOptions = new FindOptions { Collation = collation };
-
-            int totalCount = (int)await _collection.CountDocumentsAsync(
+            var totalCount = (int)await _collection.CountDocumentsAsync(
                 finalFilter, new CountOptions { Collation = collation });
 
-            List<Controle> items = await _collection
+            var items = await _collection
                 .Find(finalFilter, new FindOptions { Collation = collation })
                 .Sort(sort)
                 .Skip((pageNumber - 1) * pageSize)

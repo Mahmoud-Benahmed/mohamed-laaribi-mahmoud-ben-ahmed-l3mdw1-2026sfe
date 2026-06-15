@@ -1,45 +1,348 @@
+# Docker Mode deployment for ERP System infrastructure services
+name: erp-system
+
+x-common-env: &common-env
+  ASPNETCORE_ENVIRONMENT: Docker
+  Kafka__BootstrapServers: ${Kafka__BootstrapServers}
+  JWT__Secret: ${JWT__Secret}
+  JWT__Issuer: ${JWT__Issuer}
+  JWT__Audience: ${JWT__Audience}
+
 services:
-  service_name-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    develop:
-      watch:
-        - action: rebuild
-          path: .
-          ignore:
-            - bin/
-            - obj/
-    container_name: erp-service_name
+
+# ─────────────────────────────────────────────────────────────
+# INFRA
+# ─────────────────────────────────────────────────────────────
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
-      - "PORT_TO_EXPOSE:8080"
-    env_file:
-      - .env
-    depends_on:
-      sqlserver:
-        condition: service_healthy
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
     networks:
       - erp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - erp-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - erp-frontend-html:/usr/share/nginx/html:ro
+    depends_on:
+      - gateway
+      - angular
+    networks: [erp-network]
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: erp-service_name-sqlserver
+    container_name: sqlserver
+    restart: unless-stopped
     environment:
-      SA_PASSWORD: ${SQLSERVER__SA_PASSWORD}
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      MSSQL_SA_PASSWORD: ${SQLSERVER__SA_PASSWORD}
     ports:
-      - "WSL_PORT:1433"
+      - "1435:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - erp-network
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${SQLSERVER__SA_PASSWORD}' -Q 'SELECT 1' -C"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SQLSERVER__SA_PASSWORD} -Q 'SELECT 1' -C"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - erp-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "${MONGO_USERNAME}", "--password", "${MONGO_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
-    networks:
-      - erp-network
+
+# ─────────────────────────────────────────────────────────────
+# SERVICES
+# ─────────────────────────────────────────────────────────────
+
+  tenant-service:
+    build: ./ERP.TenantService
+    container_name: tenant-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=TenantDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-service:
+    build: ./ERP.AuthService
+    container_name: auth-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      mongo:
+        condition: service_healthy
+      tenant-service:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      MongoSettings__RootConnectionString: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
+      MongoSettings__ConnectionString: ${MongoSettings__ConnectionString}
+      MongoSettings__DatabaseName: ${MongoSettings__DatabaseName}
+      MongoSettings__AppUsername: ${MongoSettings__AppUsername}
+      MongoSettings__AppPassword: ${MongoSettings__AppPassword}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  article-service:
+    build: ./ERP.ArticleService
+    container_name: article-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=ArticlesDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  client-service:
+    build: ./ERP.ClientService
+    container_name: client-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=ClientsDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  fournisseur-service:
+    build: ./ERP.FournisseurService
+    container_name: fournisseur-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=FournisseurDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  stock-service:
+    build: ./ERP.StockService
+    container_name: stock-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      article-service:
+        condition: service_healthy
+      client-service:
+        condition: service_healthy
+      fournisseur-service:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=StockDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+      Kafka__ConsumerGroups__Article: stock-service-article-cache
+      Kafka__ConsumerGroups__ArticleCategory: stock-service-article-category-cache
+      Kafka__ConsumerGroups__Client: stock-service-client-cache
+      Kafka__ConsumerGroups__ClientCategory: stock-service-client-category-cache
+      Kafka__ConsumerGroups__Fournisseur: stock-service-fournisseur-cache
+      Kafka__ConsumerGroups__Invoice: stock-service-invoice-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  invoice-service:
+    build: ./ERP.InvoiceService
+    container_name: invoice-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      stock-service:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=InvoiceDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+      Kafka__ConsumerGroups__Article: invoice-service-article-cache
+      Kafka__ConsumerGroups__ArticleCategory: invoice-service-article-category-cache
+      Kafka__ConsumerGroups__Client: invoice-service-client-cache
+      Kafka__ConsumerGroups__ClientCategory: invoice-service-client-category-cache
+      Kafka__ConsumerGroups__Payment: invoice-service-payment-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  payment-service:
+    build: ./ERP.PaymentService
+    container_name: payment-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks: [erp-network]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=PaymentDb;User Id=sa;Password=${SQLSERVER__SA_PASSWORD};TrustServerCertificate=True;
+      Kafka__ConsumerGroups__Invoice: payment-service-invoice-cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  gateway:
+    build: ./ERP.Gateway
+    container_name: gateway
+    restart: unless-stopped
+    ports: []
+    networks: [erp-network]
+    depends_on:
+      redis:
+        condition: service_healthy
+      tenant-service:
+        condition: service_healthy
+    environment:
+      <<: *common-env
+      ConnectionStrings__REDIS: ${ConnectionStrings__REDIS},password=${REDIS_PASSWORD}
+      TenantService__BaseUrl: http://tenant-service:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# ─────────────────────────────────────────────────────────────
+# FRONTEND APPLICATION COMPILATION (ANGULAR 21 ENGINE)
+# ─────────────────────────────────────────────────────────────
+  angular:
+    image: node:20-alpine
+    container_name: angular
+    restart: no
+    working_dir: /app
+    volumes:
+      - ./../ERP.Frontend:/app
+      - /app/node_modules
+      - erp-frontend-html:/app/dist/ERP.Frontend/browser
+    command: sh -c "npm install && npx ng build --configuration=development --watch"
+    networks: [erp-network]
+
+# ─────────────────────────────────────────────────────────────
+# NETWORKS & VOLUMES
+# ─────────────────────────────────────────────────────────────
 
 networks:
   erp-network:
-    external: true
-    name: erp-network
+    driver: bridge
+
+volumes:
+  redis-data:
+  sqlserver-data:
+  mongo-data:
+  kafka-data:
+  erp-frontend-html:

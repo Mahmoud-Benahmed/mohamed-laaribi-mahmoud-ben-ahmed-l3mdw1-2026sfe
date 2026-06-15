@@ -90,11 +90,14 @@ public sealed record ClientResponseDto(
     int DuePaymentPeriod,
     string? Phone,
     string? TaxNumber,
-    decimal? CreditLimit,
+    decimal? CreditLimit, 
+    decimal? EffectiveCreditLimit,
     int? DelaiRetour,
+    int? EffectiveDelaiRetour,
     bool IsBlocked,
     bool IsDeleted,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    List<CategoryResponseDto> Categories
+    List<CategoryResponseDto> Categories,
+    Guid? TenantId
 );

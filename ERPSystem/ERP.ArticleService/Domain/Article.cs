@@ -3,7 +3,7 @@
     public class Article
     {
         public Guid Id { get; private set; }
-
+        public Guid? TenantId { get; init; }
         public Guid CategoryId { get; private set; }
         public Category Category { get; private set; }
 
@@ -22,7 +22,7 @@
 
         private Article() { }
 
-        public Article(string code, string libelle, decimal prix, UnitEnum unit, Category category, string barCode, int? tva)
+        public Article(string code, string libelle, decimal prix, UnitEnum unit, Category category, string barCode, int? tva, Guid? tenantId=null)
         {
             if (string.IsNullOrWhiteSpace(code))
                 throw new ArgumentException("Code is required");
@@ -38,6 +38,7 @@
                 throw new ArgumentException("TVA must be greater than zero.");
 
             Id = Guid.NewGuid();
+            TenantId= tenantId;
             CodeRef = code;
             Libelle = libelle.Trim();
             Prix = Math.Round(prix, 2);

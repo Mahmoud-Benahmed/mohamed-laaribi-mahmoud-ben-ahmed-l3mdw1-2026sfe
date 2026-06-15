@@ -8,7 +8,7 @@ public sealed record ClientResponseDto(
     string Name,
     string Email,
     string Address,
-    int DuePaymentPeriod,
+    int? DuePaymentPeriod,
     string? Phone,
     string? TaxNumber,
     decimal? CreditLimit,
@@ -17,7 +17,8 @@ public sealed record ClientResponseDto(
     bool IsDeleted,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    List<ClientCategoryResponseDto> Categories
+    List<ClientCategoryResponseDto> Categories,
+    Guid? TenantId
 );
 
 public sealed record ClientCategoryResponseDto(
@@ -32,7 +33,8 @@ public sealed record ClientCategoryResponseDto(
     bool IsActive,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
 );
 
 
@@ -43,7 +45,8 @@ public record ArticleCategoryResponseDto(
     decimal TVA,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
 );
 
 public record ArticleResponseDto(
@@ -57,7 +60,8 @@ public record ArticleResponseDto(
     decimal TVA,
     bool IsDeleted,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    Guid? TenantId
     );
 
 
@@ -65,7 +69,7 @@ public sealed record FournisseurResponseDto(
 Guid Id, string Name, string Address, string Phone,
 string? Email, string TaxNumber, string RIB,
 bool IsDeleted, bool IsBlocked,
-DateTime CreatedAt, DateTime? UpdatedAt);
+DateTime CreatedAt, DateTime? UpdatedAt, Guid? TenantId);
 
 public sealed record InvoiceEventDto(
     Guid Id,
@@ -73,7 +77,8 @@ public sealed record InvoiceEventDto(
     decimal TotalTTC,
     string Status,
     Guid ClientId,
-    List<InvoiceItemEventDto> Items  // ← add this
+    List<InvoiceItemEventDto> Items,
+    Guid? TenantId
 );
 
 public record InvoiceItemEventDto(
@@ -87,12 +92,12 @@ public sealed record InvoicePaidEvent(
     Guid InvoiceId,
     Guid PaymentId,
     decimal PaidAmount,
-    DateTime PaidAt
+    DateTime PaidAt, Guid? TenantId
 );
 
 public record PaymentCancelledEvent(
     Guid PaymentId,
     Guid InvoiceId,
     decimal ReversedAmount,
-    DateTime CancelledAt
+    DateTime CancelledAt, Guid? TenantId
 );

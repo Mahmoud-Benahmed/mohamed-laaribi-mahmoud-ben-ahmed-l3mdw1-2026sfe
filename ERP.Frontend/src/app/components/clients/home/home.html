@@ -3,7 +3,7 @@
   <!-- ===================== PAGE HEADER ===================== -->
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'CLIENTS.BREADCRUMB' | translate }}</p>
+      <p class="breadcrumb">{{ 'clients.breadcrumb' | translate }}</p>
       <h1 class="page-title">{{ pageTitle | translate }}</h1>
     </div>
   </div>
@@ -38,7 +38,7 @@
            [class.stat-card--current]="isList()">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENTS.STATS.ACTIVE' | translate }}</p>
+            <p class="stat-card__label">{{ 'clients.stats.active' | translate }}</p>
             <p class="stat-card__value">{{ activeClients }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--green">
@@ -56,7 +56,7 @@
            [class.disabled]="blockedClients < 1">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENTS.STATS.BLOCKED' | translate }}</p>
+            <p class="stat-card__label">{{ 'clients.stats.blocked' | translate }}</p>
             <p class="stat-card__value">{{ blockedClients }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--amber">
@@ -75,7 +75,7 @@
           [class.disabled]="deletedClients < 1">
         <div class="stat-card__body">
           <div>
-            <p class="stat-card__label">{{ 'CLIENTS.STATS.DELETED' | translate }}</p>
+            <p class="stat-card__label">{{ 'clients.stats.deleted' | translate }}</p>
             <p class="stat-card__value">{{ deletedClients }}</p>
           </div>
           <div class="stat-card__icon stat-card__icon--red">
@@ -100,14 +100,17 @@
         <input
           class="search-input"
           type="text"
-          [placeholder]="'CLIENTS.SEARCH_PLACEHOLDER' | translate"
+          [placeholder]="'clients.search_placeholder' | translate"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilter()"
         />
       </div>
       <button class="btn-add" (click)="openCreate()"
-              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()">
-        + {{ 'CLIENTS.ADD_BUTTON' | translate }}
+              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()"
+              [disabled]="categories.length < 1"
+              [matTooltip]="categories.length < 1 ? ('validation.client_categories_empty' | translate): ''"
+          >
+        + {{ 'clients.add_button' | translate }}
       </button>
     </div>
 
@@ -118,7 +121,7 @@
           <thead>
             <tr>
               <th (click)="sortBy('name')" class="th--sortable">
-                {{ 'CLIENTS.TABLE.NAME' | translate }}
+                {{ 'clients.table.name' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'name' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -131,7 +134,7 @@
                 </span>
               </th>
               <th (click)="sortBy('email')" class="th--sortable">
-                {{ 'CLIENTS.TABLE.EMAIL' | translate }}
+                {{ 'clients.table.email' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'email' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -144,7 +147,7 @@
                 </span>
               </th>
               <th (click)="sortBy('creditLimit')" class="th--sortable">
-                {{ 'CLIENTS.TABLE.CREDIT_LIMIT' | translate }}
+                {{ 'clients.table.credit_limit' | translate }}
                 <span class="sort-icon">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'creditLimit' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -156,7 +159,7 @@
                   </svg>
                 </span>
               </th>
-              <th class="text-center">{{ 'CLIENTS.TABLE.ACTIONS' | translate }}</th>
+              <th class="text-center">{{ 'clients.table.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -164,18 +167,18 @@
               <td class="td--name">{{ client.name }}</td>
               <td class="td--email">{{ client.email }}</td>
               <td class="td--price">
-                <span *ngIf="client.creditLimit != null">{{ client.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
-                <span class="td--empty-value" *ngIf="client.creditLimit == null">—</span>
+                <span *ngIf="client.effectiveCreditLimit != null">{{ client.effectiveCreditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
+                <span class="td--empty-value" *ngIf="client.effectiveCreditLimit == null">—</span>
               </td>
               <td class="td--actions">
-                <button class="icon-btn icon-btn--view" (click)="openView(client)" [title]="'COMMON.VIEW' | translate"
+                <button class="icon-btn icon-btn--view" (click)="openView(client)" [title]="'common.view' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.VIEW_CLIENTS)">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--edit" (click)="openEdit(client)" [title]="'COMMON.EDIT' | translate"
+                <button class="icon-btn icon-btn--edit" (click)="openEdit(client)" [title]="'common.edit' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT) && !client.isDeleted && !client.isBlocked">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -186,7 +189,7 @@
                   class="icon-btn"
                   [ngClass]="client.isBlocked ? 'icon-btn--unblock' : 'icon-btn--block'"
                   (click)="toggleBlock(client)"
-                  [title]="client.isBlocked ? ('COMMON.UNBLOCK' | translate) : ('COMMON.BLOCK' | translate)"
+                  [title]="client.isBlocked ? ('common.unblock' | translate) : ('common.block' | translate)"
                   *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT) && !client.isDeleted">
                   <svg *ngIf="!client.isBlocked" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
@@ -197,7 +200,7 @@
                     <polyline points="9 11 12 14 22 4"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--delete" (click)="delete(client)" [title]="'COMMON.DELETE' | translate"
+                <button class="icon-btn icon-btn--delete" (click)="delete(client)" [title]="'common.delete' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.DELETE_CLIENT) && !client.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/>
@@ -206,7 +209,7 @@
                     <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                   </svg>
                 </button>
-                <button class="icon-btn icon-btn--reactivate" (click)="restore(client)" [title]="'COMMON.RESTORE' | translate"
+                <button class="icon-btn icon-btn--reactivate" (click)="restore(client)" [title]="'common.restore' | translate"
                         *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.RESTORE_CLIENT) && client.isDeleted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -217,7 +220,7 @@
             </tr>
             <tr *ngIf="sortedData.length === 0">
               <td colspan="5" class="td--empty">
-                {{ 'COMMON.NO_RESULTS' | translate }}{{ searchQuery ? ' for "' + searchQuery + '"' : '' }}
+                {{ 'common.no_results' | translate }}{{ searchQuery ? ' for "' + searchQuery + '"' : '' }}
               </td>
             </tr>
           </tbody>
@@ -238,82 +241,82 @@
   <!-- ===================== VIEW PANEL ===================== -->
   <div class="panel" *ngIf="isView() && selectedClient">
     <div class="panel__header">
-      <h2 class="panel__title">{{ 'CLIENTS.TITLE_DETAILS' | translate }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ 'clients.title_details' | translate }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.NAME' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.name' | translate }}</span>
           <span class="detail-value">{{ selectedClient.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.EMAIL' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.email' | translate }}</span>
           <span class="detail-value">{{ selectedClient.email }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.ADDRESS' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.address' | translate }}</span>
           <span class="detail-value">{{ selectedClient.address }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.PHONE' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.phone' | translate }}</span>
           <span class="detail-value">{{ selectedClient.phone ?? '—' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.TAX_NUMBER' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.tax_number' | translate }}</span>
           <span class="detail-value detail-value--mono">{{ selectedClient.taxNumber ?? '—' }}</span>
         </div>
         <div class="detail-item" *ngIf="getSelectedClientDiscountRate() > 0">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.DISCOUNT_RATE' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.discount_rate' | translate }}</span>
           <span class="detail-value">{{ getSelectedClientDiscountRate() }} %</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.CREDIT_LIMIT' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.credit_limit' | translate }}</span>
           <span class="detail-value">
-            {{ selectedClient.creditLimit != null ? (selectedClient.creditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale): '—' }}
+            {{ selectedClient.effectiveCreditLimit != null ? (selectedClient.effectiveCreditLimit | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale ): '—' }}
           </span>
         </div>
-        <div class="detail-item" *ngIf="selectedClient.creditLimit != null">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.OUTSTANDING_BALANCE' | translate }}</span>
+        <div class="detail-item" *ngIf="selectedClient.effectiveCreditLimit != null">
+          <span class="detail-label">{{ 'clients.details.outstanding_balance' | translate }}</span>
           <span class="detail-value">{{ outstandingBalance | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale }}</span>
         </div>
-        <div class="detail-item" *ngIf="selectedClient.creditLimit != null">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.REMAINING_CREDIT' | translate }}</span>
+        <div class="detail-item" *ngIf="selectedClient.effectiveCreditLimit != null">
+          <span class="detail-label">{{ 'clients.details.remaining_credit' | translate }}</span>
           <span class="detail-value" [class.text-danger]="creditRemaining !== null && creditRemaining < 0">
-            {{ creditRemaining !== null ? (creditRemaining | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale) : '—' }}
+            {{ creditRemaining !== null ? (creditRemaining | currency: currencyCode : 'symbol' : '1.2-2' : currencyLocale ) : '—' }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.DUE_PAYMENT_PERIOD' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.due_payment_period' | translate }}</span>
           <span class="detail-value">
-            {{ selectedClient.duePaymentPeriod > 0 ? ('COMMON.DAYS_COUNT' | translate: { count: selectedClient.duePaymentPeriod }) : '—' }}
+            {{ selectedClient.duePaymentPeriod > 0 ? ('common.days_count' | translate: { count: selectedClient.duePaymentPeriod }) : '—' }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.DELAI_RETOUR' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.delai_retour' | translate }}</span>
           <span class="detail-value">
             {{ selectedClient.delaiRetour != null ? selectedClient.delaiRetour + ' days' : '—' }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.STATUS' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.status' | translate }}</span>
           <span class="badge" [ngClass]="selectedClient.isBlocked ? 'badge--blocked' : 'badge--active'">
-            {{ selectedClient.isBlocked ? ('COMMON.BLOCKED' | translate) : ('COMMON.ACTIVE' | translate) }}
+            {{ selectedClient.isBlocked ? ('common.blocked' | translate) : ('common.active' | translate) }}
           </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.CREATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.created_at' | translate }}</span>
           <span class="detail-value">{{ selectedClient.createdAt | date:'medium' }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">{{ 'CLIENTS.DETAILS.UPDATED_AT' | translate }}</span>
+          <span class="detail-label">{{ 'clients.details.updated_at' | translate }}</span>
           <span class="detail-value">{{ selectedClient.updatedAt ? (selectedClient.updatedAt | date:'medium') : '—' }}</span>
         </div>
       </div>
 
       <!-- Categories Section -->
       <div class="section-divider">
-        <span class="section-divider__label">{{ 'CLIENTS.DETAILS.ASSIGNED_CATEGORIES' | translate }}</span>
+        <span class="section-divider__label">{{ 'clients.details.assigned_categories' | translate }}</span>
       </div>
 
       <div class="categories-list" *ngIf="selectedClient.categories.length > 0; else noCategories">
@@ -321,7 +324,7 @@
           <span class="category-tag__code">{{ cat.code }}</span>
           <span class="category-tag__name">{{ cat.name }}</span>
 
-          <button class="category-tag__remove" (click)="removeCategory(selectedClient!.id, cat.id, cat.name)" [title]="'CONFIRMATION.REMOVE_CATEGORY_TITLE' | translate: { name: cat.name }"
+          <button class="category-tag__remove" (click)="removeCategory(selectedClient!.id, cat.id, cat.name)" [title]="'clients.confirmations.remove_category_title' | translate"
                   *ngIf="!selectedClient.isDeleted">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -331,39 +334,39 @@
         </div>
       </div>
       <ng-template #noCategories>
-        <p class="no-data-hint">{{ 'CLIENTS.DETAILS.NO_CATEGORIES' | translate }}</p>
+        <p class="no-data-hint">{{ 'clients.details.no_categories' | translate }}</p>
       </ng-template>
 
       <div class="add-category-row"
            *ngIf="availableCategories.length > 0 && !selectedClient.isDeleted && !selectedClient.isBlocked">
         <select class="form__input form__select form__select--inline" [(ngModel)]="selectedCategoryId">
-          <option value="">{{ 'CLIENTS.DETAILS.SELECT_CATEGORY' | translate }}</option>
+          <option value="">{{ 'clients.details.select_category' | translate }}</option>
           <option *ngFor="let cat of availableCategories" [value]="cat.id">{{ cat.name }}</option>
         </select>
         <button
           class="btn-add btn-add--sm"
           [disabled]="!selectedCategoryId"
           (click)="addCategory(selectedClient!.id)">
-          + {{ 'COMMON.ADD' | translate }}
+          + {{ 'common.add' | translate }}
         </button>
       </div>
 
       <div class="panel__actions">
         <button class="btn-secondary" (click)="openEdit(selectedClient)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT) && !selectedClient.isDeleted && !selectedClient.isBlocked">
-          {{ 'CLIENTS.FORM.EDIT_TITLE' | translate }} {{ 'CLIENTS.KEYWORD' | translate }}
+          {{ 'clients.form.edit_title' | translate }} {{ 'clients.keyword' | translate }}
         </button>
         <button class="btn-warning" (click)="toggleBlock(selectedClient)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT) && !selectedClient.isDeleted">
-          {{ selectedClient.isBlocked ? ('COMMON.UNBLOCK' | translate) : ('COMMON.BLOCK' | translate) }} {{ 'CLIENTS.KEYWORD' | translate }}
+          {{ selectedClient.isBlocked ? ('common.unblock' | translate) : ('common.block' | translate) }} {{ 'clients.keyword' | translate }}
         </button>
         <button class="btn-danger" (click)="delete(selectedClient)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.DELETE_CLIENT) && !selectedClient.isDeleted">
-          {{ 'COMMON.DELETE' | translate }}
+          {{ 'common.delete' | translate }}
         </button>
         <button class="btn-success" (click)="restore(selectedClient)"
                 *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.RESTORE_CLIENT) && selectedClient.isDeleted">
-          {{ 'COMMON.RESTORE' | translate }}
+          {{ 'common.restore' | translate }}
         </button>
       </div>
     </div>
@@ -373,8 +376,8 @@
   <div class="panel" *ngIf="(isCreate() && authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT))
                          || (isEdit()   && authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT))">
     <div class="panel__header">
-      <h2 class="panel__title">{{ isCreate() ? ('CLIENTS.FORM.ADD_TITLE' | translate) : ('CLIENTS.FORM.EDIT_TITLE' | translate) }}</h2>
-      <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+      <h2 class="panel__title">{{ isCreate() ? ('clients.form.add_title' | translate) : ('clients.form.edit_title' | translate) }}</h2>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
     </div>
     <div class="panel__body">
       <form [formGroup]="clientForm" (ngSubmit)="submit()" class="form">
@@ -382,34 +385,33 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.FULL_NAME' | translate }}</label>
+              <label>{{ 'clients.form.full_name' | translate }}</label>
               <mat-icon>person</mat-icon>
             </div>
-            <input class="form__input" type="text" formControlName="name" [placeholder]="'CLIENTS.FORM.NAME_PLACEHOLDER' | translate"
-              [pattern]="namePattern"
+            <input class="form__input" type="text" formControlName="name" [placeholder]="'clients.form.name_placeholder' | translate"
             [class.form__input--error]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched"/>
             <span class="field__error" *ngIf="clientForm.get('name') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.NAME_MIN' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['minlength']">{{ 'validation.name_min' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'validation.name_max' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.alpha_only' | translate }}</span>
               </ng-container>
             </span>
           </div>
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.EMAIL' | translate }}</label>
+              <label>{{ 'clients.form.email' | translate }}</label>
               <mat-icon>email</mat-icon>
             </div>
             <input class="form__input" type="email"
-                    formControlName="email" [placeholder]="'CLIENTS.FORM.EMAIL_PLACEHOLDER' | translate"
+                    formControlName="email" [placeholder]="'clients.form.email_placeholder' | translate"
                     [class.form__input--error]="clientForm.get('email')?.invalid && clientForm.get('email')?.touched"/>
             <span class="field__error" *ngIf="clientForm.get('email') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['email']">{{ 'VALIDATION.EMAIL_INVALID' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['email']">{{ 'validation.invalid_email' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -417,17 +419,16 @@
 
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'CLIENTS.FORM.ADDRESS' | translate }}</label>
+            <label>{{ 'clients.form.address' | translate }}</label>
             <mat-icon>location_on</mat-icon>
           </div>
-          <input class="form__input" type="text" formControlName="address" [placeholder]="'CLIENTS.FORM.ADDRESS_PLACEHOLDER' | translate"
-                  [pattern]="addressPattern"
+          <input class="form__input" type="text" formControlName="address" [placeholder]="'clients.form.address_placeholder' | translate"
                   [class.form__input--error]="clientForm.get('address')?.invalid && clientForm.get('address')?.touched"/>
             <span class="field__error" *ngIf="clientForm.get('address') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['minlength']">{{ 'VALIDATION.ADDRESS_MIN' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.ADDRESS_PATTERN' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['minlength']">{{ 'validation.address_min' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.address_pattern' | translate }}</span>
               </ng-container>
             </span>
         </div>
@@ -435,32 +436,29 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.PHONE' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'clients.form.phone' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
               <mat-icon>phone</mat-icon>
             </div>
             <input class="form__input" type="text"
-                  [pattern]="phonePattern"
-                  formControlName="phone" [placeholder]="'CLIENTS.FORM.PHONE_PLACEHOLDER' | translate" [pattern]="phonePattern" />
+                  formControlName="phone" [placeholder]="'clients.form.phone_placeholder' | translate" />
             <span class="field__error" *ngIf="clientForm.get('phone') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.PHONE_INVALID' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.PHONE_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.invalid_phone' | translate }}</span>
               </ng-container>
             </span>
           </div>
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.TAX_NUMBER' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'clients.form.tax_number' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
               <mat-icon>receipt_long</mat-icon>
             </div>
             <input class="form__input" type="text"
-                  [pattern]="taxNumberPattern"
-                  formControlName="taxNumber" [placeholder]="'CLIENTS.FORM.TAX_NUMBER_PLACEHOLDER' | translate"/>
+                  formControlName="taxNumber" [placeholder]="'clients.form.tax_number_placeholder' | translate"/>
             <span class="field__error" *ngIf="clientForm.get('taxNumber') as ctrl">
               <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.TAX_NUMBER_INVALID' | translate }}</span>
-                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.TAX_NUMBER_MAX' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.tax_number_invalid' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['maxlength']">{{ 'validation.tax_number_max' | translate }}</span>
               </ng-container>
             </span>
           </div>
@@ -469,52 +467,51 @@
         <div class="form__row">
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.CREDIT_LIMIT' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'clients.form.credit_limit' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
               <mat-icon>account_balance_wallet</mat-icon>
             </div>
-            <input class="form__input" type="number" formControlName="creditLimit" [placeholder]="'CLIENTS.FORM.CREDIT_LIMIT_PLACEHOLDER' | translate"
+            <input class="form__input" type="number" formControlName="creditLimit" [placeholder]="'clients.form.credit_limit_placeholder' | translate"
                           step="0.01" min="1000"
                           [class.form__input--error]="clientForm.get('creditLimit')?.invalid && clientForm.get('creditLimit')?.touched"/>
             <span class="form__error" *ngIf="clientForm.get('creditLimit')?.invalid && clientForm.get('creditLimit')?.touched">
-              {{ 'VALIDATION.CREDIT_LIMIT_INVALID' | translate }}
+              {{ 'validation.credit_limit_invalid' | translate }}
             </span>
           </div>
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'CLIENTS.FORM.DUE_PAYMENT_PERIOD' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+              <label>{{ 'clients.form.due_payment_period' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
               <mat-icon>schedule</mat-icon>
             </div>
             <input class="form__input" type="number" formControlName="duePaymentPeriod"
-              [placeholder]="'CLIENTS.FORM.DUE_PAYMENT_PERIOD_PLACEHOLDER' | translate" min="7" max="180"
+              [placeholder]="'clients.form.due_payment_period_placeholder' | translate" min="7" max="180"
               [class.form__input--error]="clientForm.get('duePaymentPeriod')?.invalid && clientForm.get('duePaymentPeriod')?.touched"/>
             <span class="form__error" *ngIf="clientForm.get('duePaymentPeriod')?.invalid && clientForm.get('duePaymentPeriod')?.touched">
-              {{ 'VALIDATION.DUE_PAYMENT_PERIOD_INVALID' | translate }}
+              {{ 'validation.due_payment_period_invalid' | translate }}
             </span>
           </div>
         </div>
 
         <div class="form__field">
           <div class="form__label">
-            <label>{{ 'CLIENTS.FORM.DELAI_RETOUR' | translate }} <span class="form__optional">({{ 'COMMON.OPTIONAL' | translate }})</span></label>
+            <label>{{ 'clients.form.delai_retour' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
             <mat-icon>assignment_return</mat-icon>
           </div>
-          <input class="form__input" type="number" formControlName="delaiRetour" [placeholder]="'CLIENTS.FORM.DELAI_RETOUR_PLACEHOLDER' | translate" min="7" max="270"
+          <input class="form__input" type="number" formControlName="delaiRetour" [placeholder]="'clients.form.delai_retour_placeholder' | translate" min="7" max="270"
             [class.form__input--error]="clientForm.get('delaiRetour')?.invalid && clientForm.get('delaiRetour')?.touched"/>
             <span class="form__error" *ngIf="clientForm.get('delaiRetour')?.invalid && clientForm.get('delaiRetour')?.touched">
-              {{ 'VALIDATION.DELAI_RETOUR_INVALID' | translate }}
+              {{ 'validation.delai_retour_invalid' | translate }}
             </span>
         </div>
 
         <div class="form__actions">
-          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+          <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
           <button type="submit" class="btn-add" [disabled]="clientForm.invalid">
-            {{ isCreate() ? ('COMMON.ADD' | translate) : ('COMMON.SAVE' | translate) }}
+            {{ isCreate() ? ('common.add' | translate) : ('common.save' | translate) }}
           </button>
         </div>
 
       </form>
     </div>
   </div>
-
 </div>

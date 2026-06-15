@@ -3,6 +3,7 @@
 public class BonNumber
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string DocumentType { get; private set; }  // "BON_ENTRE", "BON_SORTIE", "BON_RETOUR"
     public string Prefix { get; private set; }
     public int LastNumber { get; private set; }
@@ -11,7 +12,7 @@ public class BonNumber
     // Required by EF Core
     private BonNumber() { }
 
-    public BonNumber(string documentType, string prefix, int padding = 6)
+    public BonNumber(string documentType, string prefix, int padding = 6, Guid? tenantId= null)
     {
         if (string.IsNullOrWhiteSpace(documentType))
             throw new ArgumentException("Document type cannot be empty.", nameof(documentType));

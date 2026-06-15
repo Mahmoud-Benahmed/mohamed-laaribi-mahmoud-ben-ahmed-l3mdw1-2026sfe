@@ -2,8 +2,8 @@
 <ng-container *ngIf="!isLoading">
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{'PERMISSIONS.BREADCRUMB'| translate}}</p>
-      <h1 class="page-title">{{'PERMISSIONS.TITLE_LIST'| translate}}</h1>
+      <p class="breadcrumb">{{'auth.permissions.breadcrumb'| translate}}</p>
+      <h1 class="page-title">{{'auth.permissions.title_list'| translate}}</h1>
     </div>
   </div>
 
@@ -56,7 +56,7 @@
                   <button class="cell cell--granted"
                           *ngSwitchCase="getCell(role.id, controle.id)?.isGranted === true && !getCell(role.id, controle.id)?.loading"
                           (click)="togglePrivilege(role.id, controle.id)"
-                          [title]="('PERMISSIONS.REVOKE_TOOLTIP' | translate: { controle: controle.libelle, role: formatRole(role.libelle) })">
+                          [title]="('auth.permissions.revoke_tooltip' | translate: { controle: controle.libelle, role: formatRole(role.libelle) })">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -64,7 +64,7 @@
                   <button class="cell cell--denied"
                           *ngSwitchDefault
                           (click)="togglePrivilege(role.id, controle.id)"
-                          [title]="('PERMISSIONS.GRANT_TOOLTIP' | translate: { controle: controle.libelle, role: formatRole(role.libelle) })">
+                          [title]="('auth.permissions.grant_tooltip' | translate: { controle: controle.libelle, role: formatRole(role.libelle) })">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                       <line x1="18" y1="6" x2="6" y2="18"/>
                       <line x1="6" y1="6" x2="18" y2="18"/>
@@ -84,17 +84,17 @@
     <div class="matrix-footer">
       <div class="matrix-stat">
         <span class="matrix-stat__value">{{ roles.length }}</span>
-        <span class="matrix-stat__label">{{ 'PERMISSIONS.ROLES' | translate }}</span>
+        <span class="matrix-stat__label">{{ 'auth.permissions.roles' | translate }}</span>
       </div>
       <div class="matrix-stat__divider"></div>
       <div class="matrix-stat">
         <span class="matrix-stat__value">{{ controles.length }}</span>
-        <span class="matrix-stat__label">{{ 'PERMISSIONS.CONTROLS' | translate }}</span>
+        <span class="matrix-stat__label">{{ 'auth.permissions.controls' | translate }}</span>
       </div>
       <div class="matrix-stat__divider"></div>
       <div class="matrix-stat">
         <span class="matrix-stat__value">{{ categories.length }}</span>
-        <span class="matrix-stat__label">{{ 'PERMISSIONS.SERVICES' | translate }}</span>
+        <span class="matrix-stat__label">{{ 'auth.permissions.services' | translate }}</span>
       </div>
     </div>
 

@@ -1,9 +1,10 @@
-﻿using MongoDB.Bson;
+﻿using ERP.AuthService.Infrastructure.Persistence.Repositories;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace ERP.AuthService.Domain
 {
-    public class RefreshToken
+    public class RefreshToken : ITenantFilterable
     {
         [BsonId]
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
@@ -11,6 +12,10 @@ namespace ERP.AuthService.Domain
 
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public Guid UserId { get; private set; }
+
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid? TenantId { get; private set; }
+        public bool IsGlobal => TenantId == null;
 
         public string Token { get; set; }
 
@@ -26,11 +31,12 @@ namespace ERP.AuthService.Domain
         [BsonConstructor]
         private RefreshToken() { }
 
-        public RefreshToken(Guid userId, string token, DateTime expiresAt)
+        public RefreshToken(Guid userId, string token, DateTime expiresAt, Guid? tenantId=null)
         {
             Id = Guid.NewGuid();
             UserId = userId;
             Token = token;
+            TenantId= tenantId;
             ExpiresAt = expiresAt;
             CreatedAt = DateTime.UtcNow;
             IsRevoked = false;

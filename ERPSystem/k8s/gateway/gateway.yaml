@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: erp
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      initContainers:
+        - name: wait-for-auth
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z auth-service 80; do echo waiting for auth-service; sleep 3; done
+        - name: wait-for-tenant
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z tenant-service 80; do echo waiting for tenant-service; sleep 3; done
+      containers:
+        - name: gateway
+          image: gateway:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Docker"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ApiKey__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secret
+                  key: api-key
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
+            - name: Jwt__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: issuer
+            - name: Jwt__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: audience
+            - name: Services__Auth
+              value: "http://auth-service"
+            - name: Services__Tenant
+              value: "http://tenant-service"
+            - name: Services__Article
+              value: "http://article-service"
+            - name: Services__Client
+              value: "http://client-service"
+            - name: Services__Fournisseur
+              value: "http://fournisseur-service"
+            - name: Services__Stock
+              value: "http://stock-service"
+            - name: Services__Invoice
+              value: "http://invoice-service"
+            - name: Services__Payment
+              value: "http://payment-service"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: erp
+spec:
+  selector:
+    app: gateway
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: NodePort

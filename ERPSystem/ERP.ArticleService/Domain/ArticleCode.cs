@@ -6,11 +6,12 @@
         public string Prefix { get; private set; }
         public int LastNumber { get; private set; }
         public int Padding { get; private set; }
+        public Guid? TenantId { get; init; }
 
         // Required by EF Core for materialization
         private ArticleCode() { }
 
-        public ArticleCode(string prefix, int padding = 6)
+        public ArticleCode(string prefix, Guid? tenantId=null, int padding = 6)
         {
             if (string.IsNullOrWhiteSpace(prefix))
                 throw new ArgumentException("Prefix cannot be empty.", nameof(prefix));
@@ -18,8 +19,11 @@
                 throw new ArgumentOutOfRangeException(nameof(padding), "Padding must be greater than zero.");
 
             Id = Guid.NewGuid();
-            Prefix = prefix.Trim().ToUpperInvariant();
+            TenantId = tenantId;
             Padding = padding;
+            Prefix = !string.IsNullOrEmpty(prefix)
+                ? $"{prefix.Trim().ToUpperInvariant()}-ART"
+                : "ART";
             LastNumber = 0;
         }
 

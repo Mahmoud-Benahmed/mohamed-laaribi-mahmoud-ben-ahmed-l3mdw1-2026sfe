@@ -68,7 +68,7 @@ export interface PagedResultDto<T> {
 
 @Injectable({ providedIn: 'root' })
 export class AuditLogService {
-  private readonly baseUrl = `${environment.apiUrl}/audit`;
+  private readonly baseUrl = `/audit`;
 
   constructor(private http: HttpClient) {}
 

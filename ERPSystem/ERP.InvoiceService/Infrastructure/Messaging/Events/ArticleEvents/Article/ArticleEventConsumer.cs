@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using ERP.InvoiceService.Application.DTOs;
 using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.Article;
@@ -13,7 +14,8 @@ public sealed class ArticleEventConsumer : BackgroundService
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     public ArticleEventConsumer(
@@ -28,8 +30,7 @@ public sealed class ArticleEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Article"]
-        ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Article not configured"),
+            GroupId = $"invoice-service-article-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
         };
@@ -65,9 +66,15 @@ public sealed class ArticleEventConsumer : BackgroundService
                         continue;
                     }
 
+                    using var scope= _scopeFactory.CreateScope();
+                    var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
+                    
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+                    var testId = tenantContext.TenantId;
+                    _logger.LogWarning($"After SetTenantId, TenantId = {testId}");
+
                     // Log deserialized data
-                    _logger.LogInformation("Processing article: Id={Id}, Libelle={Libelle}, CategoryId={CategoryId}, CategoryName={CategoryName}",
-                        dto.Id, dto.Libelle, dto.Category?.Id, dto.Category?.Name);
+                    _logger.LogInformation("Processing article: {dto}", dto);
 
                     // Validate category data
                     if (dto.Category == null)
@@ -85,40 +92,36 @@ public sealed class ArticleEventConsumer : BackgroundService
                         continue;
                     }
 
-                    // Create a new scope for each message
-                    using (IServiceScope scope = _scopeFactory.CreateScope())
+                    IArticleCategoryCacheService categoryCacheService = scope.ServiceProvider.GetRequiredService<IArticleCategoryCacheService>();
+
+                    // Check if category exists (using async properly)
+                    bool categoryExists = await categoryCacheService.ExistsAsync(dto.Category.Name) || await categoryCacheService.GetByIdAsync(dto.Category.Id) != null;
+
+                    if (!categoryExists)
                     {
-                        IArticleCategoryCacheService categoryCacheService = scope.ServiceProvider.GetRequiredService<IArticleCategoryCacheService>();
+                        _logger.LogWarning("Category {CategoryId} ({CategoryName}) not found in cache for article {ArticleId}. " +
+                                            "Creating category first.",
+                                            dto.Category.Id, dto.Category.Name, dto.Id);
 
-                        // Check if category exists (using async properly)
-                        bool categoryExists = await categoryCacheService.ExistsAsync(dto.Category.Name) || await categoryCacheService.GetByIdAsync(dto.Category.Id) != null;
+                        await categoryCacheService.SyncCreatedAsync(dto.Category);
+                    }
 
-                        if (!categoryExists)
-                        {
-                            _logger.LogWarning("Category {CategoryId} ({CategoryName}) not found in cache for article {ArticleId}. " +
-                                                "Creating category first.",
-                                                dto.Category.Id, dto.Category.Name, dto.Id);
+                    IArticleEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleEventHandler>();
 
-                            await categoryCacheService.SyncCreatedAsync(dto.Category);
-                        }
-
-                        IArticleEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleEventHandler>();
-
-                        switch (result.Topic)
-                        {
-                            case ArticleTopics.Created:
-                                await handler.HandleCreatedAsync(dto);
-                                break;
-                            case ArticleTopics.Updated:
-                                await handler.HandleUpdatedAsync(dto);
-                                break;
-                            case ArticleTopics.Deleted:
-                                await handler.HandleDeletedAsync(dto);
-                                break;
-                            case ArticleTopics.Restored:
-                                await handler.HandleRestoredAsync(dto);
-                                break;
-                        }
+                    switch (result.Topic)
+                    {
+                        case ArticleTopics.Created:
+                            await handler.HandleCreatedAsync(dto);
+                            break;
+                        case ArticleTopics.Updated:
+                            await handler.HandleUpdatedAsync(dto);
+                            break;
+                        case ArticleTopics.Deleted:
+                            await handler.HandleDeletedAsync(dto);
+                            break;
+                        case ArticleTopics.Restored:
+                            await handler.HandleRestoredAsync(dto);
+                            break;
                     }
 
                     _consumer.Commit(result);

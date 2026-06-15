@@ -17,7 +17,7 @@ namespace ERP.StockService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -43,14 +43,18 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Numero")
+                    b.HasIndex("Numero", "TenantId")
                         .IsUnique()
-                        .HasDatabaseName("IX_BonEntres_Numero");
+                        .HasDatabaseName("IX_BonEntres_Numero")
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("BonEntres", (string)null);
                 });
@@ -86,14 +90,18 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Numero")
+                    b.HasIndex("Numero", "TenantId")
                         .IsUnique()
-                        .HasDatabaseName("IX_BonRetours_Numero");
+                        .HasDatabaseName("IX_BonRetours_Numero")
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("BonRetours", (string)null);
                 });
@@ -119,14 +127,18 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Numero")
+                    b.HasIndex("Numero", "TenantId")
                         .IsUnique()
-                        .HasDatabaseName("IX_BonSorties_Numero");
+                        .HasDatabaseName("IX_BonSorties_Numero")
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("BonSorties", (string)null);
                 });
@@ -153,6 +165,9 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.ToTable("BonNumbers", (string)null);
@@ -173,12 +188,16 @@ namespace ERP.StockService.Migrations
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("BonSortieId");
+                    b.HasIndex("BonSortieId", "TenantId");
 
-                    b.HasIndex("InvoiceId")
-                        .IsUnique();
+                    b.HasIndex("InvoiceId", "TenantId")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("InvoiceBonSortieMappings");
                 });
@@ -227,6 +246,9 @@ namespace ERP.StockService.Migrations
                     b.Property<decimal>("StockBefore")
                         .HasColumnType("decimal(18,3)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ArticleId");
@@ -241,7 +263,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("ERP.StockService.Domain.LigneEntre", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
@@ -257,6 +278,9 @@ namespace ERP.StockService.Migrations
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -297,12 +321,15 @@ namespace ERP.StockService.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal>("Prix")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<decimal>("TVA")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -314,17 +341,19 @@ namespace ERP.StockService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarCode")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CodeRef")
+                    b.HasIndex("TenantId", "BarCode")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsDeleted");
+                    b.HasIndex("TenantId", "CategoryId");
+
+                    b.HasIndex("TenantId", "CodeRef")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("TenantId", "IsDeleted");
 
                     b.ToTable("ArticleCache", (string)null);
                 });
@@ -353,13 +382,17 @@ namespace ERP.StockService.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("ArticleCategoryCache", (string)null);
                 });
@@ -379,15 +412,15 @@ namespace ERP.StockService.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("CreditLimitMultiplier")
-                        .HasPrecision(8, 4)
-                        .HasColumnType("decimal(8,4)");
+                        .HasPrecision(8, 3)
+                        .HasColumnType("decimal(8,3)");
 
                     b.Property<int>("DelaiRetour")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("DiscountRate")
-                        .HasPrecision(5, 4)
-                        .HasColumnType("decimal(5,4)");
+                        .HasPrecision(5, 3)
+                        .HasColumnType("decimal(5,3)");
 
                     b.Property<int>("DuePaymentPeriod")
                         .HasColumnType("int");
@@ -403,6 +436,9 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -411,11 +447,11 @@ namespace ERP.StockService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsActive");
+                    b.HasIndex("TenantId", "IsActive");
 
                     b.ToTable("ClientCategoryCache", (string)null);
                 });
@@ -435,8 +471,8 @@ namespace ERP.StockService.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("CreditLimit")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int?>("DelaiRetour")
                         .HasColumnType("int");
@@ -468,16 +504,19 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsBlocked");
+                    b.HasIndex("TenantId", "IsBlocked");
 
                     b.ToTable("ClientCache", (string)null);
                 });
@@ -542,27 +581,30 @@ namespace ERP.StockService.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TaxNumber")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("Email", "TenantId")
                         .HasFilter("[Email] IS NOT NULL AND [IsDeleted] = 0");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Name", "TenantId")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("Phone");
+                    b.HasIndex("Phone", "TenantId");
 
-                    b.HasIndex("TaxNumber")
+                    b.HasIndex("TaxNumber", "TenantId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasDatabaseName("IX_FournisseurCaches_TaxNumber")
+                        .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
 
                     b.ToTable("FournisseurCaches");
                 });
@@ -570,7 +612,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("LigneRetour", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
@@ -591,6 +632,9 @@ namespace ERP.StockService.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BonRetourId");
@@ -601,7 +645,6 @@ namespace ERP.StockService.Migrations
             modelBuilder.Entity("LigneSortie", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ArticleId")
@@ -617,6 +660,9 @@ namespace ERP.StockService.Migrations
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

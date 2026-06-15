@@ -13,6 +13,8 @@ import { HttpError } from '../../../interfaces/HttpError';
 import { CategoryRequestDto, ArticleCategoryResponseDto, CategoryService, ArticleCategoryStatsDto } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type ViewMode = 'list' | 'list-deleted' | 'create' | 'edit' | 'view';
 
@@ -58,6 +60,10 @@ export class ArticleCategoriesComponent implements OnInit {
   readonly PRIVILEGES = PRIVILEGES;
   categoryForm: FormGroup;
 
+  readonly templateTranslationKey= `articles.categories`;
+  readonly responseSuccessTranslationKey="articles.responses.success";
+  readonly confirmationsTranslationKey="articles.confirmations";
+
   constructor(
     public authService: AuthService,
     private categoryService: CategoryService,
@@ -66,8 +72,8 @@ export class ArticleCategoriesComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      tva:  [null, [Validators.required, Validators.min(0), Validators.max(100)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), Validators.pattern(RegexPatterns.alpha)]],
+      tva:  [null, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
 
@@ -78,11 +84,20 @@ export class ArticleCategoriesComponent implements OnInit {
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate())      return 'ARTICLES_CATEGORIES.TITLE_ADD';
-    if (this.isEdit())        return 'ARTICLES_CATEGORIES.TITLE_EDIT';
-    if (this.isView())        return 'ARTICLES_CATEGORIES.TITLE_DETAILS';
-    if (this.isDeletedList()) return 'ARTICLES_CATEGORIES.TITLE_DELETED';
-    return 'ARTICLES_CATEGORIES.TITLE_LIST';
+    if (this.isCreate())      return `${this.templateTranslationKey}.title_add`;
+    if (this.isEdit())        return `${this.templateTranslationKey}.title_edit`;
+    if (this.isView())        return `${this.templateTranslationKey}.title_details`;
+    if (this.isDeletedList()) return `${this.templateTranslationKey}.title_deleted`;
+    return `${this.templateTranslationKey}.title_deleted`;
+  }
+
+  private translateError(errorCode: string): string {
+    const key = `articles.responses.errors.${errorCode}`;
+    const translated = this.translate.instant(key);
+    if (translated !== key) {
+      return translated;
+    }
+    return this.translate.instant('errors.internal_error');
   }
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -112,11 +127,11 @@ export class ArticleCategoriesComponent implements OnInit {
     }
   }
 
-  get sortedData(): ArticleCategoryResponseDto[] {
-    const filtered = [...this.dataSource.filteredData];
+  get sortedData() {
+    const data = [...this.dataSource.filteredData];
+    if (!this.sortColumn) return data;
 
-    if (this.sortColumn) {
-      filtered.sort((a, b) => {
+    return data.sort((a, b) => {
         let valA = (a as any)[this.sortColumn];
         let valB = (b as any)[this.sortColumn];
 
@@ -127,11 +142,7 @@ export class ArticleCategoriesComponent implements OnInit {
         if (typeof valB === 'string') valB = valB.toLowerCase();
 
         return (valA < valB ? -1 : valA > valB ? 1 : 0) * (this.sortDirection === 'asc' ? 1 : -1);
-      });
-    }
-
-    const start = (this.pageNumber() - 1) * this.pageSize();
-    return filtered.slice(start, start + this.pageSize());
+    });
   }
 
   // ── Load ──────────────────────────────────────────────────────────────────
@@ -144,7 +155,10 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
+      },
     });
   }
 
@@ -155,7 +169,10 @@ export class ArticleCategoriesComponent implements OnInit {
         this.totalCount = result.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
+      },
     });
   }
 
@@ -170,7 +187,10 @@ export class ArticleCategoriesComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
+      },
     });
   }
 
@@ -266,16 +286,15 @@ export class ArticleCategoriesComponent implements OnInit {
   }
 
   restore(cat: ArticleCategoryResponseDto): void {
-    const message = this.translate.instant('SUCCESS.CATEGORY_RESTORED', { name: cat.name });
     this.categoryService.restore(cat.id).subscribe({
       next: () => {
-        this.flash('success', message);
+        this.flash('success', this.translate.instant('articles.categories.responses.success.category_restored', { name: cat.name }));
         if (this.isView()) this.cancel();
         this.reload();
       },
-      error: (error) => {
-        const err = error.error as HttpError;
-        this.flash('error', err?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR'));
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+        this.flash('error', msg);
       },
     });
   }
@@ -289,18 +308,26 @@ export class ArticleCategoriesComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.CATEGORY_CREATED', { name: dto.name }));
+          this.flash('success', this.translate.instant('articles.categories.responses.success.category_created', { name: dto.name }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        error: (err: HttpErrorResponse) => {
+          console.log(err);
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
+        },
       });
     } else if (this.isEdit() && this.selectedCategory) {
       this.categoryService.update(this.selectedCategory.id, dto).subscribe({
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.CATEGORY_UPDATED', { name: dto.name }));
+          this.flash('success', this.translate.instant('articles.categories.responses.success.category_updated'));        },
+        error: (err: HttpErrorResponse) => {
+          console.log(err);
+          
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
       });
     }
   }
@@ -309,9 +336,9 @@ export class ArticleCategoriesComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.DELETE_CATEGORY_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.DELETE_CATEGORY', { name: category.name }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title:       this.translate.instant('articles.categories.confirmations.delete_category.title'),
+        message:     this.translate.instant('articles.categories.confirmations.delete_category.message', { name: category.name }),
+        confirmText: this.translate.instant('common.delete'),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -325,10 +352,13 @@ export class ArticleCategoriesComponent implements OnInit {
         this.categoryService.delete(category.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.CATEGORY_DELETED', { name: category.name }));
+            this.flash('success', this.translate.instant('articles.categories.responses.success.category_deleted', { name: category.name }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
+          this.flash('error', msg);
+        },
         });
       });
   }

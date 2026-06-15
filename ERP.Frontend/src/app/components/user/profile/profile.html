@@ -1,240 +1,208 @@
 <div class="page">
-    <div class="profile-shell">
+  <div class="profile-shell">
 
-      <!-- ── LOADING ── -->
-      <div class="loading-state" *ngIf="isLoading">
-        <mat-spinner diameter="48"></mat-spinner>
-        <p>{{ 'COMMON.LOADING' | translate }}</p>
+    <!-- ── LOADING ── -->
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading && userProfile">
+
+      <!-- ── HERO CARD ── -->
+      <div class="hero-card">
+        <div class="hero-card__layout">
+
+          <!-- Avatar -->
+          <div class="hero-avatar">
+            <span class="hero-avatar__initials">{{ initials }}</span>
+            <span class="hero-avatar__status"
+                  [class.hero-avatar__status--active]="userProfile.isActive"
+                  [class.hero-avatar__status--inactive]="!userProfile.isActive"
+                  [matTooltip]="userProfile.isActive ? (`${templateTranslationKey}hero.active` | translate) : (`${templateTranslationKey}hero.inactive` | translate)">
+            </span>
+          </div>
+
+          <!-- Identity -->
+          <div class="hero-identity">
+            <h1 class="hero-identity__name">{{ userProfile.fullName }}</h1>
+            <p class="hero-identity__email">{{ userProfile.login }}</p>
+            <div class="hero-identity__chips">
+              <mat-chip>
+                <mat-icon matChipAvatar>shield</mat-icon>
+                {{ userProfile.roleName }}
+              </mat-chip>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="hero-actions">
+            <button mat-stroked-button class="edit-btn" (click)="toggleEditing()" *ngIf="canEditProfile">
+              <mat-icon>edit</mat-icon>
+              {{ `${templateTranslationKey}actions.edit_profile` | translate }}
+            </button>
+
+            <a mat-stroked-button class="password-btn" *ngIf="isOwnProfile" routerLink="/change-password">
+              <mat-icon>lock_reset</mat-icon>
+              {{ `${templateTranslationKey}actions.change_password` | translate }}
+            </a>
+            <a mat-stroked-button class="password-btn" *ngIf="hasPrivilege" [routerLink]="['/change-password', selectedUserId]">
+              <mat-icon>lock_reset</mat-icon>
+              {{ `${templateTranslationKey}actions.change_password` | translate }}
+            </a>
+            <a mat-stroked-button class="settings-btn" *ngIf="isSystemAdmin && isOwnProfile" routerLink="/system-settings">
+              <mat-icon>settings</mat-icon>
+              {{ `${templateTranslationKey}actions.system_settings` | translate }}
+            </a>
+          </div>
+        </div>
       </div>
 
-      <ng-container *ngIf="!isLoading && userProfile">
+      <div class="content-grid">
+        <!-- ── INFO CARD (personal info) ── -->
+        <div class="info-card">
+          <div class="card-header">
+            <div class="card-title">
+              <mat-icon>person</mat-icon>
+              {{ `${templateTranslationKey}personal_info.title` | translate }}
+            </div>
+            <button class="card-collapse-btn" (click)="infoCollapsed = !infoCollapsed" type="button">
+              <mat-icon [class.rotated]="infoCollapsed">expand_more</mat-icon>
+            </button>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="card-collapse" [class.card-collapse--closed]="infoCollapsed">
+            <!-- VIEW MODE -->
+            @if(!isEditing) {
+              <div class="info-list">
+                <div class="info-row" *ngIf="userProfile.fullName">
+                  <span class="info-row__label">
+                    <mat-icon>person</mat-icon> {{ `${templateTranslationKey}personal_info.full_name` | translate }}
+                  </span>
+                  <span class="info-row__value">{{ userProfile.fullName }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="info-row" *ngIf="userProfile.login">
+                  <span class="info-row__label">
+                    <mat-icon>badge</mat-icon> {{ `${templateTranslationKey}personal_info.login` | translate }}
+                  </span>
+                  <span class="info-row__value mono">{{ userProfile.login }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="info-row" *ngIf="userProfile.email">
+                  <span class="info-row__label">
+                    <mat-icon>email</mat-icon> {{ `${templateTranslationKey}personal_info.email` | translate }}
+                  </span>
+                  <span class="info-row__value mono">{{ userProfile.email }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="info-row" *ngIf="memberSince">
+                  <span class="info-row__label">
+                    <mat-icon>calendar_today</mat-icon> {{ `${templateTranslationKey}personal_info.member_since` | translate }}
+                  </span>
+                  <span class="info-row__value">{{ memberSince }}</span>
+                </div>
+                <mat-divider *ngIf="userProfile.updatedAt"></mat-divider>
+                <div class="info-row" *ngIf="userProfile.updatedAt">
+                  <span class="info-row__label">
+                    <mat-icon>update</mat-icon> {{ `${templateTranslationKey}personal_info.last_updated` | translate }}
+                  </span>
+                  <span class="info-row__value">{{ userProfile.updatedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                </div>
+              </div>
+            }
 
-        <!-- ── HERO CARD ── -->
-        <div class="hero-card">
-          <div class="hero-card__layout">
-
-              <!-- Avatar -->
-              <div class="hero-avatar">
-                <span class="hero-avatar__initials">{{ initials }}</span>
-                <span class="hero-avatar__status"
-                      [class.hero-avatar__status--active]="userProfile.isActive"
-                      [class.hero-avatar__status--inactive]="!userProfile.isActive"
-                      [matTooltip]="userProfile.isActive ? ('USERS.PROFILE.ACTIVE' | translate) : ('USERS.PROFILE.INACTIVE' | translate)">
+            <!-- EDIT MODE -->
+            <form class="edit-form" [formGroup]="editForm" *ngIf="isEditing">
+              <div class="form__field">
+                <div class="form__label">
+                  <label>{{ `${templateTranslationKey}edit_profile.full_name` | translate }}</label>
+                  <mat-icon>badge</mat-icon>
+                </div>
+                <input class="form__input"
+                      type="text"
+                      formControlName="fullName"
+                      [placeholder]="`${templateTranslationKey}edit_profile.full_name` | translate"
+                      [class.form__input--error]="editForm.get('fullName')?.invalid && editForm.get('fullName')?.touched" />
+                <span class="field__error" *ngIf="editForm.get('fullName') as ctrl">
+                  <ng-container *ngIf="ctrl.invalid && ctrl.touched">
+                    <span *ngIf="ctrl.errors?.['required']">{{ `${templateTranslationKey}edit_profile.validation.required` | translate }}</span>
+                    <span *ngIf="ctrl.errors?.['maxlength']">{{ `${templateTranslationKey}edit_profile.validation.name_max` | translate }}</span>
+                    <span *ngIf="ctrl.errors?.['pattern']">{{ `${templateTranslationKey}edit_profile.validation.alpha_only` | translate }}</span>
+                  </ng-container>
+                </span>
+                <span class="warning-hint" *ngIf="noDataChange && !editForm.get('fullName')?.touched">
+                  <mat-icon>warning</mat-icon> {{ `${templateTranslationKey}edit_profile.no_changes` | translate }}
                 </span>
               </div>
 
-              <!-- Identity -->
-              <div class="hero-identity">
-                <h1 class="hero-identity__name">
-                  {{ userProfile.fullName }}
-                </h1>
-                <p class="hero-identity__email">{{ userProfile.login }}</p>
-
-                <div class="hero-identity__chips">
-                  <mat-chip>
-                    <mat-icon matChipAvatar>shield</mat-icon>
-                    {{ userProfile.roleName }}
-                  </mat-chip>
+              <div class="form__field">
+                <div class="form__label">
+                  <label>{{ `${templateTranslationKey}edit_profile.email` | translate }}</label>
+                  <mat-icon>email</mat-icon>
                 </div>
+                <input class="form__input"
+                      type="email"
+                      formControlName="email"
+                      [placeholder]="`${templateTranslationKey}edit_profile.email` | translate"
+                      [class.form__input--error]="editForm.get('email')?.invalid && editForm.get('email')?.touched" />
+                <span class="field__error" *ngIf="editForm.get('email') as ctrl">
+                  <ng-container *ngIf="ctrl.invalid && ctrl.touched">
+                    <span *ngIf="ctrl.errors?.['required']">{{ `${templateTranslationKey}edit_profile.validation.required` | translate }}</span>
+                    <span *ngIf="ctrl.errors?.['email']">{{ `${templateTranslationKey}edit_profile.validation.email_invalid` | translate }}</span>
+                    <span *ngIf="ctrl.errors?.['maxlength']">{{ `${templateTranslationKey}edit_profile.validation.email_max` | translate }}</span>
+                  </ng-container>
+                </span>
               </div>
 
-              <!-- Actions -->
-              <div class="hero-actions">
-                <button mat-stroked-button
-                        class="edit-btn"
-                        (click)="toggleEditing()"
-                        *ngIf="canEditProfile">
-                  <mat-icon>edit</mat-icon>
-                  {{ 'USERS.PROFILE.EDIT_PROFILE' | translate }}
+              <div class="edit-form__actions">
+                <button class="btn-secondary" (click)="cancelEditing()" [disabled]="isSaving">{{ 'common.cancel' | translate }}</button>
+                <button class="btn-add save-btn"
+                        (click)="saveProfile()"
+                        [disabled]="isSaving || editForm.invalid || noDataChange">
+                  <mat-spinner diameter="16" *ngIf="isSaving" />
+                  {{ isSaving ? (`${templateTranslationKey}edit_profile.saving` | translate) : (`${templateTranslationKey}edit_profile.save` | translate) }}
                 </button>
-
-                <a mat-stroked-button
-                        class="password-btn"
-                        *ngIf="isOwnProfile"
-                        routerLink="/change-password">
-                  <mat-icon>lock_reset</mat-icon>
-                  {{ 'USERS.PROFILE.CHANGE_PASSWORD' | translate }}
-                </a>
-                <a mat-stroked-button
-                        class="password-btn"
-                        *ngIf="hasPrivilege"
-                        [routerLink]="['/change-password', selectedUserId]">
-                  <mat-icon>lock_reset</mat-icon>
-                  {{ 'USERS.PROFILE.CHANGE_PASSWORD' | translate }}
-                </a>
-
               </div>
+            </form>
           </div>
         </div>
 
-        <div class="content-grid">
-            <!-- ── INFO CARD ── -->
-            <div class="info-card">
-              <div class="card-header">
-                <div class="card-title">
-                  <mat-icon>person</mat-icon>
-                  {{ 'USERS.PROFILE.PERSONAL_INFO' | translate }}
-                </div>
-                <button class="card-collapse-btn" (click)="infoCollapsed = !infoCollapsed" type="button">
-                  <mat-icon [class.rotated]="infoCollapsed">expand_more</mat-icon>
-                </button>
+        <!-- ── ACCOUNT CARD ── -->
+        <div class="account-card">
+          <div class="card-header">
+            <div class="card-title">
+              <mat-icon>manage_accounts</mat-icon>
+              {{ `${templateTranslationKey}account_details.title` | translate }}
+            </div>
+            <button class="card-collapse-btn" (click)="accountCollapsed = !accountCollapsed" type="button">
+              <mat-icon [class.rotated]="accountCollapsed">expand_more</mat-icon>
+            </button>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="card-collapse" [class.card-collapse--closed]="accountCollapsed">
+            <div class="info-list">
+              <div class="info-row">
+                <span class="info-row__label"><mat-icon>key</mat-icon> {{ `${templateTranslationKey}account_details.auth_id` | translate }}</span>
+                <span class="info-row__value mono small">{{ userProfile.id }}</span>
               </div>
-
               <mat-divider></mat-divider>
-
-              <div class="card-collapse" [class.card-collapse--closed]="infoCollapsed">
-                    <!-- VIEW MODE -->
-                    @if(!isEditing){
-                        <div class="info-list">
-
-                          <div class="info-row" *ngIf="userProfile.fullName">
-                            <span class="info-row__label">
-                              <mat-icon>person</mat-icon> {{ 'USERS.PROFILE.FULL_NAME' | translate }}
-                            </span>
-                            <span class="info-row__value">{{ userProfile.fullName }}</span>
-                          </div>
-
-                          <mat-divider></mat-divider>
-
-                          <div class="info-row" *ngIf="userProfile.login">
-                            <span class="info-row__label">
-                              <mat-icon>badge</mat-icon> {{ 'USERS.REGISTER.LOGIN' | translate }}
-                            </span>
-                            <span class="info-row__value mono">{{ userProfile.login }}</span>
-                          </div>
-
-                          <mat-divider></mat-divider>
-
-                          <div class="info-row" *ngIf="userProfile.email">
-                            <span class="info-row__label">
-                              <mat-icon>email</mat-icon> {{ 'USERS.PROFILE.EMAIL' | translate }}
-                            </span>
-                            <span class="info-row__value mono">{{ userProfile.email }}</span>
-                          </div>
-
-                          <mat-divider></mat-divider>
-
-                          <div class="info-row" *ngIf="memberSince">
-                            <span class="info-row__label">
-                              <mat-icon>calendar_today</mat-icon> {{ 'USERS.PROFILE.MEMBER_SINCE' | translate }}
-                            </span>
-                            <span class="info-row__value">{{ memberSince }}</span>
-                          </div>
-
-                          <mat-divider *ngIf="userProfile.updatedAt"></mat-divider>
-
-                          <div class="info-row" *ngIf="userProfile.updatedAt">
-                            <span class="info-row__label">
-                              <mat-icon>update</mat-icon> {{ 'USERS.PROFILE.LAST_UPDATED' | translate }}
-                            </span>
-                            <span class="info-row__value">
-                              {{ userProfile.updatedAt | date:'dd MMM yyyy, HH:mm' }}
-                            </span>
-                          </div>
-
-                        </div>
-                    }
-
-                    <!-- EDIT MODE -->
-                    <form class="edit-form" [formGroup]="editForm" *ngIf="isEditing">
-
-                      <div class="form__field">
-                        <div class="form__label">
-                          <label>{{ 'USERS.PROFILE.FULL_NAME' | translate }}</label>
-                          <mat-icon>badge</mat-icon>
-                        </div>
-                        <input class="form__input"
-                              type="text"
-                              formControlName="fullName"
-                              [placeholder]="'USERS.PROFILE.FULL_NAME' | translate"
-                              [class.form__input--error]="editForm.get('fullName')?.invalid && editForm.get('fullName')?.touched"/>
-                        <span class="field__error" *ngIf="editForm.get('fullName') as ctrl">
-                          <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                            <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                            <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.NAME_MAX' | translate }}</span>
-                            <span *ngIf="ctrl.errors?.['pattern']">{{ 'VALIDATION.NAME_PATTERN' | translate }}</span>
-                          </ng-container>
-                        </span>
-                        <span class="warning-hint" *ngIf="noDataChange && !editForm.get('fullName')?.touched">
-                          <mat-icon>warning</mat-icon> {{ 'USERS.PROFILE.NO_CHANGES' | translate }}
-                        </span>
-                      </div>
-
-                      <div class="form__field">
-                        <div class="form__label">
-                          <label>{{ 'USERS.PROFILE.EMAIL' | translate }}</label>
-                          <mat-icon>email</mat-icon>
-                        </div>
-                        <input class="form__input"
-                              type="email"
-                              formControlName="email"
-                              [placeholder]="'USERS.PROFILE.EMAIL' | translate"
-                              [class.form__input--error]="editForm.get('email')?.invalid && editForm.get('email')?.touched"/>
-                        <span class="field__error" *ngIf="editForm.get('email') as ctrl">
-                          <ng-container *ngIf="ctrl.invalid && ctrl.touched">
-                            <span *ngIf="ctrl.errors?.['required']">{{ 'VALIDATION.REQUIRED' | translate }}</span>
-                            <span *ngIf="ctrl.errors?.['email']">{{ 'VALIDATION.EMAIL_INVALID' | translate }}</span>
-                            <span *ngIf="ctrl.errors?.['maxlength']">{{ 'VALIDATION.EMAIL_MAX' | translate }}</span>
-                          </ng-container>
-                        </span>
-                      </div>
-
-                      <div class="edit-form__actions">
-                        <button class="btn-secondary" (click)="cancelEditing()" [disabled]="isSaving">
-                          {{ 'COMMON.CANCEL' | translate }}
-                        </button>
-                        <button class="btn-add save-btn"
-                                (click)="saveProfile()"
-                                [disabled]="isSaving || editForm.invalid || noDataChange">
-                          <mat-spinner diameter="16" *ngIf="isSaving"/>
-                          {{ isSaving ? ('COMMON.SAVING' | translate) : ('COMMON.SAVE' | translate) }}
-                        </button>
-                      </div>
-
-                    </form>
+              <div class="info-row">
+                <span class="info-row__label"><mat-icon>toggle_on</mat-icon> {{ `${templateTranslationKey}account_details.status` | translate }}</span>
+                <span class="info-row__value">
+                  <span class="status-dot" [class.status-dot--active]="userProfile.isActive" [class.status-dot--inactive]="!userProfile.isActive"></span>
+                  {{ userProfile.isActive ? (`${templateTranslationKey}hero.active` | translate) : (`${templateTranslationKey}hero.inactive` | translate) }}
+                </span>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="info-row">
+                <span class="info-row__label"><mat-icon>login</mat-icon> {{ `${templateTranslationKey}account_details.last_login` | translate }}</span>
+                <span class="info-row__value">{{ (userProfile.lastLoginAt | date:'dd MMM yyyy, HH:mm') ?? '—' }}</span>
               </div>
             </div>
-
-            <!-- ── ACCOUNT CARD ── -->
-            <div class="account-card">
-              <div class="card-header">
-                <div class="card-title">
-                  <mat-icon>manage_accounts</mat-icon>
-                  {{ 'USERS.PROFILE.ACCOUNT_DETAILS' | translate }}
-                </div>
-                <button class="card-collapse-btn" (click)="accountCollapsed = !accountCollapsed" type="button">
-                  <mat-icon [class.rotated]="accountCollapsed">expand_more</mat-icon>
-                </button>
-              </div>
-
-              <mat-divider></mat-divider>
-
-              <div class="card-collapse" [class.card-collapse--closed]="accountCollapsed">
-                  <div class="info-list">
-                    <div class="info-row">
-                      <span class="info-row__label"><mat-icon>key</mat-icon> {{ 'USERS.PROFILE.AUTH_ID' | translate }}</span>
-                      <span class="info-row__value mono small">{{ userProfile.id }}</span>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="info-row">
-                      <span class="info-row__label"><mat-icon>toggle_on</mat-icon> {{ 'USERS.PROFILE.STATUS' | translate }}</span>
-                      <span class="info-row__value">
-                        <span class="status-dot" [class.status-dot--active]="userProfile.isActive" [class.status-dot--inactive]="!userProfile.isActive"></span>
-                        {{ userProfile.isActive ? ('USERS.PROFILE.ACTIVE' | translate) : ('USERS.PROFILE.INACTIVE' | translate) }}
-                      </span>
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="info-row">
-                      <span class="info-row__label"><mat-icon>login</mat-icon> {{ 'USERS.PROFILE.LAST_LOGIN' | translate }}</span>
-                      <span class="info-row__value">
-                        {{ (userProfile.lastLoginAt | date:'dd MMM yyyy, HH:mm') ?? '—' }}
-                      </span>
-                    </div>
-                  </div>
-              </div>
-            </div>
+          </div>
         </div>
-
-      </ng-container>
-    </div>
+      </div>
+    </ng-container>
+  </div>
 </div>

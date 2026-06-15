@@ -18,6 +18,7 @@ namespace ERP.AuthService.Application.Services
         public async Task LogAsync(
             AuditAction action,
             bool success,
+            Guid? tenantId= null,
             Guid? performedBy = null,
             Guid? targetUserId = null,
             string? failureReason = null,
@@ -28,6 +29,7 @@ namespace ERP.AuthService.Application.Services
             AuditLog log = new AuditLog(
                 action,
                 success,
+                tenantId,
                 performedBy,
                 targetUserId,
                 failureReason,

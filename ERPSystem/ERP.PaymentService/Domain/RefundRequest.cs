@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-namespace ERP.PaymentService.Domain;
+﻿namespace ERP.PaymentService.Domain;
 
 public class RefundRequest
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public Guid ClientId { get; private set; }
     public Guid InvoiceId { get; private set; }
     public RefundStatus Status { get; private set; }
@@ -16,8 +15,10 @@ public class RefundRequest
 
     private RefundRequest() { }
 
-    public RefundRequest(Guid clientId, Guid invoiceId, string? reason= null)
+    public RefundRequest(Guid clientId, Guid invoiceId, string? reason= null, Guid? tenantId = null)
     {
+        Id = Guid.NewGuid();
+        TenantId = tenantId;
         ClientId = clientId;
         InvoiceId= invoiceId;
         RefundReason = reason;

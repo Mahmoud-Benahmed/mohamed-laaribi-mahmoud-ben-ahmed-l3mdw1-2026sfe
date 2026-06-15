@@ -679,9 +679,10 @@ $bp-xl:  1200px;
   &--edit:hover       { background: $amber-bg;  border-color: $amber-border;  color: $amber; }
   &--delete:hover     { background: $red-bg;    border-color: $red-border;    color: $red; }
   &--deactivate:hover { background: $orange-bg; border-color: $orange-border; color: $orange; }
+  &--suspend:hover    { background: $gray-bg;   border-color: $gray-border;   color: $gray; }
   &--reactivate:hover { background: $green-bg;  border-color: $green-border;  color: $green; }
   &--block:hover      { background: $orange-bg; border-color: $orange-border; color: $orange;}
-  &--unblock:hover      { background: $green-bg; border-color: $green-border; color: $green;}
+  &--unblock:hover    { background: $green-bg;  border-color: $green-border;  color: $green;}
 }
 
 // ========================
@@ -1083,7 +1084,6 @@ $bp-xl:  1200px;
 
   &:hover {
     background: rgba($amber, 0.2);
-    color: $text-hi;
     border-color: $amber;
   }
 }
@@ -1696,4 +1696,3 @@ $bp-xl:  1200px;
     }
   }
 }
-

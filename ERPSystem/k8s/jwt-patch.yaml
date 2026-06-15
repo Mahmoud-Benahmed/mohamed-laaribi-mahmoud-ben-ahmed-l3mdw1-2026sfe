@@ -1,0 +1,11 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: auth-service
+        env:
+        - name: JWT__Secret
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret

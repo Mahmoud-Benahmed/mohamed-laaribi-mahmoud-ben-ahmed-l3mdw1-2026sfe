@@ -1,79 +1,77 @@
+using Confluent.Kafka;
 using ERP.ArticleService.Application.Interfaces;
 using ERP.ArticleService.Application.Services;
 using ERP.ArticleService.Infrastructure.Messaging;
 using ERP.ArticleService.Infrastructure.Persistence;
 using ERP.ArticleService.Infrastructure.Persistence.Seeders;
 using ERP.ArticleService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 builder.Configuration.AddEnvironmentVariables();
-
-// =========================
-// DATABASE
-// =========================
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionString 'DefaultConnection' is not configured.");
 
-// ── Database
 builder.Services.AddDbContext<ArticleDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            string message = string.Join(" | ", context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+
+            return new BadRequestObjectResult(new
+            {
+                statusCode = 400,
+                code = "VALIDATION_ERROR",
+                message
+            });
+        };
     });
 
-// API responses normalization
-builder.Services.Configure<ApiBehaviorOptions>(options =>
+var kafkaConfig = new ProducerConfig
 {
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        string message = string.Join(" | ", context.ModelState.Values
-            .SelectMany(v => v.Errors)
-            .Select(e => e.ErrorMessage));
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
 
-        return new BadRequestObjectResult(new
-        {
-            statusCode = 400,
-            code = "VALIDATION ERROR",
-            message
-        });
-    };
-});
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
-// =========================
-// REPOSITORIES
-// =========================
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IArticleCodeRepository, ArticleCodeRepository>();
 
-// =========================
-// SERVICES
-// =========================
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IArticleCodeService, ArticleCodeService>();
 
-// =========================
-// MESSAGING
-// =========================
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
+
 
 builder.Services.AddScoped<ArticleCodeSeeder>();
-builder.Services.AddScoped<CategorySeeder>();
-builder.Services.AddScoped<ArticleSeeder>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
-// =========================
-// CONTROLLERS & API
-// =========================
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
@@ -83,59 +81,26 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
-    ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+    var db = scope.ServiceProvider.GetRequiredService<ArticleDbContext>();
 
-    try
-    {
-        ArticleDbContext context = services.GetRequiredService<ArticleDbContext>();
-
-        logger.LogInformation("Resetting database...");
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.MigrateAsync();
-
-        logger.LogInformation("Clearing existing data...");
-        await context.ArticleCodes.IgnoreQueryFilters().ExecuteDeleteAsync();
-        await context.Articles.IgnoreQueryFilters().ExecuteDeleteAsync();
-        await context.Categories.IgnoreQueryFilters().ExecuteDeleteAsync();
-
-        // ✅ RESOLVE SEEDERS FROM DI (NOT using 'new')
-        logger.LogInformation("Seeding article codes...");
-        ArticleCodeSeeder articleCodeSeeder = services.GetRequiredService<ArticleCodeSeeder>();
-        await articleCodeSeeder.SeedAsync();
-
-        logger.LogInformation("Seeding categories...");
-        CategorySeeder categorySeeder = services.GetRequiredService<CategorySeeder>();
-        await categorySeeder.SeedAsync();
-
-        logger.LogInformation("Seeding articles...");
-        ArticleSeeder articleSeeder = services.GetRequiredService<ArticleSeeder>();
-        await articleSeeder.SeedAsync();
-
-        logger.LogInformation("✅ All seeding completed successfully!");
-    }
-    catch (Exception ex)
-    {
-
-        logger.LogError(ex, "❌ An error occurred while seeding the database.");
-        throw;
-    }
+    await db.Database.MigrateAsync();
 }
 
-
-// =========================
-// PIPELINE
-// =========================
 app.UseSwagger();
 app.UseSwaggerUI();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-    app.UseHsts();
-}
-
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
+
 
 app.Run();

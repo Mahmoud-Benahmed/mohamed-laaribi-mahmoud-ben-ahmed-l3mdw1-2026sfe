@@ -1,6 +1,7 @@
 ﻿// Infrastructure/Messaging/ClientEvents/Category/ClientCategoryEventConsumer.cs
 using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Category;
@@ -28,8 +29,7 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:ClientCategory"]
-                ?? throw new InvalidOperationException("Kafka:ConsumerGroups:ClientCategory not configured"),
+            GroupId = $"stock-service-client-category-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true,
@@ -96,8 +96,24 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
                         continue;
                     }
 
+                    _logger.LogWarning($"Payload recived: {dto}");
+
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        if (!dto.TenantId.HasValue)
+                        {
+                            _logger.LogError(
+                                "Missing TenantId for article event {ArticleId}",
+                                dto.Id);
+
+                            return;
+                        }
+
+                        var tenantContext =
+                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
+
                         IClientCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IClientCategoryEventHandler>();
 
                         switch (result.Topic)

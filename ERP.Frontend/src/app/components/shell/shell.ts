@@ -1,3 +1,4 @@
+import { ThemeType, LanguageType, Language, Theme } from './../../interfaces/AuthDto';
 import { AuthService, PRIVILEGES } from './../../services/auth/auth.service';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -8,6 +9,7 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TenantService } from '../../services/tenant/tenant.service';
 
 @Component({
   selector: 'app-shell',
@@ -29,39 +31,42 @@ export class ShellComponent implements OnInit, OnDestroy {
   openGroups: Record<string, boolean> = {
     auth: false,
     articles: false,
-    clients:  false,
-    stock:    false,
-    invoices: false
+    clients: false,
+    stock: false,
+    invoices: false,
+    payments: false
   };
 
   userName = '';
   userRole = '';
   initials = '';
-  readonly PRIVILEGES= PRIVILEGES;
+
+  readonly PRIVILEGES = PRIVILEGES;
+  readonly THEME= Theme;
+  readonly LANGUAGE=  Language;
 
 
-  constructor(private router: Router, public authService: AuthService,
-              private cdr: ChangeDetectorRef,
-              public userSettings: UserSettingsService,
-              public translate: TranslateService
-  ) {
-  }
-
+  constructor(
+    private router: Router,
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    public userSettings: UserSettingsService,
+    public translate: TranslateService,
+    public tenantService: TenantService,
+    public themeService: UserSettingsService
+  ) {}
 
   ngOnInit(): void {
     this.subs.add(
-      this.router.events.pipe(
-        filter(e => e instanceof NavigationEnd)
-      ).subscribe((e: any) => {
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
         const url: string = e.urlAfterRedirects;
         this.breadcrumbs = this.getBreadcrumbs(url);
         if (url.startsWith('/users') || url.startsWith('/permissions')) this.openGroups['auth'] = true;
         if (url.startsWith('/articles')) this.openGroups['articles'] = true;
-        if (url.startsWith('/clients'))  this.openGroups['clients']  = true;
-        if (url.startsWith('/stock'))    this.openGroups['stock']    = true;
+        if (url.startsWith('/clients')) this.openGroups['clients'] = true;
+        if (url.startsWith('/stock')) this.openGroups['stock'] = true;
         if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
         if (url.startsWith('/payments')) this.openGroups['payments'] = true;
-
       })
     );
 
@@ -76,53 +81,141 @@ export class ShellComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subs.add(
+      this.translate.onLangChange.subscribe(() => {
+        this.breadcrumbs = this.getBreadcrumbs(this.router.url);
+      })
+    );
+
     const url = this.router.url;
     this.breadcrumbs = this.getBreadcrumbs(url);
     if (url.startsWith('/users') || url.startsWith('/permissions')) this.openGroups['auth'] = true;
     if (url.startsWith('/articles')) this.openGroups['articles'] = true;
-    if (url.startsWith('/clients'))  this.openGroups['clients']  = true;
-    if (url.startsWith('/stock'))    this.openGroups['stock']    = true;
+    if (url.startsWith('/clients')) this.openGroups['clients'] = true;
+    if (url.startsWith('/stock')) this.openGroups['stock'] = true;
     if (url.startsWith('/invoices')) this.openGroups['invoices'] = true;
     if (url.startsWith('/payments')) this.openGroups['payments'] = true;
+
     window.addEventListener('resize', this.resizeListener);
   }
 
   private getBreadcrumbs(url: string): { label: string; link?: string }[] {
-    if (url.startsWith('/change-password/'))  return [{ label: 'Users', link: '/users' }, { label: 'Reset Password' }];
+    const t = (key: string) => this.translate.instant(key);
 
-    if (url.startsWith('/users/register'))    return [{ label: 'Users', link: '/users' }, { label: 'Register' }];
-    if (url.startsWith('/users/deactivated')) return [{ label: 'Users', link: '/users' }, { label: 'Deactivated' }];
-    if (url.startsWith('/users/deleted'))     return [{ label: 'Users', link: '/users' }, { label: 'Deleted' }];
-    if (url.startsWith('/users/categories'))  return [{ label: 'Users', link: '/users' }, { label: 'Controles' }];
-    if (url.startsWith('/users/roles'))       return [{ label: 'Users', link: '/roles' }, { label: 'Roles' }];
-    if (url.startsWith('/users/'))            return [{ label: 'Users', link: '/users' }, { label: 'Profile' }];
-    if (url.startsWith('/users'))             return [{ label: 'Users' }];
+    // Special dynamic routes (with parameters)
+    if (url.startsWith('/change-password/')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'auth.changePassword.title' } // Use lowercase key
+      ];
+    }
 
-    if (url.startsWith('/articles/categories'))   return [{ label: 'Articles', link: '/articles/categories' }, { label: 'Categories' }];
-    if (url.startsWith('/articles'))              return [{ label: 'Articles' }];
+    if (url.startsWith('/users/register')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.register' }
+      ];
+    }
+    if (url.startsWith('/users/deactivated')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.deactivated' }
+      ];
+    }
+    if (url.startsWith('/users/deleted')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.deleted' }
+      ];
+    }
+    if (url.startsWith('/users/categories')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.controles' }
+      ];
+    }
+    if (url.startsWith('/users/roles')) {
+      return [
+        { label: 'nav.auth.roles', link: '/roles' },
+        { label: 'nav.auth.roles' }
+      ];
+    }
+    if (url.startsWith('/users/')) {
+      return [
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'auth.profile.edit_profile.title' } // Use lowercase key from your JSON
+      ];
+    }
+    if (url.startsWith('/users')) {
+      return [{ label: 'nav.auth.list' }];
+    }
 
-    if (url.startsWith('/clients/categories'))    return [{ label: 'Clients', link: '/clients/categories' }, { label: 'Categories' }];
-    if (url.startsWith('/clients'))               return [{ label: 'Clients' }];
+    // Articles
+    if (url.startsWith('/articles/categories')) {
+      return [
+        { label: 'nav.articles.main', link: '/articles' },
+        { label: 'nav.articles.categories' }
+      ];
+    }
+    if (url.startsWith('/articles')) {
+      return [{ label: 'nav.articles.main' }];
+    }
 
-    if (url.startsWith('/invoices'))              return [{ label: this.translate.instant('NAV.INVOICES'), link:'/invoices' }];
+    // Clients
+    if (url.startsWith('/clients/categories')) {
+      return [
+        { label: 'nav.clients.main', link: '/clients' },
+        { label: 'nav.clients.categories' }
+      ];
+    }
+    if (url.startsWith('/clients')) {
+      return [{ label: 'nav.clients.main' }];
+    }
 
-    if (url.startsWith('/stock/fournisseurs'))    return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock/fournisseurs'}, {label: this.translate.instant('NAV.FOURNISSEURS')}];
-    if (url.startsWith('/stock/bons'))            return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock/bons'}, {label: this.translate.instant('NAV.BONS')}];
-    if (url.startsWith('/stock'))                 return [{ label: this.translate.instant('NAV.STOCK') , link:'/stock'}];
+    // Invoices
+    if (url.startsWith('/invoices')) {
+      return [{ label: 'nav.invoices.main' }];
+    }
 
-    if (url.startsWith('/payments'))              return [{ label: this.translate.instant('NAV.PAYMENTS') , link:'/payments'}];
-    if (url.startsWith('/payments/refunds'))      return [{ label: this.translate.instant('NAV.REFUNDS') , link:'/payments/refunds'}];
+    // Stock
+    if (url.startsWith('/stock/fournisseurs')) {
+      return [
+        { label: 'nav.stock.main', link: '/stock' },
+        { label: 'nav.stock.suppliers' }
+      ];
+    }
+    if (url.startsWith('/stock/bons')) {
+      return [
+        { label: 'nav.stock.main', link: '/stock' },
+        { label: 'nav.stock.bons' }
+      ];
+    }
+    if (url.startsWith('/stock')) {
+      return [{ label: 'nav.stock.main' }];
+    }
 
+    // Payments
+    if (url.startsWith('/payments/refunds')) {
+      return [
+        { label: 'nav.payments.main', link: '/payments' },
+        { label: 'nav.payments.refunds' }
+      ];
+    }
+    if (url.startsWith('/payments')) {
+      return [{ label: 'nav.payments.main' }];
+    }
 
+    // Other top-level routes
+    if(url.startsWith('/system-settings')) return [{label: 'auth.profile.actions.system_settings'}];
+    if(url.startsWith('/subscription-expiry')) return [{label: 'tenants.subscription.renew_title'}];
+    if (url.startsWith('/permissions')) return [{ label: 'nav.auth.permissions' }];
+    if (url.startsWith('/audit-log')) return [{ label: 'nav.auth.audit_log' }];
+    if (url.startsWith('/profile')) return [{ label: 'home.quick_access.my_profile' }];
+    if (url.startsWith('/change-password')) return [{ label: 'auth.profile.changePassword.title_change' }];
+    if (url.startsWith('/tenants')) return [{ label: 'nav.tenants.main' }];
+    if (url.startsWith('/home')) return [{ label: 'nav.home' }];
 
-
-    if (url.startsWith('/permissions'))       return [{ label: 'Permissions' }];
-    if (url.startsWith('/audit-log'))         return [{ label: 'Audit Log' }];
-    if (url.startsWith('/profile'))           return [{ label: 'My Profile' }];
-    if (url.startsWith('/change-password'))   return [{ label: 'Change Password' }];
-    if (url.startsWith('/home'))              return [{ label: 'Home' }];
-
-    return [{ label: 'Dashboard' }];
+    return [{ label: t('common.select') }];
   }
 
   private resizeListener = () => {
@@ -130,12 +223,12 @@ export class ShellComponent implements OnInit, OnDestroy {
   };
 
   toggleNav(): void {
-  if (window.innerWidth <= 768) {
-    this.mobileNavOpen ? this.closeMobileNav() : this.openMobileNav();
-  } else {
-    this.toggleSidebar();
+    if (window.innerWidth <= 768) {
+      this.mobileNavOpen ? this.closeMobileNav() : this.openMobileNav();
+    } else {
+      this.toggleSidebar();
+    }
   }
-}
 
   toggleSidebar(): void {
     this.collapsed = !this.collapsed;
@@ -146,16 +239,16 @@ export class ShellComponent implements OnInit, OnDestroy {
   }
 
   openMobileNav(): void {
-    this.mobileNavOpen    = true;
+    this.mobileNavOpen = true;
     this.mobileNavClosing = false;
     document.body.style.overflow = 'hidden';
   }
 
   closeMobileNav(): void {
-    document.body.style.overflow = ''; // ← immediately, before animation
+    document.body.style.overflow = '';
     this.mobileNavClosing = true;
     setTimeout(() => {
-      this.mobileNavOpen    = false;
+      this.mobileNavOpen = false;
       this.mobileNavClosing = false;
     }, 220);
   }

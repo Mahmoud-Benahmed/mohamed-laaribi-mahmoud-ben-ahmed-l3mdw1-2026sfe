@@ -3,6 +3,7 @@
 public abstract class PieceStock
 {
     public Guid Id { get; protected set; }
+    public Guid? TenantId { get; protected set; }
     public string Numero { get; init; } = default!;
     public string? Observation { get; protected set; }
     public DateTime CreatedAt { get; protected set; }

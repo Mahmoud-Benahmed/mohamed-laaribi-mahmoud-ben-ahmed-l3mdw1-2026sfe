@@ -38,3 +38,9 @@ public class InvoiceAlreadyPaidException : Exception
     public InvoiceAlreadyPaidException(Guid id)
         : base($"Invoice '{id}' is already fully paid.") { }
 }
+
+public class RefundExistsException : Exception
+{
+    public RefundExistsException(Guid invoiceId)
+        : base($"A refund request for invoice '{invoiceId}' already exists.") { }
+}

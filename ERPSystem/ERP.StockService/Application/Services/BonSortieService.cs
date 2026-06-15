@@ -15,13 +15,16 @@ public class BonSortieService : IBonSortieService
     private readonly IClientCacheRepository _clientCacheRepository;
     private readonly IBonNumeroRepository _bonNumeroRepository;
     private readonly IJournalStockRepository _journalStockRepository;
+    private readonly ITenantContext _tenantContext;
 
     public BonSortieService(IBonSortieRepository repo,
         IArticleCacheRepository articleCacheRepository,
         IClientCacheRepository clientCacheRepository,
         IBonNumeroRepository bonNumeroRepository,
-        IJournalStockRepository journalStockRepository)
+        IJournalStockRepository journalStockRepository,
+        ITenantContext tenantContext)
     {
+        _tenantContext = tenantContext;
         _repo = repo;
         _articleCacheRepository = articleCacheRepository;
         _clientCacheRepository = clientCacheRepository;
@@ -54,7 +57,7 @@ public class BonSortieService : IBonSortieService
         try
         {
             string numero = await _bonNumeroRepository.GetNextDocumentNumberAsync("BON_SORTIE");
-            BonSortie bon = BonSortie.Create(numero, dto.ClientId, dto.Observation);
+            BonSortie bon = BonSortie.Create(numero, dto.ClientId, dto.Observation, _tenantContext.TenantId);
 
             Dictionary<Guid, ArticleCache> articleDictionary = articles.ToDictionary(a => a.Id, a => a);
 
@@ -84,7 +87,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore,
                     StockMovementType.BonSortie,
                     "StockService",
-                    "CreateBonSortie"
+                    "CreateBonSortie",
+                    tenantId: _tenantContext.TenantId
                 ));
             }
 
@@ -104,7 +108,7 @@ public class BonSortieService : IBonSortieService
     // =========================
     public async Task<BonSortieResponseDto> UpdateAsync(Guid id, UpdateBonSortieRequestDto dto)
     {
-        BonSortie bon = await _repo.GetByIdAsync(id) ?? throw new BonSortieNotFoundException(id);
+        BonSortie bon = await _repo.GetByIdForUpdateAsync(id) ?? throw new BonSortieNotFoundException(id);
         _ = await _clientCacheRepository.GetByIdAsync(dto.ClientId) ?? throw new KeyNotFoundException($"Client with Id {dto.ClientId} not found");
 
         Dictionary<Guid, decimal> oldQtyMap = [];
@@ -121,14 +125,13 @@ public class BonSortieService : IBonSortieService
                 throw new InvalidOperationException(
                     $"Articles not found: {string.Join(", ", missingIds)}");
 
-            // Capture BEFORE mutating
-            oldQtyMap = bon.Lignes
-                .GroupBy(l => l.ArticleId)
-                .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
 
-            bon.ClearLignes();
-            foreach (LigneRequestDto l in dto.Lignes)
-                bon.AddLigne(l.ArticleId, l.Quantity, l.Price);
+            oldQtyMap = bon.Lignes
+                        .GroupBy(l => l.ArticleId)
+                        .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
+
+            // ✅ ExecuteDelete + clear + re-add, all tracker-safe
+            await _repo.ReplaceLignesAsync(bon, dto.Lignes);
 
             bon.ValidateLignes();
         }
@@ -162,7 +165,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore,
                     StockMovementType.BonSortie,
                     "StockService",
-                    "UpdateBonSortie"
+                    "UpdateBonSortie",
+                    tenantId: _tenantContext.TenantId
                 ));
             }
 
@@ -181,7 +185,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonSortie,
                     sourceService: "StockService",
-                    sourceOperation: "UpdateBonSortie_Reversal"
+                    sourceOperation: "UpdateBonSortie_Reversal",
+                    tenantId: _tenantContext.TenantId
                 ));
 
             }
@@ -219,7 +224,8 @@ public class BonSortieService : IBonSortieService
                     stockBefore: stockBefore,
                     movementType: StockMovementType.BonSortie,
                     sourceService: "StockService",
-                    sourceOperation: "DeleteBonSortie"
+                    sourceOperation: "DeleteBonSortie",
+                    tenantId: _tenantContext.TenantId
                 );
                 await _journalStockRepository.AddAsync(reversal);
             }

@@ -8,7 +8,7 @@ namespace ERP.ArticleService.Application.Interfaces
         Task AddAsync(Category category);
         Task<Category?> GetByIdAsync(Guid id);
         Task<Category?> GetByIdDeletedAsync(Guid id);
-
+        Task<bool> DuplicateExists(string name, Guid? excludeId = null);
         Task<Category?> GetByNameAsync(string name);
         Task<List<Category>> GetAllAsync();
         Task<CategoryStatsDto> GetStatsAsync();
@@ -17,7 +17,6 @@ namespace ERP.ArticleService.Application.Interfaces
         Task<List<Category>> GetBetweenTVAAsync(decimal min, decimal max);
         Task<List<Category>> GetHigherThanTVAAsync(decimal tva);
         Task<List<Category>> GetBelowTVAAsync(decimal tva);
-
 
         void Remove(Category category);
         Task SaveChangesAsync();

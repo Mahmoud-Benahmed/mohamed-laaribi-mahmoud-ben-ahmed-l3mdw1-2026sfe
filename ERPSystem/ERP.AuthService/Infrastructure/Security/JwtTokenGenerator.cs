@@ -16,6 +16,8 @@ namespace ERP.AuthService.Infrastructure.Security
         private const string CLAIM_LOGIN = "login";
         private const string CLAIM_ROLE = "role";
         private const string CLAIM_PRIVILEGE = "privilege";
+        private const string CLAIM_TENANT_ID = "tenantId";
+        private const string CLAIM_SLUG = "slug";
 
         public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
         {
@@ -26,7 +28,9 @@ namespace ERP.AuthService.Infrastructure.Security
                 Guid userId,
                 string login,
                 string role,
-                IEnumerable<string> privileges)
+                IEnumerable<string> privileges,
+                Guid? tenantId = null,
+                string? slug= null)
         {
             SymmetricSecurityKey key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtSettings.Secret));
@@ -46,6 +50,11 @@ namespace ERP.AuthService.Infrastructure.Security
             .Concat(privileges.Select(p => new Claim(CLAIM_PRIVILEGE, p)))
             .ToList();
 
+            if (tenantId.HasValue)
+                claims.Add(new Claim(CLAIM_TENANT_ID, tenantId.Value.ToString()));
+            if (slug is not null)
+                claims.Add(new Claim(CLAIM_SLUG, slug));
+
             DateTime expires = DateTime.UtcNow
                 .AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
 
@@ -59,13 +68,6 @@ namespace ERP.AuthService.Infrastructure.Security
             return (new JwtSecurityTokenHandler().WriteToken(token), expires);
         }
 
-        public string GenerateRefreshToken()
-        {
-            byte[] randomBytes = new byte[64];
-            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
-        }
 
         /// <summary>
         /// Validates a JWT token and returns the ClaimsPrincipal if valid

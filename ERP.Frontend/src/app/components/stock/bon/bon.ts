@@ -29,6 +29,8 @@ import { ClientResponseDto, ClientsService } from '../../../services/clients/cli
 import { ArticleResponseDto } from '../../../services/articles/articles.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FournisseurResponse } from '../../../services/fournisseur.service';
+import { CurrencyConfigService } from '../../../services/currency-config.service';
+import { take } from 'rxjs';
 
 export type BonType = 'entre' | 'sortie' | 'retour';
 
@@ -144,13 +146,17 @@ export class BonsComponent implements OnInit {
   selectedArticleLabel = '';
   private articleSearchSubject$ = new Subject<string>();
 
+  private fournisseurCache = new Map<string, string>();
+  fournisseurNames = signal<Map<string, string>>(new Map());
+
   constructor(
     private stock: StockService,
     public authService: AuthService,
     public clientService: ClientsService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private currencyConfig: CurrencyConfigService
   ) {
     this.headerForm = this.buildHeaderForm();
     this.ligneForm  = this.buildLigneForm();
@@ -287,7 +293,7 @@ export class BonsComponent implements OnInit {
         this.pageNumber.set(1);
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.DATE_FILTER_FAILED'))
+      error: () => this.flash('error', this.translate.instant('stock.bons.errors.date_filter_failed'))
     });
   }
 
@@ -320,8 +326,13 @@ export class BonsComponent implements OnInit {
     this.reload();
   }
 
+
+  get currencyCode():   string { return this.currencyConfig.code;   }
+  get currencyLocale(): string { return this.currencyConfig.locale; }
+
   reload(): void {
     const list$ = this.bonApi[this.activeBonType].list(this.pageNumber(), this.pageSize());
+
     const articles$ = this.activeBonType === 'sortie'
       ? forkJoin({
           arts: this.stock.getArticlesPaged(1, 20),
@@ -349,6 +360,13 @@ export class BonsComponent implements OnInit {
         next: ({ list, articles, fournisseurs, sourceBons }) => {
           this.dataSource.data = list.items;
           this.totalCount = list.totalCount;
+
+          if (this.activeBonType === 'entre') {
+            const ids = list.items
+              .map(b => (b as BonEntreResponse).fournisseurId)
+              .filter((id): id is string => !!id);
+            if (ids.length) this.prefetchFournisseurs(ids);
+          }
 
           this.masterArticles = articles.arts.items.filter(a => !a.isDeleted);
           if (articles.stock) {
@@ -393,7 +411,7 @@ export class BonsComponent implements OnInit {
         error: (err) => {
           this.flash(
             'error',
-            (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_FAILED')
+            (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.load_failed')
           );
         },
       });
@@ -427,7 +445,7 @@ export class BonsComponent implements OnInit {
           }
           this.cdr.markForCheck();
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_SOURCE_BONS_FAILED')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.load_source_bons_failed')),
       });
   }
 
@@ -460,7 +478,7 @@ export class BonsComponent implements OnInit {
 
           this.syncArticles();
         },
-        error: () => this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.LOAD_ARTICLES_FAILED'))
+        error: () => this.flash('error', this.translate.instant('stock.bons.errors.load_articles_failed'))
       });
   }
 
@@ -541,13 +559,13 @@ export class BonsComponent implements OnInit {
         },
         error: (err) => {
           const error = err.error as HttpError;
-          this.flash('error', error.message ?? this.translate.instant('STOCK.BONS.ERRORS.LOAD_SOURCE_BON_LIGNES_FAILED'));
+          this.flash('error', error.message ?? this.translate.instant('stock.bons.errors.load_source_bon_lignes_failed'));
         }
       });
     }
   }
 
-  private getArticleLabel(articleId: string): string {
+  getArticleLabel(articleId: string): string {
     const article = this.articles.find(a => a.id === articleId);
     return article ? `${article.codeRef} — ${article.libelle}` : articleId;
   }
@@ -681,7 +699,7 @@ export class BonsComponent implements OnInit {
 
     const master = this.masterArticles.find(a => a.id === val.articleId);
     if (!master) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.ARTICLE_NOT_FOUND'));
+      this.flash('error', this.translate.instant('stock.bons.errors.article_not_found'));
       return;
     }
 
@@ -699,7 +717,7 @@ export class BonsComponent implements OnInit {
 
     if (max !== Infinity) {
       if (val.quantity > max) {
-        this.flash('error', this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK', {
+        this.flash('error', this.translate.instant('stock.responses.errors.insufficient_stock', {
           max, requested: val.quantity
         }));
         return;
@@ -710,7 +728,7 @@ export class BonsComponent implements OnInit {
           ? (this.masterStockMap.get(val.articleId) ?? 0)
           : (this.masterRetourMap.get(val.articleId) ?? 0);
         if (combined > masterMax) {
-          this.flash('error', this.translate.instant('STOCK.ERRORS.MERGED_QUANTITY_EXCEEDS_STOCK', {
+          this.flash('error', this.translate.instant('stock.responses.errors.merged_quantity_exceeds_stock', {
             article: master.libelle, total: combined, max: masterMax
           }));
           return;
@@ -798,12 +816,12 @@ export class BonsComponent implements OnInit {
     if (this.headerForm.invalid) return;
 
     if (this.isCreate() && this.pendingLignes.length === 0) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.NO_LIGNES'));
+      this.flash('error', this.translate.instant('stock.bons.errors.no_lignes'));
       return;
     }
 
     if (this.isEdit() && this.editLignes.length === 0) {
-      this.flash('error', this.translate.instant('STOCK.BONS.ERRORS.NO_LIGNES'));
+      this.flash('error', this.translate.instant('stock.bons.errors.no_lignes'));
       return;
     }
 
@@ -816,12 +834,12 @@ export class BonsComponent implements OnInit {
     req$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.flash('success', creating
-          ? this.translate.instant('STOCK.BONS.SUCCESS.CREATED')
-          : this.translate.instant('STOCK.BONS.SUCCESS.UPDATED'));
+          ? this.translate.instant('stock.bons.success.created')
+          : this.translate.instant('stock.bons.success.updated'));
         this.cancel();
         this.reload();
       },
-      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.OPERATION_FAILED')),
+      error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.operation_failed')),
     });
   }
 
@@ -892,9 +910,9 @@ export class BonsComponent implements OnInit {
       .open(ModalComponent, {
         width: '400px',
         data: {
-          title:       this.translate.instant('CONFIRMATION.DELETE_BON_TITLE'),
-          message:     this.translate.instant('CONFIRMATION.DELETE_BON', { numero: bon.numero }),
-          confirmText: this.translate.instant('COMMON.DELETE'),
+          title:       this.translate.instant('stock.bons.confirmations.delete_bon.title'),
+          message:     this.translate.instant('stock.bons.confirmations.delete_bon.message', { numero: bon.numero }),
+          confirmText: this.translate.instant('common.delete'),
           showCancel:  true,
           icon:        'auto_delete',
           iconColor:   'danger',
@@ -912,9 +930,9 @@ export class BonsComponent implements OnInit {
         next: () => {
           if (this.isView()) this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('STOCK.BONS.SUCCESS.DELETED', { numero: bon.numero }));
+          this.flash('success', this.translate.instant('stock.bons.success.deleted', { numero: bon.numero }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('STOCK.BONS.ERRORS.DELETE_FAILED')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('stock.bons.errors.delete_failed')),
       });
   }
 
@@ -1027,9 +1045,9 @@ export class BonsComponent implements OnInit {
 
   getAddButtonTooltip(): string {
     if (this.fournisseurs.length === 0 && this.activeBonType === 'entre')
-      return this.translate.instant('STOCK.ERRORS.FOURNISSEURS_NOT_FOUND');
+      return this.translate.instant('stock.responses.errors.fournisseurs_not_found');
     if (this.articles.length === 0 && (this.activeBonType === 'retour' || this.activeBonType === 'sortie'))
-      return this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND');
+      return this.translate.instant('stock.responses.errors.articles_not_found');
     return '';
   }
 
@@ -1117,13 +1135,6 @@ export class BonsComponent implements OnInit {
     this.loadFournisseurs(this.fournisseurPage + 1, true);
   }
 
-  selectFournisseur(fournisseur: FournisseurResponse): void {
-    this.headerForm.patchValue({ fournisseurId: fournisseur.id });
-    this.selectedFournisseurLabel = `${fournisseur.name} — ${fournisseur.taxNumber}`;
-    this.fournisseurDropdownOpen = false;
-    this.cdr.markForCheck();
-  }
-
   toggleFournisseurDropdown(): void {
     this.fournisseurDropdownOpen = !this.fournisseurDropdownOpen;
     if (this.fournisseurDropdownOpen) {
@@ -1136,14 +1147,61 @@ export class BonsComponent implements OnInit {
     this.fournisseurSearchSubject$.next(query);
   }
 
-  private restoreFournisseurLabel(): void {
-    const id = this.headerForm.get('fournisseurId')?.value;
-    if (!id) return;
-    const found = this.fournisseurs.find(f => f.id === id);
-    if (found) {
-      this.selectedFournisseurLabel = `${found.name} — ${found.taxNumber}`;
-      this.cdr.markForCheck();
+  private prefetchFournisseurs(ids: string[]): void {
+    const unique = [...new Set(ids)];
+
+    forkJoin(
+      unique.map(id => this.stock.getFournisseurById(id).pipe(
+        map(f => ({ id, name: f.name })),
+        catchError(() => of({ id, name: '—' }))
+      ))
+    ).pipe(take(1))
+    .subscribe(results => {
+      results.forEach(r => this.fournisseurCache.set(r.id, r.name));
+      this.fournisseurNames.set(new Map(this.fournisseurCache));
+    });
+  }
+
+  getFournisseurName(id: string): string {
+    if (this.fournisseurCache.has(id)) {
+      return this.fournisseurCache.get(id)!;
     }
+
+    // Fetch only if not cached
+    this.stock.getFournisseurById(id)
+      .pipe(take(1))
+      .subscribe({
+        next: (fournisseur) => {
+          this.fournisseurCache.set(id, fournisseur.name);
+          this.fournisseurNames.set(new Map(this.fournisseurCache)); // trigger signal update
+        },
+        error: () => {
+          this.fournisseurCache.set(id, '—'); // fallback so it doesn't retry on every render
+        }
+      });
+
+    return '…'; // placeholder while loading
+  }
+
+  selectFournisseur(fournisseur: FournisseurResponse): void {
+      this.headerForm.patchValue({ fournisseurId: fournisseur.id });
+      this.selectedFournisseurLabel = fournisseur.taxNumber
+          ? `${fournisseur.name} — ${fournisseur.taxNumber}`
+          : fournisseur.name;                                  // ← just name if no tax number
+      this.fournisseurDropdownOpen = false;
+      this.cdr.markForCheck();
+  }
+
+  private restoreFournisseurLabel(): void {
+      const id = this.headerForm.get('fournisseurId')?.value;
+      if (!id) return;
+      const found = this.fournisseurs.find(f => f.id === id);
+      if (found) {
+          this.selectedFournisseurLabel = found.taxNumber
+              ? `${found.name} — ${found.taxNumber}`
+              : found.name;                                    // ← same here
+          this.cdr.markForCheck();
+      }
   }
 
   loadArticlesForDropdown(page: number, append = false): void {
@@ -1232,5 +1290,9 @@ export class BonsComponent implements OnInit {
       default:
         return 1;
     }
+  }
+
+  getClientName(id: string): string {
+    return this.clients.find(c => c.id === id)?.name ?? id;
   }
 }

@@ -10,11 +10,13 @@ public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
-    public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher)
+    public CategoryService(ICategoryRepository categoryRepository, IEventPublisher eventPublisher, ITenantContext tenantContext)
     {
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -22,16 +24,16 @@ public class CategoryService : ICategoryService
     // =========================
     public async Task<CategoryResponseDto> CreateAsync(CreateCategoryRequestDto request)
     {
-        Category? existing = await _categoryRepository.GetByCodeAsync(request.Code);
-        if (existing is not null)
-            throw new CategoryAlreadyExistsException(request.Code);
+        if(await _categoryRepository.DuplicateExists(request.Code))
+            throw new DuplicateKeyException($"Category.Code: {request.Code}");
 
         if (!request.UseBulkPricing && request.DiscountRate != null)
             throw new ArgumentException("Discount not allowed without bulk pricing");
 
         Category category = Category.Create(
             request.Name, request.Code, request.DelaiRetour, request.DuePaymentPeriod,
-            request.UseBulkPricing, request.DiscountRate, request.CreditLimitMultiplier);
+            request.UseBulkPricing, request.DiscountRate, request.CreditLimitMultiplier,
+            _tenantContext.TenantId);
 
         await _categoryRepository.AddAsync(category);
         await _categoryRepository.SaveChangesAsync();
@@ -62,12 +64,8 @@ public class CategoryService : ICategoryService
             throw new CategoryNotFoundException(id);
 
         string normalised = request.Code.Trim().ToUpperInvariant();
-        if (category.Code != normalised)
-        {
-            Category? existing = await _categoryRepository.GetByCodeAsync(request.Code);
-            if (existing is not null)
-                throw new CategoryAlreadyExistsException(request.Code);
-        }
+        if (await _categoryRepository.DuplicateExists(normalised, id))
+            throw new DuplicateKeyException($"Category.Code: {normalised}");
 
         category.Update(
             request.Name, request.Code, request.DelaiRetour, request.DuePaymentPeriod,
@@ -217,7 +215,8 @@ public class CategoryService : ICategoryService
             IsActive: category.IsActive,
             IsDeleted: category.IsDeleted,
             CreatedAt: category.CreatedAt,
-            UpdatedAt: category.UpdatedAt
+            UpdatedAt: category.UpdatedAt,
+            TenantId: category.TenantId
         );
     }
 }

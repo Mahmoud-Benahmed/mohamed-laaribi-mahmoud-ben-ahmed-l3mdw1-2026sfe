@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Category;
@@ -27,8 +28,7 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                             ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:ArticleCategory"]
-                            ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Category not configured"),
+            GroupId = $"stock-service-article-category-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true,
@@ -73,27 +73,40 @@ public sealed class ArticleCategoryEventConsumer : BackgroundService
                         continue;
                     }
 
-                    using (IServiceScope scope = _scopeFactory.CreateScope())
+                    _logger.LogWarning($"Payload recived: {dto}");
+
+                    if (!dto.TenantId.HasValue)
                     {
-                        IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
+                        _logger.LogError(
+                            "Missing TenantId for article event {ArticleId}",
+                            dto.Id);
 
-                        switch (result.Topic)
-                        {
-                            case ArticleCategoryTopics.Created:
-                                await handler.HandleCreatedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Updated:
-                                await handler.HandleUpdatedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Deleted:
-                                await handler.HandleDeletedAsync(dto);
-                                break;
-                            case ArticleCategoryTopics.Restored:
-                                await handler.HandleRestoredAsync(dto);
-                                break;
-                        }
+                        return;
                     }
+                    
+                    using var scope = _scopeFactory.CreateScope();
+                    var tenantContext = scope.ServiceProvider.GetRequiredService<ITenantContext>();
 
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+                    var testId = tenantContext.TenantId;
+
+                    IArticleCategoryEventHandler handler = scope.ServiceProvider.GetRequiredService<IArticleCategoryEventHandler>();
+
+                    switch (result.Topic)
+                    {
+                        case ArticleCategoryTopics.Created:
+                            await handler.HandleCreatedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Updated:
+                            await handler.HandleUpdatedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Deleted:
+                            await handler.HandleDeletedAsync(dto);
+                            break;
+                        case ArticleCategoryTopics.Restored:
+                            await handler.HandleRestoredAsync(dto);
+                            break;
+                    }
                     _consumer.Commit(result);
                 }
                 catch (ConsumeException ex)

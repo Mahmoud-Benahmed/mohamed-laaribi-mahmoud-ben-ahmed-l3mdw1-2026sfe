@@ -1,4 +1,6 @@
-﻿public static class Privileges
+﻿namespace ERP.AuthService.Properties;
+
+public static class Privileges
 {
     public static class Users
     {
@@ -17,6 +19,8 @@
         public const string CREATE_CONTROLE = "CREATE_CONTROLE";
         public const string UPDATE_CONTROLE = "UPDATE_CONTROLE";
         public const string DELETE_CONTROLE = "DELETE_CONTROLE";
+        public const string BUY_SUBSCRIPTION = "BUY_SUBSCRIPTION";
+        public const string EDIT_SYSTEM_SETTINGS = "EDIT_SYSTEM_SETTINGS";
     }
 
     public static class Audit
@@ -98,4 +102,20 @@
         public const string VIEW_REPORTS = "VIEW_REPORTS";
         public const string EXPORT_REPORTS = "EXPORT_REPORTS";
     }
+}
+
+public static class TenantPrivileges
+{
+    // Tenant lifecycle
+    public const string VIEW_TENANTS = "VIEW_TENANTS";
+    public const string CREATE_TENANT = "CREATE_TENANT";
+    public const string UPDATE_TENANT = "UPDATE_TENANT";
+    public const string DELETE_TENANT = "DELETE_TENANT";
+    public const string RESTORE_TENANT = "RESTORE_TENANT";
+    public const string SUSPEND_TENANT = "SUSPEND_TENANT";
+    public const string ACTIVATE_TENANT = "ACTIVATE_TENANT";
+
+    // Subscription / billing
+    public const string MANAGE_SUBSCRIPTIONS = "MANAGE_SUBSCRIPTIONS";
+    public const string VIEW_BILLING = "VIEW_BILLING";
 }

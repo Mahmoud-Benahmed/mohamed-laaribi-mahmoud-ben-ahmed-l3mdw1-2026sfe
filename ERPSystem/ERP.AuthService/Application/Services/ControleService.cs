@@ -12,10 +12,17 @@ namespace ERP.AuthService.Application.Services
     {
         private readonly IAuditLogger _auditLogger;
         private readonly IControleRepository _controleRepository;
+        private readonly IPrivilegeRepository _privilegeRepository;
+        private readonly ITenantContext _tenantContext;
+
 
         public ControleService(IAuditLogger auditLogger,
-                                IControleRepository controleRepository)
+                                IControleRepository controleRepository,
+                                IPrivilegeRepository privilegeRepository,
+                                ITenantContext tenantContext)
         {
+            _tenantContext = tenantContext;
+            _privilegeRepository = privilegeRepository;
             _auditLogger = auditLogger;
             _controleRepository = controleRepository;
         }
@@ -73,11 +80,10 @@ namespace ERP.AuthService.Application.Services
         /// </summary>
         public async Task<ControleResponseDto> CreateControleAsync(ControleRequestDto request, Guid requesterId)
         {
-            Controle? existing = await _controleRepository.GetByLibelleAsync(request.Libelle);
-            if (existing is not null)
-                throw new InvalidOperationException($"A controle with libelle '{request.Libelle}' already exists.");
+            if (await _controleRepository.DuplicateExists(request.Libelle))
+                throw new DuplicateKeyException($"User.Libelle: {request.Libelle}");
 
-            Controle controle = new Controle(request.Category, request.Libelle, request.Description);
+            Controle controle = new Controle(request.Category, request.Libelle, request.Description, tenantId: _tenantContext.TenantId);
             await _controleRepository.AddAsync(controle);
             await _auditLogger.LogAsync(
                         AuditAction.ControleCreated,
@@ -94,9 +100,13 @@ namespace ERP.AuthService.Application.Services
         /// </summary>
         public async Task<ControleResponseDto> UpdateControleAsync(Guid id, ControleRequestDto request, Guid requesterId)
         {
+
             Controle? existing = await _controleRepository.GetByIdAsync(id);
             if (existing is null)
                 throw new KeyNotFoundException($"Controle with ID '{id}' was not found.");
+
+            if (await _controleRepository.DuplicateExists(request.Libelle, id))
+                throw new DuplicateKeyException($"User.Libelle: {request.Libelle}");
 
             existing.Update(request);
 
@@ -123,6 +133,8 @@ namespace ERP.AuthService.Application.Services
         {
             Controle existing = await _controleRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Controle with ID '{id}' was not found.");
 
+
+            await _privilegeRepository.DeleteByControleIdAsync(id);
             await _controleRepository.DeleteAsync(id);
 
             await _auditLogger.LogAsync(

@@ -23,7 +23,7 @@ public class KafkaEventPublisher : IEventPublisher, IDisposable
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            ClientId = $"client-service-{Guid.NewGuid()}",
+            ClientId = $"client-service-v1",
             EnableDeliveryReports = true,  // Enable delivery reports
             Acks = Acks.All,               // Wait for all replicas
             MessageTimeoutMs = 30000,       // 30 seconds

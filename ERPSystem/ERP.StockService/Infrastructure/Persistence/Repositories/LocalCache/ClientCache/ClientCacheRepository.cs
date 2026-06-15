@@ -1,12 +1,13 @@
 ﻿using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Domain.LocalCache.Client;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
 
+
 public class ClientCacheRepository : IClientCacheRepository
 {
     private readonly StockDbContext _dbContext;
-
     public ClientCacheRepository(StockDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -20,13 +21,19 @@ public class ClientCacheRepository : IClientCacheRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task DeleteAsync(Domain.LocalCache.Client.ClientCache client)
+    public async Task<Domain.LocalCache.Client.ClientCache?> GetByIdDeletedAsync(Guid id)
     {
-        if (client == null)
-            throw new ArgumentNullException(nameof(client));
+        return await _dbContext.ClientCaches.IgnoreQueryFilters()
+            .Include(c => c.ClientCategories)
+            .ThenInclude(cc => cc.Category)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
 
-        _dbContext.ClientCaches.Remove(client); // Use correct DbSet
-        await _dbContext.SaveChangesAsync();
+    public Task DeleteAsync(Domain.LocalCache.Client.ClientCache? client)
+    {
+        if (client is null) throw new ArgumentNullException(nameof(client));
+        _dbContext.ClientCaches.Remove(client);
+        return Task.CompletedTask;
     }
 
     public async Task<Domain.LocalCache.Client.ClientCache?> GetByNameAsync(string name)
@@ -34,16 +41,14 @@ public class ClientCacheRepository : IClientCacheRepository
         return await _dbContext.ClientCaches
             .Include(c => c.ClientCategories)
             .ThenInclude(cc => cc.Category)
-            .FirstOrDefaultAsync(c => c.Name == name && !c.IsDeleted);
+            .FirstOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
     }
 
     public async Task<Domain.LocalCache.Client.ClientCache?> GetByEmailAsync(string email)
-    {
-        return await _dbContext.ClientCaches
+        => await _dbContext.ClientCaches
             .Include(c => c.ClientCategories)
-            .ThenInclude(cc => cc.Category)
-            .FirstOrDefaultAsync(c => c.Email == email && !c.IsDeleted);
-    }
+                .ThenInclude(cc => cc.Category)
+            .FirstOrDefaultAsync(c => c.Email.ToLower() == email.Trim().ToLower());
 
     public async Task<(List<Domain.LocalCache.Client.ClientCache> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? search = null)
@@ -77,24 +82,43 @@ public class ClientCacheRepository : IClientCacheRepository
     }
 
 
+
+    public async Task<List<Domain.LocalCache.Client.ClientCache?>> GetActiveAsync()
+        => await _dbContext.ClientCaches
+            .Where(c => !c.IsBlocked)
+            .Include(c => c.ClientCategories)
+                .ThenInclude(cc => cc.Category)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
     public async Task<bool> ExistsAsync(Guid id)
     {
         return await _dbContext.ClientCaches.AnyAsync(c => c.Id == id);
     }
 
-    public async Task AddAsync(Domain.LocalCache.Client.ClientCache client)
+    public Task AddAsync(Domain.LocalCache.Client.ClientCache? client)
     {
-        await _dbContext.ClientCaches.AddAsync(client);
+        _dbContext.ClientCaches.Add(client);
+        return Task.CompletedTask;
     }
 
     public Task UpdateAsync(Domain.LocalCache.Client.ClientCache client)
     {
-        _dbContext.ClientCaches.Update(client);
+        _dbContext.Entry(client).State = EntityState.Modified;
+
+        // Detach all category assignments — they're managed separately
+        // by ClientCategoryCacheRepository, not via the aggregate
+        foreach (ClientCategoryCache cc in client.ClientCategories)
+        {
+            _dbContext.Entry(cc).State = EntityState.Detached;
+        }
+
         return Task.CompletedTask;
     }
 
     public async Task SaveChangesAsync()
     {
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear(); // ← stops phantom re-inserts on subsequent operations
     }
 }

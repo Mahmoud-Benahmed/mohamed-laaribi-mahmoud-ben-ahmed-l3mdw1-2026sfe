@@ -1,40 +1,41 @@
 ﻿using ERP.ClientService.Application.DTOs;
 using ERP.ClientService.Application.Interfaces;
+using ERP.ClientService.Domain;
 
 namespace ERP.ClientService.Infrastructure.Persistence.Seeders;
 
 public class CategorySeeder
 {
-    private readonly ICategoryService _categoryService;
+    private readonly ICategoryRepository categoryRepository;
     private readonly ILogger<CategorySeeder> _logger;
 
-    public CategorySeeder(ICategoryService categoryService, ILogger<CategorySeeder> logger)
+    public CategorySeeder(ICategoryRepository _categoryRepository, ILogger<CategorySeeder> logger)
     {
-        _categoryService = categoryService;
+        categoryRepository = _categoryRepository;
         _logger = logger;
     }
 
-    public async Task<List<CategoryResponseDto>> SeedAsync()
+    public async Task<List<Category>> SeedAsync()
     {
         // Check if categories already exist
-        List<CategoryResponseDto> existingCategories = await _categoryService.GetAllAsync();
+        List<Category> existingCategories = await categoryRepository.GetAllAsync();
         if (existingCategories.Any())
         {
             _logger.LogInformation("Categories already seeded — returning existing.");
             return existingCategories;
         }
 
-        List<CreateCategoryRequestDto> categories = BuildCategoryRequests();
-        List<CategoryResponseDto> createdCategories = new List<CategoryResponseDto>();
+        List<Category> categories = BuildCategoryRequests();
+        List<Category> createdCategories = new List<Category>();
 
-        foreach (CreateCategoryRequestDto request in categories)
+        foreach (Category request in categories)
         {
             try
             {
-                CategoryResponseDto category = await _categoryService.CreateAsync(request);
-                createdCategories.Add(category);
+                await categoryRepository.AddAsync(request);
+                createdCategories.Add(request);
                 _logger.LogInformation("Seeded category: {Name} (Code: {Code}, Id: {Id})",
-                    category.Name, category.Code, category.Id);
+                    request.Name, request.Code, request.Id);
             }
             catch (Exception ex)
             {
@@ -45,36 +46,36 @@ public class CategorySeeder
         // Create and deactivate Legacy category
         try
         {
-            CreateCategoryRequestDto legacyRequest = new CreateCategoryRequestDto(
-                Name: "Legacy",
-                Code: "LGC",
-                DelaiRetour: 10,
-                DuePaymentPeriod: 30,
-                UseBulkPricing: false,
-                DiscountRate: null,
-                CreditLimitMultiplier: null);
-
-            CategoryResponseDto legacy = await _categoryService.CreateAsync(legacyRequest);
-            await _categoryService.DeactivateAsync(legacy.Id);
-            createdCategories.Add(legacy);
-            _logger.LogInformation("Seeded and deactivated category: Legacy (Id: {Id})", legacy.Id);
+            Category legacyCategory = Category.Create(
+                "Legacy",
+                "LGC",
+                10,
+                30,
+                false,
+                null,
+                null);
+            legacyCategory.Deactivate();
+            await categoryRepository.AddAsync(legacyCategory);
+            createdCategories.Add(legacyCategory);
+            _logger.LogInformation("Seeded and deactivated category: Legacy (Id: {Id})", legacyCategory.Id);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to seed Legacy category");
         }
 
+
         _logger.LogInformation("Category seeding completed. Created {Count} categories.", createdCategories.Count);
         return createdCategories;
     }
 
-    private List<CreateCategoryRequestDto> BuildCategoryRequests() =>
+    private List<Category> BuildCategoryRequests() =>
     [
-        new("Standard", "STD", 15, 30, false, null, null),
-        new("VIP", "VIP", 60, 60, true, 0.10m, 1.5m),
-        new("Wholesale", "WHL", 30, 45, true, 0.15m, 2.0m),
-        new("Public Sector", "PUB", 45, 60, false, null, 1.2m),
-        new("Reseller", "RSL", 30, 45, true, 0.20m, 1.8m),
-        new("New Client", "NEW", 7, 15, false, null, null),
+        Category.Create("Standard", "STD", 15, 30, false, null, null),
+        Category.Create("VIP", "VIP", 60, 60, true, 0.10m, 1.5m),
+        Category.Create("Wholesale", "WHL", 30, 45, true, 0.15m, 2.0m),
+        Category.Create("Public Sector", "PUB", 45, 60, false, null, 1.2m),
+        Category.Create("Reseller", "RSL", 30, 45, true, 0.20m, 1.8m),
+        Category.Create("New Client", "NEW", 7, 15, false, null, null),
     ];
 }

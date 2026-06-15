@@ -1,4 +1,4 @@
-import { PRIVILEGES } from './../../../services/auth/auth.service';
+import { PRIVILEGES, ROLES } from './../../../services/auth/auth.service';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink, RouterModule } from '@angular/router';
@@ -19,7 +19,8 @@ import { AuthUserGetResponseDto } from '../../../interfaces/AuthDto';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalComponent } from '../../modal/modal';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { HttpError } from '../../../interfaces/HttpError';
+import { HttpErrorResponse } from '@angular/common/http';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 @Component({
   selector: 'app-profile',
@@ -42,47 +43,40 @@ import { HttpError } from '../../../interfaces/HttpError';
     TranslatePipe
   ],
   templateUrl: './profile.html',
-  styleUrl: './profile.scss',
+  styleUrls: ['./profile.scss'],
 })
 export class ProfileComponent implements OnInit {
-  private translate  = inject(TranslateService);
-  private fb         = inject(FormBuilder);
+  private translate = inject(TranslateService);
+  private fb = inject(FormBuilder);
 
-  infoCollapsed    = false;
+  // Translation prefix
+  readonly templateTranslationKey = 'auth.profile.';
+
+  infoCollapsed = false;
   accountCollapsed = false;
 
   userProfile: AuthUserGetResponseDto | null = null;
-  isLoading  = true;
-  isEditing  = false;
-  isSaving   = false;
+  isLoading = true;
+  isEditing = false;
+  isSaving = false;
   authUserId: string | null = null;
   noDataChange = true;
 
   showCurrentPassword = false;
-  showNewPassword     = false;
+  showNewPassword = false;
 
-  passwordScore    = 0;
+  passwordScore = 0;
   passwordStrength = '';
 
-  // ── Patterns (match backend) ──────────────────────────────────────────────
-  // UpdateProfileDto: [EmailAddress][MaxLength(255)]
-  // UpdateProfileDto: [MaxLength(100)][RegularExpression(RegexPatterns.FullName)]
-  // ChangePasswordRequestDto: MinLength(8) MaxLength(128), must differ from current
-  // AdminChangeProfileRequest: [Required][MinLength(8)][MaxLength(128)]
-
-  readonly fullNamePattern = /^[\p{L}]+(\s[\p{L}]+)*$/u;
-  readonly emailPattern    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  // ── Forms ─────────────────────────────────────────────────────────────────
-  editForm!:          FormGroup;
-  passwordForm!:      FormGroup;
+  editForm!: FormGroup;
+  passwordForm!: FormGroup;
   adminPasswordForm!: FormGroup;
 
   constructor(
     private authService: AuthService,
-    private dialog:      MatDialog,
-    private route:       ActivatedRoute,
-    private cdr:         ChangeDetectorRef,
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -92,24 +86,21 @@ export class ProfileComponent implements OnInit {
 
   private buildForms(): void {
     this.editForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(this.fullNamePattern)]],
-      email:    ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+      fullName: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(RegexPatterns.alpha)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
     });
 
     this.editForm.valueChanges.subscribe(() => this.checkChanges());
 
-    // Own profile password form — cross-field: newPassword !== currentPassword
     this.passwordForm = this.fb.group({
       currentPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
-      newPassword:     ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
     }, { validators: this.passwordsDifferValidator });
 
-    // Admin password form
     this.adminPasswordForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
     });
 
-    // Trigger strength check on change
     this.passwordForm.get('newPassword')?.valueChanges.subscribe(() => this.onPasswordChange());
     this.passwordForm.get('currentPassword')?.valueChanges.subscribe(() => this.onPasswordChange());
     this.adminPasswordForm.get('newPassword')?.valueChanges.subscribe(() => this.onPasswordChange());
@@ -117,39 +108,53 @@ export class ProfileComponent implements OnInit {
 
   private passwordsDifferValidator(group: AbstractControl): ValidationErrors | null {
     const current = group.get('currentPassword')?.value;
-    const next    = group.get('newPassword')?.value;
+    const next = group.get('newPassword')?.value;
     if (!current || !next) return null;
     return current === next ? { samePassword: true } : null;
   }
 
-  // ── Profile load ──────────────────────────────────────────────────────────
-
   loadProfile(): void {
-    const routeId  = this.route.snapshot.paramMap.get('authUserId');
+    const routeId = this.route.snapshot.paramMap.get('authUserId');
     this.authUserId = routeId ?? this.authService.UserId;
 
-    if (!this.authUserId) { this.isLoading = false; return; }
+    if (!this.authUserId) {
+      this.isLoading = false;
+      return;
+    }
 
     if (this.authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS) && this.authService.UserId !== this.authUserId) {
       this.authService.getById(this.authUserId).subscribe({
-        next:  u  => { this.userProfile = u; this.stopLoading('isLoading'); },
-        error: () => { this.stopLoading('isLoading'); this.showErrorDialog(this.translate.instant('USERS.PROFILE.LOAD_ERROR_TITLE'), this.translate.instant('USERS.PROFILE.LOAD_ERROR_MESSAGE')); }
+        next: u => {
+          this.userProfile = u;
+          this.stopLoading('isLoading');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.stopLoading('isLoading');
+          const message = err.error?.message || this.translate.instant(`${this.templateTranslationKey}notifications.load_failed`);
+          this.showErrorDialog(message);
+        }
       });
     } else {
       const cached = this.authService.UserProfile;
       if (cached) {
         this.userProfile = cached;
-        this.isLoading   = false;
+        this.isLoading = false;
       } else {
         this.authService.getMe().subscribe({
-          next:  u  => { this.userProfile = u; this.authService.setUserProfile(u); this.stopLoading('isLoading'); },
-          error: () => { this.stopLoading('isLoading'); this.showErrorDialog(this.translate.instant('USERS.PROFILE.LOAD_ERROR_TITLE'), this.translate.instant('USERS.PROFILE.LOAD_ERROR_MESSAGE')); }
+          next: u => {
+            this.userProfile = u;
+            this.authService.setUserProfile(u);
+            this.stopLoading('isLoading');
+          },
+          error: (err: HttpErrorResponse) => {
+            this.stopLoading('isLoading');
+            const message = err.error?.message || this.translate.instant(`${this.templateTranslationKey}notifications.load_failed`);
+            this.showErrorDialog(message);
+          }
         });
       }
     }
   }
-
-  // ── Edit profile ──────────────────────────────────────────────────────────
 
   toggleEditing(): void {
     if (this.isEditing) {
@@ -158,16 +163,16 @@ export class ProfileComponent implements OnInit {
       if (!this.userProfile) return;
       this.editForm.patchValue({
         fullName: this.userProfile.fullName ?? '',
-        email:    this.userProfile.email    ?? '',
+        email: this.userProfile.email ?? '',
       });
       this.noDataChange = true;
-      this.isEditing    = true;
+      this.isEditing = true;
     }
   }
 
-  cancelEditing():void{
-      this.isEditing = false;
-      this.editForm.reset();
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.editForm.reset();
   }
 
   checkChanges(): void {
@@ -185,27 +190,43 @@ export class ProfileComponent implements OnInit {
         this.userProfile = { ...updated, mustChangePassword: this.userProfile!.mustChangePassword, lastLoginAt: this.userProfile!.lastLoginAt };
         this.isEditing = false;
         this.stopLoading('isSaving');
-        this.showSuccessDialog(this.translate.instant('SUCCESS.USER_UPDATED'));
+        const successMsg = this.translate.instant(`${this.templateTranslationKey}notifications.profile_updated`);
+        this.showSuccessDialog(successMsg);
         if (this.isOwnProfile) this.authService.setUserProfile(this.userProfile);
         else this.loadProfile();
       },
-      error: err => {
+      error: (err: HttpErrorResponse) => {
         this.stopLoading('isSaving');
-        this.showErrorDialog(this.translate.instant('USERS.PROFILE.UPDATE_ERROR_TITLE'), (err.error as HttpError).message);
+        const message = err.error?.message || this.translate.instant(`${this.templateTranslationKey}notifications.update_failed`);
+        this.showErrorDialog(message);
       }
     });
   }
 
-  // ── Password ──────────────────────────────────────────────────────────────
+  // ── Password change (self or admin) ───────────────────────────────────────
 
   changePassword(): void {
     const form = this.hasPrivilege ? this.adminPasswordForm : this.passwordForm;
     if (form.invalid) return;
     this.isSaving = true;
 
-    const stop = () => { this.isSaving = false; this.cdr.markForCheck(); };
-    const onSuccess = () => { stop(); this.showSuccessDialog(this.translate.instant('SUCCESS.PASSWORD_CHANGED')); form.reset(); };
-    const onError   = (err: any) => { stop(); this.showErrorDialog(this.translate.instant('USERS.PROFILE.UPDATE_ERROR_TITLE'), (err.error as HttpError).message); };
+    const stop = () => {
+      this.isSaving = false;
+      this.cdr.markForCheck();
+    };
+
+    const onSuccess = () => {
+      stop();
+      const successMsg = this.translate.instant(`${this.templateTranslationKey}changePassword.success_dialog.message`);
+      this.showSuccessDialog(successMsg);
+      form.reset();
+    };
+
+    const onError = (err: HttpErrorResponse) => {
+      stop();
+      const message = err.error?.message || this.translate.instant(`${this.templateTranslationKey}changePassword.errors.change_failed`);
+      this.showErrorDialog(message);
+    };
 
     if (this.isOwnProfile) {
       this.authService.changeProfilePassword(this.passwordForm.value).subscribe({ next: onSuccess, error: onError });
@@ -217,10 +238,9 @@ export class ProfileComponent implements OnInit {
   }
 
   onPasswordChange(): void {
-    const pwd     = this.hasPrivilege ? this.adminPasswordForm.get('newPassword')?.value : this.passwordForm.get('newPassword')?.value;
+    const pwd = this.hasPrivilege ? this.adminPasswordForm.get('newPassword')?.value : this.passwordForm.get('newPassword')?.value;
     const current = this.hasPrivilege ? null : this.passwordForm.get('currentPassword')?.value;
-    const result  = checkPassword(pwd, current);
-    this.passwordScore    = result.score;
+    const result = checkPassword(pwd, current);
     this.passwordStrength = result.strength;
   }
 
@@ -234,13 +254,28 @@ export class ProfileComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  get hasPrivilege(): boolean { return this.authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_USER) && !this.isOwnProfile; }
-  get isOwnProfile(): boolean { return this.selectedUserId === this.authService.UserId; }
-  get canEditProfile(): boolean { return this.isOwnProfile || this.hasPrivilege; }
-  get selectedUserId(): string | undefined { return this.userProfile?.id; }
+  get isSystemAdmin(): boolean {
+    return this.authService.Role === ROLES.SYSTEM_ADMIN;
+  }
+
+  get hasPrivilege(): boolean {
+    return this.authService.hasPrivilege(PRIVILEGES.USERS.UPDATE_USER) && !this.isOwnProfile;
+  }
+
+  get isOwnProfile(): boolean {
+    return this.selectedUserId === this.authService.UserId;
+  }
+
+  get canEditProfile(): boolean {
+    return this.isOwnProfile || this.hasPrivilege;
+  }
+
+  get selectedUserId(): string | undefined {
+    return this.userProfile?.id;
+  }
 
   get initials(): string {
-    const name  = this.userProfile?.fullName ?? this.userProfile?.email ?? '?';
+    const name = this.userProfile?.fullName ?? this.userProfile?.email ?? '?';
     const words = name.split(' ').filter(w => w.length > 0);
     if (words.length === 0) return '?';
     if (words.length === 1) return words[0][0].toUpperCase();
@@ -256,24 +291,50 @@ export class ProfileComponent implements OnInit {
   }
 
   getStrengthClass(): string {
-    return { weak: 'strength--weak', fair: 'strength--fair', strong: 'strength--strong', 'very strong': 'strength--very-strong' }[this.passwordStrength] ?? '';
+    const map: Record<string, string> = {
+      weak: 'strength--weak',
+      fair: 'strength--fair',
+      strong: 'strength--strong',
+      'very strong': 'strength--very-strong'
+    };
+    return map[this.passwordStrength] ?? '';
   }
 
   getStrengthLabel(): string {
-    return this.translate.instant(`VALIDATION.PASSWORD_${this.passwordStrength.toUpperCase().replace(/ /g, '_')}`);
+    return this.translate.instant(`auth.register.validation.password_strength.${this.passwordStrength.toLowerCase().replace(/ /g, '_')}`);
   }
 
   stopLoading(type: 'isSaving' | 'isLoading'): void {
     if (type === 'isLoading') this.isLoading = false;
-    if (type === 'isSaving')  this.isSaving  = false;
+    if (type === 'isSaving') this.isSaving = false;
     this.cdr.markForCheck();
   }
 
-  private showErrorDialog(title: string, message: string): void {
-    this.dialog.open(ModalComponent, { width: '400px', data: { title, message, confirmText: this.translate.instant('COMMON.OK'), showCancel: false, icon: 'info', iconColor: 'warn' } });
+  private showErrorDialog(message: string): void {
+    this.dialog.open(ModalComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('common.error'),
+        message,
+        confirmText: this.translate.instant('common.ok'),
+        showCancel: false,
+        icon: 'error',
+        iconColor: 'danger'
+      }
+    });
   }
 
   private showSuccessDialog(message: string): void {
-    this.dialog.open(ModalComponent, { width: '400px', data: { title: this.translate.instant('USERS.PROFILE.SUCCESS_TITLE'), message, confirmText: this.translate.instant('COMMON.OK'), showCancel: false, icon: 'check_circle', iconColor: 'success' } });
+    this.dialog.open(ModalComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('common.success'),
+        message,
+        confirmText: this.translate.instant('common.ok'),
+        showCancel: false,
+        icon: 'check_circle',
+        iconColor: 'success'
+      }
+    });
   }
 }

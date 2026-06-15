@@ -6,6 +6,7 @@
         Guid ControleId,
         string ControleLibelle,
         string ControleCategory,
-        bool IsGranted
+        bool IsGranted,
+        Guid? TenantId
     );
 }

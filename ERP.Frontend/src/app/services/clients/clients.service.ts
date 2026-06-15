@@ -26,10 +26,12 @@ export interface ClientResponseDto {
   address: string;
   duePaymentPeriod: number;
   canUseBulkPricing: boolean;
-  phone?: string;
-  taxNumber?: string;
-  creditLimit?: number;
-  delaiRetour?: number;
+  phone: string | null;
+  taxNumber: string | null;
+  creditLimit: number|null;
+  effectiveCreditLimit: number|null;
+  delaiRetour: number|null;
+  effectiveDelaiRetour: number|null;
   isBlocked: boolean;
   isDeleted: boolean;
   createdAt: string;
@@ -55,11 +57,11 @@ export interface CreateClientRequestDto {
   name: string;
   email: string;
   address: string;
-  duePaymentPeriod?: number;
-  phone?: string;
-  taxNumber?: string;
-  creditLimit?: number;
-  delaiRetour?: number;
+  duePaymentPeriod: number | null;
+  phone: string | null;
+  taxNumber: string | null;
+  creditLimit: number | null;
+  delaiRetour: number | null;
 }
 
 export interface UpdateClientRequestDto extends CreateClientRequestDto {}
@@ -79,7 +81,7 @@ export interface PagedResultDto<T> {
   providedIn: 'root'
 })
 export class ClientsService {
-  private readonly baseUrl = `${environment.apiUrl}/clients`;
+  private readonly baseUrl = `${environment.routes.clients}`;
 
   private readonly endpoints = {
     deleted: `${this.baseUrl}/deleted`,

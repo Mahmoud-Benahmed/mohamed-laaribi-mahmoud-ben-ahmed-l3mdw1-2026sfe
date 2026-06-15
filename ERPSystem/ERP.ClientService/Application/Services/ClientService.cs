@@ -11,14 +11,20 @@ public class ClientService : IClientService
     private readonly IClientRepository _clientRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
+    private readonly ILogger<ClientService> _logger;
 
     public ClientService(IClientRepository clientRepository,
                         ICategoryRepository categoryRepository,
-                        IEventPublisher eventPublisher)
+                        IEventPublisher eventPublisher,
+                        ITenantContext tenantContext,
+                        ILogger<ClientService> logger)
     {
         _clientRepository = clientRepository;
         _categoryRepository = categoryRepository;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
+        _logger = logger;
     }
 
     // =========================
@@ -26,9 +32,9 @@ public class ClientService : IClientService
     // =========================
     public async Task<ClientResponseDto> CreateAsync(CreateClientRequestDto request)
     {
-        Client? existing = await _clientRepository.GetByEmailAsync(request.Email);
-        if (existing is not null)
-            throw new ClientAlreadyExistsException(request.Email);
+        if (await _clientRepository.DuplicateExists(request.Email, request.Phone))
+            throw new DuplicateKeyException($"Client.Email: {request.Email} | Client.Phone: {request.Phone}");
+
 
         Client client = Client.Create(
             name: request.Name,
@@ -38,12 +44,14 @@ public class ClientService : IClientService
             taxNumber: request.TaxNumber,
             creditLimit: request.CreditLimit,
             delaiRetour: request.DelaiRetour,
-            duePaymentPeriod: request.DuePaymentPeriod);   // ← named args prevent future positional bugs
+            duePaymentPeriod: request.DuePaymentPeriod,
+            tenantId: _tenantContext.TenantId);
 
         await _clientRepository.AddAsync(client);
         await _clientRepository.SaveChangesAsync();
+
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Created, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Created, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -64,12 +72,8 @@ public class ClientService : IClientService
         Client client = await _clientRepository.GetByIdAsync(id) ?? throw new ClientNotFoundException(id);
 
         string normalised = request.Email.Trim().ToLowerInvariant();
-        if (client.Email != normalised)
-        {
-            Client? existing = await _clientRepository.GetByEmailAsync(request.Email);
-            if (existing is not null)
-                throw new ClientAlreadyExistsException(request.Email);
-        }
+        if (await _clientRepository.DuplicateExists(request.Email, request.Phone, id))
+            throw new DuplicateKeyException($"Client.Email: {request.Email} | Client.Phone: {request.Phone}");
 
         client.Update(request.Name, request.Email, request.Address,
             request.Phone, request.TaxNumber);
@@ -91,7 +95,8 @@ public class ClientService : IClientService
 
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        // Publish effective values — consumers use these for business rules, not raw limits
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with {CreditLimit= res.EffectiveCreditLimit, DelaiRetour= res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -105,7 +110,7 @@ public class ClientService : IClientService
         client.Delete();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Deleted, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Deleted, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
     }
 
     // =========================
@@ -121,7 +126,7 @@ public class ClientService : IClientService
         client.Restore();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Restored, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Restored, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
     }
 
     // =========================
@@ -134,7 +139,7 @@ public class ClientService : IClientService
         client.Block();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -145,7 +150,7 @@ public class ClientService : IClientService
         client.Unblock();
         await _clientRepository.SaveChangesAsync();
         ClientResponseDto res = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, res);
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
         return res;
     }
 
@@ -156,15 +161,18 @@ public class ClientService : IClientService
     public async Task<ClientResponseDto> AddCategoryAsync(
         Guid clientId, Guid categoryId, Guid assignedById)
     {
+
+        _logger.LogWarning($"\n\n\nREquesterId: {assignedById}\n\n\n");
+
         Client client = await _clientRepository.GetByIdAsync(clientId) ?? throw new ClientNotFoundException(clientId);
 
         Category category = await _categoryRepository.GetByIdAsync(categoryId) ?? throw new CategoryNotFoundException(categoryId);
-
+        
         client.AddCategory(category, assignedById);
         await _clientRepository.SaveChangesAsync();
-        ClientResponseDto dto = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, dto);
-        return dto;
+        ClientResponseDto res = client.ToResponseDto();
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
+        return res;
     }
 
     public async Task<ClientResponseDto> RemoveCategoryAsync(Guid clientId, Guid categoryId)
@@ -177,9 +185,9 @@ public class ClientService : IClientService
         client.RemoveCategory(category);
 
         await _clientRepository.SaveChangesAsync();
-        ClientResponseDto dto = client.ToResponseDto();
-        await _eventPublisher.PublishAsync(ClientTopics.Updated, dto);
-        return dto;
+        ClientResponseDto res = client.ToResponseDto();
+        await _eventPublisher.PublishAsync(ClientTopics.Updated, res with { CreditLimit = res.EffectiveCreditLimit, DelaiRetour = res.EffectiveDelaiRetour });
+        return res;
     }
 
     // =========================

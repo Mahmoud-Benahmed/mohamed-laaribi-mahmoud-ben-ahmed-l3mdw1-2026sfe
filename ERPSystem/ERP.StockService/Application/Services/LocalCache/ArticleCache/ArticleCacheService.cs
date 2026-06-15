@@ -73,105 +73,37 @@ public sealed class ArticleCacheService : IArticleCacheService
     // ── Kafka sync ────────────────────────────────────────────────────────────
     public async Task SyncCreatedAsync(ArticleResponseDto dto)
     {
-        try
+        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
+
+        if (existing == null)
         {
-            _logger.LogInformation("SyncCreatedAsync starting for article {ArticleId}", dto.Id);
-
-            // CRITICAL: Ensure the category exists locally and get the local Category ID
-            ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-            if (localCategory == null)
-            {
-                _logger.LogWarning("Category {CategoryName} not found, creating it first", dto.Category.Name);
-                await _categoryCacheService.SyncCreatedAsync(dto.Category);
-                Task.Delay(1000).Wait(); // Small delay to ensure the category is created before we try to fetch it again
-                localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-            }
-
-            if (localCategory == null)
-            {
-                throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
-            }
-
-            // Create a copy of the DTO with the LOCAL Category ID
-            ArticleResponseDto localDto = dto with
-            {
-                Category = dto.Category with
-                {
-                    Id = localCategory.Id
-                }
-            };
-
-            Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id) ??
-                          await _repo.GetByBarCodeAsync(dto.BarCode) ??
-                          await _repo.GetByCodeRefAsync(dto.CodeRef);
-
-            if (existing is not null)
-            {
-                _logger.LogWarning("Article {Id} already exists, updating", dto.Id);
-                existing.ApplyUpdate(localDto);  // Use localDto with corrected CategoryId
-            }
-            else
-            {
-                _logger.LogInformation("Adding new article {Id} to cache", dto.Id);
-                Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(localDto);  // Use localDto
-                await _repo.AddAsync(article);
-            }
-
-            _logger.LogInformation("Calling SaveChangesAsync...");
+            // Create new article using the factory overload
+            Domain.LocalCache.Article.ArticleCache article = Domain.LocalCache.Article.ArticleCache.FromEvent(dto);
+            await _repo.AddAsync(article);
             await _repo.SaveChangesAsync();
-            _logger.LogInformation("SaveChangesAsync completed successfully for article {Id}", dto.Id);
         }
-        catch (DbUpdateException dbEx)
+        else
         {
-            _logger.LogError(dbEx, "Database update failed for article {ArticleId}", dto.Id);
-            _logger.LogError("Inner exception: {InnerException}", dbEx.InnerException?.Message);
-            throw;
+            _logger.LogWarning(
+                "SyncUpdated: article {Id} existing in cache, create process will be cancelled", dto.Id);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unexpected error in SyncCreatedAsync for article {ArticleId}", dto.Id);
-            throw;
-        }
+
     }
 
     public async Task SyncUpdatedAsync(ArticleResponseDto dto)
     {
-        _logger.LogInformation("SyncUpdatedAsync starting for article {ArticleId}", dto.Id);
-
-        // CRITICAL: Ensure the category exists locally and get the local Category ID
-        ArticleCategoryCache? localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-
-        if (localCategory == null)
-        {
-            _logger.LogWarning("Category {CategoryName} not found in update, creating it first", dto.Category.Name);
-            await _categoryCacheService.SyncCreatedAsync(dto.Category);
-            localCategory = await _categoryRepo.GetByNameAsync(dto.Category.Name);
-        }
-
-        if (localCategory == null)
-        {
-            throw new InvalidOperationException($"Failed to create or find category: {dto.Category.Name}");
-        }
-
-        // Create a copy of the DTO with the LOCAL Category ID
-        ArticleResponseDto localDto = dto with
-        {
-            Category = dto.Category with
-            {
-                Id = localCategory.Id
-            }
-        };
-
         Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
         if (existing is null)
         {
-            _logger.LogWarning("SyncUpdated: article {Id} not in cache, inserting instead", dto.Id);
-            return;
+            _logger.LogWarning(
+                "SyncUpdated: article {Id} not existing in cache, update process will be cancelled", dto.Id);
         }
-        existing.ApplyUpdate(localDto);
-        await _repo.SaveChangesAsync();
-        _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
+        else
+        {
+            existing.ApplyUpdate(dto);
+            await _repo.SaveChangesAsync();
+            _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Libelle);
+        }
     }
 
     public async Task SyncDeletedAsync(ArticleResponseDto dto)
@@ -190,7 +122,7 @@ public sealed class ArticleCacheService : IArticleCacheService
 
     public async Task SyncRestoredAsync(ArticleResponseDto dto)
     {
-        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdAsync(dto.Id);
+        Domain.LocalCache.Article.ArticleCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogError("SyncRestored: article {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
@@ -215,15 +147,16 @@ public sealed class ArticleCacheService : IArticleCacheService
         TVA: a.TVA,
         IsDeleted: a.IsDeleted,
         CreatedAt: a.CreatedAt,
-        UpdatedAt: a.UpdatedAt);
+        UpdatedAt: a.UpdatedAt,
+        TenantId: a.TenantId);
 
-    private static ArticleCategoryResponseDto MapCategoryToDto(ArticleCategoryCache? c) => c is null
-        ? new ArticleCategoryResponseDto(Guid.Empty, string.Empty, 0, false, DateTime.MinValue, null)
-        : new ArticleCategoryResponseDto(
+    private static ArticleCategoryResponseDto? MapCategoryToDto(ArticleCategoryCache? c) =>
+        c is null ? null : new(
             Id: c.Id,
             Name: c.Name,
             TVA: c.TVA,
             IsDeleted: c.IsDeleted,
             CreatedAt: c.CreatedAt,
-            UpdatedAt: c.UpdatedAt);
+            UpdatedAt: c.UpdatedAt,
+            TenantId: c.TenantId);
 }

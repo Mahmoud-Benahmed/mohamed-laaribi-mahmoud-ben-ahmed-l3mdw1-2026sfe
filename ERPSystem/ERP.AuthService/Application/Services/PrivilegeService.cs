@@ -11,15 +11,18 @@ namespace ERP.AuthService.Application.Services
         private readonly IPrivilegeRepository _privilegeRepository;
         private readonly IControleRepository _controleRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly ITenantContext _tenantContext;
 
         public PrivilegeService(
             IPrivilegeRepository privilegeRepository,
             IControleRepository controleRepository,
-            IRoleRepository roleRepository)
+            IRoleRepository roleRepository,
+            ITenantContext tenantContext)
         {
             _privilegeRepository = privilegeRepository;
             _controleRepository = controleRepository;
             _roleRepository = roleRepository;
+            _tenantContext = tenantContext;
         }
 
         public async Task<List<PrivilegeResponseDto>> GetByRoleIdAsync(Guid roleId)
@@ -41,7 +44,9 @@ namespace ERP.AuthService.Application.Services
                     p.ControleId,
                     controle.Libelle,
                     controle.Category,
-                    p.IsGranted));
+                    p.IsGranted,
+                    TenantId: _tenantContext.TenantId
+                ));
             }
 
             return result;
@@ -49,19 +54,15 @@ namespace ERP.AuthService.Application.Services
 
         public async Task AllowAsync(Guid roleId, Guid controleId)
         {
-            Role? role = await _roleRepository.GetByIdAsync(roleId);
-            if (role == null)
-                throw new RoleNotFoundException(roleId);
+            Role role = await _roleRepository.GetByIdAsync(roleId) ?? throw new RoleNotFoundException(roleId);
 
-            Controle? controle = await _controleRepository.GetByIdAsync(controleId);
-            if (controle == null)
-                throw new ControleNotFoundException(controleId);
+            Controle controle = await _controleRepository.GetByIdAsync(controleId) ?? throw new ControleNotFoundException(controleId);
 
             Privilege? privilege = await _privilegeRepository.GetByRoleIdAndControleIdAsync(roleId, controleId);
 
             if (privilege == null)
             {
-                privilege = new Privilege(roleId, controleId, true);
+                privilege = new Privilege(roleId, controleId, true, _tenantContext.TenantId);
                 await _privilegeRepository.AddAsync(privilege);
             }
             else
@@ -75,20 +76,16 @@ namespace ERP.AuthService.Application.Services
 
         public async Task DenyAsync(Guid roleId, Guid controleId)
         {
-            Role? role = await _roleRepository.GetByIdAsync(roleId);
-            if (role == null)
-                throw new RoleNotFoundException(roleId);
+            Role role = await _roleRepository.GetByIdAsync(roleId) ?? throw new RoleNotFoundException(roleId);
 
-            Controle? controle = await _controleRepository.GetByIdAsync(controleId);
-            if (controle == null)
-                throw new ControleNotFoundException(controleId);
+            Controle controle = await _controleRepository.GetByIdAsync(controleId) ?? throw new ControleNotFoundException(controleId);
 
 
             Privilege? privilege = await _privilegeRepository.GetByRoleIdAndControleIdAsync(roleId, controleId);
 
             if (privilege == null)
             {
-                privilege = new Privilege(roleId, controleId, false);
+                privilege = new Privilege(roleId, controleId, false, _tenantContext.TenantId);
                 await _privilegeRepository.AddAsync(privilege);
             }
             else

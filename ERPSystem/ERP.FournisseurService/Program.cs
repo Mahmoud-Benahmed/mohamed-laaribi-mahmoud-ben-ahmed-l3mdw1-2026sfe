@@ -1,3 +1,4 @@
+using Confluent.Kafka;
 using ERP.FournisseurService.Application.Interfaces;
 using ERP.FournisseurService.Application.Services;
 using ERP.FournisseurService.Infrastructure.Messaging;
@@ -5,8 +6,10 @@ using ERP.FournisseurService.Infrastructure.Persistence;
 using ERP.FournisseurService.Infrastructure.Persistence.Repositories;
 using ERP.FournisseurService.Infrastructure.Persistence.Seeders;
 using ERP.FournisseurService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -22,14 +25,33 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<FournisseurDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 // =========================
 // DEPENDENCY INJECTION
 // =========================
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IFournisseurRepository, FournisseurRepository>();
 builder.Services.AddScoped<IFournisseurService, FournisseurService>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
+builder.Services.AddHostedService<KafkaTopicInitializer>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
+
 builder.Services.AddScoped<FournisseurSeeder>();
+
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 // =========================
 // CONTROLLERS & API
@@ -76,18 +98,17 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     FournisseurDbContext db = scope.ServiceProvider.GetRequiredService<FournisseurDbContext>();
-    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-
-    await db.Database.EnsureDeletedAsync();
-    await db.Database.MigrateAsync();
-    await seeder.SeedAsync();
+   await db.Database.MigrateAsync();
 }
 
 // =========================
 // PIPELINE
 // =========================
-app.UseSwagger();
-app.UseSwaggerUI();
+if(app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -97,5 +118,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

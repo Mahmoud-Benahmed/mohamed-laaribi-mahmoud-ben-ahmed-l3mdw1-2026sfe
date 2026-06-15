@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
 using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Client;
@@ -27,8 +28,7 @@ public sealed class ClientEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Client"]
-                ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Client not configured"),
+            GroupId = $"stock-service-client-category-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
             AllowAutoCreateTopics = true  // Add this
@@ -78,11 +78,25 @@ public sealed class ClientEventConsumer : BackgroundService
                         continue;
                     }
 
+
+                    _logger.LogWarning($"Payload recived: {dto}");
+
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
-                        // FIXED: Use IClientCacheService instead of IArticleCacheService
-                        IClientCacheService clientCacheService = scope.ServiceProvider.GetRequiredService<IClientCacheService>();
+                        if (!dto.TenantId.HasValue)
+                        {
+                            _logger.LogError(
+                                "Missing TenantId for article event {ArticleId}",
+                                dto.Id);
+
+                            return;
+                        }
+
+                        var tenantContext =
+                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
 
                         IClientEventHandler handler = scope.ServiceProvider.GetRequiredService<IClientEventHandler>();
 

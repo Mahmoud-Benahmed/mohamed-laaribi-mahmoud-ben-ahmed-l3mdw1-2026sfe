@@ -16,7 +16,7 @@ namespace ERP.PaymentService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -41,14 +41,18 @@ namespace ERP.PaymentService.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
 
                     b.HasIndex("PaymentId");
 
-                    b.HasIndex("PaymentId", "InvoiceId")
-                        .IsUnique();
+                    b.HasIndex("PaymentId", "InvoiceId", "TenantId")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("PaymentInvoices", (string)null);
                 });
@@ -65,6 +69,9 @@ namespace ERP.PaymentService.Migrations
                     b.Property<int>("CurrentNumber")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -73,8 +80,9 @@ namespace ERP.PaymentService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Year")
-                        .IsUnique();
+                    b.HasIndex("Year", "TenantId")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("PaymentSequences", (string)null);
                 });
@@ -103,39 +111,16 @@ namespace ERP.PaymentService.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvoiceId")
-                        .IsUnique();
-
-                    b.ToTable("Refunds", (string)null);
-                });
-
-            modelBuilder.Entity("ERP.PaymentService.Infrastructure.Persistence.OutboxMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Payload")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ProcessedAt");
+                    b.HasIndex("InvoiceId", "TenantId")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
-                    b.ToTable("OutboxMessages", (string)null);
+                    b.ToTable("Refunds", (string)null);
                 });
 
             modelBuilder.Entity("InvoiceCache", b =>
@@ -163,6 +148,9 @@ namespace ERP.PaymentService.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalTTC")
                         .HasPrecision(18, 2)
@@ -213,6 +201,9 @@ namespace ERP.PaymentService.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -221,8 +212,9 @@ namespace ERP.PaymentService.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("Number")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("Payments", (string)null);
                 });

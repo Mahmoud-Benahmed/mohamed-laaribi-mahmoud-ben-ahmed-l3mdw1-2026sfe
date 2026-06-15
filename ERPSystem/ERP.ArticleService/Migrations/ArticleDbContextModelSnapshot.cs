@@ -17,7 +17,7 @@ namespace ERP.ArticleService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -61,6 +61,9 @@ namespace ERP.ArticleService.Migrations
                     b.Property<int>("TVA")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -71,13 +74,15 @@ namespace ERP.ArticleService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarCode")
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "BarCode")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0 AND [BarCode] IS NOT NULL");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("CodeRef")
+                    b.HasIndex("TenantId", "CodeRef")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
@@ -104,10 +109,16 @@ namespace ERP.ArticleService.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Prefix")
-                        .IsUnique();
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "Prefix")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("ArticleCodes", (string)null);
                 });
@@ -135,13 +146,19 @@ namespace ERP.ArticleService.Migrations
                     b.Property<int>("TVA")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Categories", (string)null);
                 });

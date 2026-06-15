@@ -139,7 +139,7 @@ export interface StockStatusResponseUppercase {
 
 @Injectable({ providedIn: 'root' })
 export class StockService {
-  private readonly base = `${environment.apiUrl}${environment.routes.stock}`;
+  private readonly base = `${environment.routes.stock}`;
 
   constructor(private http: HttpClient) {}
 
@@ -320,42 +320,42 @@ export class StockService {
       );
   }
 
-  
-  
+
+
     // ARticle caching
     getArticleById(id: string): Observable<ArticleResponseDto> {
       return this.http.get<ArticleResponseDto>(
         `${this.base}/cache/articles/${id}`
       );
     }
-  
+
     getArticleByBarcode(barcode: string): Observable<ArticleResponseDto> {
       const params = new HttpParams().set('barcode', barcode);
-  
+
       return this.http.get<ArticleResponseDto>(
         `${this.base}/cache/articles/by-barcode`,
         { params }
       );
     }
-  
+
     getArticleByRefCode(refcode: string): Observable<ArticleResponseDto> {
       const params = new HttpParams().set('refcode', refcode);
-  
+
       return this.http.get<ArticleResponseDto>(
         `${this.base}/cache/articles/by-refcode`,
         { params }
       );
     }
-  
+
     getArticlesPaged(pageNumber = 1, pageSize = 10, search = ''): Observable<PagedResultDto<ArticleResponseDto>> {
       var params = new HttpParams()
         .set('pageNumber', pageNumber)
         .set('pageSize', pageSize);
-  
+
       if (search?.trim()) {
         params = params.set('search', search.trim());
       }
-  
+
       return this.http.get<PagedResultDto<ArticleResponseDto>>(
         `${this.base}/cache/articles`,
         { params }
@@ -373,7 +373,7 @@ export class StockService {
       var params = new HttpParams()
         .set('pageNumber', pageNumber)
         .set('pageSize', pageSize);
-      
+
       if (search?.trim()) {
         params = params.set('search', search.trim());
       }
@@ -389,7 +389,7 @@ export class StockService {
         `${this.base}/cache/fournisseurs/${id}`
       );
     }
-    
+
     getFournisseursPaged(pageNumber = 1, pageSize = 10, search= ''): Observable<PagedResultDto<FournisseurResponse>> {
       var params = new HttpParams()
         .set('pageNumber', pageNumber)

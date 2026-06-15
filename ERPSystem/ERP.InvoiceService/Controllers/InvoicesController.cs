@@ -143,7 +143,7 @@ namespace InvoiceService.API.Controllers
             if (invoice == null)
                 return NotFound();
 
-            byte[] pdfBytes = _pdfGenerator.GenerateInvoicePdf(invoice);
+            byte[] pdfBytes = await _pdfGenerator.GenerateInvoicePdf(invoice);
             return File(pdfBytes, "application/pdf", $"Invoice_{invoice.InvoiceNumber}.pdf");
         }
 

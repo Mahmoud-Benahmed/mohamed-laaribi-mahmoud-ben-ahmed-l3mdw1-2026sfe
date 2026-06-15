@@ -1,0 +1,134 @@
+<div class="plans-page">
+
+  <div class="plans-container">
+    <!-- Header -->
+    <header class="plans-header">
+      <div class="logo">
+        <div class="logo-icon-wrap">
+          <img src="favicon.ico" alt="ERPSuite" height="30" width="30">
+        </div>
+        <span class="logo-text">ERPSuite</span>
+      </div>
+
+      <!-- Expiry notice banner -->
+      <div class="expiry-notice">
+        <mat-icon>schedule</mat-icon>
+        {{ `${templateTranslationKey}.expiry_notice` | translate }}
+      </div>
+
+      <h1>{{ `${templateTranslationKey}.renew_title` | translate }}</h1>
+      <p class="header-sub">{{ `${templateTranslationKey}.renew_subtitle` | translate }}</p>
+
+      <div class="billing-toggle">
+        <button class="toggle-option" [class.toggle-option--active]="!billingYearly"
+                (click)="billingYearly = false; period = SubscriptionPeriod.MONTH" type="button">
+          {{ `${plansTranslationKey}.month` | translate }}
+        </button>
+        <button class="toggle-option" [class.toggle-option--active]="billingYearly"
+                (click)="billingYearly = true; period = SubscriptionPeriod.YEAR" type="button">
+          {{ `${plansTranslationKey}.year` | translate }}
+        </button>
+      </div>
+    </header>
+
+    <!-- Success -->
+    <div class="plans-success" *ngIf="success">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      {{ `${templateTranslationKey}.renewed_success` | translate }}
+    </div>
+
+    <!-- Error -->
+    <div class="plans-error" *ngIf="error">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Cards -->
+    <ng-template #checkIcon>
+      <svg class="feature-check" width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </ng-template>
+
+    <div class="plans-grid" *ngIf="!error && !success">
+      <div class="plan-card"
+           *ngFor="let plan of plans"
+           [class.plan-card--highlighted]="plan.code === 'PRO'"
+           [class.plan-card--selected]="selectedPlan?.id === plan.id"
+           (click)="selectPlan(plan)">
+        <div class="card-header" [class.card-header--highlighted]="plan.code === 'PRO'">
+          <div class="card-badges-abs">
+            <span class="badge-popular" *ngIf="plan.code === 'PRO'">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              {{ `${plansTranslationKey}.popular` | translate }}
+            </span>
+            <span class="badge-discount" *ngIf="billingYearly">
+              {{ `${plansTranslationKey}.save_badge` | translate : { percent: getSavings(plan) } }}
+            </span>
+          </div>
+          <div class="card-plan-name">{{ plan.name }}</div>
+          <p class="card-plan-info">
+            <span *ngIf="plan.code === 'STARTER'">{{ `${plansTranslationKey}.starter_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'PRO'">{{ `${plansTranslationKey}.pro_desc` | translate }}</span>
+            <span *ngIf="plan.code === 'ENTERPRISE'">{{ `${plansTranslationKey}.enterprise_desc` | translate }}</span>
+          </p>
+          <div class="card-price">
+            <span class="price-amount">TND {{ getPrice(plan) | number:'1.0-0' }}</span>
+            <span class="price-period">/{{ billingYearly ? (`${plansTranslationKey}.year` | translate) : (`${plansTranslationKey}.month` | translate) }}</span>
+          </div>
+        </div>
+        <div class="card-features" [class.card-features--highlighted]="plan.code === 'PRO'">
+          <div class="feature-row">
+            <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
+            <span>{{ `${plansTranslationKey}.users` | translate : { count: plan.maxUsers } }}</span>
+          </div>
+          <div class="feature-row">
+            <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
+            <span>{{ `${plansTranslationKey}.storage` | translate : { size: plan.maxStorageMb >= 1024 ? (plan.maxStorageMb / 1024) + ' GB' : plan.maxStorageMb + ' MB' } }}</span>
+          </div>
+          <div class="feature-row">
+            <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
+            <span>{{ `${plansTranslationKey}.feature_erp` | translate }}</span>
+          </div>
+          <div class="feature-row">
+            <ng-container *ngTemplateOutlet="checkIcon"></ng-container>
+            <span>{{ `${plansTranslationKey}.feature_isolation` | translate }}</span>
+          </div>
+        </div>
+        <div class="card-footer" [class.card-footer--highlighted]="plan.code === 'PRO'">
+          <button class="plan-cta"
+                  [class.plan-cta--default]="plan.code === 'PRO' && selectedPlan?.id !== plan.id"
+                  [class.plan-cta--outline]="plan.code !== 'PRO' && selectedPlan?.id !== plan.id"
+                  [class.plan-cta--selected]="selectedPlan?.id === plan.id"
+                  type="button">
+            <svg *ngIf="selectedPlan?.id === plan.id" width="14" height="14" viewBox="0 0 14 14"
+                 fill="none" style="vertical-align:middle;margin-right:5px;flex-shrink:0">
+              <path d="M2.5 7l3 3 6-6" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <ng-container *ngIf="selectedPlan?.id === plan.id">{{ `${plansTranslationKey}.selected` | translate }}</ng-container>
+            <ng-container *ngIf="selectedPlan?.id !== plan.id">{{ `${plansTranslationKey}.select` | translate }}</ng-container>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action -->
+    <div class="plans-action" *ngIf="!success">
+      <button class="btn-proceed" [disabled]="!selectedPlan || isSubmitting" (click)="renew()">
+        <span *ngIf="!isSubmitting && selectedPlan">
+          {{ `${templateTranslationKey}.renew_with` | translate : { name: selectedPlan.name } }}
+        </span>
+        <span *ngIf="!isSubmitting && !selectedPlan">{{ `${templateTranslationKey}.select_to_renew` | translate }}</span>
+        <span *ngIf="isSubmitting">{{ 'common.processing' | translate }}</span>
+      </button>
+    </div>
+  </div>
+</div>

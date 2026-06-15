@@ -5,6 +5,7 @@ namespace ERP.StockService.Domain.LocalCache.Article;
 public sealed class ArticleCache
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public Guid CategoryId { get; private set; }          // ← FK
     public ArticleCategoryCache? Category { get; private set; }  // ← navigation
     public string CodeRef { get; private set; } = default!;
@@ -22,7 +23,24 @@ public sealed class ArticleCache
     public static ArticleCache FromEvent(ArticleResponseDto dto) => new()
     {
         Id = dto.Id,
+        TenantId = dto.TenantId,
         CategoryId = dto.Category.Id,
+        CodeRef = dto.CodeRef,
+        BarCode = dto.BarCode,
+        Libelle = dto.Libelle,
+        Prix = dto.Prix,
+        Unit = dto.Unit,
+        TVA = dto.TVA,
+        IsDeleted = dto.IsDeleted,
+        CreatedAt = dto.CreatedAt,
+        UpdatedAt = dto.UpdatedAt,
+    };
+
+    public static ArticleCache FromEvent(ArticleResponseDto dto, ArticleCategoryCache existingCategory) => new()
+    {
+        Id = dto.Id,
+        Category = existingCategory,          // attach the tracked category
+        CategoryId = existingCategory.Id,     // foreign key (optional, EF will infer)
         CodeRef = dto.CodeRef,
         BarCode = dto.BarCode,
         Libelle = dto.Libelle,
@@ -36,9 +54,7 @@ public sealed class ArticleCache
 
     public void ApplyUpdate(ArticleResponseDto dto)
     {
-        if (CategoryId != dto.Category.Id)
-            CategoryId = dto.Category.Id;
-
+        CategoryId = dto.Category.Id;
         CodeRef = dto.CodeRef;
         BarCode = dto.BarCode;
         Libelle = dto.Libelle;

@@ -8,8 +8,15 @@ public sealed class BonSortie : PieceStock
     public IReadOnlyCollection<LigneSortie> Lignes => _lignes.AsReadOnly();
     private BonSortie() { }
 
-    public static BonSortie Create(string numero, Guid clientId, string? observation = null) =>
-        new() { Id = Guid.NewGuid(), Numero = numero.Trim(), ClientId = clientId, Observation = observation?.Trim(), CreatedAt = DateTime.UtcNow };
+    public static BonSortie Create(string numero, Guid clientId, string? observation = null, Guid? tenantId = null) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Numero = numero.Trim(), 
+            ClientId = clientId, 
+            Observation = observation?.Trim(), 
+            CreatedAt = DateTime.UtcNow };
 
     public void Update(Guid clientId, string? observation = null)
     {
@@ -24,7 +31,7 @@ public sealed class BonSortie : PieceStock
         if (price < 0)
             throw new ArgumentException("Price cannot be negative");
 
-        LigneSortie l = LigneSortie.Create(Id, articleId, qty, price);
+        LigneSortie l = LigneSortie.Create(Id, articleId, qty, price, tenantId: TenantId);
         _lignes.Add(l);
         return l;
     }

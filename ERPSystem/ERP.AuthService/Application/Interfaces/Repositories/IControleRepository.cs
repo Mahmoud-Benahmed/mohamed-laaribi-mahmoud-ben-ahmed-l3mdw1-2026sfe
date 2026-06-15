@@ -4,6 +4,7 @@ namespace ERP.AuthService.Application.Interfaces.Repositories
 {
     public interface IControleRepository
     {
+        Task<bool> DuplicateExists(string libelle, Guid? excludeId = null);
         Task<Controle?> GetByIdAsync(Guid id);
         Task<Controle?> GetByLibelleAsync(string libelle);
         Task<(List<Controle> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize);

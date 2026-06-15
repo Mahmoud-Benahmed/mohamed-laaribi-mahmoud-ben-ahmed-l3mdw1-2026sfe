@@ -5,6 +5,7 @@ namespace ERP.InvoiceService.Domain.LocalCache.Article;
 public sealed class ArticleCategoryCache
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public decimal TVA { get; private set; }
     public bool IsDeleted { get; private set; }
@@ -15,6 +16,7 @@ public sealed class ArticleCategoryCache
     public static ArticleCategoryCache FromEvent(ArticleCategoryResponseDto dto) => new()
     {
         Id = dto.Id,
+        TenantId = dto.TenantId,
         Name = dto.Name,
         TVA = dto.TVA,
         IsDeleted = dto.IsDeleted,

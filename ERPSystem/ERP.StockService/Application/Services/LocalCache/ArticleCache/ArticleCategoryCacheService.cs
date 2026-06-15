@@ -68,73 +68,32 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
     // CategoryCacheService.cs
     public async Task SyncCreatedAsync(ArticleCategoryResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
-
-        if (string.IsNullOrWhiteSpace(dto.Name))
+        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
+        if (existing is not null)
         {
-            _logger.LogWarning("Category event has null or empty Name. Id: {CategoryId}", dto.Id);
+            _logger.LogWarning("SyncCreated: category {Id} already exists, skipping", dto.Id);
             return;
         }
 
-        try
-        {
-            // Try to find by ID first, then by Name
-            ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id) ?? await _repo.GetByNameAsync(dto.Name);
-
-            if (existing != null)
-            {
-                _logger.LogInformation(
-                    existing.Id == dto.Id
-                        ? "Category {Name} (Id: {Id}) found. Updating."
-                        : "Category name '{Name}' found with different ID (Existing: {ExistingId}, New: {NewId}). Updating existing.",
-                    dto.Name, dto.Id, existing.Id);
-
-                existing.ApplyUpdate(dto); // make the intent explicit
-                await _repo.SaveChangesAsync();
-                return;
-            }
-
-            // Create new category
-            _logger.LogInformation("Creating new category: {Name} (Id: {Id})", dto.Name, dto.Id);
-            await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
-            await _repo.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate") == true)
-        {
-            // Race condition - another instance created it first
-            _logger.LogWarning(ex, "Duplicate category detected for '{Name}'. Attempting to retrieve existing...", dto.Name);
-
-            await Task.Delay(1000); // Wait a bit and try to get the category that was just created
-
-            ArticleCategoryCache? existing = await _repo.GetByNameAsync(dto.Name);
-            if (existing != null)
-            {
-                _logger.LogInformation("Found existing category '{Name}'. Updating instead.", dto.Name);
-                existing.ApplyUpdate(dto);
-                await _repo.SaveChangesAsync();
-            }
-            else
-            {
-                _logger.LogError("Could not recover from duplicate error for category '{Name}'", dto.Name);
-                throw;
-            }
-        }
+        await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
+        await _repo.SaveChangesAsync();
     }
     public async Task SyncUpdatedAsync(ArticleCategoryResponseDto dto)
     {
         ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
         if (existing is null)
         {
-            _logger.LogError("SyncUpdated: category {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
-            return;
+            _logger.LogWarning("SyncUpdated: category {Id} not in cache, inserting instead", dto.Id);
+            await _repo.AddAsync(ArticleCategoryCache.FromEvent(dto));
+        }
+        else
+        {
+            existing.ApplyUpdate(dto);
         }
 
-        existing.ApplyUpdate(dto);
         await _repo.SaveChangesAsync();
-        _logger.LogInformation("ArticleCategoryCache synced (updated) for {Id} — {Name}", dto.Id, dto.Name);
+        _logger.LogInformation("ArticleCache synced (updated) for {Id} — {Libelle}", dto.Id, dto.Name);
     }
-
 
     public async Task SyncDeletedAsync(ArticleCategoryResponseDto dto)
     {
@@ -152,7 +111,7 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
 
     public async Task SyncRestoredAsync(ArticleCategoryResponseDto dto)
     {
-        ArticleCategoryCache? existing = await _repo.GetByIdAsync(dto.Id);
+        ArticleCategoryCache? existing = await _repo.GetByIdDeletedAsync(dto.Id);
         if (existing is null)
         {
             _logger.LogError("SyncRestored: category {Id} not in cache. Cache may be out of sync. Dropping event.", dto.Id);
@@ -172,5 +131,6 @@ public sealed class ArticleCategoryCacheService : IArticleCategoryCacheService
         TVA: c.TVA,
         IsDeleted: c.IsDeleted,
         CreatedAt: c.CreatedAt,
-        UpdatedAt: c.UpdatedAt);
+        UpdatedAt: c.UpdatedAt, 
+        TenantId: c.TenantId);
 }

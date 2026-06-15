@@ -68,7 +68,7 @@ public class GlobalExceptionMiddleware
             await auditLogger.LogAsync(
                 action,
                 success: false,
-                performedBy: performedBy == Guid.Empty ? null : performedBy,
+                performedBy: performedBy,
                 failureReason: exception.Message,
                 ipAddress: context.Connection.RemoteIpAddress?.ToString(),
                 metadata: new()
@@ -103,10 +103,12 @@ public class GlobalExceptionMiddleware
             ArgumentException => ((int)HttpStatusCode.BadRequest, "AUTH_013", "AUTH_013"),
             InvalidOperationException => ((int)HttpStatusCode.BadRequest, "AUTH_014", "AUTH_014"),
             LoginAlreadyExsistException => ((int)HttpStatusCode.Conflict, "AUTH_015", "AUTH_015"),
+            DuplicateKeyException ex => ((int)HttpStatusCode.Conflict, "DUPLICATE_ENTRY",ex.Message),
             FluentValidation.ValidationException vex => ((int)HttpStatusCode.BadRequest, "AUTH_016", string.Join(", ", vex.Errors.Select(e => e.ErrorMessage))),
             MongoWriteException mwx when mwx.WriteError?.Code == 11000 =>
                                                                             ((int)HttpStatusCode.Conflict, "AUTH_017", "AUTH_017"),
             InvalidRefreshTokenException => ((int)HttpStatusCode.Unauthorized, "AUTH_018", "AUTH_018"),
+            TenantUserLimitReachedException => ((int)HttpStatusCode.Forbidden, "TENANT_USER_LIMIT_REACHED", "TENANT_USER_LIMIT_REACHED"),
             _ => ((int)HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "AUTH_000")
         };
 

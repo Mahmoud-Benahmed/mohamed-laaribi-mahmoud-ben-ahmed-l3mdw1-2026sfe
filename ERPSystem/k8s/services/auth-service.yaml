@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: erp
+  labels:
+    app: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z mongo 27017; do echo waiting for mongo; sleep 3; done
+        - name: wait-for-kafka
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z kafka 9092; do echo waiting for kafka; sleep 3; done
+        - name: wait-for-tenant
+          image: busybox
+          command:
+            - sh
+            - -c
+            - until nc -z tenant-service 80; do echo waiting for tenant-service; sleep 3; done
+      containers:
+        - name: auth-service
+          image: auth-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Docker"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: MongoSettings__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: connection-string
+            - name: MongoSettings__DatabaseName
+              value: "ERPAuthDb"
+            - name: JWT__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
+            - name: JWT__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: issuer
+            - name: JWT__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: audience
+
+            - name: Kafka__BootstrapServers
+              value: "kafka:9092"
+            - name: Services__TenantService
+              value: "http://tenant-service"
+            - name: InternalApi__Key
+              valueFrom:
+                secretKeyRef:
+                  name: internal-secret
+                  key: api-key
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: erp
+spec:
+  selector:
+    app: auth-service
+  ports:
+    - port: 80
+      targetPort: 8080

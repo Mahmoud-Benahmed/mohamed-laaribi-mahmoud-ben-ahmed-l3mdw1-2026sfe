@@ -22,6 +22,7 @@ import { ModalComponent } from '../../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-deactivated',
@@ -53,6 +54,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 export class DeactivatedComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private translate = inject(TranslateService);
+
+  readonly templateTranslationKey="auth.deactivated.";
+  readonly responseSuccessTranslationKey="auth.responses.success.";
+  readonly confirmationsTranslationKey="auth.confirmations.";
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -116,9 +121,10 @@ export class DeactivatedComponent implements OnInit {
         this.isLoading = false;
         this.loadStats();
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('USERS.ERRORS.LOAD_DEACTIVATED_FAILED'));
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+        this.flash('error', errorMessage);
       },
     });
   }
@@ -126,9 +132,10 @@ export class DeactivatedComponent implements OnInit {
   loadStats(): void {
     this.authService.getStats().subscribe({
       next: (result) => this.stats = result,
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('USERS.ERRORS.LOAD_STATS_FAILED'));
+        const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+        this.flash('error', errorMessage);
       }
     });
   }
@@ -183,7 +190,7 @@ export class DeactivatedComponent implements OnInit {
   activateUser(user: AuthUserGetResponseDto): void {
     this.authService.activate(user.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.USER_ACTIVATED', { name: user.fullName ?? user.login }));
+        this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}user_activated`, { fullname: user.fullName ?? user.login }));
         this.reload();
       },
       error: () =>
@@ -192,12 +199,13 @@ export class DeactivatedComponent implements OnInit {
   }
 
   delete(user: AuthUserGetResponseDto): void {
+    const prefix=`${this.confirmationsTranslationKey}delete_user`;
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('CONFIRMATION.DELETE_USER_TITLE'),
-        message: this.translate.instant('CONFIRMATION.DELETE_USER', { name: user.fullName ?? user.login }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title: this.translate.instant(`${prefix}.title`),
+        message: this.translate.instant(`${prefix}.message`, { fullname: user.fullName ?? user.login }),
+        confirmText: this.translate.instant(`${prefix}.confirm_text`),
         showCancel: true,
         icon: 'auto_delete',
         iconColor: 'danger',
@@ -210,10 +218,14 @@ export class DeactivatedComponent implements OnInit {
         if (!result) return;
         this.authService.softDelete(user.id).subscribe({
           next: () => {
-            this.flash('success', this.translate.instant('SUCCESS.USER_DELETED', { name: user.fullName ?? user.login }));
+            this.flash('success', this.translate.instant(`${this.responseSuccessTranslationKey}user_deleted`, { fullname: user.fullName ?? user.login }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('USERS.ERRORS.DELETE_FAILED')),
+          error: (err: HttpErrorResponse) => {
+            const errorMessage = err.error?.message || this.translate.instant('auth.responses.INTERNAL_ERROR');
+            this.flash('error', errorMessage);
+            this.isLoading = false;
+          }
         });
       });
   }

@@ -1,4 +1,12 @@
-﻿using ERP.AuthService.Application.Interfaces.Repositories;
+﻿/////////////////////////////////////////////////////////////
+/// THIS FILE IS NOT USED 
+/// AND LEFT FOR REFERENCE PURPOSES TO 
+/// IMPLEMENT BETTER SEEDERS BASED ON IT 
+/// SO ❌ DON'T DELETE IT
+/////////////////////////////////////////////////////////////
+
+using ERP.AuthService.Application.Interfaces.Repositories;
+using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Properties;
@@ -7,8 +15,18 @@ using MongoDB.Driver;
 
 namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
 {
+
     public static class AuthServiceSeeder
     {
+        private static readonly Guid _tenantId;
+        private static readonly List<(string Login, string Email, string FullName, string Password)> SystemAdmins =
+        [
+            ("sysadmin_1", "sysadmin1@support.erp.com", "System Admin 1", "Admin@1234"),
+            ("sysadmin_2", "sysadmin2@support.erp.com", "System Admin 2", "Admin@1234"),
+            ("sysadmin_3", "sysadmin3@support.erp.com", "System Admin 3", "Admin@1234")
+        ];
+
+
         public static async Task SeedAsync(
             MongoDbContext dbContext,
             IAuditLogRepository auditLogRepository,
@@ -16,30 +34,48 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
             IRoleRepository roleRepository,
             IControleRepository controleRepository,
             IPrivilegeRepository privilegeRepository,
-            IPasswordHasher<AuthUser> passwordHasher, // ← moved before configuration
-            IConfiguration configuration)
+            IPasswordHasher<AuthUser> passwordHasher,
+            IConfiguration configuration,
+            Guid? tenantId,
+            IHostEnvironment env)
         {
+            bool isTenantSeed = tenantId.HasValue;
+
+            // controles are shared — always seed them regardless of tenant
             Dictionary<string, Controle> controles = await SeedControlesAsync(controleRepository);
-            Dictionary<string, Role> roles = await SeedRolesAsync(roleRepository);
-            await SeedPrivilegesAsync(privilegeRepository, roles, controles);
-            await SeedUsersAsync(userRepository, roleRepository, configuration, passwordHasher);
+
+            Dictionary<string, Role> roles = await SeedRolesAsync(roleRepository, tenantId);
+            await SeedPrivilegesAsync(privilegeRepository, roles, controles, tenantId);
+
+            if (isTenantSeed)
+                // provision default tenant users
+                await SeedUsersAsync(userRepository, roleRepository, configuration, passwordHasher, tenantId);
+            else
+                // system startup — seed global SuperAdmins only
+                await SeedSystemAdminsAsync(userRepository, passwordHasher, roleRepository);
         }
 
         // ── 1. SEED CONTROLES ─────────────────────────────
         private static async Task<Dictionary<string, Controle>> SeedControlesAsync(
             IControleRepository controleRepository)
         {
-            await controleRepository.DeleteAllAsync();
+            Dictionary<string, Controle> result = new(StringComparer.OrdinalIgnoreCase);
 
-            Dictionary<string, Controle> result = new Dictionary<string, Controle>(StringComparer.OrdinalIgnoreCase);
-
-            // Deduplicate by Code — same code may appear under multiple categories
             IEnumerable<PrivilegeDefinition> distinctDefs = PrivilegeRegistry.All
                 .GroupBy(d => d.Code, StringComparer.OrdinalIgnoreCase)
                 .Select(g => g.First());
 
-            foreach (PrivilegeDefinition? def in distinctDefs)
+            foreach (PrivilegeDefinition def in distinctDefs)
             {
+                Controle? existing = await controleRepository.GetByLibelleAsync(def.Code);
+
+                if (existing is not null)
+                {
+                    result[def.Code] = existing;
+                    continue;
+                }
+
+                // ← was missing: actually insert when not found
                 Controle controle = new Controle(def.Category, def.Code, def.Description);
                 await controleRepository.AddAsync(controle);
                 result[def.Code] = controle;
@@ -48,27 +84,24 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
             return result;
         }
 
-
         // ── 2. SEED ROLES ─────────────────────────────────
         private static async Task<Dictionary<string, Role>> SeedRolesAsync(
-            IRoleRepository roleRepository)
+            IRoleRepository roleRepository,
+            Guid? tenantId)
         {
-            await roleRepository.DeleteAllAsync();
-
-            Dictionary<string, Role> result = new Dictionary<string, Role>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, Role> result = new(StringComparer.OrdinalIgnoreCase);
             string[] roleNames = [Roles.SystemAdmin, Roles.Accountant, Roles.SalesManager, Roles.StockManager];
 
             foreach (string roleName in roleNames)
             {
                 try
                 {
-                    Role role = new Role(roleName);
+                    Role role = new Role(roleName, tenantId);
                     await roleRepository.AddAsync(role);
                     result[roleName] = role;
                 }
                 catch (MongoWriteException ex) when (ex.WriteError?.Code == 11000)
                 {
-                    // Already exists → fetch it instead
                     Role? existing = await roleRepository.GetByLibelleAsync(roleName.ToUpper());
                     result[roleName] = existing!;
                 }
@@ -77,28 +110,19 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
             return result;
         }
 
-
-
         // ── 3. SEED PRIVILEGES ────────────────────────────
         private static async Task SeedPrivilegesAsync(
             IPrivilegeRepository privilegeRepository,
             Dictionary<string, Role> roles,
-            Dictionary<string, Controle> controles
-        )
+            Dictionary<string, Controle> controles,
+            Guid? tenantId)
         {
-            await privilegeRepository.DeleteAllAsync();
-
-            foreach (KeyValuePair<string, Role> rolePair in roles)
+            foreach ((string roleName, Role role) in roles)
             {
-                string roleName = rolePair.Key;
-                Role role = rolePair.Value;
-
                 foreach (PrivilegeDefinition def in PrivilegeRegistry.All)
                 {
                     if (!controles.TryGetValue(def.Code, out Controle? controle))
-                    {
                         continue;
-                    }
 
                     bool isGranted = RoleHasPrivilege(roleName, def.Category, def.Code);
 
@@ -107,13 +131,86 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
 
                     if (existing is null)
                     {
-                        Privilege privilege = new Privilege(role.Id, controle.Id, isGranted);
+                        Privilege privilege = new Privilege(role.Id, controle.Id, isGranted, tenantId);
                         await privilegeRepository.AddAsync(privilege);
                     }
                 }
             }
         }
 
+        // ── 4. SEED TENANT USERS ──────────────────────────
+        private static async Task SeedUsersAsync(
+            IAuthUserRepository userRepository,
+            IRoleRepository roleRepository,
+            IConfiguration configuration,
+            IPasswordHasher<AuthUser> passwordHasher,
+            Guid? tenantId)
+        {
+            List<Role> roles = await roleRepository.GetAllAsync();
+
+            Role adminRole = roles.Find(r => r.Libelle == Roles.SystemAdmin) ?? throw new InvalidOperationException($"Role '{Roles.SystemAdmin}' not found.");
+            Role salesRole = roles.Find(r => r.Libelle == Roles.SalesManager) ?? throw new InvalidOperationException($"Role '{Roles.SalesManager}' not found.");
+            Role stockRole = roles.Find(r => r.Libelle == Roles.StockManager) ?? throw new InvalidOperationException($"Role '{Roles.StockManager}' not found.");
+            Role accountRole = roles.Find(r => r.Libelle == Roles.Accountant) ?? throw new InvalidOperationException($"Role '{Roles.Accountant}' not found.");
+
+            var seedUsers = new List<(string Login, string Email, string FullName, string Password, Guid RoleId)>
+    {
+        ("admin_erp1234",   "admin@erp.com",    "John DOE",        "Admin@1234",   adminRole.Id),
+        ("sales_erp1234",   "sales@erp.com",    "Sales Alex",      "Sales@1234",   salesRole.Id),
+        ("stock_erp1234",   "stock@erp.com",    "Stock David",     "Stock@1234",   stockRole.Id),
+        ("account_erp1234", "account@erp.com",  "Accountant Jane", "Account@1234", accountRole.Id),
+    };
+
+            Random random = new Random();  // ← outside the loop
+            Theme[] themes = Enum.GetValues<Theme>();
+            Language[] languages = Enum.GetValues<Language>();
+
+            foreach ((string login, string email, string fullName, string password, Guid roleId) in seedUsers)
+            {
+                bool exists = await userRepository.ExistsByEmailAsync(email)
+                           || await userRepository.ExistsByLoginAsync(login);
+                if (exists)
+                    continue;
+
+                UserSettings settings = new UserSettings
+                {
+                    Theme = themes[random.Next(themes.Length)],
+                    Language = languages[random.Next(languages.Length)]
+                };
+
+                AuthUser user = new AuthUser(login, email, fullName, roleId, tenantId, settings);
+                user.SetPasswordHash(passwordHasher.HashPassword(user, password));
+                await userRepository.AddAsync(user);
+            }
+        }
+
+        // ── 5. SEED GLOBAL SYSTEM ADMINS ─────────────────
+        private static async Task SeedSystemAdminsAsync(
+            IAuthUserRepository userRepository,
+            IPasswordHasher<AuthUser> passwordHasher,
+            IRoleRepository roleRepository)
+        {
+            Role adminRole = await roleRepository.GetByLibelleAsync(Roles.SystemAdmin)
+                ?? throw new InvalidOperationException("SystemAdmin role missing.");
+
+            foreach ((string login, string email, string fullName, string password) in SystemAdmins)
+            {
+                bool exists = await userRepository.ExistsByLoginAsync(login)
+                           || await userRepository.ExistsByEmailAsync(email);
+                if (exists)
+                    continue;
+
+                AuthUser user = new AuthUser(login, email, fullName, adminRole.Id, tenantId: null);
+                user.SetPasswordHash(passwordHasher.HashPassword(user, password));
+                await userRepository.AddAsync(user);
+            }
+        }
+
+
+
+        /////////////////////////////
+        /////// Private Helpers
+        ////////////////////////////
         private static bool RoleHasPrivilege(string role, string category, string privilegeCode)
         {
             if (role == Roles.SystemAdmin) return true;
@@ -228,57 +325,5 @@ namespace ERPrivileges.AuthService.Infrastructure.Persistence.Seeder
 
             _ => false
         };
-
-
-        // ── 4. SEED USERS ─────────────────────────────────
-        private static async Task SeedUsersAsync(
-            IAuthUserRepository userRepository,
-            IRoleRepository roleRepository,
-            IConfiguration configuration,
-            IPasswordHasher<AuthUser> passwordHasher)
-        {
-            await userRepository.DeleteAllAsync();
-
-            List<Role> roles = await roleRepository.GetAllAsync();
-
-            Role adminRole = roles.Find(r => r.Libelle == Roles.SystemAdmin) ?? throw new InvalidOperationException($"Role '{Roles.SystemAdmin}' not found. Ensure roles are seeded before users.");
-            Role salesRole = roles.Find(r => r.Libelle == Roles.SalesManager) ?? throw new InvalidOperationException($"Role '{Roles.SalesManager}' not found.");
-            Role stockRole = roles.Find(r => r.Libelle == Roles.StockManager) ?? throw new InvalidOperationException($"Role '{Roles.StockManager}' not found.");
-            Role accountRole = roles.Find(r => r.Libelle == Roles.Accountant) ?? throw new InvalidOperationException($"Role '{Roles.Accountant}' not found.");
-
-
-            List<(string Login, string Email, string FullName, string Password, Guid roleId)> seedUsers = new List<(string Login, string Email, string FullName, string Password, Guid roleId)>
-            {
-                ("admin_erp1234",   "admin@erp.com",    "John DOE",         "Admin@1234",   adminRole.Id),
-                ("sales_erp1234",   "sales@erp.com",    "Sales Alex",       "Sales@1234",   salesRole.Id),
-                ("stock_erp1234",   "stock@erp.com",    "Stock David",      "Stock@1234",   stockRole.Id),
-                ("account_erp1234", "account@erPrivileges.com",  "Accountant Jane",  "Account@1234", accountRole.Id),
-            };
-
-            foreach ((string? login, string? email, string? fullName, string? password, Guid roleId) in seedUsers)
-            {
-                if (await userRepository.ExistsByEmailAsync(email))
-                    continue;
-
-                Random random = new Random();
-                Theme[] themes = Enum.GetValues<Theme>();
-                Language[] languages = Enum.GetValues<Language>();
-
-                UserSettings settings = new UserSettings
-                {
-                    Theme = themes[random.Next(themes.Length)],
-                    Language = languages[random.Next(languages.Length)]
-                };
-
-                AuthUser user = new AuthUser(login, email, fullName, roleId, settings);
-
-
-                string hashedPassword = passwordHasher.HashPassword(user, password);
-                user.SetPasswordHash(hashedPassword);
-
-                await userRepository.AddAsync(user);
-
-            }
-        }
     }
 }

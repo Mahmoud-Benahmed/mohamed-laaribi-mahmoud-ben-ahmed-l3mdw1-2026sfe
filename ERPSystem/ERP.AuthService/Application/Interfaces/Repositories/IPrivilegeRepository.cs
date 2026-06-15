@@ -12,6 +12,7 @@ namespace ERP.AuthService.Application.Interfaces.Repositories
         Task UpdateAsync(Privilege privilege);
         Task DeleteAsync(Guid id);
         Task DeleteByControleIdAsync(Guid controleId);
+        Task DeleteByRoleIdAsync(Guid roleId);
         Task DeleteAllAsync();
         Task<long> CountAsync();
     }

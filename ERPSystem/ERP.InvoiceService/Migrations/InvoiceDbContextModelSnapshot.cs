@@ -17,7 +17,7 @@ namespace ERP.InvoiceService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -61,6 +61,9 @@ namespace ERP.InvoiceService.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -71,17 +74,19 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarCode")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CodeRef")
+                    b.HasIndex("TenantId", "BarCode")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsDeleted");
+                    b.HasIndex("TenantId", "CategoryId");
+
+                    b.HasIndex("TenantId", "CodeRef")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("TenantId", "IsDeleted");
 
                     b.ToTable("ArticleCache", (string)null);
                 });
@@ -110,13 +115,17 @@ namespace ERP.InvoiceService.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("ArticleCategoryCache", (string)null);
                 });
@@ -160,6 +169,9 @@ namespace ERP.InvoiceService.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -168,11 +180,11 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("TenantId", "Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsActive");
+                    b.HasIndex("TenantId", "IsActive");
 
                     b.ToTable("ClientCategoryCache", (string)null);
                 });
@@ -225,16 +237,19 @@ namespace ERP.InvoiceService.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("IsBlocked");
+                    b.HasIndex("TenantId", "IsBlocked");
 
                     b.ToTable("ClientCache", (string)null);
                 });
@@ -255,6 +270,66 @@ namespace ERP.InvoiceService.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("ClientCategoriesCache", (string)null);
+                });
+
+            modelBuilder.Entity("ERP.InvoiceService.Domain.LocalCache.Tenant.TenantCache", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PrimaryColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<string>("SecondaryColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("TenantId");
+
+                    b.HasIndex("TenantId", "Slug")
+                        .IsUnique();
+
+                    b.ToTable("TenantCaches", (string)null);
                 });
 
             modelBuilder.Entity("InvoiceService.Domain.Invoice", b =>
@@ -301,6 +376,9 @@ namespace ERP.InvoiceService.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("OriginalInvoiceNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -310,6 +388,9 @@ namespace ERP.InvoiceService.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalHT")
                         .HasPrecision(18, 3)
@@ -328,8 +409,9 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InvoiceNumber")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "InvoiceNumber")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("Invoices", (string)null);
                 });
@@ -341,7 +423,6 @@ namespace ERP.InvoiceService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ArticleBarCode")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -395,6 +476,9 @@ namespace ERP.InvoiceService.Migrations
                     b.Property<int>("CurrentNumber")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -403,8 +487,9 @@ namespace ERP.InvoiceService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Year")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Year")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("InvoiceSequences");
                 });

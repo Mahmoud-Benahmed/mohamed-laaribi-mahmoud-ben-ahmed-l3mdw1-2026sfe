@@ -1,23 +1,29 @@
 ﻿using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Infrastructure.Security;
 using MongoDB.Driver;
 
 namespace ERP.AuthService.Infrastructure.Persistence.Repositories
 {
-    public class RefreshTokenRepository : IRefreshTokenRepository
+    public class RefreshTokenRepository : BaseRepository<RefreshToken>,IRefreshTokenRepository
     {
-        private readonly IMongoCollection<RefreshToken> _collection;
+        private readonly IRefreshTokenHashingHelper _refreshTokenHashingHelper;
 
-        public RefreshTokenRepository(MongoDbContext context)
-        {
-            _collection = context.RefreshTokens;
+        public RefreshTokenRepository(MongoDbContext context, IRefreshTokenHashingHelper refreshTokenHashing) 
+            :base(context, CollectionNames.RefreshTokens) {
+            _refreshTokenHashingHelper = refreshTokenHashing;
         }
 
         public async Task AddAsync(RefreshToken token)
             => await _collection.InsertOneAsync(token);
 
-        public async Task<RefreshToken?> GetByTokenAsync(string token)
-            => await _collection.Find(x => x.Token == token).FirstOrDefaultAsync();
+        public async Task<RefreshToken?> GetByTokenAsync(string rawToken)
+        {
+            string hash = _refreshTokenHashingHelper.Hash(rawToken);  // ← hash before querying
+            return await _collection
+                .Find(WithTenant(Builders<RefreshToken>.Filter.Eq(t => t.Token, hash)))
+                .FirstOrDefaultAsync();
+        }
 
         public async Task UpdateAsync(RefreshToken refreshToken)
         {

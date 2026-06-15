@@ -42,7 +42,6 @@ export class CreatePaymentModal implements OnInit{
   private readonly destroyRef = inject(DestroyRef);
   private cdr = inject(ChangeDetectorRef);
   private translate = inject(TranslateService);
-  private router = inject(Location);
 
   form!: FormGroup;
 
@@ -188,7 +187,7 @@ export class CreatePaymentModal implements OnInit{
       },
       error: (err) => {
         this.invoicesLoading = false;
-        const msg = err?.error?.message ?? this.translate.instant('INVOICES.ERRORS.LOAD_FAILED');
+        const msg = err?.error?.message ?? this.translate.instant('invoices.responses.errors.load_failed');
         this.flash('error', msg);
         this.cdr.markForCheck();
       }
@@ -233,7 +232,6 @@ export class CreatePaymentModal implements OnInit{
           const unpaidClientIds = new Set(
             unpaidResult.items.map(inv => inv.clientId)
           );
-
           if (unpaidClientIds.size === 0) {
             // No unpaid invoices — no clients to show
             return of({ items: [], totalCount: 0, unpaidClientIds });
@@ -248,7 +246,7 @@ export class CreatePaymentModal implements OnInit{
             map(clientResult => ({ ...clientResult, unpaidClientIds }))
           );
         }),
-        takeUntilDestroyed(this.destroyRef)
+        take(1)
       )
       .subscribe({
         next: ({ items, totalCount, unpaidClientIds }) => {
@@ -259,17 +257,16 @@ export class CreatePaymentModal implements OnInit{
           this.hasMoreClients = this.clients.length < totalCount;
           this.clientsLoading = false;
 
-          // Auto-select first client only on create
           if (!append && this.mode === 'create' &&
               this.clients.length > 0 && !this.form?.get('clientId')?.value) {
-            this.selectClient(this.clients[0]);
+            setTimeout(() => this.selectClient(this.clients[0])); // ← defers past CD
           }
 
           this.cdr.markForCheck();
         },
         error: (err) => {
           this.clientsLoading = false;
-          const msg = err?.error?.message ?? this.translate.instant('INVOICES.ERRORS.LOAD_CLIENTS_FAILED');
+          const msg = err?.error?.message ?? this.translate.instant('clients.responses.errors.load_failed');
           this.flash('error', msg);
           this.cdr.markForCheck();
         }
@@ -358,7 +355,7 @@ export class CreatePaymentModal implements OnInit{
   createLine(): FormGroup {
     return this.fb.group({
       invoiceId:       ['', Validators.required],
-      allocatedAmount: [0, [Validators.required, Validators.min(0.01)]]
+      allocatedAmount: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -371,6 +368,21 @@ export class CreatePaymentModal implements OnInit{
       this.allocations.removeAt(index);
       this.onAllocatedAmountChange(); // ← recalculate total after removal
     }
+  }
+
+  completeLine(index: number): void {
+    if (index < 0 || index >= this.allocations.length) return;
+
+    const line = this.getAllocationLine(index);
+    const invoiceId = line.get('invoiceId')?.value;
+    if (!invoiceId) return;
+
+    const invoice = this.invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) return;
+
+    line.patchValue({ allocatedAmount: invoice.remainingAmount });
+    this.onAllocatedAmountChange();
+    this.cdr.markForCheck();
   }
 
   onAllocatedAmountChange(): void {
@@ -415,14 +427,14 @@ export class CreatePaymentModal implements OnInit{
         .subscribe({
           next: (payment) => {
             this.isSubmitting = false;
-            this.flash('success', this.translate.instant('PAYMENTS.SUCCESS.CREATED'));
+            this.flash('success', this.translate.instant('payments.responses.success.created'));
             setTimeout(() =>
               this.dialogRef.close(payment), 1500
-            ); // ← let user see success
+            );
           },
           error: (err) => {
             this.isSubmitting = false;
-            const msg = err?.error?.message ?? this.translate.instant('PAYMENTS.ERRORS.CREATE_FAILED');
+            const msg = err?.error?.message ?? this.translate.instant('payments.errors.create_failed');
             this.flash('error', msg);
           }
         });

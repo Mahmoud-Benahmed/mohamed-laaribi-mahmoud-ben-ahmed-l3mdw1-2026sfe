@@ -44,6 +44,18 @@ namespace ERP.ArticleService.Infrastructure.Persistence
                 _context.Categories.IgnoreQueryFilters().Where(c => c.IsDeleted), pageNumber, pageSize, q => q.OrderBy(c => c.Name));
         }
 
+        public async Task<bool> DuplicateExists(string name, Guid? excludeId = null)
+        {
+            var query = _context.Categories.Where(c=>
+                name.ToLower() == c.Name.ToLower()
+            );
+
+            if (excludeId.HasValue)
+                query = query.Where(f => f.Id != excludeId.Value);
+
+            return await query.AnyAsync();
+        }
+
 
         // =========================
         // READ - BY NAME

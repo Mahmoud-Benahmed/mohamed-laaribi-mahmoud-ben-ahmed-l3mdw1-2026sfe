@@ -1,12 +1,12 @@
 import { ModalComponent } from './../../../modal/modal';
-import { HttpError } from '../../../../interfaces/HttpError';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AdminChangeProfileRequest } from './../../../../interfaces/AuthDto';
 import { AuthService } from '../../../../services/auth/auth.service';
-import { PasswordService } from '../../../../services/password.service';        // ← added
+import { PasswordService } from '../../../../services/password.service';
 import { ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -22,40 +22,41 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     MatProgressSpinnerModule,
     MatDialogModule,
     TranslatePipe
-],
+  ],
   templateUrl: './change-password.html',
-  styleUrl: './change-password.scss',
+  styleUrls: ['./change-password.scss'],
 })
 export class ChangePasswordComponent implements OnInit {
   @ViewChild('passwordFormRef') passwordFormRef!: NgForm;
 
-  private location= inject(Location);
+  private location = inject(Location);
+  private translate = inject(TranslateService);
+  private passwordService = inject(PasswordService);
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  public router = inject(Router);
+  private dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+
+  // Translation prefixes
+  readonly templateTranslationKey = 'auth.changePassword.';
+  readonly responseSuccessTranslationKey = 'auth.responses.success.';
+  readonly responseErrorsTranslationKey = 'auth.responses.errors.';
 
   // ── Route context ─────────────────────────────────────────────────────────
   targetUserId: string | null = null;
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  isLoading       = false;
+  isLoading = false;
   showNewPassword = false;
   errors: string[] = [];
 
   // ── Password validation ───────────────────────────────────────────────────
-  passwordErrors:   string[] = [];
-  passwordScore     = 0;
-  passwordStrength  = '';
+  passwordErrors: string[] = [];
+  passwordStrength = '';
 
   // ── Form ──────────────────────────────────────────────────────────────────
   adminForm: AdminChangeProfileRequest = { newPassword: '' };
-
-  constructor(
-    private authService: AuthService,
-    public  router:      Router,
-    private route:       ActivatedRoute,
-    private dialog:      MatDialog,
-    private cdr:         ChangeDetectorRef,
-    private passwordService:PasswordService,
-    private translate: TranslateService
-  ) {}
 
   ngOnInit(): void {
     this.targetUserId = this.route.snapshot.paramMap.get('authUserId');
@@ -74,86 +75,67 @@ export class ChangePasswordComponent implements OnInit {
     this.authService.adminChangePassword(this.targetUserId!, this.adminForm).subscribe({
       next: () => {
         this.isLoading = false;
-        this.cdr.markForCheck();
         this.dialog
           .open(ModalComponent, {
             width: '400px',
             data: {
-              title:       this.translate.instant('PASSWORD.RESET_SUCCESS_TITLE'),
-              message:     this.translate.instant('PASSWORD.RESET_SUCCESS_MESSAGE'),
-              confirmText: this.translate.instant('PASSWORD.GOT_IT'),
-              showCancel:  false,
-              icon:        'check_circle',
-              iconColor:   'success',
+              title: this.translate.instant(`${this.responseSuccessTranslationKey}reset_success_title`),
+              message: this.translate.instant(`${this.responseSuccessTranslationKey}reset_success_message`),
+              confirmText: this.translate.instant(`${this.responseSuccessTranslationKey}got_it`),
+              showCancel: false,
+              icon: 'check_circle',
+              iconColor: 'success',
             },
           })
           .afterClosed()
           .subscribe(() => this.router.navigate(['/users', this.targetUserId]));
       },
-      error: (error) => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        const err = error.error as HttpError;
-        if (err.code === 'VALIDATION_ERROR' && err.errors) {
-          this.flashErrors(Object.values(err.errors).flat());
-        } else {
-          this.flash(err.message ?? this.translate.instant('PASSWORD.ERRORS.RESET_FAILED'));
-        }
+        const errorMessage = err.error?.message || this.translate.instant(`${this.responseErrorsTranslationKey}reset_failed`);
+        this.flash(errorMessage);
       },
     });
   }
 
   // ── Password validation ───────────────────────────────────────────────────
 
-  // Admin flow: no current password context — pass null
   onPasswordChange(): void {
-    const result = this.passwordService.validatePassword(   // ← was checkPassword()
-      this.adminForm.newPassword,
-      null,
-    );
-    this.passwordErrors   = result.errors;
-    this.passwordScore    = result.score;
+    const result = this.passwordService.validatePassword(this.adminForm.newPassword, null);
+    this.passwordErrors = result.errors;
     this.passwordStrength = result.strength;
   }
 
-  // ── Generate ──────────────────────────────────────────────────────────────
-
   generatePassword(): void {
-    this.adminForm.newPassword = this.passwordService.generatePassword();   // ← was generatePassword()
+    this.adminForm.newPassword = this.passwordService.generatePassword();
     this.showNewPassword = true;
     this.onPasswordChange();
   }
 
-  // ── Strength meter — all delegated to PasswordService ────────────────────
-
   getScore(): number {
-    return this.passwordService.getStrengthScore(this.passwordStrength);    // ← was inline map
+    return this.passwordService.getStrengthScore(this.passwordStrength);
   }
 
   getStrengthClass(): string {
-    return this.passwordService.getStrengthClass(this.passwordStrength);    // ← was inline map
+    return this.passwordService.getStrengthClass(this.passwordStrength);
   }
 
   getStrengthLabel(): string {
-    return this.passwordService.getStrengthLabel(this.passwordStrength);    // ← was inline translate.instant
+    return this.passwordService.getStrengthLabel(this.passwordStrength);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  dismissError(): void { this.errors = []; }
-
   flash(msg: string): void {
     this.errors = [msg];
     this.cdr.markForCheck();
-    setTimeout(() => { this.errors = []; this.cdr.markForCheck(); }, 4000);
+    setTimeout(() => {
+      this.errors = [];
+      this.cdr.markForCheck();
+    }, 4000);
   }
 
-  flashErrors(messages: string[]): void {
-    this.errors = messages;
-    this.cdr.markForCheck();
-    setTimeout(() => { this.errors = []; this.cdr.markForCheck(); }, 4000);
-  }
-
-  goBack(){
+  goBack(): void {
     this.location.back();
   }
 }

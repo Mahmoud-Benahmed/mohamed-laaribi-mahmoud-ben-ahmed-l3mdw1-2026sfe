@@ -2,8 +2,8 @@
 
   <div class="page-header">
     <div>
-      <p class="breadcrumb">{{ 'USERS.BREADCRUMB' | translate }}</p>
-      <h1 class="page-title">{{ 'USERS.TITLE_ACTIVE' | translate }}</h1>
+      <p class="breadcrumb">{{ `${templateTranslationKey}breadcrumb` | translate }}</p>
+      <h1 class="page-title">{{ `${templateTranslationKey}title` | translate }}</h1>
     </div>
   </div>
 
@@ -38,7 +38,7 @@
       [class.stat-card--disabled]="usersLink.isActive || activeUsers < 1">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.ACTIVE' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.active` | translate }}</p>
           <p class="stat-card__value">{{ activeUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--green">
@@ -57,7 +57,7 @@
       [class.stat-card--disabled]="deactivatedLink.isActive || deactivatedUsers < 1">
       <div class="stat-card__body">
         <div>
-          <p class="stat-card__label">{{ 'USERS.STATS.DEACTIVATED' | translate }}</p>
+          <p class="stat-card__label">{{ `${templateTranslationKey}stats.inactive` | translate }}</p>
           <p class="stat-card__value">{{ deactivatedUsers }}</p>
         </div>
         <div class="stat-card__icon stat-card__icon--red">
@@ -78,13 +78,13 @@
       <input
         class="search-input"
         type="text"
-        [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate"
+        [placeholder]="`${templateTranslationKey}search_placeholder` | translate"
         [(ngModel)]="searchTerm"
         (ngModelChange)="applyFilter()" />
     </div>
     <button class="btn-add" (click)="goToRegister()"
             *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_USER)">
-      + {{ 'USERS.ADD_BUTTON' | translate }}
+      + {{ 'common.add' | translate }}
     </button>
   </div>
 
@@ -95,7 +95,7 @@
         <thead>
           <tr>
             <th (click)="sortBy('fullName')" class="th--sortable">
-              {{ 'USERS.TABLE.FULL_NAME' | translate }}
+              {{ `${templateTranslationKey}table.head.fullname` | translate }}
               <span class="sort-icon">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'fullName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -108,7 +108,7 @@
               </span>
             </th>
             <th (click)="sortBy('email')" class="th--sortable">
-              {{ 'USERS.TABLE.EMAIL' | translate }}
+              {{ `${templateTranslationKey}table.head.email` | translate }}
               <span class="sort-icon">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'email' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -121,7 +121,7 @@
               </span>
             </th>
             <th (click)="sortBy('roleName')" class="th--sortable">
-              {{ 'USERS.TABLE.ROLE' | translate }}
+              {{ `${templateTranslationKey}table.head.role` | translate }}
               <span class="sort-icon">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'roleName' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -134,7 +134,7 @@
               </span>
             </th>
             <th (click)="sortBy('lastLoginAt')" class="th--sortable">
-              {{ 'USERS.TABLE.LAST_LOGIN' | translate }}
+              {{ `${templateTranslationKey}table.head.last_login` | translate }}
               <span class="sort-icon">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     [style.opacity]="sortColumn === 'lastLoginAt' && sortDirection === 'asc' ? '1' : '0.25'">
@@ -146,7 +146,7 @@
                 </svg>
               </span>
             </th>
-            <th>{{ 'USERS.TABLE.ACTIONS' | translate }}</th>
+            <th>{{ `${templateTranslationKey}table.head.actions` | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -165,12 +165,12 @@
             <td><span class="role-badge">{{ user.roleName }}</span></td>
             <td>
               <span class="date-cell">
-                {{ user.lastLoginAt && user.isActive ? (user.lastLoginAt | date:'dd MMM yyyy') : ('USERS.TABLE.NO_LOGIN' | translate) }}
+                {{ user.lastLoginAt && user.isActive ? (user.lastLoginAt | date:'dd MMM yyyy') : ('common.no_login' | translate) }}
               </span>
             </td>
             <td class="td--actions">
               <!-- View button -->
-              <button class="icon-btn icon-btn--view" [title]="'COMMON.VIEW' | translate"
+              <button class="icon-btn icon-btn--view" [title]="`common.view` | translate"
                       (click)="goToProfile(user.id)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,7 +179,7 @@
               </button>
 
               <!-- Deactivate button -->
-              <button class="icon-btn icon-btn--deactivate" [title]="'COMMON.DEACTIVATE' | translate"
+              <button class="icon-btn icon-btn--deactivate" [title]="`common.deactivate` | translate"
                       (click)="deactivateUser(user)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) && user.id !== currentUserId">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -188,7 +188,7 @@
               </button>
 
               <!-- Delete button (only one, not duplicated) -->
-              <button class="icon-btn icon-btn--delete" [title]="'COMMON.DELETE' | translate"
+              <button class="icon-btn icon-btn--delete" [title]="`common.delete` | translate"
                       (click)="softDeleteUser(user)"
                       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DELETE_USER) && user.id !== currentUserId">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -203,7 +203,7 @@
 
           <tr *ngIf="sortedData.length === 0">
             <td colspan="5" class="td--empty">
-              {{ 'COMMON.NO_RESULTS' | translate }}{{ searchTerm ? ' "' + searchTerm + '"' : '' }}
+              {{ 'common.no_results' | translate }}{{ searchTerm ? ' "' + searchTerm + '"' : '' }}
             </td>
           </tr>
         </tbody>

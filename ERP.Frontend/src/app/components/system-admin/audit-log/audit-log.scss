@@ -84,6 +84,6 @@
 }
 
 .detail-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline; }
-.detail-key  { font-size: 1rem; color: $text-lo; font-weight: 500; white-space: nowrap; }
-.detail-val  { font-size: 1rem; color: $text-lo; word-break: break-all;
-  &.small { font-size: 0.75rem; color: $text-lo; } }
+.detail-key  { font-size: 1rem; color: $text-hi; font-weight: 500; white-space: nowrap; }
+.detail-val  { font-size: 1rem; color: $text-hi; word-break: break-all;
+  &.small { font-size: 0.75rem; color: $text-hi; } }

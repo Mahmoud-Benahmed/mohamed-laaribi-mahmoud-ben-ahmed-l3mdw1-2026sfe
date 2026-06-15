@@ -16,6 +16,17 @@ export interface AuthUserGetResponseDto {
 }
 export type ThemeType= 'light' | 'dark';
 export type LanguageType= 'fr' | 'en';
+
+export enum Theme{
+  light='light',
+  dark='dark'
+}
+
+export enum Language{
+  fr='fr',
+  en='en'
+}
+
 export interface UserSettings{
   theme: ThemeType,
   language: LanguageType
@@ -33,6 +44,8 @@ export interface AuthResponseDto {
   refreshToken: string;
   mustChangePassword: boolean;
   expiresAt: string;
+  slug: string | null;
+  tenantId: string | null;
 }
 
 export interface LoginRequestDto {

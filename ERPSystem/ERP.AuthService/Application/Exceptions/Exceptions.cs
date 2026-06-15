@@ -1,4 +1,6 @@
-﻿namespace ERP.AuthService.Application.Exceptions;
+﻿using ERP.AuthService.Properties;
+
+namespace ERP.AuthService.Application.Exceptions;
 
 public class EmailAlreadyExistsException : Exception
 {
@@ -13,6 +15,7 @@ public class EmailAlreadyExistsException : Exception
     }
 }
 
+public class SubscriptionPlanNotFoundException() : Exception($"SubscriptionPlan was not found.");
 
 public class InvalidCredentialsException : Exception
 {
@@ -134,3 +137,11 @@ public class InvalidRefreshTokenException : Exception
     public InvalidRefreshTokenException()
         : base("Invalid refresh token.") { }
 }
+
+public class TenantUserLimitReachedException : Exception
+{
+    public TenantUserLimitReachedException()
+        : base("Tenant user limit reached.") { }
+}
+
+public class DuplicateKeyException(string key) : Exception(key);

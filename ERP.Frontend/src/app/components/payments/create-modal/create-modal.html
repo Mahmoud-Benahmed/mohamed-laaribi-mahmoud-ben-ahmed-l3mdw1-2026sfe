@@ -1,5 +1,5 @@
 <div class="modal-header" id="top">
-  <h2 class="modal-title">{{ 'PAYMENTS.FORM.TITLE' | translate }}</h2>
+  <h2 class="modal-title">{{ 'payments.form.title' | translate }}</h2>
   <button type="button" class="shell-icon-btn" (click)="cancel()">
     <mat-icon>close</mat-icon>
   </button>
@@ -23,7 +23,7 @@
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'STOCK.BONS.FORM.CLIENT' | translate }}</label>
+                <label>{{ 'stock.bons.form.client' | translate }}</label>
                 <mat-icon>person</mat-icon>
             </div>
 
@@ -36,7 +36,7 @@
                         (click)="toggleClientDropdown()"
                         [disabled]="mode==='edit'">
                 <span [class.client-dropdown__placeholder]="!selectedClientLabel">
-                    {{ selectedClientLabel || ('STOCK.BONS.FORM.SELECT_CLIENT' | translate) }}
+                    {{ selectedClientLabel || ('stock.bons.form.select_client' | translate) }}
                 </span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     [style.transform]="clientDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'"
@@ -52,7 +52,7 @@
                 <div class="client-dropdown__search">
                     <input type="text"
                         class="client-dropdown__search-input"
-                        [placeholder]="'COMMON.SEARCH' | translate"
+                        [placeholder]="'common.search' | translate"
                         [ngModel]="clientSearchQuery"
                         (ngModelChange)="onClientSearch($event)"
                         [ngModelOptions]="{standalone: true}"
@@ -77,7 +77,7 @@
                     </svg>
                     </li>
                     <li *ngIf="!clientsLoading && clients.length === 0" class="client-dropdown__empty">
-                    {{ 'COMMON.NO_RESULTS' | translate }}
+                    {{ 'common.no_results' | translate }}
                     </li>
                 </ul>
 
@@ -86,7 +86,7 @@
                     <button type="button"
                             class="client-dropdown__load-more-btn"
                             (click)="loadMoreClients(); $event.stopPropagation()">
-                    {{ 'COMMON.LOAD_MORE' | translate }}
+                    {{ 'common.load_more' | translate }}
                     <span class="client-dropdown__load-more-count">
                         ({{ clients.length }} / {{ clientTotalCount }})
                     </span>
@@ -109,64 +109,64 @@
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'PAYMENTS.FORM.TOTAL_AMOUNT' | translate }}</label>
+                <label>{{ 'payments.form.total_amount' | translate }}</label>
                 <mat-icon>payments</mat-icon>
             </div>
-            <input type="number" readonly class="form__input" formControlName="totalAmount" [class.form__input--error]="form.get('notes')?.invalid && form.get('notes')?.touched" [matTooltip]="('PAYMENTS.TOOLTIPS.TOTAL_AMOUNT' | translate)">
+            <input type="number" readonly class="form__input" formControlName="totalAmount" [class.form__input--error]="form.get('notes')?.invalid && form.get('notes')?.touched" [matTooltip]="('payments.tooltips.total_amount' | translate)">
             <span class="form__error"
                     *ngIf="form.get('totalAmount')?.value <= 0">
-                {{ 'PAYMENTS.VALIDATION.TOTAL_AMOUNT' | translate }}
+                {{ 'payments.validation.total_amount' | translate }}
             </span>
         </div>
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'PAYMENTS.FORM.METHOD' | translate }}</label>
+                <label>{{ 'payments.form.method' | translate }}</label>
                 <mat-icon>payment</mat-icon>
             </div>
 
             <select class="form__input form__select"
                     formControlName="method" required
                     [class.form__input--error]="form.get('method')?.invalid && form.get('method')?.touched">
-                <option value="" disabled selected>{{ 'PAYMENTS.FORM.SELECT_METHOD' | translate }}</option>
+                <option value="" disabled selected>{{ 'payments.form.select_method' | translate }}</option>
                 <option *ngFor="let method of paymentMethods" [value]="method">
-                {{ 'PAYMENTS.METHOD.' + method | translate }}
+                {{ 'payments.method.' + method | translate }}
                 </option>
             </select>
 
             <span class="form__error"
                     *ngIf="form.get('method')?.invalid && form.get('method')?.touched">
-                {{ 'VALIDATION.REQUIRED' | translate }}
+                {{ 'validation.required' | translate }}
             </span>
         </div>
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'PAYMENTS.FORM.PAYMENT_DATE' | translate }}</label>
+                <label>{{ 'payments.form.payment_date' | translate }}</label>
                 <mat-icon>calendar_month</mat-icon>
             </div>
             <input type="date" class="form__input" required formControlName="paymentDate" [class.form__input--error]="form.get('paymentDate')?.invalid && form.get('paymentDate')?.touched">
             <span class="form__error"
                     *ngIf="form.get('paymentDate')?.invalid && form.get('paymentDate')?.touched">
-                {{ 'VALIDATION.REQUIRED' | translate }}
+                {{ 'validation.required' | translate }}
             </span>
         </div>
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'PAYMENTS.FORM.EXTERNAL_REFERENCE' | translate }} ({{ 'COMMON.OPTIONAL' | translate }})</label>
+                <label>{{ 'payments.form.external_reference' | translate }} ({{ 'common.optional' | translate }})</label>
                 <mat-icon>checkbook</mat-icon>
             </div>
             <input type="text" class="form__input" formControlName="externalReference" [class.form__input--error]="form.get('externalReference')?.invalid && form.get('externalReference')?.touched">
             <span class="form__error"
                     *ngIf="form.get('externalReference')?.invalid && form.get('externalReference')?.touched">
-                {{ 'VALIDATION.REQUIRED' | translate }}
+                {{ 'validation.required' | translate }}
             </span>
         </div>
 
         <div class="form__field">
             <div class="form__label">
-                <label>{{ 'PAYMENTS.FORM.NOTES' | translate }} ({{ 'COMMON.OPTIONAL' | translate }})</label>
+                <label>{{ 'payments.form.notes' | translate }} ({{ 'common.optional' | translate }})</label>
                 <mat-icon>note</mat-icon>
             </div>
             <input type="text" class="form__input" formControlName="notes" [class.form__input--error]="form.get('notes')?.invalid && form.get('notes')?.touched">
@@ -178,20 +178,20 @@
                     <div class="panel__title-wrap">
                         <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
                         <div>
-                            <h2 class="panel__title">{{ 'PAYMENTS.FORM.ALLOCATE_AMOUNTS' | translate }}</h2>
+                            <h2 class="panel__title">{{ 'payments.form.allocate_amounts' | translate }}</h2>
                         </div>
                     </div>
                     <button type="button" class="btn-add"
                             (click)="addLine()"
                             [disabled]="selectedInvoiceIds.size >= invoices.length">
-                        {{ 'PAYMENTS.FORM.ADD_LINE' | translate }}
+                        {{ 'payments.form.add_line' | translate }}
                     </button>
                 </div>
 
                 <div class="panel__body">
                     <div *ngIf="!form.get('clientId')?.value" class="allocation-empty">
                         <mat-icon>receipt_long</mat-icon>
-                        <p>{{ 'PAYMENTS.FORM.SELECT_CLIENT_FIRST' | translate }}</p>
+                        <p>{{ 'payments.form.select_client_first' | translate }}</p>
                     </div>
 
                     <ng-container *ngIf="form.get('clientId')?.value">
@@ -201,7 +201,7 @@
 
                             <div class="form__field form__field--grow">
                                 <div class="form__label">
-                                    <label>{{ 'PAYMENTS.FORM.INVOICE' | translate }}</label>
+                                    <label>{{ 'payments.form.invoice' | translate }}</label>
                                     <mat-icon>receipt_long</mat-icon>
                                 </div>
                                 <!-- ↓ removed [disabled]="mode==='edit'" -->
@@ -210,50 +210,60 @@
                                         (change)="onInvoiceSelected(i)"
                                         [class.form__input--error]="getAllocationLine(i).get('invoiceId')?.invalid && getAllocationLine(i).get('invoiceId')?.touched">
                                     <option value="" disabled selected>
-                                        {{ invoicesLoading ? ('COMMON.LOADING' | translate) : ('PAYMENTS.FORM.SELECT_INVOICE' | translate) }}
+                                        {{ invoicesLoading ? ('common.loading' | translate) : ('payments.form.select_invoice' | translate) }}
                                     </option>
                                     <option *ngFor="let inv of availableInvoicesForLine(i)" [value]="inv.id">
-                                        #{{ inv.invoiceNumber }} — {{ 'PAYMENTS.FORM.REMAINING' | translate }}: {{ inv.remainingAmount | number:'1.2-2' }} TND
+                                        #{{ inv.invoiceNumber }} — {{ 'payments.form.remaining' | translate }}: {{ inv.remainingAmount | number:'1.2-2' }} TND
                                     </option>
                                 </select>
                                 <span class="form__error"
                                     *ngIf="getAllocationLine(i).get('invoiceId')?.invalid && getAllocationLine(i).get('invoiceId')?.touched">
-                                    {{ 'VALIDATION.REQUIRED' | translate }}
+                                    {{ 'validation.required' | translate }}
                                 </span>
                             </div>
 
                             <div class="form__field allocation-line__amount">
                                 <div class="form__label">
-                                    <label>{{ 'PAYMENTS.FORM.AMOUNT' | translate }}</label>
+                                    <label>{{ 'payments.form.amount' | translate }}</label>
                                     <mat-icon>price_check</mat-icon>
                                 </div>
                                 <!-- ↓ removed [readOnly]="mode==='edit'" -->
                                 <input type="number"
                                     class="form__input"
                                     formControlName="allocatedAmount"
-                                    min="0.01"
-                                    [placeholder]="'PAYMENTS.FORM.AMOUNT' | translate"
+                                    min="0"
+                                    step="0.1"
+                                    [placeholder]="'payments.form.amount' | translate"
                                     (input)="onAllocatedAmountChange()"
                                     (change)="onAllocatedAmountChange()"
                                     [max]="getMaxForLine(i)"
                                     [class.form__input--error]="getAllocationLine(i).get('allocatedAmount')?.invalid && getAllocationLine(i).get('allocatedAmount')?.touched" />
                                 <span class="form__error"
                                     *ngIf="getAllocationLine(i).get('allocatedAmount')?.invalid && getAllocationLine(i).get('allocatedAmount')?.touched">
-                                    {{ 'PAYMENTS.VALIDATION.ALLOCATED_AMOUNT' | translate }}
+                                    {{ 'payments.validation.allocated_amount' | translate }}
                                 </span>
                                 <span class="form__error"
                                     *ngIf="getAllocationLine(i).get('allocatedAmount')?.hasError('max')">
-                                    {{ 'PAYMENTS.VALIDATION.EXCEEDS_REMAINING' | translate: { max: getMaxForLine(i) | number:'1.2-2' } }}
+                                    {{ 'payments.validation.exceeds_remaining' | translate: { max: getMaxForLine(i) | number:'1.2-2' } }}
                                 </span>
                             </div>
 
-                            <button type="button"
-                                    class="icon-btn icon-btn--delete"
-                                    (click)="removeLine(i)"
-                                    [disabled]="allocations.length === 1"
-                                    [matTooltip]="'COMMON.REMOVE' | translate">
-                                <mat-icon style="font-size:24px;width:24px;height:24px;">delete_outline</mat-icon>
-                            </button>
+                            <div class="allocation-line__actions">
+                                <button type="button"
+                                        class="icon-btn icon-btn--complete"
+                                        (click)="completeLine(i)"
+                                        [disabled]="!getAllocationLine(i).get('invoiceId')?.value"
+                                        [matTooltip]="'payments.actions.full_payment' | translate">
+                                    <mat-icon style="font-size:24px;width:24px;height:24px;">check_circle</mat-icon>
+                                </button>
+                                <button type="button"
+                                        class="icon-btn icon-btn--delete"
+                                        (click)="removeLine(i)"
+                                        [disabled]="allocations.length === 1"
+                                        [matTooltip]="'common.remove' | translate">
+                                    <mat-icon style="font-size:24px;width:24px;height:24px;">delete_outline</mat-icon>
+                                </button>
+                            </div>
                         </div>
                     </ng-container>
                 </div>
@@ -265,13 +275,13 @@
 
 <mat-dialog-actions align="end">
   <button type="button" class="btn-secondary" (click)="cancel()">
-    {{ 'COMMON.CANCEL' | translate }}
+    {{ 'common.cancel' | translate }}
   </button>
   <button type="button"
           class="btn-add"
           [class.disabled]="form.invalid || isSubmitting"
           (click)="onSubmit()">
-    <span *ngIf="!isSubmitting">{{ 'COMMON.ADD' | translate }}</span>
-    <span *ngIf="isSubmitting">{{ 'COMMON.SAVING' | translate }}...</span>
+    <span *ngIf="!isSubmitting">{{ 'common.add' | translate }}</span>
+    <span *ngIf="isSubmitting">{{ 'common.saving' | translate }}</span>
   </button>
 </mat-dialog-actions>

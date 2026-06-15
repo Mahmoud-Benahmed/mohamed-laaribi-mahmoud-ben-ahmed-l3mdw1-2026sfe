@@ -1,4 +1,6 @@
-﻿public record PrivilegeDefinition(
+﻿using ERP.AuthService.Properties;
+
+public record PrivilegeDefinition(
     string Code,
     string Category,
     string Description
@@ -24,6 +26,8 @@ public static class PrivilegeRegistry
         new(Privileges.Users.CREATE_CONTROLE,   "AUTH", "Create controle"),
         new(Privileges.Users.UPDATE_CONTROLE,   "AUTH", "Update controle"),
         new(Privileges.Users.DELETE_CONTROLE,   "AUTH", "Delete controle"),
+        new(Privileges.Users.BUY_SUBSCRIPTION,  "AUTH", "Buy subscription for tenant"),
+        new(Privileges.Users.EDIT_SYSTEM_SETTINGS,  "AUTH", "Access and change system settings"),
         new(Privileges.Audit.MANAGE_AUDITLOGS,  "AUTH", "Manage audit logs"),
 
         // ── Clients
@@ -85,7 +89,23 @@ public static class PrivilegeRegistry
         // ── Reports
         new(Privileges.Reports.MANAGE_REPORTS,  "REPORTING", "Manage reports"),
         new(Privileges.Reports.VIEW_REPORTS,    "REPORTING", "View reports"),
-        new(Privileges.Reports.EXPORT_REPORTS,  "REPORTING", "Export reports"),
+        new(Privileges.Reports.EXPORT_REPORTS,  "REPORTING", "Export reports")
+    };
+
+    public static readonly List<PrivilegeDefinition> TenantsPrivilegeDefinition = new()
+    {
+
+        new(TenantPrivileges.VIEW_TENANTS, "TENANT", "View tenants"),
+        new(TenantPrivileges.CREATE_TENANT, "TENANT", "Create tenant"),
+        new(TenantPrivileges.UPDATE_TENANT, "TENANT", "Update tenant"),
+        new(TenantPrivileges.DELETE_TENANT, "TENANT", "Delete tenant"),
+        new(TenantPrivileges.RESTORE_TENANT, "TENANT", "Restore tenant"),
+        new(TenantPrivileges.SUSPEND_TENANT, "TENANT", "Suspend tenant"),
+        new(TenantPrivileges.ACTIVATE_TENANT, "TENANT", "Activate tenant"),
+
+        // ── Subscription / Billing
+        new(TenantPrivileges.MANAGE_SUBSCRIPTIONS, "TENANT", "Manage subscriptions"),
+        new(TenantPrivileges.VIEW_BILLING, "TENANT", "View billing")
     };
 
     // In PrivilegeRegistry, after the list definition:

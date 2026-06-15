@@ -90,7 +90,7 @@ export interface CreateRefundDto {
 }
 
 export interface CompleteRefundDto {
-  refundReason: string;
+  externalReference: string;  // ✅
 }
 
 export interface RefundStatsDto{
@@ -116,7 +116,7 @@ export type PaymentStatus = 'DONE' | 'CANCELLED'
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/payment`;
+  private readonly base = `${environment.routes.payment}`;
 
   // ── Payments ──────────────────────────────────────────────────────────────
 

@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.StockService.Application.DTOs;
+using ERP.StockService.Application.Services;
 using System.Text.Json;
 
 namespace ERP.StockService.Infrastructure.Messaging.Events.FournisseurEvents;
@@ -26,10 +27,10 @@ public sealed class FournisseurEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:Fournisseur"] ?? throw new InvalidOperationException("Kafka:ConsumerGroups:Article not configured"),
+            GroupId = $"stock-service-fournisseur-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
-            AllowAutoCreateTopics = true  // Add this
+            AllowAutoCreateTopics = true 
         };
 
         _consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -79,6 +80,19 @@ public sealed class FournisseurEventConsumer : BackgroundService
                     // Create a new scope for each message
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
+                        var tenantContext =
+                            scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                        tenantContext.SetTenantId(dto.TenantId.Value);
+
+                        if (!dto.TenantId.HasValue)
+                        {
+                            _logger.LogError(
+                                "Missing TenantId for article event {ArticleId}",
+                                dto.Id);
+
+                            return;
+                        }
                         IFournisseurEventHandler handler = scope.ServiceProvider.GetRequiredService<IFournisseurEventHandler>();
 
                         switch (result.Topic)

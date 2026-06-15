@@ -11,6 +11,8 @@ import { BehaviorSubject, catchError, Observable, Subject, take, tap, throwError
 
 interface JwtPayload {
   sub: string;
+  tenantId: string;
+  slug: string;
   login: string;
   role: string;
   theme: 'light' | 'dark';
@@ -22,6 +24,13 @@ interface JwtPayload {
 export interface UserSettings{
   theme: 'light' | 'dark';
   language: 'fr' | 'en';
+}
+
+export const ROLES={
+  SYSTEM_ADMIN : "SYSTEM_ADMIN",
+  SALES_MANAGER: "SALES_MANAGER",
+  STOCK_MANAGER: "STOCK_MANAGER",
+  ACCOUNTANT   : "ACCOUNTANT"
 }
 
 export const PRIVILEGES = {
@@ -40,7 +49,8 @@ export const PRIVILEGES = {
     DELETE_CONTROLE:"DELETE_CONTROLE",
     CREATE_ROLE:"CREATE_ROLE",
     UPDATE_ROLE:"UPDATE_ROLE",
-    DELETE_ROLE:"DELETE_ROLE"
+    DELETE_ROLE:"DELETE_ROLE",
+    EDIT_SYSTEM_SETTINGS: "EDIT_SYSTEM_SETTINGS"
   },
   AUDIT: {
     MANAGE_AUDITLOGS: "MANAGE_AUDITLOGS",
@@ -104,6 +114,17 @@ export const PRIVILEGES = {
     VIEW_REPORTS: "VIEW_REPORTS",
     EXPORT_REPORTS: "EXPORT_REPORTS",
   },
+  TENANTS:{
+    VIEW_TENANTS: "VIEW_TENANTS",
+    CREATE_TENANT: "CREATE_TENANT",
+    UPDATE_TENANT: "UPDATE_TENANT",
+    DELETE_TENANT: "DELETE_TENANT",
+    RESTORE_TENANT: "RESTORE_TENANT",
+    SUSPEND_TENANT: "SUSPEND_TENANT",
+    ACTIVATE_TENANT: "ACTIVATE_TENANT",
+    MANAGE_SUBSCRIPTIONS: "MANAGE_SUBSCRIPTIONS",
+    VIEW_BILLING: "VIEW_BILLING"
+  }
 };
 
 @Injectable({
@@ -123,15 +144,14 @@ export class AuthService {
     this.loadProfileFromStorage()
   );
   readonly userProfile$ = this._userProfile$.asObservable();
-  
+
   private _loggingOut = false;
 
   private _onLogout$ = new Subject<void>();
   readonly onLogout$ = this._onLogout$.asObservable();
 
-
-
-  private readonly baseUrl = `${environment.apiUrl}${environment.routes.auth}`;
+  private readonly baseUrl = `${environment.routes.auth}`;
+  private readonly loginUrl = `/login`;
 
   constructor(private http: HttpClient,   private router: Router) {}
 
@@ -142,25 +162,21 @@ export class AuthService {
     localStorage.setItem(this.ACCESS_TOKEN_KEY, response.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
     localStorage.setItem('expiresAt', response.expiresAt);
-    localStorage.setItem('mustChangePassword', String(response.mustChangePassword)); // ADD THIS
+    localStorage.setItem('mustChangePassword', String(response.mustChangePassword));
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
-  }
+    return localStorage.getItem(this.ACCESS_TOKEN_KEY);}
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-  }
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);}
 
   getExpiresAt(): Date | null {
     const value = localStorage.getItem('expiresAt');
-    return value ? new Date(value) : null;
-  }
+    return value ? new Date(value) : null;}
 
   getMustChangePassword(): boolean {
-    return localStorage.getItem('mustChangePassword') === 'true';
-  }
+    return localStorage.getItem('mustChangePassword') === 'true';}
 
 
   clearSession(): void {
@@ -202,6 +218,14 @@ export class AuthService {
       }
   }
 
+  get TenantId(): string | null {
+    return this.JwtPayload?.tenantId ?? null;
+  }
+
+  get Slug(): string | null {
+    return this.JwtPayload?.slug ?? null;
+  }
+
   get UserId(): string | null {
     return this.JwtPayload?.sub ?? null;
   }
@@ -230,7 +254,10 @@ export class AuthService {
     return Array.isArray(payload.privilege) ? payload.privilege : [payload.privilege];
   }
 
-  hasPrivilege(privilege: string): boolean { return this.Privileges.includes(privilege); }
+  hasPrivilege(...privileges: string[]): boolean {
+    if (!privileges || privileges.length === 0) return false;
+    return privileges.some(privilege => this.Privileges.includes(privilege));
+  }
 
   storeMustChangePassword(value: boolean): void {
     localStorage.setItem('mustChangePassword', String(value));
@@ -365,7 +392,11 @@ export class AuthService {
   // LOGIN
   // =========================
   login(request: LoginRequestDto): Observable<AuthResponseDto> {
-    return this.http.post<AuthResponseDto>(`${this.baseUrl}/login`, request).pipe(
+    // remove last session's leftovers to prevent access for non logged in user
+    this.clearSession();
+    this.clearUserProfile();
+
+    return this.http.post<AuthResponseDto>(`${this.loginUrl}`, request).pipe(
       tap(response => this.storeTokens(response))
     );
   }
@@ -432,7 +463,6 @@ export class AuthService {
       })
     );
   }
-
 
   // =========================
   // REVOKE + LOGOUT

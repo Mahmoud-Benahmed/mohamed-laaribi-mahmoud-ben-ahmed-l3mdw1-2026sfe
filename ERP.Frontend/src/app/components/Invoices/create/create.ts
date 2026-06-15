@@ -1,19 +1,18 @@
-import { CommonModule, Location, ViewportScroller } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectorRef, Component, computed, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ClientResponseDto, ClientsService } from '../../../services/clients/clients.service';
+import { ClientResponseDto} from '../../../services/clients/clients.service';
 import { StockItem, StockService } from '../../../services/stock.service';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subject } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
 import { CreateInvoiceDto, InvoiceService, TaxCalculationMode } from '../../../services/invoice.service';
-import { ArticleResponseDto, ArticleService, UnitEnum } from '../../../services/articles/articles.service';
+import { ArticleResponseDto, UnitEnum } from '../../../services/articles/articles.service';
 import { HttpError } from '../../../interfaces/HttpError';
-import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface PendingItem {
@@ -77,7 +76,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   private masterArticles: StockItem[] = [];
   articles: StockItem[] = [];
   clients: ClientResponseDto[] = [];
-  filteredClients: ClientResponseDto[] = [];
   clientSearchQuery = '';
   pendingItems: PendingItem[] = [];
 
@@ -120,7 +118,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   articlesLoading = false;
   hasMoreArticles = true;
   selectedArticleLabel = '';
-  private articleSearchSubject$ = new Subject<string>();
 
   // ── Alerts ────────────────────────────────────────────────────────────────
   errors: string[] = [];
@@ -173,7 +170,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     if (this.clientsLoading) return;
     this.clientsLoading = true;
 
-    this.stock.getClientsPaged(page, this.clientPageSize, this.clientSearchQuery)
+    this.invoiceService.getClientsPaged(page, this.clientPageSize, this.clientSearchQuery)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -239,15 +236,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
 
-  invoiceTotalTTC = computed(() => {
-    if (this.discountInfo.applies && this.discountInfo.discountedTotal > 0) {
-      return this.discountInfo.discountedTotal;
-    }
-    return this.pendingTotalTTC;
-  });
-
-
-
   private syncArticles(): void {
     const consumed = new Map<string, number>();
     for (const item of this.pendingItems) {
@@ -279,17 +267,8 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     return 'stock-normal';
   }
 
-  isLowStock(stock: number): boolean { return stock > 0 && stock <= 10; }
-  isCriticalStock(stock: number): boolean { return stock > 0 && stock <= 5; }
-  isOutOfStock(stock: number): boolean { return stock === 0; }
-
   getAddButtonTooltip(): string {
-    return this.articles.length === 0 ? this.translate.instant('STOCK.ERRORS.ARTICLES_NOT_FOUND') : '';
-  }
-
-  checkArticleStock(articleId: string, _requestedQuantity: number): void {
-    const article = this.articles.find(a => a.id === articleId);
-    this.updateQuantityValidator(article?.quantity ?? 0);
+    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
   }
 
   getQuantityMax(): number {
@@ -299,26 +278,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   getUnitTranslation(): string {
     const unit = this._selectedArticle?.unit;
     if (!unit) return '';
-    return this.translate.instant(`ARTICLES.UNIT.${unit.toUpperCase()}`);
-  }
-
-  getAvailableStock(articleId: string): number {
-    return this.articles.find(a => a.id === articleId)?.quantity || 0;
-  }
-  onArticleSelectChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    const article = this.articles.find(a => a.id === id);
-    this.onArticleSelected(article);
-  }
-
-  onArticleSelected(article: StockItem | undefined): void {
-    if (!article) return;
-    this._selectedArticle = article;
-    this.itemForm.patchValue({
-      uniPriceHT: article.prix ?? 0,
-      taxRate: article.tva ?? 19,
-    });
-    this.updateQuantityValidator(article.quantity ?? 0);
+    return this.translate.instant(`common.unit.${unit.toUpperCase()}`);
   }
 
   openInlineItemAdd(): void {
@@ -353,7 +313,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   submitInlineItem(): void {
     if (this.itemForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
 
@@ -362,7 +322,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     // Use masterArticles for the real stock ceiling
     const master = this.masterArticles.find(a => a.id === articleId);
     if (!master) {
-      this.flash('error', this.translate.instant('ERRORS.ARTICLE_NOT_FOUND'));
+      this.flash('error', this.translate.instant('errors.article_not_found'));
       return;
     }
 
@@ -374,7 +334,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     const maxAllowed = master.quantity - alreadyConsumed;
 
     if (quantity > maxAllowed) {
-      this.flash('error', this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK', {
+      this.flash('error', this.translate.instant('stock.responses.errors.INSUFFICIENT_STOCK', {
         max: maxAllowed, requested: quantity
       }));
       return;
@@ -430,16 +390,15 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   private calcLineAmounts(
     qty: number,
     uniPriceHT: number,
-    taxRate: number,          // as percentage e.g. 19
-    discountRate = 0          // as percentage e.g. 10
+    taxRate: number,
+    discountRate = 0
   ): { effectivePriceHT: number; totalHT: number; taxAmount: number; totalTTC: number } {
-    const effectivePriceHT = uniPriceHT * (1 - discountRate / 100);
-    const totalHT  = qty * effectivePriceHT;
-    const taxAmount = totalHT * (taxRate / 100);
-    const totalTTC  = totalHT + taxAmount;
+    const effectivePriceHT = Math.round(uniPriceHT * (1 - discountRate / 100) * 100) / 100;
+    const totalHT           = Math.round(qty * effectivePriceHT * 100) / 100;
+    const taxAmount         = Math.round(totalHT * (taxRate / 100) * 100) / 100;
+    const totalTTC          = Math.round((totalHT + taxAmount) * 100) / 100;
     return { effectivePriceHT, totalHT, taxAmount, totalTTC };
   }
-
   // In the component — replace checkClientLimitsAndDiscount():
   async checkClientLimitsAndDiscount(): Promise<void> {
     const client = this.selectedClientForValidation;
@@ -481,14 +440,14 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     const discountedTotalHT = originalTotalHT * discountMultiplier;
     const discountedTotalTTC = originalTotalTTC * discountMultiplier;
 
-    this.discountInfo = {
-      applies,
-      rate: discountRate,
-      discountAmountHT: originalTotalHT - discountedTotalHT,
-      discountAmount: originalTotalTTC - discountedTotalTTC,
-      originalTotal: originalTotalTTC,
-      discountedTotal: discountedTotalTTC
-    };
+  this.discountInfo = {
+    applies,
+    rate: discountRate,
+    discountAmountHT: Math.round((originalTotalHT - discountedTotalHT) * 100) / 100,
+    discountAmount:   Math.round((originalTotalTTC - discountedTotalTTC) * 100) / 100,
+    originalTotal:    Math.round(originalTotalTTC * 100) / 100,
+    discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
+  };
 
     // ── 2. Recalculate line prices ────────────────────────
     this.recalcAllItemPrices();
@@ -532,25 +491,11 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   get duePaymentPeriodHint(): string {
     if (!this.selectedClientForValidation?.duePaymentPeriod) return '';
-    return this.translate.instant('INVOICES.FORM.DUE_DATE_HINT', {
+    return this.translate.instant('invoices.form.due_date_hint', {
       days: this.selectedClientForValidation.duePaymentPeriod
     });
   }
 
-  filterClients(query: string): void {
-    if (!query || query.length < 2) { this.filteredClients = []; return; }
-    const q = query.toLowerCase();
-    this.filteredClients = this.clients
-      .filter(c => c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q))
-      .slice(0, 8);
-  }
-
-
-  onClientSelectChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    const client = this.clients.find(c => c.id === id);
-    if (client) this.selectClient(client);
-  }
   calculateDueDate(invoiceDate: string | Date | null | undefined, paymentPeriod: number | null | undefined): string {
     const daysToAdd = paymentPeriod || 30;
     const date = invoiceDate ? new Date(invoiceDate) : new Date();
@@ -593,10 +538,10 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   getSubmitButtonTooltip(): string {
-    if (this.isValidating) return this.translate.instant('COMMON.PROCESSING');
-    if (this.invoiceForm.invalid) return this.translate.instant('VALIDATION.REQUIRED');
-    if (this.pendingItems.length === 0) return this.translate.instant('INVOICES.FORM.NO_ITEMS_YET');
-    if (this.creditWarning) return this.translate.instant('INVOICES.ERRORS.CREDIT_LIMIT_EXCEEDED');
+    if (this.isValidating) return this.translate.instant('common.processing');
+    if (this.invoiceForm.invalid) return this.translate.instant('validation.required');
+    if (this.pendingItems.length === 0) return this.translate.instant('invoices.form.no_items_yet');
+    if (this.creditWarning) return this.translate.instant('invoices.responses.errors.credit_limit_exceeded');
     return '';
   }
 
@@ -619,7 +564,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
     if (failures.length > 0) {
       const msgs = failures.map(f =>
-        this.translate.instant('STOCK.ERRORS.INSUFFICIENT_STOCK_DETAIL', {
+        this.translate.instant('stock.responses.errors.INSUFFICIENT_STOCK_DETAIL', {
           article: (f as any).articleName,
           requested: (f as any).requested,
           available: (f as any).available,
@@ -634,28 +579,28 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   // ── CRUD actions ──────────────────────────────────────────────────────────
   async submit(): Promise<void> {
     if (this.invoiceForm.invalid) {
-      this.flash('error', this.translate.instant('VALIDATION.REQUIRED'));
+      this.flash('error', this.translate.instant('validation.required'));
       return;
     }
     if (this.pendingItems.length === 0) {
-      this.flash('error', this.translate.instant('INVOICES.FORM.NO_ITEMS_YET'));
+      this.flash('error', this.translate.instant('invoices.form.no_items_yet'));
       return;
     }
 
     const formValue = this.invoiceForm.value;
     const selectedClient = this.clients.find(c => c.id === formValue.clientId);
     if (!selectedClient) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_NOT_FOUND'));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_not_found'));
       return;
     }
 
     // ── UI-level guards only ──────────────────────────────────────────────
     if (selectedClient.isBlocked) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_BLOCKED', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_blocked', {client: selectedClient.name}));
       return;
     }
     if (selectedClient.isDeleted) {
-      this.flash('error', this.translate.instant('INVOICES.ERRORS.CLIENT_DELETED', {client: selectedClient.name}));
+      this.flash('error', this.translate.instant('invoices.responses.errors.client_deleted', {client: selectedClient.name}));
       return;
     }
 
@@ -679,7 +624,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     };
     this.invoiceService.create(dto).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.CREATED'));
+        this.flash('success', this.translate.instant('invoices.responses.success.created'));
         setTimeout(() => {
           document.getElementById('top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 0);
@@ -690,7 +635,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
       },
       error: (err) => {
         const errorMsg = (err.error as HttpError)?.message
-          || this.translate.instant('INVOICES.ERRORS.CREATE_FAILED');
+          || this.translate.instant('invoices.responses.errors.create_failed');
         this.flash('error', errorMsg);
         this.isValidating = false;
       },
@@ -715,16 +660,13 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalHT(): number {
-    // always sum effectivePriceHT (post-discount) × qty
-    return this.pendingItems.reduce((s, i) => s + i.totalHT, 0);
+    return Math.round(this.pendingItems.reduce((s, i) => s + i.totalHT, 0) * 100) / 100;
   }
 
   get pendingTotalTVA(): number {
     if (this.taxCalculationMode === TaxCalculationMode.LINE) {
-      // sum each line's tax individually (may differ due to rounding)
-      return this.pendingItems.reduce((s, i) => s + i.taxAmount, 0);
+      return Math.round(this.pendingItems.reduce((s, i) => s + i.taxAmount, 0) * 100) / 100;
     }
-    // INVOICE mode: weighted average rate on total HT
     const totalHT = this.pendingTotalHT;
     if (totalHT === 0) return 0;
     const weightedRate = this.pendingItems.reduce(
@@ -734,15 +676,16 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   get pendingTotalTTC(): number {
-    return this.pendingTotalHT + this.pendingTotalTVA;
+    return Math.round((this.pendingTotalHT + this.pendingTotalTVA) * 100) / 100;
   }
 
-  trackById(_: number, item: { id: string }) { return item.id; }
   trackByLocalId(_: number, item: PendingItem) { return item._localId; }
 
 
   onClientSearch(query: string): void {
-    this.clientSearchSubject$.next(query);
+    this.clientSearchQuery = query;
+    this.clientPage = 1;
+    this.loadClients(1, false);
   }
 
   loadMoreClients(): void {
@@ -773,22 +716,12 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
     this.invoiceForm.markAsDirty();
 
     this.clientSearchQuery = client.name;
-    this.filteredClients = [];
 
     this.checkClientLimitsAndDiscount();
+    this.loadArticlesForDropdown(true);
+
     this.cdr.markForCheck();
   }
-
-  private restoreClientLabel(): void {
-    const clientId = this.invoiceForm.get('clientId')?.value;
-    if (!clientId) return;
-    const found = this.clients.find(c => c.id === clientId);
-    if (found) {
-      this.selectedClientLabel = `${found.name} - ${found.email}`;
-      this.cdr.markForCheck();
-    }
-  }
-
 
   toggleClientDropdown(): void {
     this.clientDropdownOpen = !this.clientDropdownOpen;
@@ -799,26 +732,31 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   loadArticlesForDropdown(resetPage = true): void {
-    if (resetPage) {
-      this.articlePage = 1;
-    }
+      if (resetPage) {
+        this.articlePage = 1;
+      }
 
-    // Filter articles based on search query
-    let filtered = this.articles.filter(a =>
-      a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
-      a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase())
-    );
+      const creditLimit = this.selectedClientForValidation?.creditLimit;
 
-    this.articleTotalCount = filtered.length;
-    this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+      let filtered = this.articles.filter(a => {
+        const matchesSearch =
+          a.libelle?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.codeRef?.toLowerCase().includes(this.articleSearchQuery.toLowerCase()) ||
+          a.barCode?.toLowerCase().includes(this.articleSearchQuery.toLowerCase());
 
-    // Paginate
-    const start = (this.articlePage - 1) * this.articlePageSize;
-    const end = start + this.articlePageSize;
-    this.articleDropdownItems = filtered.slice(start, end);
+        const withinCreditLimit = creditLimit == null || a.prix <= creditLimit;
 
-    this.cdr.markForCheck();
+        return matchesSearch && withinCreditLimit;
+      });
+
+      this.articleTotalCount = filtered.length;
+      this.hasMoreArticles = this.articlePage * this.articlePageSize < this.articleTotalCount;
+
+      const start = (this.articlePage - 1) * this.articlePageSize;
+      const end = start + this.articlePageSize;
+      this.articleDropdownItems = filtered.slice(start, end);
+
+      this.cdr.markForCheck();
   }
 
 
@@ -854,11 +792,6 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   onArticleSearch(query: string): void {
     this.articleSearchQuery = query;
     this.loadArticlesForDropdown(true);  // reset to first page
-  }
-
-  getArticleMaxQty(articleId: string): number {
-    const a = this.articles.find(x => x.id === articleId);
-    return (a as any)?._maxQty ?? Infinity;
   }
 
   getArticleQtyStep(): number {
@@ -904,7 +837,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
 
   // Template
   get pageTitle():string{
-    return 'INVOICES.TITLE_NEW';
+    return 'invoices.title_new';
   }
 
   flash(type: 'success' | 'error', msg: string): void {

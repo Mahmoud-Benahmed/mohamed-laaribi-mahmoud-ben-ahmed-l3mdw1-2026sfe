@@ -10,6 +10,7 @@ public class CategoryNotFoundException : Exception
     public CategoryNotFoundException(string name)
         : base($"Category with name '{name}' was not found.") { }
 }
+public class SubscriptionPlanNotFoundException(Guid id) : Exception($"SubscriptionPlan with id '{id}' was not found.");
 
 public class CategoryAlreadyExistsException : Exception
 {
@@ -53,3 +54,5 @@ public class ArticleAlreadyInactiveException : Exception
     public ArticleAlreadyInactiveException(Guid id)
         : base($"Article with id '{id}' is already inactive.") { }
 }
+
+public class DuplicateKeyException(string key) : Exception(key);

@@ -3,6 +3,7 @@
     public class Category
     {
         public Guid Id { get; private set; }
+        public Guid? TenantId { get; init; }
         public string Name { get; private set; }
         public int TVA { get; private set; }
         public bool IsDeleted { get; private set; } = false;
@@ -11,7 +12,7 @@
 
         private Category() { }
 
-        public Category(string name, int tva)
+        public Category(string name, int tva, Guid? tenantId=null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Category name is required");
@@ -22,6 +23,7 @@
             Id = Guid.NewGuid();
             Name = name.Trim();
             TVA = tva;
+            TenantId = tenantId;
             CreatedAt = DateTime.UtcNow;
         }
 
@@ -32,9 +34,6 @@
 
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Category name is required");
-
-            if (Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase))
-                return;
 
             TVA = tva;
             Name = name.Trim();

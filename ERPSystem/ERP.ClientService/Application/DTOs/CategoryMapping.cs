@@ -17,6 +17,7 @@ public static class CategoryMappings
             IsActive: category.IsActive,
             IsDeleted: category.IsDeleted,
             CreatedAt: category.CreatedAt,
-            UpdatedAt: category.UpdatedAt
+            UpdatedAt: category.UpdatedAt,
+            TenantId: category.TenantId
         );
 }

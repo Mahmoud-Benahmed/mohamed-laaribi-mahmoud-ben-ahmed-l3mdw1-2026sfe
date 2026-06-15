@@ -126,22 +126,23 @@ export class PaymentComponent implements OnInit {
         const cacheMap = new Map(
           invoiceCache.items.map(c => [c.id, c])
         );
-        this.invoicesCached = invoices.items.map(inv => {
-          const cache = cacheMap.get(inv.id);
-
-          return {
-            ...inv,
-            paidAmount: cache?.paidAmount ?? 0,
-            remainingAmount: cache?.remainingAmount ?? inv.totalTTC
-          };
-        });
+        this.invoicesCached = invoices.items
+          .filter(inv => inv.status === 'UNPAID') // or include only unpaid
+          .map(inv => {
+            const cache = cacheMap.get(inv.id);
+            return {
+              ...inv,
+              paidAmount: cache?.paidAmount ?? 0,
+              remainingAmount: cache?.remainingAmount ?? inv.totalTTC
+            };
+          });
 
         this.stats= stats;
 
         this.cdr.markForCheck();
       },
       error:()=>{
-        this.flash("error", this.translate.instant('INVOICES.ERRORS.LOAD_FAILED'));
+        this.flash("error", this.translate.instant('invoices.responses.errors.load_failed'));
         this.cdr.markForCheck();
       }
 
@@ -151,11 +152,11 @@ export class PaymentComponent implements OnInit {
   cancel(payment: PaymentDto){
     this.paymentService.cancelPayment(payment.id).subscribe({
       next:()=>{
-        this.flash('success', this.translate.instant('PAYMENTS.SUCCESS.CANCELLED'));
+        this.flash('success', this.translate.instant('payments.responses.success.cancelled'));
         this.reload();
       },
       error:()=>{
-        this.flash('error', this.translate.instant('PAYMENTS.ERRORS.CANCELLED'));
+        this.flash('error', this.translate.instant('payments.responses.errors.cancel_failed'));
       }
     })
   }
@@ -237,7 +238,9 @@ export class PaymentComponent implements OnInit {
   }
 
   getAddButtonTooltip(): string {
-    return this.invoicesCached.length === 0 ? this.translate.instant('PAYMENTS.ERRORS.UNPAID_INVOICES_NOT_FOUND') : '';
+    return this.invoicesCached.length === 0 ?
+      this.translate.instant('payments.responses.errors.unpaid_invoices_not_found')
+      : this.translate.instant('payments.new_button');
   }
   dismissError(): void { this.errors = []; }
 

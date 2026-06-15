@@ -3,6 +3,7 @@
 public class PaymentSequence
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public int Year { get; private set; }
     public int CurrentNumber { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -10,9 +11,10 @@ public class PaymentSequence
 
     private PaymentSequence() { }
 
-    public PaymentSequence(int year)
+    public PaymentSequence(int year, Guid? tenantId = null)
     {
         Id = Guid.NewGuid();
+        TenantId = tenantId;
         Year = year;
         CurrentNumber = 0;
         CreatedAt = DateTime.UtcNow;

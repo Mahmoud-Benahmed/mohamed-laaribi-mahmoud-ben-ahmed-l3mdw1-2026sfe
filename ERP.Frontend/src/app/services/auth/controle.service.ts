@@ -33,7 +33,7 @@ export interface PagedResultDto<T> {
 @Injectable({ providedIn: 'root' })
 export class ControleService {
   /** Base URL – override via environment or injection token in your app. */
-  private readonly baseUrl = environment.apiUrl + environment.routes.controles;
+  private readonly baseUrl = `${environment.routes.controles}`;
 
   constructor(private readonly http: HttpClient) {}
 

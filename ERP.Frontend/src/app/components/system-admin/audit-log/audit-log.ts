@@ -1,5 +1,5 @@
 import { AuthService } from './../../../services/auth/auth.service';
-import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, formatNumber, KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { ModalComponent } from '../../modal/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { PaginationComponent } from "../../pagination/pagination";
 
 interface ActionMeta {
   icon: string;
@@ -38,8 +39,9 @@ interface ActionMeta {
     MatSelectModule, MatButtonToggleModule, MatProgressSpinnerModule,
     MatTooltipModule, MatDividerModule, MatSnackBarModule,
     MatDialogModule, MatChipsModule, MatInputModule, MatSelectModule, MatFormFieldModule,
-    TranslatePipe
-  ],
+    TranslatePipe,
+    PaginationComponent
+],
   templateUrl: './audit-log.html',
   styleUrl: './audit-log.scss',
 })
@@ -52,9 +54,6 @@ export class AuditLogComponent implements OnInit {
   displayedColumns = ['status', 'action', 'performedBy', 'targetUserId', 'ipAddress', 'timestamp', 'details'];
   dataSource = new MatTableDataSource<AuditLogResponseDto>([]);
 
-  totalCount = 0;
-  pageNumber = 1;
-  pageSize = 20;
   isLoading = false;
 
   selectedAction: AuditAction | null = null;
@@ -104,10 +103,15 @@ export class AuditLogComponent implements OnInit {
       UnhandledError:           { icon: 'bug_report',         category: 'danger' }
   };
 
+    // ── Pagination ────────────────────────────────────────────────────────────
+  pageNumber = signal(1);
+  pageSize = signal(10);
+  pageSizeOptions = [5, 10, 25, 50];
+  totalCount = 0;
+
   constructor(
     private authService: AuthService,
     private auditLogService: AuditLogService,
-    private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private router: Router
@@ -118,12 +122,19 @@ export class AuditLogComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize()); }
+  onPageSizeChange(): void {
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+
   load(): void {
     this.isLoading = true;
 
     const source$ = this.userIdFilter.trim()
-      ? this.auditLogService.getByUser(this.userIdFilter.trim(), this.pageNumber, this.pageSize)
-      : this.auditLogService.getAll(this.pageNumber, this.pageSize);
+      ? this.auditLogService.getByUser(this.userIdFilter.trim(), this.pageNumber(), this.pageSize())
+      : this.auditLogService.getAll(this.pageNumber(), this.pageSize());
 
     source$.subscribe({
       next: (result) => {
@@ -135,29 +146,13 @@ export class AuditLogComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        this.flash('error', this.translate.instant('auth.audit_log.responses.errors.internal_error'));
       }
     });
   }
 
-  get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize); }
-
-  prevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.load();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.load();
-    }
-  }
-
   onFilterChange(): void {
-    this.pageNumber = 1;
+    this.pageNumber.set(1);
     this.load();
   }
 
@@ -169,9 +164,9 @@ export class AuditLogComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('AUDIT.CLEAR'),
-        message: this.translate.instant('CONFIRMATION.CLEAR_AUDIT_LOGS'),
-        confirmText: this.translate.instant('COMMON.OK'),
+        title: this.translate.instant('auth.audit_log.clear'),
+        message: this.translate.instant('auth.audit_log.confirmations.clear_logs'),
+        confirmText: this.translate.instant('common.ok'),
         showCancel: true,
         icon: 'playlist_remove',
         iconColor: 'warn',
@@ -184,11 +179,11 @@ export class AuditLogComponent implements OnInit {
         if (result) {
           this.auditLogService.clear().subscribe({
             next: () => {
-              this.flash('success', this.translate.instant('SUCCESS.AUDIT_LOG_CLEARED'));
+              this.flash('success', this.translate.instant('auth.audit_log.responses.success.logs_cleared'));
               this.load();
               this.cdr.markForCheck();
             },
-            error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'))
+            error: () => this.flash('error', this.translate.instant('auth.audit_log.responses.errors.internal_error'))
           });
         }
       });
@@ -196,7 +191,7 @@ export class AuditLogComponent implements OnInit {
 
   formatAction(action: AuditAction): string {
     // Return the translation key path, the template will use the translate pipe
-    return `AUDIT.ACTIONS.${action}`;
+    return `auth.audit_log.actions.${action}`;
   }
 
   getActionIcon(action: AuditAction): string {

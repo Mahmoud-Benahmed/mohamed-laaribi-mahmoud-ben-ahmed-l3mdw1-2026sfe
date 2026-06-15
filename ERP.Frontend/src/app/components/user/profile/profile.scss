@@ -116,52 +116,82 @@
   @media (max-width: 640px) { flex-direction: row; width: 100%; }
 }
 
-.edit-btn {
-  border: 1px solid $border-hi !important;
-  color: $text-hi !important;
+// ============================================
+// SHARED BUTTON STYLES (placeholder)
+// ============================================
+%action-button {
   border-radius: 8px !important;
-  font-weight: 600 !important;
-  font-size: 13px !important;
   height: 40px;
-  background: $bg-card !important;
   cursor: pointer;
   display: inline-flex !important;
   align-items: center;
   gap: 6px;
-  padding: 0 1rem !important;
   transition: all 0.2s;
-  mat-icon { font-size: 18px; }
+  font-size: 13px !important;
+
+  mat-icon {
+    font-size: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================
+// EDIT BUTTON (amber / filled style)
+// ============================================
+.edit-btn {
+  @extend %action-button;
+  border: 1px solid $border-hi !important;
+  color: $text-hi !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  padding: 0 1rem !important;
 
   &:hover {
     background: $amber-bg !important;
     border-color: $amber !important;
     box-shadow: 0 0 16px $amber-border;
   }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
+// ============================================
+// PASSWORD BUTTON (blue / outlined style)
+// ============================================
 .password-btn {
+  @extend %action-button;
   border: 1px solid $border !important;
-  color: $text-mid !important;
-  border-radius: 8px !important;
+  color:  $text-hi !important;
   font-weight: 500 !important;
-  font-size: 13px !important;
-  height: 40px;
   background: transparent !important;
-  cursor: pointer;
-  display: inline-flex !important;
-  align-items: center;
-  gap: 6px;
   padding: 0 14px !important;
-  transition: all 0.2s;
-  mat-icon { font-size: 18px; }
 
   &:hover {
     background: $blue-bg !important;
     border-color: $blue !important;
     box-shadow: 0 0 16px $blue-border;
   }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ============================================
+// SETTINGS BUTTON (grey / outlined style)
+// (customise variables to match your theme)
+// ============================================
+.settings-btn {
+  @extend %action-button;
+  border: 1px solid $border !important;
+  color:  $text-hi !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  padding: 0 1rem !important;
+
+  &:hover {
+    background: $gray-bg !important;
+    border-color: $gray !important;
+    box-shadow: 0 0 16px $gray-border;
+  }
 }
 
 // ── CHIPS ─────────────────────────────────────────

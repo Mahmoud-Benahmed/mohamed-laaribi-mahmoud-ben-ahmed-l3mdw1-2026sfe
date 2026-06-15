@@ -1,5 +1,6 @@
 ﻿using ERP.FournisseurService.Application.DTOs;
 using ERP.FournisseurService.Application.Interfaces;
+using ERP.FournisseurService.Application.Services;
 using ERP.FournisseurService.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,9 +9,13 @@ namespace ERP.FournisseurService.Infrastructure.Persistence.Repositories;
 public class FournisseurRepository : IFournisseurRepository
 {
     private readonly FournisseurDbContext _context;
+    private readonly ITenantContext _tenantContext;
 
-    public FournisseurRepository(FournisseurDbContext context) => _context = context;
-
+    public FournisseurRepository(FournisseurDbContext context, ITenantContext tenantContext)
+    {
+        _tenantContext = tenantContext;
+        _context = context;
+    }
     // =========================
     // CREATE / SAVE
     // =========================
@@ -23,8 +28,22 @@ public class FournisseurRepository : IFournisseurRepository
     public async Task<Fournisseur?> GetByIdAsync(Guid id) =>
         await _context.Fournisseurs.FirstOrDefaultAsync(f => f.Id == id && !f.IsDeleted);
 
+    public async Task<bool> DuplicateExists(string email, string taxNum, string rib, Guid? excludeId = null)
+    {
+        var query = _context.Fournisseurs.Where(f =>
+            (!string.IsNullOrEmpty(rib) && f.RIB.ToLower() == rib.ToLower())
+            || (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(f.Email) && f.Email.ToLower() == email.ToLower())
+            || (!string.IsNullOrEmpty(taxNum) && !string.IsNullOrEmpty(f.TaxNumber) && f.TaxNumber.ToLower() == taxNum.ToLower())
+        );
+
+        if (excludeId.HasValue)
+            query = query.Where(f => f.Id != excludeId.Value);
+
+        return await query.AnyAsync();
+    }
+
     public async Task<Fournisseur?> GetByIdDeletedAsync(Guid id) =>
-        await _context.Fournisseurs.IgnoreQueryFilters().FirstOrDefaultAsync(f => f.Id == id && f.IsDeleted);
+        await _context.Fournisseurs.IgnoreQueryFilters().FirstOrDefaultAsync(f => f.Id == id && f.IsDeleted && f.TenantId == _tenantContext.TenantId);
 
     // =========================
     // PAGING
@@ -49,7 +68,7 @@ public class FournisseurRepository : IFournisseurRepository
     {
         ValidatePaging(page, size);
 
-        IQueryable<Fournisseur> query = _context.Fournisseurs.IgnoreQueryFilters().Where(f => f.IsDeleted);
+        IQueryable<Fournisseur> query = _context.Fournisseurs.IgnoreQueryFilters().Where(f => f.IsDeleted && f.TenantId == _tenantContext.TenantId);
 
         int total = await query.CountAsync();
         List<Fournisseur> items = await query
@@ -87,9 +106,9 @@ public class FournisseurRepository : IFournisseurRepository
             .GroupBy(_ => 1)
             .Select(g => new
             {
-                Total = g.Count(),
-                Blocked = g.Count(f => f.IsBlocked && !f.IsDeleted),
-                Deleted = g.Count(f => f.IsDeleted),
+                Total = g.Count(f=> !f.IsDeleted && f.TenantId == _tenantContext.TenantId),
+                Blocked = g.Count(f => f.IsBlocked && !f.IsDeleted && f.TenantId == _tenantContext.TenantId),
+                Deleted = g.Count(f => f.IsDeleted && f.TenantId == _tenantContext.TenantId),
             })
             .FirstOrDefaultAsync();
 

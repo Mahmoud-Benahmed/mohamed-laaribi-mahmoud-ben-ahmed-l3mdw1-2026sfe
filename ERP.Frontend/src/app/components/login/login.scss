@@ -23,22 +23,32 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+
+  &__row {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
 
   &__icon > img {
-    width: 72px; height: 72px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 14px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: block;
   }
 
   &__name {
-    font-size: 20px; font-weight: 700;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: -0.5px;
     color: $text-hi;
-    letter-spacing: -0.3px; margin-bottom: 4px;
   }
 
-  &__sub { font-size: 13px; color: $text-mid; }
+  &__sub {
+    font-size: 13px;
+    color: $text-mid;
+    letter-spacing: 0.02em;
+  }
 }
 
 // ── Card
@@ -58,6 +68,7 @@ body {
   &__title {
     font-size: 18px; font-weight: 600;
     color: $text-hi;
+    text-align: center;
     margin-bottom: 24px; letter-spacing: -0.3px;
   }
 }

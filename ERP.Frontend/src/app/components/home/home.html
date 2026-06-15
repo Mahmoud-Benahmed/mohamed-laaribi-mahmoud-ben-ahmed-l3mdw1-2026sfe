@@ -23,7 +23,6 @@
     <h1 class="home__welcome">{{ welcomeMessage }}</h1>
     <div class="home__meta">
       <span class="home__role-badge">{{ roleName }}</span>
-      <span class="home__last-login">{{ lastLoginMessage }}</span>
     </div>
   </div>
 
@@ -32,125 +31,110 @@
 
     <a class="home__quick-card" routerLink="/profile">
       <div class="home__quick-icon home__quick-icon--blue"><mat-icon>person</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.MY_PROFILE' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.my_profile' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/users"
        *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.VIEW_USERS)">
       <div class="home__quick-icon home__quick-icon--green"><mat-icon>group</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.MANAGE_USERS' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.manage_users' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/users/register"
        *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.CREATE_USER)">
       <div class="home__quick-icon home__quick-icon--purple"><mat-icon>person_add</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.REGISTER_USER' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.register_user' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/users/deactivated"
        *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.DEACTIVATE_USER) || authService.hasPrivilege(PRIVILEGES.USERS.ACTIVATE_USER)">
       <div class="home__quick-icon home__quick-icon--amber"><mat-icon>person_off</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.DEACTIVATED_USERS' | translate }}</span>
-      <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
-    </a>
-
-    <a class="home__quick-card" routerLink="/users/deleted"
-       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.RESTORE_USER)">
-      <div class="home__quick-icon home__quick-icon--red"><mat-icon>delete</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.DELETED_USERS' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.deactivated_users' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/users/controles"
        *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
       <div class="home__quick-icon home__quick-icon--green"><mat-icon>verified_user</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.CONTROLES' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.controles' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/users/roles"
-       *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
-      <div class="home__quick-icon home__quick-icon--purple"><mat-icon>shield</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.ROLES' | translate }}</span>
+      *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
+      <div class="home__quick-icon home__quick-icon--purple"><mat-icon>groups</mat-icon></div>
+      <span class="home__quick-label">{{ 'home.quick_access.roles' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/permissions"
        *ngIf="authService.hasPrivilege(PRIVILEGES.USERS.ASSIGN_ROLES)">
-      <div class="home__quick-icon home__quick-icon--blue"><mat-icon>lock</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.PERMISSIONS' | translate }}</span>
+      <div class="home__quick-icon home__quick-icon--blue"><mat-icon>shield</mat-icon></div>
+      <span class="home__quick-label">{{ 'home.quick_access.permissions' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/articles"
        *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.VIEW_ARTICLES)">
       <div class="home__quick-icon home__quick-icon--blue"><mat-icon>inventory_2</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.ARTICLES' | translate }}</span>
-      <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
-    </a>
-
-    <a class="home__quick-card" routerLink="/articles/categories"
-       *ngIf="authService.hasPrivilege(PRIVILEGES.ARTICLES.CREATE_ARTICLE_CATEGORIES) ||
-              authService.hasPrivilege(PRIVILEGES.ARTICLES.UPDATE_ARTICLE_CATEGORIES) ||
-              authService.hasPrivilege(PRIVILEGES.ARTICLES.DELETE_ARTICLE_CATEGORIES)">
-      <div class="home__quick-icon home__quick-icon--green"><mat-icon>category</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.ARTICLE_CATEGORIES' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.articles' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/clients"
        *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.VIEW_CLIENTS)">
       <div class="home__quick-icon home__quick-icon--purple"><mat-icon>people</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.CLIENTS' | translate }}</span>
-      <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
-    </a>
-
-    <a class="home__quick-card" routerLink="/clients/categories"
-       *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT_CATEGORIES) ||
-              authService.hasPrivilege(PRIVILEGES.CLIENTS.UPDATE_CLIENT_CATEGORIES) ||
-              authService.hasPrivilege(PRIVILEGES.CLIENTS.DELETE_CLIENT_CATEGORIES)">
-      <div class="home__quick-icon home__quick-icon--amber"><mat-icon>list_alt</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.CLIENT_CATEGORIES' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.clients' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/stock/fournisseurs"
        *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.VIEW_STOCK)">
       <div class="home__quick-icon home__quick-icon--green"><mat-icon>local_shipping</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.FOURNISSEURS' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.suppliers' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/stock/bons"
        *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.VIEW_STOCK)">
       <div class="home__quick-icon home__quick-icon--blue"><mat-icon>receipt_long</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.BONS' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.receipts' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/invoices"
       *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.VIEW_INVOICES)">
       <div class="home__quick-icon home__quick-icon--purple"><mat-icon>receipt</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.INVOICES' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.invoices' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
     <a class="home__quick-card" routerLink="/audit-log"
        *ngIf="authService.hasPrivilege(PRIVILEGES.AUDIT.MANAGE_AUDITLOGS)">
       <div class="home__quick-icon home__quick-icon--red"><mat-icon>history</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.AUDIT_LOG' | translate }}</span>
+      <span class="home__quick-label">{{ 'home.quick_access.audit_log' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
     </a>
 
-    <a class="home__quick-card" routerLink="/reports"
-       *ngIf="authService.hasPrivilege(PRIVILEGES.REPORTS.VIEW_REPORTS)">
-      <div class="home__quick-icon home__quick-icon--green"><mat-icon>bar_chart</mat-icon></div>
-      <span class="home__quick-label">{{ 'HOME.QUICK_ACCESS.REPORTS' | translate }}</span>
+    <a class="home__quick-card" routerLink="/tenants" routerLinkActive="sidebar__item--active"
+      *ngIf="authService.hasPrivilege(
+                PRIVILEGES.TENANTS.VIEW_TENANTS,
+                PRIVILEGES.TENANTS.CREATE_TENANT,
+                PRIVILEGES.TENANTS.UPDATE_TENANT,
+                PRIVILEGES.TENANTS.DELETE_TENANT,
+                PRIVILEGES.TENANTS.RESTORE_TENANT,
+                PRIVILEGES.TENANTS.ACTIVATE_TENANT,
+                PRIVILEGES.TENANTS.SUSPEND_TENANT,
+                PRIVILEGES.TENANTS.MANAGE_SUBSCRIPTIONS
+              )">
+
+      <div class="home__quick-icon home__quick-icon--green"><mat-icon>history</mat-icon></div>
+      <span class="home__quick-label">{{ 'home.quick_access.tenants' | translate }}</span>
       <mat-icon class="home__quick-arrow">chevron_right</mat-icon>
-    </a>
+  </a>
 
   </div>
 </div>

@@ -1,5 +1,6 @@
 ﻿using ERP.ArticleService.Application.DTOs;
 using ERP.ArticleService.Application.Interfaces;
+using ERP.ArticleService.Application.Services;
 using ERP.ArticleService.Domain;
 using ERP.ArticleService.Properties;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,11 @@ namespace ERP.ArticleService.API.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly ITenantContext _tenantContext;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, ITenantContext tenantContext)
         {
+            _tenantContext = tenantContext;
             _categoryService = categoryService;
         }
 
@@ -123,6 +126,10 @@ namespace ERP.ArticleService.API.Controllers
         [HttpPost(ApiRoutes.Categories.Create)]
         public async Task<ActionResult<Category>> Create([FromBody] CategoryRequestDto request)
         {
+            if (_tenantContext.TenantId is null)
+                return StatusCode(403, new { statusCode = 403, code = "TENANT_REQUIRED", message = "Tenant context is required." });
+
+
             CategoryResponseDto category = await _categoryService.CreateAsync(request);
 
             return CreatedAtAction(

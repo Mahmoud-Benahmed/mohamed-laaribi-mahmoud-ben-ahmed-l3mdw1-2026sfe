@@ -1,4 +1,5 @@
 ﻿using ERP.PaymentService.Application.DTO;
+using ERP.PaymentService.Application.Exceptions;
 using ERP.PaymentService.Application.Interfaces;
 using ERP.PaymentService.Domain;
 using static ERP.PaymentService.Properties.ApiRoutes;
@@ -9,13 +10,16 @@ public class RefundService : IRefundService
 {
     private readonly IRefundRequestRepository _refundRepo;
     private readonly IPaymentInvoiceRepository _allocationRepo;
+    private readonly ITenantContext _tenantContext;
 
     public RefundService(
         IRefundRequestRepository refundRepo,
-        IPaymentInvoiceRepository allocationRepo)
+        IPaymentInvoiceRepository allocationRepo,
+        ITenantContext tenantContext)
     {
         _refundRepo = refundRepo;
         _allocationRepo = allocationRepo;
+        _tenantContext = tenantContext;
     }
 
 
@@ -27,12 +31,16 @@ public class RefundService : IRefundService
     public async Task<RefundRequestDto> CreateRefundAsync(Guid clientId,
         Guid invoiceId, CancellationToken ct = default)
     {
+        var existing = await _refundRepo.GetByInvoiceIdAsync(invoiceId, ct);
+        if (existing is not null)
+            throw new RefundExistsException(invoiceId);
+
         var allocations = await _allocationRepo.GetByInvoiceIdAsync(invoiceId);
 
         if (allocations == null || !allocations.Any())
             throw new InvalidOperationException("No refundable allocations found.");
 
-        var refund = new RefundRequest(clientId, invoiceId);
+        var refund = new RefundRequest(clientId, invoiceId, null, _tenantContext.TenantId);
 
         foreach (var alloc in allocations)
         {
@@ -69,13 +77,11 @@ public class RefundService : IRefundService
         return result is not null ? ToDto(result) : null;
     }
 
-    public async Task<List<RefundRequestDto>> GetByClientIdAsync(Guid refundId,CancellationToken ct = default)
+    public async Task<List<RefundRequestDto>> GetByClientIdAsync(Guid clientId, CancellationToken ct = default)
     {
-        var result = await _refundRepo.GetByClientIdAsync(refundId);
-        var dtos = result.Select(ToDto).ToList();
-        return dtos;
+        var result = await _refundRepo.GetByClientIdAsync(clientId);
+        return result.Select(ToDto).ToList();
     }
-
 
     private static RefundRequestDto ToDto(RefundRequest request) => new(
         Id: request.Id,

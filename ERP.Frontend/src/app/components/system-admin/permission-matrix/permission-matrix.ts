@@ -99,14 +99,14 @@ export class PermissionMatrixComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.LOAD_MATRIX_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.load_matrix_failed'));
       },
     });
   }
 
   loadPrivileges(): void {
     const requests = this.roles.map((role) =>
-      this.http.get<PrivilegeDto[]>(`${this.baseUrl}/auth/privileges/${role.id}`)
+      this.http.get<PrivilegeDto[]>(`${environment.routes.privileges}/${role.id}`)
     );
 
     forkJoin(requests).subscribe({
@@ -147,7 +147,7 @@ export class PermissionMatrixComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.LOAD_PRIVILEGES_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.load_privileges_failed'));
       },
     });
   }
@@ -166,17 +166,17 @@ export class PermissionMatrixComponent implements OnInit {
     cell.loading = true;
 
     const action = wasGranted ? 'deny' : 'allow';
-    const url = `${this.baseUrl}/auth/privileges/${roleId}/${controleId}/${action}`;
+    const url = `${environment.routes.privileges}/${roleId}/${controleId}/${action}`;
 
     this.http.patch(url, {}).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.PRIVILEGE_UPDATED'));
+        this.flash('success', this.translate.instant('auth.responses.success.privilege_updated'));
         cell.isGranted = !wasGranted;
         cell.loading = false;
       },
       error: () => {
         cell.loading = false;
-        this.flash('error', this.translate.instant('PERMISSIONS.ERRORS.OPERATION_FAILED'));
+        this.flash('error', this.translate.instant('auth.permissions.errors.operation_failed'));
       },
     });
   }

@@ -16,13 +16,15 @@ import { HttpError } from '../../../interfaces/HttpError';
 import { ArticleCategoryResponseDto, CategoryService } from '../../../services/articles/categories.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RegexPatterns } from '../../../interfaces/RegexPatterns';
 
 type ViewMode = 'list' | 'list-deleted' | 'create' | 'edit' | 'view';
 
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, RouterLink, RouterLinkActive, PaginationComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIcon, RouterLink, RouterLinkActive, PaginationComponent, TranslatePipe, MatTooltipModule],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
@@ -48,7 +50,6 @@ export class ArticleComponent implements OnInit {
   successMessage: string | null = null;
   searchQuery = '';
 
-  readonly barCodePattern = /^\d{8,13}$/;
   readonly PRIVILEGES = PRIVILEGES;
   articleForm: FormGroup;
 
@@ -80,12 +81,12 @@ export class ArticleComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.articleForm = this.fb.group({
-      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.alphaNumeric)]],
       prix:       [null, [Validators.required, Validators.min(0.01)]],
       categoryId: ['', Validators.required],
       unit:       ['', Validators.required],
-      barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13)]],
-      tva:        [null, [Validators.min(0.01), Validators.max(100)]],
+      barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13), Validators.pattern(RegexPatterns.barCode)]],
+      tva:        [null, [Validators.min(0.01), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
 
@@ -119,11 +120,11 @@ export class ArticleComponent implements OnInit {
   // ── Page title ────────────────────────────────────────────────────────────
 
   get pageTitle(): string {
-    if (this.isCreate())      return 'ARTICLES.TITLE_ADD';
-    if (this.isEdit())        return 'ARTICLES.TITLE_EDIT';
-    if (this.isView())        return 'ARTICLES.TITLE_DETAILS';
-    if (this.isDeletedList()) return 'ARTICLES.TITLE_DELETED';
-    return 'ARTICLES.TITLE_LIST';
+    if (this.isCreate())      return 'articles.title_add';
+    if (this.isEdit())        return 'articles.title_edit';
+    if (this.isView())        return 'articles.title_details';
+    if (this.isDeletedList()) return 'articles.title_deleted';
+    return 'articles.title_list';
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
@@ -189,7 +190,7 @@ export class ArticleComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        this.flash('error', this.translate.instant('errors.internal_error'));
         this.loading = false;
       },
     });
@@ -202,14 +203,14 @@ export class ArticleComponent implements OnInit {
         this.totalCount = res.totalCount;
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.internal_error')),
     });
   }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (cats) => { this.categories = cats; this.cdr.markForCheck(); },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.internal_error')),
     });
   }
 
@@ -223,7 +224,7 @@ export class ArticleComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+      error: () => this.flash('error', this.translate.instant('errors.internal_error')),
     });
   }
 
@@ -336,9 +337,9 @@ export class ArticleComponent implements OnInit {
         next: () => {
           this.reload();
           this.cancel();
-          this.flash('success', this.translate.instant('SUCCESS.ARTICLE_CREATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant('articles.responses.success.article_created', { name: val.libelle }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.internal_error')),
       });
 
     } else if (this.isEdit() && this.selectedArticle) {
@@ -354,9 +355,9 @@ export class ArticleComponent implements OnInit {
         next: () => {
           this.cancel();
           this.reload();
-          this.flash('success', this.translate.instant('SUCCESS.ARTICLE_UPDATED', { name: val.libelle }));
+          this.flash('success', this.translate.instant('articles.responses.success.article_updated', { name: val.libelle }));
         },
-        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR')),
+        error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.internal_error')),
       });
     }
   }
@@ -365,9 +366,9 @@ export class ArticleComponent implements OnInit {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
-        title:       this.translate.instant('CONFIRMATION.DELETE_ARTICLE_TITLE'),
-        message:     this.translate.instant('CONFIRMATION.DELETE_ARTICLE', { name: article.libelle }),
-        confirmText: this.translate.instant('COMMON.DELETE'),
+        title:       this.translate.instant('articles.confirmations.delete_article.title'),
+        message:     this.translate.instant('articles.confirmations.delete_article.message', { name: article.libelle }),
+        confirmText: this.translate.instant('common.delete'),
         showCancel:  true,
         icon:        'auto_delete',
         iconColor:   'danger',
@@ -381,10 +382,10 @@ export class ArticleComponent implements OnInit {
         this.articleService.delete(article.id).subscribe({
           next: () => {
             if (this.isView()) this.cancel();
-            this.flash('success', this.translate.instant('SUCCESS.ARTICLE_DELETED', { name: article.libelle }));
+            this.flash('success', this.translate.instant('articles.responses.success.article_deleted', { name: article.libelle }));
             this.reload();
           },
-          error: () => this.flash('error', this.translate.instant('ERRORS.INTERNAL_ERROR')),
+          error: () => this.flash('error', this.translate.instant('errors.internal_error')),
         });
       });
   }
@@ -392,13 +393,13 @@ export class ArticleComponent implements OnInit {
   restore(article: ArticleResponseDto): void {
     this.articleService.restore(article.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('SUCCESS.ARTICLE_RESTORED', { name: article.libelle }));
+        this.flash('success', this.translate.instant('articles.responses.success.article_restored', { name: article.libelle }));
         this.reload();
         if (this.isView()) this.cancel();
       },
       error: (error) => {
         const err = error.error as HttpError;
-        this.flash('error', err?.message ?? this.translate.instant('ERRORS.INTERNAL_ERROR'));
+        this.flash('error', err?.message ?? this.translate.instant('errors.internal_error'));
       }
     });
   }

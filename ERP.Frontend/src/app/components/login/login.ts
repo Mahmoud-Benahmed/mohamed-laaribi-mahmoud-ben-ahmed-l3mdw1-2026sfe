@@ -2,7 +2,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,9 +13,11 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthUserGetResponseDto } from '../../interfaces/AuthDto';
 import { ModalComponent } from '../modal/modal';
 import { environment } from '../../environment';
-import { UserSettingsService } from '../../services/user-settings.service';
+import { TenantThemeService, UserSettingsService } from '../../services/user-settings.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { map, Subscription, switchMap, tap } from 'rxjs';
+import { map, of, Subscription, switchMap, take, tap } from 'rxjs';
+import { RegexPatterns } from '../../interfaces/RegexPatterns';
+import { TenantService } from '../../services/tenant/tenant.service';
 
 @Component({
   selector: 'app-login',
@@ -29,8 +31,9 @@ import { map, Subscription, switchMap, tap } from 'rxjs';
     MatProgressSpinnerModule,
     MatDialogModule,
     TranslatePipe,
-    ReactiveFormsModule
-],
+    ReactiveFormsModule,
+    RouterLink
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   encapsulation: ViewEncapsulation.None
@@ -41,7 +44,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   readonly year: number = new Date().getFullYear();
   userProfile: AuthUserGetResponseDto | null = null;
 
-  readonly loginPattern = /^[a-z0-9_]+$/;
   showPassword = false;
   isLoading = false;
   errorMessage: string | null = null;
@@ -55,11 +57,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     public userSettings: UserSettingsService,
     public translate: TranslateService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private tenantService: TenantService,
+    private themeService: TenantThemeService,
   ) {
     this.loginForm = this.fb.group({
-      login:       ['', [Validators.required, Validators.pattern(this.loginPattern)]],
-      password:    ['', [Validators.required, Validators.minLength(8)]],
+      login:    ['', [Validators.required, Validators.pattern(RegexPatterns.login)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
 
@@ -89,18 +93,30 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = null;
 
-    const {login, password}= this.loginForm.value;
+    const { login, password } = this.loginForm.value;
 
-    this.authService.login({login, password}).pipe(
-      switchMap((response) =>
+    this.authService.login({ login, password }).pipe(
+      switchMap(response =>
         this.authService.getMe().pipe(
           tap(user => {
             this.authService.setUserProfile(user);
             this.userProfile = user;
           }),
-          map(() => response) // keep login response for later use
+          map(() => response)
         )
-      )
+      ),
+      switchMap(response => {
+        const tenantId = this.authService.TenantId;
+        const isPlatformAdmin = this.authService.Role === 'SUPER_PLATFORM_ADMIN'
+                            || !tenantId;
+
+        if (isPlatformAdmin) return of(response);
+
+        return this.tenantService.loadTenantSettings(tenantId!).pipe(
+          map(() => response)
+        );
+      }),
+      take(1)
     ).subscribe({
       next: (response) => {
         this.isLoading = false;
@@ -115,13 +131,13 @@ export class LoginComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.stopLoading();
 
-        // Handle specific status codes
         if (error.status === 0) {
           this.showErrorDialog('SERVER_UNREACHABLE', error);
           return;
         }
         if (error.status === 403) {
-          this.showErrorDialog('ACCESS_DENIED', error);
+          const code = error.error?.code ?? 'ACCESS_DENIED';
+          this.showErrorDialog(code, error);
           return;
         }
         if (error.status === 429) {
@@ -129,34 +145,34 @@ export class LoginComponent implements OnInit, OnDestroy {
           return;
         }
 
-        const code = error.error?.code ?? 'UNKNOWN';
+        const code = error.error?.code ?? 'AUTH_000';
         this.showErrorDialog(code, error);
       }
     });
   }
 
   private showErrorDialog(code: string, error: any): void {
-    const key = `ERRORS.${code}`;
-    const translatedMsg = this.translate.instant(key);
+    const msgKey = `auth.responses.errors.${code}`;
+    const translatedMsg = this.translate.instant(msgKey);
 
-    // If translation key doesn't exist, fall back to error message from server
-    const displayMessage = translatedMsg === key
-      ? (error.error?.message ?? translatedMsg)
+    // Fall back to server message if translation key is missing
+    const displayMessage = translatedMsg === msgKey
+      ? (error?.error?.message ?? translatedMsg)
       : translatedMsg;
 
-    // Determine dialog title based on error type
-    let titleKey = 'DIALOG.ACCESS_DENIED';
-    if (code === 'SERVER_UNREACHABLE') titleKey = 'DIALOG.SERVER_UNREACHABLE';
-    if (code === 'RATE_LIMIT') titleKey = 'DIALOG.RATE_LIMIT';
-    if (code === 'AUTH_003') titleKey = 'DIALOG.ACCOUNT_DEACTIVATED';
-    if (code === 'AUTH_019') titleKey = 'DIALOG.SESSION_EXPIRED';
+    // Determine dialog title key based on error code
+    let titleKey = 'auth.responses.errors.AUTH_006';
+    if (code === 'SERVER_UNREACHABLE') titleKey = 'auth.responses.errors.SERVER_UNREACHABLE';
+    if (code === 'RATE_LIMIT')         titleKey = 'auth.responses.errors.RATE_LIMIT';
+    if (code === 'AUTH_003')           titleKey = 'auth.responses.errors.AUTH_003_TITLE';
+    if (code === 'AUTH_019')           titleKey = 'auth.responses.errors.AUTH_019';
 
     this.dialog.open(ModalComponent, {
       width: '400px',
       data: {
         title:       this.translate.instant(titleKey),
         message:     displayMessage,
-        confirmText: this.translate.instant('DIALOG.OK'),
+        confirmText: this.translate.instant('common.ok'),
         showCancel:  false,
         icon:        'dangerous',
         iconColor:   'danger'

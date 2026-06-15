@@ -24,7 +24,7 @@ export interface CreateCategoryRequestDto {
   name: string;
   code: string;
   delaiRetour: number;
-  duePaymentPeriod: number; 
+  duePaymentPeriod: number;
   useBulkPricing?: boolean;
   discountRate?: number | null;
   creditLimitMultiplier?: number | null;
@@ -52,7 +52,7 @@ export interface PagedResultDto<T> {
   providedIn: 'root'
 })
 export class CategoriesService {
-  private readonly baseUrl = `${environment.apiUrl}${environment.routes.clients}/categories`;
+  private readonly baseUrl = `${environment.routes.clients}/categories`;
 
   constructor(private readonly http: HttpClient) {}
 

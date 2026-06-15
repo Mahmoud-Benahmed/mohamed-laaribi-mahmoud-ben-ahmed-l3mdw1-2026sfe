@@ -1,0 +1,349 @@
+<div class="page">
+  <ng-container *ngIf="selectedTenant">
+
+    <!-- ── Alerts ─────────────────────────────────── -->
+    <div *ngFor="let e of errors" class="alert alert--error">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">error_outline</mat-icon>
+      {{ e }}
+      <button class="alert__close" (click)="dismissError()">
+        <mat-icon style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="successMessage" class="alert alert--success">
+      <mat-icon style="font-size:16px;width:16px;height:16px;">check_circle_outline</mat-icon>
+      {{ successMessage }}
+    </div>
+
+    <!-- ── Page Header ─────────────────────────────── -->
+    <div class="page-header">
+      <div class="start">
+        <div class="breadcrumb-title">
+          <p class="breadcrumb">{{ 'tenants.list.breadcrumb' | translate }} › {{ selectedTenant.name }}</p>
+          <h1 class="page-title">{{ 'tenants.list.title_details' | translate }}: {{ selectedTenant.name }}</h1>
+        </div>
+      </div>
+      <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
+    </div>
+
+    <!-- ── Action Bar ─────────────────────────────── -->
+    <div class="action-bar">
+      <div class="action-bar__btns">
+        <button class="btn-primary"
+                *ngIf="!selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                [matTooltip]="'common.edit' | translate"
+                [routerLink]="['/tenants/edit', selectedTenant.id]">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
+          {{ 'common.edit' | translate }}
+        </button>
+
+        <button class="btn-secondary"
+                *ngIf="selectedTenant.isActive && !selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                (click)="suspend(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">pause_circle</mat-icon>
+          {{ 'tenants.list.actions.suspend' | translate }}
+        </button>
+
+        <button class="btn-success"
+                *ngIf="!selectedTenant.isActive && !selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.UPDATE_TENANT)"
+                (click)="activate(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">play_circle</mat-icon>
+          {{ 'tenants.list.actions.activate' | translate }}
+        </button>
+
+        <button class="btn-danger"
+                *ngIf="!selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT)"
+                (click)="delete(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+          {{ 'common.delete' | translate }}
+        </button>
+
+        <button class="btn-success"
+                *ngIf="selectedTenant.isDeleted && authService.hasPrivilege(PRIVILEGES.TENANTS.DELETE_TENANT)"
+                (click)="restore(selectedTenant)">
+          <mat-icon style="font-size:16px;width:16px;height:16px;">restore</mat-icon>
+          {{ 'common.restore' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Detail Columns ─────────────────────────── -->
+    <div class="detail-columns">
+
+      <!-- Tenant Info Panel -->
+      <div class="panel">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>business</mat-icon></div>
+            <div><h2 class="panel__title">{{ 'tenants.view.tenant_info' | translate }}</h2></div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="detail-grid">
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'tenants.view.name' | translate }}</span>
+              <span class="detail-value detail-value--large">{{ selectedTenant.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.subdomain' | translate }}</span>
+              <span class="detail-value detail-value--mono">{{ selectedTenant.subdomainSlug }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.status' | translate }}</span>
+              <span class="badge" [ngClass]="statusClass(selectedTenant)">
+                {{ getStatusLabel(selectedTenant) | translate }}
+              </span>
+            </div>
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'tenants.view.email' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.email }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.phone' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.phone }}</span>
+            </div>
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'tenants.view.address' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.address }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.currency' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.currency }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.timezone' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.timezone }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.locale' | translate }}</span>
+              <span class="detail-value">{{ selectedTenant.locale }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.created' | translate }}</span>
+              <span class="detail-value date-cell">{{ selectedTenant.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription Panel -->
+       <ng-container *ngIf="selectedTenant.subscription as sub">
+        <ng-container *ngIf="sub.plan as plan">
+            <div class="panel">
+              <div class="panel__header">
+                <div class="panel__title-wrap">
+                  <div class="panel__icon"><mat-icon>bookmark_check</mat-icon></div>
+                  <div><h2 class="panel__title">{{ 'tenants.view.subscription_info' | translate }}</h2></div>
+                </div>
+              </div>
+              <div class="panel__body">
+                <div class="detail-grid">
+                  <div class="detail-item detail-item--full">
+                    <span class="detail-label">{{ 'tenants.view.plan_name' | translate }}</span>
+                    <span class="detail-value detail-value--large">{{ plan.name || 'N/A' }}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="plan">
+                    <span class="detail-label">{{ 'tenants.view.plan_code' | translate }}</span>
+                    <span class="detail-value detail-value--mono">{{ plan.code }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ 'tenants.view.start_date' | translate }}</span>
+                    <span class="detail-value">{{ sub.startDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ 'tenants.view.end_date' | translate }}</span>
+                    <span class="detail-value">{{ sub.endDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="plan.monthlyPrice">
+                    <span class="detail-label">{{ 'tenants.view.monthly_price' | translate }}</span>
+                    <span class="detail-value detail-value--large text-green">{{ (plan.monthlyPrice | number:'1.2-2') }} TND</span>
+                  </div>
+                  <div class="detail-item" *ngIf="plan.yearlyPrice">
+                    <span class="detail-label">{{ 'tenants.view.yearly_price' | translate }}</span>
+                    <span class="detail-value detail-value--large text-green">{{ (plan.yearlyPrice | number:'1.2-2') }} TND</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ 'tenants.view.period' | translate }}</span>
+                    <span class="badge badge--blue">{{ ('tenants.list.periods.' + sub.period) | translate }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </ng-container>
+      </ng-container>
+      <!-- Plan Details Panel -->
+      <div class="panel" *ngIf="subscriptionPlan">
+        <div class="panel__header">
+          <div class="panel__title-wrap">
+            <div class="panel__icon"><mat-icon>local_offer</mat-icon></div>
+            <div><h2 class="panel__title">{{ 'tenants.view.plan_details' | translate }}</h2></div>
+          </div>
+        </div>
+        <div class="panel__body">
+          <div class="detail-grid">
+            <div class="detail-item detail-item--full">
+              <span class="detail-label">{{ 'tenants.view.plan_name' | translate }}</span>
+              <span class="detail-value detail-value--large">{{ subscriptionPlan.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.code' | translate }}</span>
+              <span class="detail-value detail-value--mono">{{ subscriptionPlan.code }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.status' | translate }}</span>
+              <span class="badge" [ngClass]="{'badge--green': subscriptionPlan.isActive, 'badge--grey': !subscriptionPlan.isActive}">
+                {{ subscriptionPlan.isActive ? ('tenants.list.status.active' | translate) : ('tenants.list.status.suspended' | translate) }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.monthly_price' | translate }}</span>
+              <span class="detail-value text-green">{{ subscriptionPlan.monthlyPrice | number:'1.2-2' }} TND</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.yearly_price' | translate }}</span>
+              <span class="detail-value text-green">{{ subscriptionPlan.yearlyPrice | number:'1.2-2' }} TND</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.max_users' | translate }}</span>
+              <span class="detail-value">{{ subscriptionPlan.maxUsers }} {{ 'tenants.view.users' | translate }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ 'tenants.view.max_storage' | translate }}</span>
+              <span class="detail-value">{{ (subscriptionPlan.maxStorageMb / 1024) | number:'1.2-2' }} GB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Manage Subscription Panel ── -->
+    <div class="panel">
+      <div class="panel__header">
+        <div class="panel__title-wrap">
+          <div class="panel__icon"><mat-icon>card_membership</mat-icon></div>
+          <div>
+            <h2 class="panel__title">{{ 'tenants.edit.subscription' | translate }}</h2>
+            <p class="panel__subtitle">{{ 'tenants.edit.manage_subscription' | translate }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel__body">
+
+        <!-- Current subscription summary -->
+        <ng-container *ngIf="selectedTenant.subscription as sub">
+          <ng-container *ngIf="sub.plan as plan">
+            <div class="subscription-info-card">
+              <div class="subscription-info-header">
+                <mat-icon>check_circle</mat-icon>
+                <span>{{ 'tenants.edit.current_subscription' | translate }}</span>
+              </div>
+              <div class="subscription-info-body">
+                <div class="info-row">
+                  <span>{{ 'tenants.view.plan_name' | translate }}</span>
+                  <strong>{{ plan.name }}</strong>
+                </div>
+                <div class="info-row">
+                  <span>{{ 'tenants.view.start_date' | translate }}</span>
+                  <strong>{{ sub.startDate | date:'dd/MM/yyyy' }}</strong>
+                </div>
+                <div class="info-row">
+                  <span>{{ 'tenants.view.end_date' | translate }}</span>
+                  <strong>{{ sub.endDate | date:'dd/MM/yyyy' }}</strong>
+                </div>
+                <div class="info-row">
+                  <span>{{ 'tenants.view.period' | translate }}</span>
+                  <span class="badge badge--blue">{{ ('tenants.list.periods.' + sub.period) | translate }}</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+
+        <div class="empty-state" *ngIf="!selectedTenant.subscription?.plan">
+          <mat-icon>assignment_ind</mat-icon>
+          <p>{{ 'tenants.edit.no_subscription' | translate }}</p>
+        </div>
+
+        <!-- Subscription form -->
+        <form [formGroup]="subscriptionForm" class="form" *ngIf="subscriptionPlans.length > 0">
+
+          <div class="form__row form__row--2">
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'tenants.edit.select_plan' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="subscriptionPlanId"
+                      [class.form__input--error]="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                <option value="">{{ 'common.select' | translate }}</option>
+                <option *ngFor="let plan of subscriptionPlans" [value]="plan.id">
+                  {{ plan.name }} ({{ plan.code }})
+                </option>
+              </select>
+              <span class="form__error" *ngIf="subscriptionForm.get('subscriptionPlanId')?.invalid && subscriptionForm.get('subscriptionPlanId')?.touched">
+                {{ 'validation.required' | translate }}
+              </span>
+            </div>
+
+            <div class="form__field">
+              <label class="form__label">
+                {{ 'tenants.edit.billing_period' | translate }}
+                <span class="form__required">*</span>
+              </label>
+              <select class="form__input"
+                      formControlName="period"
+                      [class.form__input--error]="subscriptionForm.get('period')?.invalid && subscriptionForm.get('period')?.touched">
+                <option [value]="SubscriptionPeriod.MONTH">{{ 'tenants.list.periods.MONTH' | translate }}</option>
+                <option [value]="SubscriptionPeriod.YEAR">{{ 'tenants.list.periods.YEAR' | translate }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Plan details preview -->
+          <div class="plan-details" *ngIf="subscriptionForm.get('subscriptionPlanId')?.value">
+            <div class="plan-detail-row">
+              <span>{{ 'tenants.view.monthly_price' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.MONTH) }}</strong>
+            </div>
+            <div class="plan-detail-row">
+              <span>{{ 'tenants.view.yearly_price' | translate }}</span>
+              <strong>{{ getPlanPrice(subscriptionForm.get('subscriptionPlanId')!.value, SubscriptionPeriod.YEAR) }}</strong>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="form__actions">
+            <button type="button"
+                    class="btn-danger"
+                    *ngIf="selectedTenant.subscription?.plan"
+                    [disabled]="isValidating"
+                    (click)="removeSubscription()">
+              <mat-icon style="font-size:16px;width:16px;height:16px;">delete_outline</mat-icon>
+              {{ 'tenants.edit.remove_subscription' | translate }}
+            </button>
+            <button type="button"
+                    class="btn-success"
+                    [disabled]="subscriptionForm.invalid || isValidating"
+                    (click)="assignSubscription()">
+              <span *ngIf="!isValidating">
+                {{ selectedTenant.subscription?.plan ? ('tenants.edit.update_subscription' | translate) : ('tenants.edit.assign_subscription' | translate) }}
+              </span>
+              <span *ngIf="isValidating">{{ 'common.processing' | translate }}</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- Empty state if no tenant -->
+  <ng-container *ngIf="!selectedTenant && !loading">
+    <div style="padding: 40px; text-align: center; color: var(--text-md);">
+      <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px;">business</mat-icon>
+      <p>{{ 'tenants.responses.errors.load_failed' | translate }}</p>
+    </div>
+  </ng-container>
+</div>

@@ -30,7 +30,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         try
         {
             CategoryCache? category = await _repository.GetByIdAsync(id);
-            return category != null ? await MapToDto(category) : null;
+            return category != null ? MapToDto(category) : null;
         }
         catch (Exception ex)
         {
@@ -47,7 +47,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
             foreach (CategoryCache category in categories)
             {
-                categoryDtos.Add(await MapToDto(category));
+                categoryDtos.Add(MapToDto(category));
             }
             return categoryDtos;
         }
@@ -60,21 +60,13 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
     public async Task<List<ClientCategoryResponseDto>> GetAllAsync()
     {
-        try
-        {
-            List<CategoryCache> categories = await _repository.GetAllAsync();
-            List<ClientCategoryResponseDto> categoryDtos = new List<ClientCategoryResponseDto>();
-            foreach (CategoryCache category in categories)
-            {
-                categoryDtos.Add(await MapToDto(category));
-            }
-            return categoryDtos;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all client categories");
-            throw;
-        }
+        List<CategoryCache> categories = await _repository.GetAllAsync();
+        Dictionary<Guid, int> counts = await _repository
+            .GetClientCountsByCategoryIdsAsync(categories.Select(c => c.Id).ToList());
+
+        return categories
+            .Select(c => MapToDto(c, counts.GetValueOrDefault(c.Id, 0)))
+            .ToList();
     }
 
     public async Task<bool> ExistsAsync(Guid id)
@@ -123,118 +115,52 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
     public async Task SyncCreatedAsync(ClientCategoryResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
-
-        try
+        // Check if category already exists by ID
+        CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing != null)
         {
-            // Check if category already exists
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
-            CategoryCache? existingByCode = await _repository.GetByCodeAsync(dto.Code);
-            if (existing != null && existingByCode != null)
-            {
-                _logger.LogInformation("Category {CategoryName} already exists, updating instead", existing.Name);
-                await SyncUpdatedAsync(dto);
-                return;
-            }
-
-            if (existing == null && existingByCode != null)
-            {
-                _logger.LogInformation($"Deleting existing Category with Code {dto.Code} Due to ID mismatch.");
-                await _repository.DeleteCategoryAsync(existingByCode.Id);
-                _logger.LogInformation($"Existing Category with Code {dto.Code} has been deleted.");
-                _logger.LogInformation($"Creating new Category with Code:{dto.Code} and Id:{dto.Id}");
-
-
-            }
-
-
-            // Create new category master data
-            CategoryCache category = CategoryCache.Create(
-                    id: dto.Id,
-                    name: dto.Name,
-                    code: dto.Code,
-                    delaiRetour: dto.DelaiRetour,
-                    duePaymentPeriod: dto.DuePaymentPeriod,
-                    discountRate: dto.DiscountRate,
-                    creditLimitMultiplier: dto.CreditLimitMultiplier,
-                    useBulkPricing: dto.UseBulkPricing,
-                    isActive: dto.IsActive,
-                    createdAt: dto.CreatedAt,
-                    updatedAt: dto.UpdatedAt,
-                    isDeleted: dto.IsDeleted
-                );
-
-            await _repository.AddCategoryAsync(category);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Category {CategoryName} (Code: {Code}) added to master data",
-                dto.Name, dto.Code);
+            _logger.LogWarning("Category {CategoryId} already exists, skipping creation", dto.Id);
+            return;
         }
-        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate") == true)
-        {
-            _logger.LogWarning(ex, "Duplicate category detected for {CategoryName}", dto.Name);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing created category {CategoryName}", dto.Name);
-            throw;
-        }
+
+        // Fresh insert
+        CategoryCache category = CategoryCache.Create(dto);
+        await _repository.AddCategoryAsync(category);
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Category {CategoryName} (Code: {Code}) added to master data",
+            dto.Name, dto.Code);
     }
 
     public async Task SyncUpdatedAsync(ClientCategoryResponseDto dto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
 
-        try
+        CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id) ?? await _repository.GetByCodeAsync(dto.Code);
-            if (existing == null)
-            {
-                _logger.LogWarning("Category {CategoryId} not found for update, creating instead", dto.Id);
-                await SyncCreatedAsync(dto);
-                return;
-            }
-
-            // Check for code conflict if code changed
-            if (existing.Code != dto.Code)
-            {
-                CategoryCache? existingByCode = await _repository.GetByCodeAsync(dto.Code);
-                if (existingByCode != null && existingByCode.Id != dto.Id)
-                {
-                    _logger.LogError(
-                        "Cannot update category {CategoryId}: Code '{Code}' already used by category {ExistingId}",
-                        dto.Id, dto.Code, existingByCode.Id);
-                    throw new InvalidOperationException($"Category code '{dto.Code}' already exists");
-                }
-            }
-
-            // Update category properties
-            existing.Update(
-                name: dto.Name,
-                code: dto.Code,
-                delaiRetour: dto.DelaiRetour,
-                duePaymentPeriod: dto.DuePaymentPeriod,
-                discountRate: dto.DiscountRate,
-                creditLimitMultiplier: dto.CreditLimitMultiplier,
-                useBulkPricing: dto.UseBulkPricing,
-                isActive: dto.IsActive,
-                isDeleted: dto.IsDeleted,
-                createdAt: dto.CreatedAt,
-                updatedAt: dto.UpdatedAt
-            );
-
-            await _repository.UpdateCategoryAsync(existing);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Category {CategoryName} (Code: {Code}) updated", dto.Name, dto.Code);
+            _logger.LogWarning("Category {CategoryId} not found for update.Skip updating", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing updated category {CategoryId}", dto.Id);
-            throw;
-        }
+
+        // Update category properties
+        existing.Update(
+            name: dto.Name,
+            code: dto.Code,
+            delaiRetour: dto.DelaiRetour,
+            duePaymentPeriod: dto.DuePaymentPeriod,
+            discountRate: dto.DiscountRate,
+            creditLimitMultiplier: dto.CreditLimitMultiplier,
+            useBulkPricing: dto.UseBulkPricing,
+            isActive: dto.IsActive,
+            isDeleted: dto.IsDeleted,
+            createdAt: dto.CreatedAt,
+            updatedAt: dto.UpdatedAt
+        );
+
+        await _repository.UpdateCategoryAsync(existing); // ← missing
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Category {CategoryName} (Code: {Code}) updated", dto.Name, dto.Code);
     }
 
     public async Task SyncDeletedAsync(ClientCategoryResponseDto dto)
@@ -242,26 +168,19 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        try
+        CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
-                return;
-            }
-
-            await _repository.DeleteCategoryAsync(dto.Id);
-            await _repository.SaveChangesAsync();
-
-            _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
-                existing.Name, existing.Code);
+            _logger.LogWarning("Category {CategoryId} not found for deletion", dto.Id);
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error syncing deleted category {CategoryId}", dto.Id);
-            throw;
-        }
+
+        existing.Delete();
+        await _repository.UpdateCategoryAsync(existing); // use the already-loaded entity
+        await _repository.SaveChangesAsync();
+
+        _logger.LogInformation("Category {CategoryName} (Code: {Code}) soft deleted",
+            existing.Name, existing.Code);
     }
 
     public async Task SyncRestoredAsync(ClientCategoryResponseDto dto)
@@ -271,7 +190,7 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
 
         try
         {
-            CategoryCache? existing = await _repository.GetByIdAsync(dto.Id);
+            CategoryCache? existing = await _repository.GetByIdDeletedAsync(dto.Id);
             if (existing == null)
             {
                 _logger.LogWarning("Category {CategoryId} not found for restore", dto.Id);
@@ -413,11 +332,8 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
     // PRIVATE HELPERS
     // =========================
 
-    private async Task<ClientCategoryResponseDto> MapToDto(CategoryCache category)
-    {
-        int clientCount = await _repository.GetCountForClientAsync(category.Id);
-
-        return new ClientCategoryResponseDto(
+    private static ClientCategoryResponseDto MapToDto(CategoryCache category, int clientCount = 0)
+        => new(
             Id: category.Id,
             Name: category.Name,
             Code: category.Code,
@@ -429,7 +345,8 @@ public class ClientCategoryCacheService : IClientCategoryCacheService
             IsActive: category.IsActive,
             IsDeleted: category.IsDeleted,
             CreatedAt: category.CreatedAt,
-            UpdatedAt: category.UpdatedAt
+            UpdatedAt: category.UpdatedAt,
+            TenantId: category.TenantId
             );
-    }
+
 }

@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using ERP.InvoiceService.Application.DTOs;
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using System.Text.Json;
 
@@ -26,10 +27,8 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"]
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers not configured."),
-            GroupId = configuration["Kafka:ConsumerGroups:ClientCategory"]
-                ?? throw new InvalidOperationException("Kafka:ConsumerGroups:ClientCategory not configured."),
+            GroupId = $"invoice-service-client-category-cache-v1",
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false,
             AllowAutoCreateTopics = true,
             SocketTimeoutMs = 60000,
             SessionTimeoutMs = 60000
@@ -88,6 +87,12 @@ public sealed class ClientCategoryEventConsumer : BackgroundService
                         result.Topic, dto.Id, dto.Name);
 
                     using IServiceScope scope = _scopeFactory.CreateScope();
+
+                    var tenantContext =
+                        scope.ServiceProvider.GetRequiredService<ITenantContext>();
+
+                    tenantContext.SetTenantId(dto.TenantId.Value);
+
                     IClientCategoryEventHandler handler = scope.ServiceProvider
                         .GetRequiredService<IClientCategoryEventHandler>();
 

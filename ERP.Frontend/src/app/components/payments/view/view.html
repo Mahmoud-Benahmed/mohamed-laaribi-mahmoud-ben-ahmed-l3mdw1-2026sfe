@@ -4,11 +4,11 @@
         <div class="page-header">
           <div class="start">
             <div class="breadcrumb-title">
-              <p class="breadcrumb">{{ 'PAYMENTS.BREADCRUMB' | translate }} › {{ selectedPayment.number }}</p>
-              <h1 class="page-title">{{ 'PAYMENTS.TITLE_DETAILS' | translate }}: {{ (client$ | async)?.name }}</h1>
+              <p class="breadcrumb">{{ 'payments.breadcrumb' | translate }} › {{ selectedPayment.number }}</p>
+              <h1 class="page-title">{{ 'payments.title_details' | translate }}: {{ (client$ | async)?.name }}</h1>
             </div>
           </div>
-          <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+          <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
         </div>
       </ng-container>
 
@@ -19,45 +19,45 @@
               <div class="panel__header">
                 <div class="panel__title-wrap">
                     <div class="panel__icon"><mat-icon>receipt</mat-icon></div>
-                    <div><h2 class="panel__title">{{ 'INVOICES.DETAILS.INVOICE_INFO' | translate }}</h2></div>
+                    <div><h2 class="panel__title">{{ 'invoices.details.invoice_info' | translate }}</h2></div>
                     </div>
                 </div>
                 <div class="panel__body">
                     <div class="detail-grid">
                     <div class="detail-item">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.NUMBER' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.number' | translate }}</span>
                         <span class="detail-value detail-value--mono">{{ selectedPayment.number }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.DATE' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.date' | translate }}</span>
                         <span class="detail-value">{{ selectedPayment.paymentDate| date:'dd/MM/yyyy' }}</span>
                     </div>
                     <div class="paid-row">
                         <div class="detail-item">
-                            <span class="detail-label">{{ 'PAYMENTS.DETAILS.STATUS' | translate }}</span>
-                            <span class="badge" [ngClass]="statusClass(selectedPayment.status)">{{ 'PAYMENTS.STATUS.' + selectedPayment.status | translate }}</span>
+                            <span class="detail-label">{{ 'payments.details.status' | translate }}</span>
+                            <span class="badge" [ngClass]="statusClass(selectedPayment.status)">{{ 'payments.status.' + selectedPayment.status | translate }}</span>
                         </div>
 
                         <div class="detail-item detail-item--full" *ngIf="selectedPayment.status === 'CANCELLED'">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.CANCELLED_AT' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.cancelled_at' | translate }}</span>
                         <span class="detail-value detail-value--large text-red">{{ selectedPayment.cancelledAt| date:'dd/MM/yyyy' }}</span>
                         </div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.TOTAL_AMOUNT' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.total_amount' | translate }}</span>
                         <span class="detail-value">{{ selectedPayment.totalAmount| number:'1.2-2' }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.METHOD' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.method' | translate }}</span>
                         <span class="detail-value detail-value--large">{{ selectedPayment.method }} </span>
                     </div>
 
                     <div class="detail-item detail-item--full" *ngIf="selectedPayment.externalReference">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.EXTERNAL_REF' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.external_ref' | translate }}</span>
                         <span class="detail-value">{{ selectedPayment.externalReference }}</span>
                     </div>
                     <div class="detail-item detail-item--full">
-                        <span class="detail-label">{{ 'PAYMENTS.DETAILS.NOTES' | translate }}</span>
+                        <span class="detail-label">{{ 'payments.details.notes' | translate }}</span>
                         <span class="detail-value">{{ selectedPayment.notes ?? '-' }}</span>
                     </div>
                 </div>
@@ -68,18 +68,18 @@
                 <div class="panel__header">
                 <div class="panel__title-wrap">
                     <div class="panel__icon"><mat-icon>request_quote</mat-icon></div>
-                    <div><h2 class="panel__title">{{ 'PAYMENTS.DETAILS.ALLOCATIONS' | translate }}</h2></div>
+                    <div><h2 class="panel__title">{{ 'payments.details.allocations' | translate }}</h2></div>
                 </div>
                 </div>
                 <div class="panel__body">
                     <div class="detail-grid" *ngFor="let alloc of selectedPayment.allocations; trackBy: trackById">
                         <div class="detail-item detail-item--full">
-                            <span class="detail-label">{{ 'INVOICES.DETAILS.INVOICE_NUMBER' | translate }}</span>
+                            <span class="detail-label">{{ 'invoices.details.invoice_number' | translate }}</span>
                             <span class="role-badge role-badge--clickable" [routerLink]="['/invoices', alloc.invoiceId]" style="cursor: pointer">{{ getByInvoiceId(alloc.invoiceId)?.invoiceNumber }}</span>
                         </div>
 
                         <div class="detail-item detail-item--full">
-                            <span class="detail-label">{{ 'INVOICES.DETAILS.AMOUNT_PAID' | translate }}</span>
+                            <span class="detail-label">{{ 'invoices.details.amount_paid' | translate }}</span>
                             <span class="detail-value">{{ alloc.amountAllocated| number:'1.2-2'}}</span>
                         </div>
                     </div>
@@ -90,25 +90,25 @@
                 <div class="panel__header">
                 <div class="panel__title-wrap">
                     <div class="panel__icon"><mat-icon>person_outline</mat-icon></div>
-                    <div><h2 class="panel__title">{{ 'INVOICES.DETAILS.CLIENT_INFO' | translate }}</h2></div>
+                    <div><h2 class="panel__title">{{ 'invoices.details.client_info' | translate }}</h2></div>
                 </div>
                 </div>
                 <div class="panel__body">
                 <div class="detail-grid">
                     <div class="detail-item detail-item--full">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.NAME' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.name' | translate }}</span>
                     <span class="role-badge role-badge--clickable" [routerLink]="['/clients', (client$ | async)?.id]" style="cursor: pointer">{{ (client$ | async)?.name }}</span>
                     </div>
                     <div class="detail-item detail-item--full">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.ADDRESS' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.address' | translate }}</span>
                     <span class="detail-value">{{ (client$ | async)?.address ?? "-" }}</span>
                     </div>
                     <div class="detail-item">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.CREATED' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.created' | translate }}</span>
                     <span class="detail-value date-cell">{{ (client$ | async)?.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                     <div class="detail-item">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.UPDATED' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.updated' | translate }}</span>
                     <span class="detail-value date-cell">{{ (client$ | async)?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                 </div>

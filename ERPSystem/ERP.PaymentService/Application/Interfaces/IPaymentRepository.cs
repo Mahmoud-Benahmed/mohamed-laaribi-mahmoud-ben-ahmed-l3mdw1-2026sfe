@@ -8,11 +8,14 @@ public interface IPaymentRepository
     Task<PaymentStatsDto> GetStatsAsync();
     Task<Payment?> GetByIdAsync(Guid id);
     Task<Payment?> GetByNumberAsync(string number);
-    Task<List<Payment>> GetByClientIdAsync(Guid clientId);
+    Task<List<Payment>> GetByClientIdAsync(Guid clientId); 
+    Task<(List<Payment> Items, int TotalCount)> GetPagedByClientIdAsync(
+    Guid clientId, int pageNumber, int pageSize);
     Task<(List<Payment> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, PaymentStatus status, string? search = null);
     Task<List<PaymentSummaryDto>> GetSummaryByInvoiceIdAsync(Guid invoiceId);
     Task AddAsync(Payment payment);
     Task UpdateAsync(Payment payment);
+    Task SaveChangesAsync();
 }
 
 public interface IPaymentInvoiceRepository
@@ -22,7 +25,7 @@ public interface IPaymentInvoiceRepository
     Task<List<PaymentInvoice>> GetByInvoiceIdAsync(Guid invoiceId);
     Task AddAsync(PaymentInvoice paymentInvoice);
     Task SaveChangesAsync();
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(PaymentInvoice paymentInvoice);
 }
 
 public interface IRefundRequestRepository

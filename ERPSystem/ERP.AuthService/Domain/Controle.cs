@@ -1,25 +1,31 @@
 ﻿using ERP.AuthService.Application.DTOs.Role;
+using ERP.AuthService.Infrastructure.Persistence.Repositories;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.RegularExpressions;
 
 namespace ERP.AuthService.Domain
 {
-    public class Controle
+    public class Controle:ITenantFilterable
     {
         [BsonId]
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public Guid Id { get; private set; }
 
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid? TenantId { get; private set; }
+
         public string Category { get; private set; } = default!;
         public string Libelle { get; private set; } = default!;
         public string Description { get; private set; } = default!;
 
+        [BsonConstructor]
         private Controle() { }
 
-        public Controle(string category, string libelle, string description)
+        public Controle(string category, string libelle, string description, Guid? tenantId= null)
         {
             Id = Guid.NewGuid();
+            TenantId = tenantId;
             Category = Regex.Replace(
                 category.Trim().ToUpper(),
                 @"\s+",

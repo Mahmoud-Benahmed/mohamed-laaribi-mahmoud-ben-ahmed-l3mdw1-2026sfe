@@ -99,7 +99,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           const errorMsg = (err.error as HttpError)?.message
-            ?? this.translate.instant('INVOICES.ERRORS.LOAD_FAILED');
+            ?? this.translate.instant('invoices.responses.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -109,10 +109,10 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
   finalize(invoice: InvoiceDto): void {
     this.invoiceService.finalize(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.FINALIZED'));
+        this.flash('success', this.translate.instant('invoices.responses.success.finalized'));
         this.reload(); // ← handles everything
       },
-      error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.FINALIZE_FAILED')),
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.finalize_failed')),
     });
   }
 
@@ -120,11 +120,11 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ModalComponent, {
       width: '420px',
       data: {
-        icon: 'cancel', iconColor: 'warn',
-        title: this.translate.instant('INVOICES.DIALOG.CANCEL_INVOICE_TITLE'),
-        message: this.translate.instant('INVOICES.DIALOG.CANCEL_INVOICE_MESSAGE', { number: invoice.invoiceNumber }),
-        confirmText: this.translate.instant('INVOICES.DIALOG.CANCEL_CONFIRM'),
-        cancelText: this.translate.instant('INVOICES.DIALOG.GO_BACK'),
+        icon: 'cancel', iconColor: 'danger',
+        title: this.translate.instant('invoices.dialog.cancel_invoice_title'),
+        message: this.translate.instant('invoices.dialog.cancel_invoice_message', { number: invoice.invoiceNumber }),
+        confirmText: this.translate.instant('invoices.dialog.cancel_confirm'),
+        cancelText: this.translate.instant('invoices.dialog.go_back'),
         showCancel: true,
       },
     });
@@ -132,10 +132,10 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.cancel(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('INVOICES.SUCCESS.CANCELLED'));
+          this.flash('success', this.translate.instant('invoices.responses.success.cancelled'));
           this.reload();
         },
-        error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.CANCEL_FAILED')),
+        error: () => this.flash('error', this.translate.instant('invoices.responses.errors.cancel_failed')),
       });
     });
   }
@@ -145,10 +145,10 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
       width: '420px',
       data: {
         icon: 'delete', iconColor: 'warn',
-        title: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_TITLE'),
-        message: this.translate.instant('INVOICES.DIALOG.DELETE_INVOICE_MESSAGE', { number: invoice.invoiceNumber }),
-        confirmText: this.translate.instant('INVOICES.DIALOG.DELETE_CONFIRM'),
-        cancelText: this.translate.instant('COMMON.CANCEL'),
+        title: this.translate.instant('invoices.dialog.delete_invoice_title'),
+        message: this.translate.instant('invoices.dialog.delete_invoice_message', { number: invoice.invoiceNumber }),
+        confirmText: this.translate.instant('invoices.dialog.delete_confirm'),
+        cancelText: this.translate.instant('common.cancel'),
         showCancel: true,
       },
     });
@@ -156,12 +156,12 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
       if (!confirmed) return;
       this.invoiceService.delete(invoice.id).subscribe({
         next: () => {
-          this.flash('success', this.translate.instant('INVOICES.SUCCESS.DELETED'));
+          this.flash('success', this.translate.instant('invoices.responses.success.deleted'));
           setTimeout(()=>{
             this.cancel();
           }, 2000);
         },
-        error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.DELETE_FAILED')),
+        error: () => this.flash('error', this.translate.instant('invoices.responses.errors.delete_failed')),
       });
     });
   }
@@ -169,13 +169,13 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
   restore(invoice: InvoiceDto): void {
     this.invoiceService.restore(invoice.id).subscribe({
       next: () => {
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.RESTORED'));
-        this.flash('success', this.translate.instant('INVOICES.SUCCESS.CREATED'));
+        this.flash('success', this.translate.instant('invoices.responses.success.restored'));
+        this.flash('success', this.translate.instant('invoices.responses.success.created'));
         setTimeout(()=>{
             this.cancel();
           }, 2000);
       },
-      error: () => this.flash('error', this.translate.instant('INVOICES.ERRORS.RESTORE_FAILED')),
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.restore_failed')),
     });
   }
 
@@ -187,7 +187,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         // optional: revoke after a delay to free memory
         setTimeout(() => window.URL.revokeObjectURL(url), 10000);
       },
-      error: () => this.flash('error', 'PDF preview failed')
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.pdf_preview_failed'))
     });
   }
 
@@ -201,7 +201,7 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: () => this.flash('error', 'PDF generation failed')
+      error: () => this.flash('error', this.translate.instant('invoices.responses.errors.pdf_download_failed'))
     });
   }
 
@@ -251,5 +251,4 @@ export class ViewInvoiceComponent implements OnInit, OnDestroy {
         this.reload();
     });
   }
-
 }

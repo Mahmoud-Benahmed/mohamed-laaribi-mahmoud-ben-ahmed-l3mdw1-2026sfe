@@ -4,11 +4,11 @@
         <div class="page-header">
           <div class="start">
             <div class="breadcrumb-title">
-              <p class="breadcrumb">{{ 'INVOICES.BREADCRUMB' | translate }} › {{ selectedInvoice.invoiceNumber }}</p>
-              <h1 class="page-title">{{ 'INVOICES.TITLE_DETAILS' | translate }}: {{ selectedInvoice.invoiceNumber }}</h1>
+              <p class="breadcrumb">{{ 'invoices.breadcrumb' | translate }} › {{ selectedInvoice.invoiceNumber }}</p>
+              <h1 class="page-title">{{ 'invoices.title_details' | translate }}: {{ selectedInvoice.invoiceNumber }}</h1>
             </div>
           </div>
-          <button class="btn-back" (click)="cancel()">← {{ 'COMMON.BACK' | translate }}</button>
+          <button class="btn-back" (click)="cancel()">← {{ 'common.back' | translate }}</button>
         </div>
       </ng-container>
 
@@ -18,23 +18,23 @@
                   <button class="btn-primary"
                           *ngIf="selectedInvoice.status === 'DRAFT' && !selectedInvoice.isDeleted
                                 && authService.hasPrivilege(PRIVILEGES.INVOICES.CREATE_INVOICE)"
-                          [matTooltip]="'COMMON.EDIT' | translate"
+                          [matTooltip]="'common.edit' | translate"
                           (click)="openEdit(invoiceIdFromRoute!)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;">edit</mat-icon>
-                    {{('COMMON.EDIT'| translate)}}
+                    {{('common.edit'| translate)}}
                   </button>
                   <button class="btn-warning"
                           *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.UPDATE_DRAFT_INVOICE)
                           && selectedInvoice.status === 'DRAFT' && !selectedInvoice.isDeleted"
                           (click)="finalize(selectedInvoice)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;vertical-align:middle">send</mat-icon>
-                    {{ 'INVOICES.ACTIONS.FINALIZE' | translate }}
+                    {{ 'invoices.actions.finalize' | translate }}
                   </button>
                   <button class="btn-success"
-                          *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.MARK_INVOICE_PAID) && selectedInvoice?.status === 'UNPAID'"
+                          *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.MARK_INVOICE_PAID) && selectedInvoice.status === 'UNPAID'"
                           (click)="selectedInvoice && markAsPaid(selectedInvoice)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;vertical-align:middle">check_circle</mat-icon>
-                    {{ 'INVOICES.ACTIONS.MARK_AS_PAID' | translate }}
+                    {{ 'invoices.actions.mark_as_paid' | translate }}
                   </button>
                   <button class="btn-secondary"
                           *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.CANCEL_INVOICE)
@@ -42,29 +42,29 @@
                                 && !selectedInvoice.isDeleted"
                           (click)="cancelInvoice(selectedInvoice)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;vertical-align:middle">cancel</mat-icon>
-                    {{ 'INVOICES.ACTIONS.CANCEL' | translate }}
+                    {{ 'invoices.actions.cancel' | translate }}
                   </button>
                   <button class="btn-danger"
                           *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.DELETE_INVOICE) && selectedInvoice.status === 'DRAFT' && !selectedInvoice.isDeleted"
                           (click)="delete(selectedInvoice)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;vertical-align:middle">delete_outline</mat-icon>
-                    {{ 'COMMON.DELETE' | translate }}
+                    {{ 'common.delete' | translate }}
                   </button>
-                  <button class="btn-success" [matTooltip]="'INVOICES.ACTIONS.RESTORE' | translate"
+                  <button class="btn-success" [matTooltip]="'invoices.actions.restore' | translate"
                           *ngIf="authService.hasPrivilege(PRIVILEGES.INVOICES.DELETE_INVOICE) && selectedInvoice.status === 'DRAFT' && selectedInvoice.isDeleted"
                           (click)="restore(selectedInvoice)">
                     <mat-icon style="font-size:16px;width:16px;height:16px;">restore</mat-icon>
-                    {{ 'COMMON.RESTORE' | translate }}
+                    {{ 'common.restore' | translate }}
                   </button>
-                <button class="btn-primary" (click)="previewPdf(selectedInvoice)" [matTooltip]="'INVOICES.ACTIONS.PREVIEW' | translate">
+                <button class="btn-primary" (click)="previewPdf(selectedInvoice)" [matTooltip]="'invoices.actions.preview' | translate">
                 <mat-icon style="font-size:16px;width:16px;height:16px;">visibility</mat-icon>
-                {{ 'INVOICES.ACTIONS.PREVIEW' | translate }}
+                {{ 'invoices.actions.preview' | translate }}
               </button>
-              <button class="btn-success" [matTooltip]="'INVOICES.ACTIONS.PRINT' | translate"
+              <button class="btn-success" [matTooltip]="'invoices.actions.print' | translate"
                       *ngIf="!selectedInvoice.isDeleted"
                       (click)="downloadPdf(selectedInvoice)">
-                <mat-icon style="font-size:16px;width:16px;height:16px;">picture_as_pdf</mat-icon>
-                {{ 'INVOICES.ACTIONS.PRINT' | translate }}
+                <mat-icon style="font-size:16px;width:16px;height:16px;">download</mat-icon>
+                {{ 'invoices.actions.print' | translate }}
               </button>
             </div>
         </div>
@@ -75,55 +75,55 @@
             <div class="panel__header">
               <div class="panel__title-wrap">
                 <div class="panel__icon"><mat-icon>receipt</mat-icon></div>
-                <div><h2 class="panel__title">{{ 'INVOICES.DETAILS.INVOICE_INFO' | translate }}</h2></div>
+                <div><h2 class="panel__title">{{ 'invoices.details.invoice_info' | translate }}</h2></div>
               </div>
             </div>
             <div class="panel__body">
               <div class="detail-grid">
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.INVOICE_NUMBER' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.invoice_number' | translate }}</span>
                   <span class="detail-value detail-value--mono">{{ selectedInvoice.invoiceNumber }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.STATUS' | translate }}</span>
-                  <span class="badge" [ngClass]="statusClass(selectedInvoice.status)">{{ 'INVOICES.STATUS.' + selectedInvoice.status | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.status' | translate }}</span>
+                  <span class="badge" [ngClass]="statusClass(selectedInvoice.status)">{{ 'invoices.status.' + selectedInvoice.status | translate }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.INVOICE_DATE' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.invoice_date' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.invoiceDate | date:'dd/MM/yyyy' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.DUE_DATE' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.due_date' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.dueDate | date:'dd/MM/yyyy' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.TOTAL_HT' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.total_ht' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.totalHT | number:'1.2-2' }} TND</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.TOTAL_TVA' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.total_tva' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.totalTVA | number:'1.2-2' }} TND</span>
                 </div>
                 <div class="detail-item detail-item--full">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.TOTAL_TTC' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.total_ttc' | translate }}</span>
                   <span class="detail-value detail-value--large">{{ selectedInvoice.totalTTC | number:'1.2-2' }} TND</span>
                 </div>
 
                 <div class="paid-row">
                     <!-- PAID -->
                   <div class="detail-item detail-item--full" *ngIf="selectedInvoice.status === 'UNPAID'">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.AMOUNT_TO_PAY' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.amount_to_pay' | translate }}</span>
                     <span class="detail-value detail-value--large text-red">{{ selectedInvoice.remainingAmount| number:'1.2-2' }} TND</span>
                   </div>
 
                   <div class="detail-item detail-item--full" *ngIf="selectedInvoice.paidAmount && selectedInvoice.paidAmount > 0">
-                    <span class="detail-label">{{ 'INVOICES.DETAILS.AMOUNT_PAID' | translate }}</span>
+                    <span class="detail-label">{{ 'invoices.details.amount_paid' | translate }}</span>
                     <span class="detail-value detail-value--large text-green">{{ selectedInvoice.paidAmount | number:'1.2-2' }} TND</span>
                   </div>
                 </div>
 
                 <div class="detail-item detail-item--full" *ngIf="selectedInvoice.additionalNotes">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.NOTES' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.notes' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.additionalNotes }}</span>
                 </div>
               </div>
@@ -134,25 +134,25 @@
             <div class="panel__header">
               <div class="panel__title-wrap">
                 <div class="panel__icon"><mat-icon>person_outline</mat-icon></div>
-                <div><h2 class="panel__title">{{ 'INVOICES.DETAILS.CLIENT_INFO' | translate }}</h2></div>
+                <div><h2 class="panel__title">{{ 'invoices.details.client_info' | translate }}</h2></div>
               </div>
             </div>
             <div class="panel__body">
               <div class="detail-grid">
                 <div class="detail-item detail-item--full">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.NAME' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.name' | translate }}</span>
                   <span class="role-badge role-badge--clickable" [routerLink]="['/clients', selectedInvoice.clientId]" style="cursor: pointer">{{ selectedInvoice.clientFullName }}</span>
                 </div>
                 <div class="detail-item detail-item--full">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.ADDRESS' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.address' | translate }}</span>
                   <span class="detail-value">{{ selectedInvoice.clientAddress }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.CREATED' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.created' | translate }}</span>
                   <span class="detail-value date-cell">{{ selectedInvoice.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">{{ 'INVOICES.DETAILS.UPDATED' | translate }}</span>
+                  <span class="detail-label">{{ 'invoices.details.updated' | translate }}</span>
                   <span class="detail-value date-cell">{{ selectedInvoice.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
                 </div>
               </div>
@@ -166,8 +166,8 @@
             <div class="panel__title-wrap">
               <div class="panel__icon"><mat-icon>list_alt</mat-icon></div>
               <div>
-                <h2 class="panel__title">{{ 'INVOICES.DETAILS.LINE_ITEMS' | translate }}</h2>
-                <p class="panel__subtitle">{{ 'INVOICES.DETAILS.ITEMS_COUNT' | translate:{count: selectedInvoice.items.length} }}</p>
+                <h2 class="panel__title">{{ 'invoices.details.line_items' | translate }}</h2>
+                <p class="panel__subtitle">{{ 'invoices.details.items_count' | translate:{count: selectedInvoice.items.length} }}</p>
               </div>
             </div>
           </div>
@@ -176,18 +176,18 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th>{{ 'INVOICES.DETAILS.ARTICLE' | translate }}</th>
-                    <th>{{ 'INVOICES.DETAILS.BAR_CODE' | translate }}</th>
-                    <th class="text-center">{{ 'INVOICES.DETAILS.QTY' | translate }}</th>
-                    <th class="text-center">{{ 'INVOICES.DETAILS.UNIT_HT' | translate }}</th>
-                    <th class="text-center">{{ 'INVOICES.DETAILS.TAX' | translate }}</th>
-                    <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_HT_COL' | translate }}</th>
-                    <th class="text-center">{{ 'INVOICES.DETAILS.TOTAL_TTC_COL' | translate }}</th>
+                    <th>{{ 'invoices.details.article' | translate }}</th>
+                    <th>{{ 'invoices.details.bar_code' | translate }}</th>
+                    <th class="text-center">{{ 'invoices.details.qty' | translate }}</th>
+                    <th class="text-center">{{ 'invoices.details.unit_ht' | translate }}</th>
+                    <th class="text-center">{{ 'invoices.details.tax' | translate }}</th>
+                    <th class="text-center">{{ 'invoices.details.total_ht_col' | translate }}</th>
+                    <th class="text-center">{{ 'invoices.details.total_ttc_col' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngIf="!selectedInvoice.items || selectedInvoice.items.length === 0">
-                    <td colspan="7" class="td--empty">{{ 'INVOICES.DETAILS.NO_ITEMS' | translate }}</td>
+                    <td colspan="7" class="td--empty">{{ 'invoices.details.no_items' | translate }}</td>
                   </tr>
                   <tr class="table__row" *ngFor="let item of selectedInvoice.items; trackBy: trackById">
                     <td class="td--name clickable" [routerLink]="['/articles', item.articleId]">{{ item.articleName }}</td>
@@ -202,7 +202,7 @@
                 <ng-container *ngIf="selectedInvoice.items && selectedInvoice.items.length > 0">
                   <tfoot>
                     <tr class="totals-row">
-                      <td colspan="5" class="totals-label">{{ 'INVOICES.DETAILS.TOTALS' | translate }}</td>
+                      <td colspan="5" class="totals-label">{{ 'invoices.details.totals' | translate }}</td>
                       <td class="td--price text-center totals-value">{{ selectedInvoice.totalHT | number:'1.2-2' }} TND</td>
                       <td class="td--price text-center totals-value">{{ selectedInvoice.totalTTC | number:'1.2-2' }} TND</td>
                     </tr>

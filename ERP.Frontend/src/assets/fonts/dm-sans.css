@@ -1,0 +1,8 @@
+/* Normal */
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 300; font-display: swap; src: url('dm-sans/dm-sans-0-w300.ttf') format('truetype'); }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('dm-sans/dm-sans-1-w400.ttf') format('truetype'); }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('dm-sans/dm-sans-2-w500.ttf') format('truetype'); }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url('dm-sans/dm-sans-3-w600.ttf') format('truetype'); }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url('dm-sans/dm-sans-4-w700.ttf') format('truetype'); }
+/* Italic */
+@font-face { font-family: 'DM Sans'; font-style: italic; font-weight: 400; font-display: swap; src: url('dm-sans/dm-sans-5-w400.ttf') format('truetype'); }

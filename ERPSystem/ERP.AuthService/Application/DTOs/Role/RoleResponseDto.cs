@@ -2,7 +2,8 @@
 {
     public record RoleResponseDto(
        Guid Id,
-       string Libelle
+       string Libelle,
+       Guid? TenantId
     );
 
     public record RoleCreateDto(

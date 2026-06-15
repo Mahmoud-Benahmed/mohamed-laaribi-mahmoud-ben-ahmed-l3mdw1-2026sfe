@@ -18,7 +18,8 @@ namespace ERP.ArticleService.Application.DTOs
         int TVA,
         bool IsDeleted,
         DateTime CreatedAt,
-        DateTime? UpdatedAt
+        DateTime? UpdatedAt,
+        Guid? TenantId
     );
 
     public sealed record CategoryStatsDto(

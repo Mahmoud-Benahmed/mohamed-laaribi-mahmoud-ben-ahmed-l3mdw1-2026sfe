@@ -7,12 +7,15 @@ using ERP.PaymentService.Application.Services.LocalCache;
 using ERP.PaymentService.Infrastructure.Messaging;
 using ERP.PaymentService.Infrastructure.Messaging.Events;
 using ERP.PaymentService.Infrastructure.Messaging.Events.Invoice;
+using ERP.PaymentService.Infrastructure.Messaging.TenantEvent;
 using ERP.PaymentService.Infrastructure.Persistence;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories;
 using ERP.PaymentService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.PaymentService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -56,9 +59,25 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
+
 // =========================
 // REPOSITORIES
 // =========================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRefundRequestRepository, RefundRequestRepository>();
 builder.Services.AddScoped<IInvoiceCacheRepository, InvoiceCacheRepository>();
@@ -74,15 +93,16 @@ builder.Services.AddScoped<IPaymentNumberGenerator, PaymentNumberGenerator>();
 builder.Services.AddScoped<IInvoiceEventHandler, InvoiceEventHandler>();
 builder.Services.AddHostedService<InvoiceEventConsumer>();
 
-
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
+
 
 // =========================
 // SWAGGER
 // =========================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpContextAccessor();
 
 // ====================================
 // BUILD
@@ -166,8 +186,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 using (IServiceScope scope = app.Services.CreateScope())
 {
     PaymentDbContext context = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
-    if(app.Environment.IsDevelopment())
-        await context.Database.EnsureDeletedAsync();
+
     await context.Database.MigrateAsync();
 }
 
@@ -176,8 +195,11 @@ using (IServiceScope scope = app.Services.CreateScope())
 // =========================
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -187,5 +209,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

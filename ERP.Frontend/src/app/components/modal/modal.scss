@@ -1,31 +1,182 @@
+// ─── Confirm Dialog: custom theme override ───────────────────────────────────
+// Targets the CDK overlay + mat-dialog-container to replace mat-sys tokens
+// with your --bg-card / --text-* / --border CSS variables.
+
 @use 'shared' as *;
+@use '@angular/material' as mat;
 
-.icon--primary { color: var(--mat-sys-primary); }
-.icon--danger  { color: var(--mat-sys-error); }
-.icon--warn    { color: $amber; }
-.icon--accent  { color: $text-lo; }        // FIX 2: use theme-aware token
-.icon--success { color: $green; }
+// ── Color utility classes ─────────────────────────────────────────────────────
+.color-primary { color: var(--accent); }
+.color-danger  { color: var(--danger); }
+.color-warning { color: $amber; }
+.color-accent  { color: var(--text-soft); }
+.color-success { color: $green; }
 
-.modal-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 24px 0;
+.bg-primary { background-color: var(--accent) !important; }
+.bg-danger  { background-color: var(--danger) !important; }
+.bg-warning    { background-color: $amber !important; }
+.bg-accent  { background-color: var(--text-soft) !important; }
+.bg-success { background-color: $green !important; }
 
-  mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+// ── Override the Material dialog panel at the CDK overlay level ───────────────
+// These must be :root-level or inside the overlay container selector,
+// NOT scoped to the component (dialog lives outside component tree).
+
+.cdk-overlay-container {
+
+  // The actual dialog surface
+  .mat-mdc-dialog-container {
+    --mdc-dialog-container-color:       var(--bg-card);
+    --mdc-dialog-container-elevation:   none;
+    --mdc-dialog-container-shape:       12px;
+
+    // Strip Material's default white/elevation
+    .mdc-dialog__surface {
+      background-color: var(--bg-card) !important;
+      border-radius:    12px !important;
+      border:           1px solid var(--border) !important;
+      box-shadow:       0 24px 48px rgba(0, 0, 0, 0.35) !important;
+      overflow:         hidden;
+    }
   }
 
-  h2 {
-    margin: 0;
-    padding: 0;
-    color: $text-hi;
+  // Dialog title (mat-dialog-title)
+  .mat-mdc-dialog-title,
+  .mdc-dialog__title {
+    display: flex;
+    align-items: center;
+    --mdc-dialog-subhead-color: var(--text-hi);
+    color: var(--text-hi) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    padding: 0 !important;   // header handles its own padding
+
+    // Material injects a ::before pseudo that adds top space — kill it
+    &::before { display: none !important; }
+  }
+
+  // Dialog body
+  .mat-mdc-dialog-content,
+  .mdc-dialog__content {
+    --mdc-dialog-supporting-text-color: var(--text-mid);
+    color:       var(--text-mid) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size:   0.9rem !important;
+    line-height: 1.6 !important;
+    padding:     0 24px 8px !important;
+    max-height:  60vh;
+  }
+
+  // Dialog actions bar
+  .mat-mdc-dialog-actions,
+  .mdc-dialog__actions {
+    padding:        12px 24px 20px !important;
+    border-top:     1px solid var(--border) !important;
+    gap:            8px;
+    background:     var(--bg-card);
   }
 }
 
-mat-dialog-content p {
-  color: $text-mid;  // FIX 1: theme-aware, works in both light and dark
-  line-height: 1.6;
+// ── Scrim (backdrop) ──────────────────────────────────────────────────────────
+.cdk-overlay-backdrop.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(2px);
+}
+
+// ── Component-scoped layout (stays local) ─────────────────────────────────────
+.modal-header {
+  display:     flex;
+  align-items: center;
+  align-content: center;
+  justify-content: start;
+  gap:         10px;
+  padding:     20px 24px 12px;
+
+  mat-icon {
+    font-size: 26px;
+    width:     26px;
+    height:    26px;
+    flex-shrink: 0;
+  }
+
+  h2 {
+    margin:  0;
+    padding: 0;
+    // color set by .color-* utility above via [ngClass]
+  }
+}
+
+// ── Button overrides (secondary + colored confirm) ────────────────────────────
+// ── Button overrides ──────────────────────────────────────────────────────────
+.btn {
+  font-family:   'DM Sans', sans-serif !important;
+  font-size:     0.85rem !important;
+  border-radius: 8px !important;
+  border:        none;
+  cursor:        pointer;
+  padding:       0 18px;
+  height:        36px;
+  line-height:   36px;
+  transition:    filter 0.15s ease, background-color 0.15s ease;
+
+  // Cancel / ghost button — subtle, no fill
+  &-secondary {
+    --mdc-text-button-label-text-color:     var(--text-soft) !important;
+    --mdc-outlined-button-label-text-color: var(--text-soft) !important;
+    --mat-text-button-ripple-color:         transparent;
+    background-color: transparent !important;
+    color:            var(--text-soft) !important;
+    box-shadow:       none !important;
+
+    &:hover {
+      background-color: var(--bg-page) !important;
+      color:            var(--text-hi) !important;
+    }
+  }
+
+  // Confirm button — uses .bg-* utility class for color, white text
+  &-primary {
+    --mdc-protected-button-label-text-color:  #fff !important;
+    --mdc-protected-button-container-color:   var(--accent) !important;
+    background-color: var(--accent) !important;
+    color:            #fff !important;
+    box-shadow:       none !important;
+
+    &:hover { filter: brightness(1.12); }
+    &:active { filter: brightness(0.95); }
+  }
+
+  &-danger {
+    --mdc-protected-button-label-text-color:  #fff !important;
+    --mdc-protected-button-container-color:   var(--danger) !important;
+    background-color: var(--danger) !important;
+    color:            #fff !important;
+    box-shadow:       none !important;
+
+    &:hover { filter: brightness(1.12); }
+    &:active { filter: brightness(0.95); }
+  }
+
+  &-success {
+    --mdc-protected-button-label-text-color:  #fff !important;
+    --mdc-protected-button-container-color:   #{$green} !important;
+    background-color: $green !important;
+    color:            #fff !important;
+    box-shadow:       none !important;
+
+    &:hover { filter: brightness(1.12); }
+    &:active { filter: brightness(0.95); }
+  }
+
+  &-warning {
+    --mdc-protected-button-label-text-color:  #fff !important;
+    --mdc-protected-button-container-color:   #{$amber} !important;
+    background-color: $amber !important;
+    color:            #fff !important;
+    box-shadow:       none !important;
+
+    &:hover { filter: brightness(1.12); }
+    &:active { filter: brightness(0.95); }
+  }
 }

@@ -1,1375 +1,1850 @@
 {
-  "NAV": {
-    "HOME": "Home",
-    "AUTH_USERS": "Auth & Users",
-    "USERS": "Users",
-    "DEACTIVATED": "Deactivated",
-    "DELETED": "Deleted",
-    "REGISTER": "Register",
-    "CONTROLES": "Controls",
-    "ROLES": "Roles",
-    "PERMISSIONS": "Permissions",
-    "ARTICLES": "Articles",
-    "CATEGORIES": "Categories",
-    "CLIENTS": "Clients",
-    "STOCK": "Stock",
-    "FOURNISSEURS": "Suppliers",
-    "BONS": "Receipts",
-    "INVOICES":"Invoices",
-    "PAYMENTS": "Payments",
-    "REFUNDS": "Refunds",
-
-    "AUDIT_LOG": "Audit Log"
-  },
-  "COMMON": {
-    "MARK_COMPLETED": "Mark as completed",
-    "LOAD_MORE": "Load more",
-    "LEAVE": "Leave",
-    "STAY": "Stay",
-    "PROCESSING": "Processing...",
-    "SAVE": "Save",
-    "SAVE_CHANGES": "Save changes",
-    "CANCEL": "Cancel",
-    "DELETE": "Delete",
-    "EDIT": "Edit",
-    "VIEW": "View",
-    "BACK": "Back",
-    "ADD": "Add",
-    "RESTORE": "Restore",
-    "ACTIVATE": "Activate",
-    "ACTIVE": "Active",
-    "INACTIVE":"Inactive",
-    "DEACTIVATE": "Deactivate",
-    "BLOCK": "Block",
-    "UNBLOCK": "Unblock",
-    "BLOCKED": "Blocked",
-    "SEARCH": "Search",
-    "LOADING": "Loading...",
-    "NO_RESULTS": "No results found",
-    "PAGE_OF": "Page {{current}} of {{total}}",
-    "ITEMS_PER_PAGE": "{{size}} / page",
-    "PREVIOUS": "‹ Previous",
-    "NEXT": "Next ›",
-    "OK": "OK",
-    "CONFIRM": "Confirm",
-    "CLOSE": "Close",
-    "LOGOUT": "Logout",
-    "SAVING": "Saving...",
-    "UPDATE": "Edit",
-    "OPTIONAL": "optional",
-    "CLEAR": "Clear",
-    "DAYS": "days",
-    "ENABLED": "Enabled",
-    "DISABLED": "Disabled",
-    "DAYS_COUNT": "{{count}} day",
-    "DAYS_COUNT_plural": "{{count}} days",
-    "REMOVE": "Remove",
-    "OR": "OR",
-    "ACTIONS": "ACTIONS",
-    "SELECT": "Select an element from the dropdown"
-  },
-  "VALIDATION": {
-    "PHONE_INVALID": "Phone must be 8–15 digits, optionally starting with +.",
-    "PHONE_MAX": "Phone cannot exceed 20 characters.",
-    "TAX_NUMBER_INVALID": "Tax number may only contain letters and numbers.",
-    "TAX_NUMBER_MAX": "Tax number cannot exceed 50 characters.",
-    "CREDIT_LIMIT_INVALID": "Credit limit must be at least 1000.",
-    "DUE_PAYMENT_PERIOD_INVALID": "Due payment period must be between 7 and 180 days.",
-    "DELAI_RETOUR_INVALID": "Return period must be between 7 and 270 days.",
-    "NAME_MIN": "Name must be at least 2 characters.",
-    "NAME_MAX": "Name cannot exceed 200 characters.",
-    "NAME_PATTERN": "Name contains invalid characters.",
-    "EMAIL_INVALID": "Please enter a valid email address.",
-    "ADDRESS_MIN": "Address must be at least 5 characters.",
-    "ADDRESS_PATTERN": "Address contains invalid characters.",
-    "REQUIRED": "This field is required",
-    "MIN_LENGTH": "Minimum {{min}} characters required",
-    "MAX_LENGTH": "Maximum {{max}} characters allowed",
-    "INVALID_EMAIL": "Please enter a valid email address",
-    "INVALID_PHONE": "Please enter a valid phone number",
-    "INVALID_LOGIN": "Letters, digits underscores or spaces only",
-    "INVALID_TAX_NUMBER": "Tax number is required",
-    "INVALID_RIB": "RIB must be 10-34 alphanumeric characters",
-    "INVALID_PRICE": "Price must be greater than 0",
-    "INVALID_TVA": "TVA must be between 0 and 100",
-    "INVALID_QUANTITY": "Quantity must be greater than 0",
-    "INVALID_BARCODE": "Bar code must be 8-13 digits",
-    "NAME_REQUIRED": "Name is required (min 2, max 200 characters)",
-    "PRICE_REQUIRED": "Price must be greater than 0",
-    "TVA_REQUIRED": "TVA must be between 0.01 and 100",
-    "BARCODE_REQUIRED": "Bar code must be 8-13 digits",
-    "CATEGORY_REQUIRED": "Category is required",
-    "UNIT_REQUIRED": "Unit is required",
-    "ADDRESS_REQUIRED": "Address is required (min 5 characters)",
-    "CODE_REQUIRED": "Code is required (min 2, max 20 characters)",
-    "DELAI_RETOUR_REQUIRED": "Return delay is required",
-    "PASSWORD_REQUIRED": "Password is required",
-    "PASSWORD_WEAK": "Weak",
-    "PASSWORD_FAIR": "Fair",
-    "PASSWORD_GOOD": "Good",
-    "PASSWORD_STRONG": "Very Strong",
-    "MAX_QUANTITY": "Maximum quantity allowed is {{max}}",
-    "DUE_PAYMENT_PERIOD_REQUIRED": "The payment due period is required",
-    "CODE_MIN": "Code must be at least 2 characters.",
-    "CODE_MAX": "Code cannot exceed 50 characters.",
-    "DISCOUNT_RATE_INVALID": "Discount rate must be between 0 and 100.",
-    "MULTIPLIER_INVALID": "Credit limit multiplier must be between 1 and 2.",
-    "TVA_INVALID": "TVA must be between 0 and 100.",
-    "PRICE_INVALID": "Price must be greater than 0.",
-    "BARCODE_INVALID": "Barcode must be between 8 and 13 characters.",
-    "RIB_INVALID": "RIB must be between 10 and 34 alphanumeric characters.",
-    "PASSWORD_MIN": "Password must be at least 8 characters.",
-    "PASSWORD_MAX": "Password cannot exceed 128 characters.",
-    "PASSWORD_SAME": "New password must differ from the current one.",
-    "EMAIL_MAX": "Email cannot exceed 255 characters."
-  },
-  "ERRORS": {
-    "AUTH_001": "This email is already in use.",
-    "AUTH_002": "Invalid login or password.",
-    "AUTH_003": "Your account is disabled. Please contact an administrator.",
-    "AUTH_004": "This account is already active.",
-    "AUTH_005": "Your session has already been revoked.",
-    "AUTH_006": "You are not authorized. Please log in again.",
-    "AUTH_007": "You cannot perform this operation on your own account.",
-    "AUTH_008": "A security violation was detected.",
-    "AUTH_009": "User not found.",
-    "AUTH_010": "Role not found.",
-    "AUTH_011": "Controle not found.",
-    "AUTH_012": "Privilege not found.",
-    "AUTH_013": "Invalid input.",
-    "AUTH_014": "Operation not allowed.",
-    "AUTH_015": "This username is already taken.",
-    "AUTH_016": "Validation failed.",
-    "AUTH_017": "This password has been compromised. Please choose a different one.",
-    "AUTH_018": "Duplicate entry detected.",
-    "AUTH_019": "Your account no longer exists. You will be logged out.",
-    "AUTH_020": "Refresh token expired. Please log in again.",
-    "RATE_LIMIT": "Too many requests. Please wait before retrying.",
-    "SERVER_UNREACHABLE": "Unable to connect to the server. Check your connection.",
-    "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again later.",
-    "SESSION_EXPIRED": "Your session is no longer valid. You will be logged out.",
-    "ACCOUNT_DEACTIVATED": "Account Deactivated",
-    "ACCESS_DENIED": "Access Denied",
-    "INTERNAL_ERROR": "An unexpected error occurred. Please try again.",
-    "UNKNOWN": "An unexpected error occurred.",
-    "NOT_FOUND": "Resource not found",
-    "DATABASE_ERROR": "A database error occurred. Please try again later",
-    "BUSINESS_RULE_VIOLATION": "Operation violates business rules",
-    "EXTERNAL_SERVICE_ERROR": "External service unavailable",
-    "CLIENT_NOT_FOUND": "Client not found",
-    "CLIENT_BLOCKED": "Client account is blocked",
-    "CLIENT_ALREADY_EXISTS": "A client with this email already exists",
-    "CATEGORY_NOT_FOUND": "Category not found",
-    "CATEGORY_ASSIGNED": "Category cannot be deleted because it is assigned to existing clients",
-    "ARTICLE_NOT_FOUND": "Article not found",
-    "ARTICLE_ALREADY_EXISTS": "An article with this code already exists",
-    "FOURNISSEUR_NOT_FOUND": "Supplier not found",
-    "FOURNISSEUR_BLOCKED": "Supplier is blocked and cannot receive orders",
-    "BON_NOT_FOUND": "Purchase order not found",
-    "DUPLICATE_ENTRY": "Duplicate entry detected",
-    "DUPLICATE_ARTICLE_CODE": "An article with this code already exists",
-    "DUPLICATE_ARTICLE_BARCODE": "An article with this barcode already exists",
-    "DUPLICATE_CATEGORY_NAME": "A category with this name already exists",
-    "DUPLICATE_CLIENT_EMAIL": "A client with this email already exists",
-    "DUPLICATE_CLIENT_NAME": "A client with this name already exists",
-    "DUPLICATE_CATEGORY_CODE": "A category with this code already exists",
-    "ACCESS_DENIED_TITLE": "Access Denied",
-    "ACCESS_DENIED_MESSAGE": "You don't have permission to access this resource."
-  },
-  "SUCCESS": {
-    "OPERATION_COMPLETED": "Operation completed successfully",
-    "RESOURCE_CREATED": "Resource created successfully",
-    "RESOURCE_UPDATED": "Resource updated successfully",
-    "RESOURCE_DELETED": "Resource deleted successfully",
-    "CATEGORY_CREATED": "Category \"{{name}}\" created successfully",
-    "CATEGORY_UPDATED": "Category \"{{name}}\" updated successfully",
-    "CATEGORY_DELETED": "Category \"{{name}}\" deleted successfully",
-    "CATEGORY_RESTORED": "Category \"{{name}}\" has been restored",
-    "CATEGORY_ACTIVATED": "Category \"{{name}}\" activated successfully",
-    "CATEGORY_DEACTIVATED": "Category \"{{name}}\" deactivated successfully",
-    "ARTICLE_CREATED": "Article \"{{name}}\" created successfully",
-    "ARTICLE_UPDATED": "Article \"{{name}}\" updated successfully",
-    "ARTICLE_DELETED": "Article \"{{name}}\" deleted successfully",
-    "ARTICLE_RESTORED": "Article \"{{name}}\" has been restored",
-    "CLIENT_CREATED": "Client \"{{name}}\" created successfully",
-    "CLIENT_UPDATED": "Client \"{{name}}\" updated successfully",
-    "CLIENT_DELETED": "Client \"{{name}}\" deleted successfully",
-    "CLIENT_RESTORED": "Client \"{{name}}\" has been restored",
-    "CLIENT_BLOCKED": "Client \"{{name}}\" blocked successfully",
-    "CLIENT_UNBLOCKED": "Client \"{{name}}\" unblocked successfully",
-    "CLIENT_CATEGORY_ADDED": "Category assigned successfully",
-    "CLIENT_CATEGORY_REMOVED": "Category \"{{name}}\" removed",
-    "FOURNISSEUR_CREATED": "Supplier \"{{name}}\" created successfully",
-    "FOURNISSEUR_UPDATED": "Supplier \"{{name}}\" updated successfully",
-    "FOURNISSEUR_DELETED": "Supplier \"{{name}}\" deleted successfully",
-    "FOURNISSEUR_RESTORED": "Supplier restored successfully",
-    "FOURNISSEUR_BLOCKED": "Supplier \"{{name}}\" blocked successfully",
-    "FOURNISSEUR_UNBLOCKED": "Supplier \"{{name}}\" unblocked successfully",
-    "BON_CREATED": "Purchase order created successfully",
-    "BON_UPDATED": "Purchase order updated successfully",
-    "BON_DELETED": "Purchase order \"{{numero}}\" deleted successfully",
-    "USER_REGISTERED": "Account for {{name}} has been created successfully",
-    "USER_UPDATED": "Profile updated successfully",
-    "USER_DEACTIVATED": "{{name}} deactivated successfully",
-    "USER_ACTIVATED": "User \"{{name}}\" has been reactivated",
-    "USER_DELETED": "{{name}} has been deleted successfully",
-    "USER_RESTORED": "{{name}} restored successfully",
-    "PASSWORD_CHANGED": "Password changed successfully",
-    "PASSWORD_RESET": "The password has been reset. The user will be required to change it on next login",
-    "ROLE_CREATED": "Role \"{{name}}\" created successfully",
-    "ROLE_UPDATED": "Role \"{{name}}\" updated successfully",
-    "ROLE_DELETED": "Role \"{{name}}\" deleted successfully",
-    "CONTROLE_CREATED": "Control \"{{name}}\" created successfully",
-    "CONTROLE_UPDATED": "Control \"{{name}}\" updated successfully",
-    "CONTROLE_DELETED": "Control \"{{name}}\" deleted successfully",
-    "PRIVILEGE_UPDATED": "Privilege has been updated successfully",
-    "AUDIT_LOG_CLEARED": "Audit logs cleared successfully"
-  },
-  "CONFIRMATION": {
-    "RESTORE_FOURNISSEUR_TITLE": "Restore Supplier ?",
-    "RESTORE_FOURNISSEUR": "Restore supplier \"{{name}}\"? It will reappear in the active suppliers list",
-    "DELETE_CATEGORY_TITLE": "Delete Category ?",
-    "DELETE_CATEGORY": "Category \"{{name}}\" will be permanently deleted. Do you want to proceed?",
-    "DELETE_CATEGORY_SOFT": "Category \"{{name}}\" will be soft-deleted. Clients assigned to it will not be affected. Proceed?",
-
-    "ACTIVATE_CATEGORY_TITLE": "Activate Category ?",
-    "ACTIVATE_CATEGORY": "Are you sure you want to activate \"{{name}}\"?",
-    "DEACTIVATE_CATEGORY_TITLE": "Deactivate Category ?",
-    "DEACTIVATE_CATEGORY": "Are you sure you want to deactivate \"{{name}}\"?",
-
-    "DELETE_ARTICLE_TITLE": "Delete Article ?",
-    "DELETE_ARTICLE": "Article \"{{name}}\" will be permanently deleted. Do you want to proceed?",
-
-    "RESTORE_CLIENT_TITLE": "Restore Client ?",
-    "RESTORE_CLIENT": "Restore client \"{{name}}\"? It will reappear in the active clients list",
-    "DELETE_CLIENT_TITLE": "Delete Client ?",
-    "DELETE_CLIENT": "Client \"{{name}}\" will be soft-deleted. Do you want to proceed?",
-    "BLOCK_CLIENT_TITLE": "Block Client ?",
-    "BLOCK_CLIENT": "Are you sure you want to block \"{{name}}\"?",
-    "UNBLOCK_CLIENT_TITLE": "Unblock Client ?",
-    "UNBLOCK_CLIENT": "Are you sure you want to unblock \"{{name}}\"?",
-
-    "DELETE_BON_TITLE": "Delete Receipt ?",
-    "DELETE_BON": "Purchase order \"{{numero}}\" will be soft-deleted. Proceed?",
-
-    "REMOVE_CATEGORY_TITLE": "Remove Category ?",
-    "REMOVE_CATEGORY": "Remove category \"{{name}}\" from this client?",
-
-    "DELETE_FOURNISSEUR_TITLE": "Delete Supplier ?",
-    "DELETE_FOURNISSEUR": "Supplier \"{{name}}\" will be soft-deleted. Do you want to proceed?",
-    "BLOCK_FOURNISSEUR_TITLE": "Block Supplier ?",
-    "BLOCK_FOURNISSEUR": "Are you sure you want to block \"{{name}}\"?",
-    "UNBLOCK_FOURNISSEUR_TITLE": "Unblock Supplier ?",
-    "UNBLOCK_FOURNISSEUR": "Are you sure you want to unblock \"{{name}}\"?",
-    "DELETE_CONTROLE_TITLE": "Delete Controle ?",
-    "DELETE_CONTROLE": "Controle \"{{name}}\" will be permanently deleted. Do you want to proceed?",
-
-    "DELETE_ROLE_TITLE": "Delete Role ?",
-    "DELETE_ROLE": "Role \"{{name}}\" will be permanently deleted. Do you want to proceed?",
-    "DELETE_USER_TITLE": "Delete User ?",
-    "DELETE_USER": "{{name}} will be deleted. Do you want to proceed?",
-    "RESTORE_USER": "Restore \"{{name}}\"? They will regain access",
-    "RESTORE_USER_TITLE": "Restore User ?",
-    "DEACTIVATE_USER_TITLE": "Deactivate User ?",
-    "DEACTIVATE_USER": "Are you sure you want to deactivate \"{{name}}\"?",
-
-    "LOGIN_CHANGE_WARNING_TITLE": "Login input will be changed",
-    "LOGIN_CHANGE_WARNING": "Login input will be changed to {{login}}, since login cannot contain spaces nor uppercase letters. Do you want to proceed with this username?",
-
-    "CLEAR_AUDIT_LOGS": "Are you sure you want to clear the audit logs?"
-
-  },
-  "ARTICLES": {
-    "BREADCRUMB": "ARTICLE MANAGEMENT",
-    "TITLE_LIST": "List Articles",
-    "TITLE_DELETED": "Deleted Articles",
-    "TITLE_ADD": "Add Article",
-    "TITLE_EDIT": "Edit Article",
-    "TITLE_DETAILS": "Article Details",
-    "VIEW_TITLE": "Article Details",
-    "ADD_BUTTON": "Add Article",
-    "SEARCH_PLACEHOLDER": "Search by name, code, barcode or category...",
-    "STATS": {
-      "ARTICLES": "Articles",
-      "DELETED": "Deleted",
-      "CATEGORIES": "Categories"
+  "nav":{
+    "home": "Home",
+    "auth": {
+      "main": "Authentication",
+      "list": "Users",
+      "deactivated": "Deactivated",
+      "deleted":"Deleted",
+      "register": "Register",
+      "controles":"Controles",
+      "roles":"Roles",
+      "permissions":"Permissions",
+      "audit_log":"Audit log"
     },
-    "TABLE": {
-      "CODE_REF": "CODE REF",
-      "NAME": "LIBELLE",
-      "CATEGORY": "CATEGORY",
-      "PRICE": "PRICE",
-      "ACTIONS": "ACTIONS"
+    "articles":{
+      "main": "Articles",
+      "list": "Articles",
+      "categories": "Categories"
     },
-    "DETAILS": {
-      "CODE": "CODE",
-      "NAME": "NAME",
-      "CATEGORY": "CATEGORY",
-      "UNIT_PRICE": "UNIT PRICE",
-      "UNIT": "UNIT",
-      "TVA": "TVA",
-      "BAR_CODE": "BAR CODE",
-      "CREATED_AT": "CREATED AT",
-      "UPDATED_AT": "UPDATED AT"
+    "clients": {
+      "main": "Clients",
+      "list": "Clients",
+      "categories": "Categories"
     },
-    "FORM": {
-      "ADD_TITLE": "Add New Article",
-      "EDIT_TITLE": "Edit Article",
-      "ARTICLE_NAME": "Article Name",
-      "NAME_PLACEHOLDER": "Enter article name",
-      "UNIT_PRICE": "Unit Price",
-      "UNIT_PRICE_PLACEHOLDER": "Article price",
-      "TVA": "TVA (%)",
-      "TVA_PLACEHOLDER": "eg. 19",
-      "BAR_CODE": "Bar Code",
-      "BARCODE_PLACEHOLDER": "8–13 digit barcode",
-      "CATEGORY": "Category",
-      "SELECT_CATEGORY": "Select a category",
-      "UNIT": "Unit",
-      "SELECT_UNIT": "Select a unit"
+    "stock": {
+      "main": "Stock",
+      "bons": "Receipts",
+      "suppliers": "Suppliers"
     },
-    "UNIT":{
+    "invoices": {
+      "main": "Invoices"
+    },
+    "payments": {
+      "main": "Payments",
+      "list": "Payments",
+      "refunds": "Refunds"
+    },
+    "audit_log":{
+      "main": "Audit log"
+    },
+    "tenants": {
+      "main": "Tenants"
+    }
+  },
+  "common": {
+    "unit": {
       "PIECE": "Piece",
-      "DOZEN": "Dozen",
-      "PAIR": "Pair",
-      "SET": "Set",
-      "BOX": "Box",
-      "CARTON": "Carton",
-      "PACK": "Pack",
-      "ROLL": "Roll",
-      "BAG": "Bag",
-      "CRATE": "Crate",
-      "PALLET": "Pallet",
       "GRAM": "Gram",
       "KILOGRAM": "Kilogram",
       "MILLIGRAM": "Milligram",
       "TON": "Ton",
-      "MILLILITER": "Milliliter",
-      "LITER": "Liter",
-      "CUBICMETER": "Cubic Meter",
-      "MILLIMETER": "Millimeter",
-      "CENTIMETER": "Centimeter",
-      "METER": "Meter",
-      "KILOMETER": "Kilometer",
+      "MILLILITER": "Millilitre",
+      "LITER": "Litre",
+      "CUBICMETER": "Cubic metre",
+      "MILLIMETER": "Millimetre",
+      "CENTIMETER": "Centimetre",
+      "METER": "Metre",
+      "KILOMETER": "Kilometre",
       "HOUR": "Hour",
-      "DAY": "Day",
-      "SERVICE": "Service",
-      "ITEM": "Item"
+      "DAY": "Day"
+    },
+    "actions":"Actions",
+    "ok": "Ok",
+    "view": "View",
+    "edit": "Edit",
+    "restore": "Restore",
+    "delete": "Delete",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "block": "Block",
+    "unblock": "Unblock",
+    "remove": "Remove",
+    "no_results": "No results were found",
+    "no_login": "Never logged in",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "add": "Add",
+    "back": "Back",
+    "generate_password": "Generate password",
+    "logout": "Logout",
+    "change_language_to": "Change language to {{language}}",
+    "change_theme_to": "Change theme to {{theme}}",
+    "en": "English",
+    "fr": "French",
+    "light": "Light",
+    "dark": "Dark",
+    "loading": "Loading",
+    "processing": "Processing",
+    "success": "Success",
+    "error": "Error",
+    "optional": "optional",
+    "active": "Active",
+    "inactive": "Inactive",
+    "blocked": "Blocked",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "days": "days",
+    "days_count": "{{count}} days",
+    "load_more": "Load more",
+    "search": "Search",
+    "save_changes": "Save changes",
+    "saving": "Saving…",
+    "complete": "Complete",
+    "select": "— Select —",
+    "toggle_theme": "Switch theme to {{theme}}"
+  },
+  "home": {
+    "title": "Welcome back, {{username}}",
+    "last_login": "Last login: {{date}}",
+    "quick_access": {
+      "my_profile": "My profile",
+      "system_settings": "System settings",
+      "manage_users": "Manage users",
+      "register_user": "Register user",
+      "deactivated_users": "Deactivated users",
+      "deleted_users": "Deleted users",
+      "controles": "Controles",
+      "roles": "Roles",
+      "permissions": "Permissions",
+      "articles": "Articles",
+      "clients": "Clients",
+      "stock": "Stock",
+      "suppliers": "Suppliers",
+      "receipts": "Stock Receipts",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "audit_log": "Audit log",
+      "tenants": "Tenants"
     }
   },
-  "ARTICLES_CATEGORIES": {
-    "BREADCRUMB": "CATEGORY MANAGEMENT",
-    "TITLE_LIST": "List Categories",
-    "TITLE_DELETED": "Deleted Categories",
-    "TITLE_ADD": "Add Category",
-    "TITLE_EDIT": "Edit Category",
-    "TITLE_DETAILS": "Category Details",
-    "ADD_BUTTON": "Add Category",
-    "SEARCH_PLACEHOLDER": "Search by name...",
-    "STATS": {
-      "ACTIVE": "Active",
-      "DELETED": "Deleted"
-    },
-    "TABLE": {
-      "NAME": "LIBELLE",
-      "TVA": "TVA",
-      "ACTIONS": "ACTIONS"
-    },
-    "DETAILS": {
-      "ID": "ID",
-      "NAME": "NAME",
-      "TVA": "TVA"
-    },
-    "FORM": {
-      "ADD_TITLE": "Add New Category",
-      "EDIT_TITLE": "Edit Category",
-      "NAME": "Category Name",
-      "NAME_PLACEHOLDER": "Enter category name",
-      "TVA": "TVA (%)",
-      "TVA_PLACEHOLDER": "e.g. 19"
-    }
+  "pagination": {
+    "page_of": "Page {{current}} of {{total}}",
+    "items_per_page": "{{size}} / page",
+    "previous": "‹ Previous",
+    "next": "Next ›"
   },
-  "CLIENTS": {
-    "KEYWORD": "Client",
-    "KEYWORD_PLURAL": "Clients",
-    "BREADCRUMB": "CLIENT MANAGEMENT",
-    "TITLE_LIST": "List Clients",
-    "TITLE_DELETED": "Deleted Clients",
-    "TITLE_BLOCKED": "Blocked Clients",
-    "TITLE_ADD": "Add Client",
-    "TITLE_EDIT": "Edit Client",
-    "TITLE_DETAILS": "Client Details",
-    "ADD_BUTTON": "Add Client",
-    "SEARCH_PLACEHOLDER": "Search by name, email, phone or category...",
-    "STATS": {
-      "ACTIVE": "Active",
-      "BLOCKED": "Blocked",
-      "DELETED": "Deleted"
-    },
-    "TABLE": {
-      "NAME": "NAME",
-      "EMAIL": "EMAIL",
-      "CREDIT_LIMIT": "CREDIT LIMIT",
-      "ACTIONS": "ACTIONS"
-    },
-    "DETAILS": {
-      "DISCOUNT_RATE":"Discount Rate",
-      "OUTSTANDING_BALANCE": "Used credit",
-      "REMAINING_CREDIT": "Remaining Credit",
-      "NAME": "NAME",
-      "EMAIL": "EMAIL",
-      "ADDRESS": "ADDRESS",
-      "PHONE": "PHONE",
-      "TAX_NUMBER": "TAX NUMBER",
-      "CREDIT_LIMIT": "CREDIT LIMIT",
-      "DELAI_RETOUR": "Return Delay (days)",
-      "DUE_PAYMENT_PERIOD": "Due Payment Period",
-      "STATUS": "STATUS",
-      "CREATED_AT": "CREATED AT",
-      "UPDATED_AT": "UPDATED AT",
-      "ASSIGNED_CATEGORIES": "ASSIGNED CATEGORIES",
-      "NO_CATEGORIES": "No categories assigned yet.",
-      "SELECT_CATEGORY": "Select category to add..."
-    },
-    "FORM": {
-      "ADD_TITLE": "Add New Client",
-      "EDIT_TITLE": "Edit Client",
-      "FULL_NAME": "Full Name",
-      "NAME_PLACEHOLDER": "Enter client name",
-      "EMAIL": "Email",
-      "EMAIL_PLACEHOLDER": "client@example.com",
-      "ADDRESS": "Address",
-      "ADDRESS_PLACEHOLDER": "Enter full address",
-      "PHONE": "Phone",
-      "PHONE_PLACEHOLDER": "+216 XX XXX XXX",
-      "TAX_NUMBER": "Tax Number",
-      "TAX_NUMBER_PLACEHOLDER": "e.g. TN12345678",
-      "CREDIT_LIMIT": "Credit Limit",
-      "CREDIT_LIMIT_PLACEHOLDER": "0.00",
-      "DELAI_RETOUR": "Return Delay (days)",
-      "DELAI_RETOUR_PLACEHOLDER": "e.g. 30",
-      "DUE_PAYMENT_PERIOD": "Due Payment Period",
-      "DUE_PAYMENT_PERIOD_PLACEHOLDER": "e.g. 30"
-    }
-  },
-  "CLIENT_CATEGORIES": {
-    "KEYWORD": "Client category",
-    "KEYWORD_PLURAL": "Client Categories",
-    "BREADCRUMB": "CLIENT MANAGEMENT",
-    "TITLE_LIST": "Client Categories",
-    "TITLE_DELETED": "Deleted Categories",
-    "TITLE_INACTIVE": "Inactive Categories",
-    "TITLE_ADD": "Add Category",
-    "TITLE_EDIT": "Edit Category",
-    "TITLE_DETAILS": "Category Details",
-    "ADD_BUTTON": "Add Category",
-    "SEARCH_PLACEHOLDER": "Search by name or code...",
-    "STATS": {
-      "ACTIVE": "Active",
-      "INACTIVE": "Inactive",
-      "DELETED": "Deleted"
-    },
-    "TABLE": {
-      "CODE": "CODE",
-      "NAME": "NAME",
-      "DELAI_RETOUR": "RETURN DELAY",
-      "DISCOUNT": "DISCOUNT",
-      "STATUS": "STATUS",
-      "ACTIONS": "ACTIONS"
-    },
-    "DETAILS": {
-      "CODE": "CODE",
-      "NAME": "NAME",
-      "DELAI_RETOUR": "RETURN DELAY",
-      "DISCOUNT_RATE": "DISCOUNT RATE",
-      "DUE_PAYMENT_PERIOD": "Due Payment Period",
-      "CREDIT_LIMIT_MULTIPLIER": "CREDIT LIMIT MULTIPLIER",
-      "BULK_PRICING": "BULK PRICING",
-      "CLIENT_COUNT": "CLIENT COUNT",
-      "STATUS": "STATUS",
-      "CREATED_AT": "CREATED AT",
-      "UPDATED_AT": "UPDATED AT"
-    },
-    "FORM": {
-      "ADD_TITLE": "Add New Category",
-      "EDIT_TITLE": "Edit Category",
-      "NAME": "Category Name",
-      "NAME_PLACEHOLDER": "Enter category name",
-      "CODE": "Code",
-      "CODE_PLACEHOLDER": "e.g. CAT-A",
-      "DELAI_RETOUR": "Return Delay (days)",
-      "DELAI_RETOUR_PLACEHOLDER": "e.g. 30",
-      "DISCOUNT_RATE": "Discount Rate",
-      "DISCOUNT_RATE_PLACEHOLDER": "e.g. 10",
-      "CREDIT_LIMIT_MULTIPLIER": "Credit Limit Multiplier",
-      "CREDIT_LIMIT_PLACEHOLDER": "e.g. 1.5",
-      "BULK_PRICING": "Enable Bulk Pricing: {{value}}",
-      "DUE_PAYMENT_PERIOD": "Due Payment Period",
-      "DUE_PAYMENT_PERIOD_PLACEHOLDER": "e.g. 30"
-    }
-  },
-  "STOCK": {
-    "BREADCRUMB": "STOCK MANAGEMENT",
-    "FOURNISSEURS": {
-      "TITLE": "Suppliers",
-      "TITLE_LIST": "Suppliers",
-      "TITLE_DELETED": "Deleted Suppliers",
-      "TITLE_BLOCKED": "Blocked Suppliers",
-      "TITLE_ADD": "Add Supplier",
-      "TITLE_EDIT": "Edit Supplier",
-      "TITLE_DETAILS": "Supplier Details",
-      "ADD_BUTTON": "Add Supplier",
-      "EDIT_BUTTON": "Edit Supplier",
-      "SEARCH_PLACEHOLDER": "Search by name, email, phone...",
-      "STATS": {
-        "ACTIVE": "Active",
-        "BLOCKED": "Blocked",
-        "DELETED": "Deleted"
+  "auth": {
+    "list": {
+      "breadcrumb": "Users management",
+      "title": "Active Users",
+      "stats": {
+        "active": "Active",
+        "inactive": "Inactive"
       },
-      "TABLE": {
-        "NAME": "NAME",
-        "PHONE": "PHONE",
-        "EMAIL": "EMAIL",
-        "PARTNERSHIP_DATE": "PARTNERSHIP DATE",
-        "ACTIONS": "ACTIONS"
-      },
-      "DETAILS": {
-        "NAME": "NAME",
-        "ADDRESS": "ADDRESS",
-        "PHONE": "PHONE",
-        "EMAIL": "EMAIL",
-        "TAX_NUMBER": "TAX NUMBER",
-        "RIB": "RIB",
-        "STATUS": "STATUS",
-        "CREATED_AT": "CREATED AT",
-        "UPDATED_AT": "UPDATED AT"
-      },
-      "STATUS": {
-        "ACTIVE": "ACTIVE",
-        "BLOCKED": "BLOCKED",
-        "DELETED": "DELETED"
-      },
-      "FORM": {
-        "ADD_TITLE": "Add New Supplier",
-        "EDIT_TITLE": "Edit Supplier",
-        "FULL_NAME": "Full Name",
-        "NAME_PLACEHOLDER": "Supplier name",
-        "PHONE": "Phone",
-        "PHONE_PLACEHOLDER": "+216 XX XXX XXX",
-        "ADDRESS": "Address",
-        "ADDRESS_PLACEHOLDER": "Enter full address",
-        "TAX_NUMBER": "Tax Number",
-        "TAX_NUMBER_PLACEHOLDER": "e.g. TN12345678",
-        "RIB": "RIB",
-        "RIB_PLACEHOLDER": "10–34 alphanumeric characters",
-        "EMAIL": "Email",
-        "EMAIL_PLACEHOLDER": "supplier@example.com"
-      },
-      "ERRORS": {
-        "LOAD_FAILED": "Failed to load suppliers.",
-        "LOAD_DELETED_FAILED": "Failed to load deleted suppliers.",
-        "LOAD_BLOCKED_FAILED": "Failed to load blocked suppliers.",
-        "LOAD_STATS_FAILED": "Failed to load statistics.",
-        "CREATE_FAILED": "Failed to create supplier.",
-        "UPDATE_FAILED": "Failed to update supplier.",
-        "DELETE_FAILED": "Failed to delete supplier \"{{name}}\".",
-        "RESTORE_FAILED": "Failed to restore supplier.",
-        "BLOCK_FAILED": "Failed to block supplier \"{{name}}\".",
-        "UNBLOCK_FAILED": "Failed to unblock supplier \"{{name}}\"."
+      "search_placeholder": "Search by fullname, email, role, etc..",
+      "table": {
+        "head": {
+          "fullname": "Fullname",
+          "email": "Email address",
+          "role": "Role",
+          "last_login": "Last login",
+          "actions": "Actions"
+        }
       }
     },
-    "BONS": {
-      "TITLE_ENTRE": "Incoming Goods Receipts",
-      "TITLE_SORTIE": "Outgoing Goods Receipts",
-      "TITLE_RETOUR": "Returned Goods Receipts",
-      "TAB_ENTRE": "Incoming",
-      "TAB_SORTIE": "Outgoing",
-      "TAB_RETOUR": "Returned",
-      "NEW_BON": "+ New Receipt",
-      "EDIT_BON": "Edit Receipt",
-      "CREATE_BON": "Create Receipt",
-      "SAVE_CHANGES": "Save Changes",
-      "ADD_LIGNE": "Add Line",
-      "EDIT_LIGNE": "Edit Line",
-      "REMOVE_LIGNE": "Remove Line",
-      "LIGNES": "LINES",
-      "NO_LIGNES": "No lines added yet. Add at least one line to create the receipt.",
-      "LIGNE_COUNT": "{{count}} line(s) added",
-      "LIGNE_REQUIRED": " — at least one required",
-      "SEARCH_PLACEHOLDER": "Search by number, observation...",
-      "CLOSE_LIGNE_FORM_FIRST": "Close the inline line form first.",
-      "STATS": {
-        "TOTAL": "Total"
+    "deactivated": {
+      "breadcrumb": "Deactivated users",
+      "title": "Deactivated accounts",
+      "stats": {
+        "active": "Active",
+        "deactivated": "Deactivated"
       },
-      "TABLE": {
-        "NUMERO": "NUMBER",
-        "OBSERVATION": "OBSERVATION",
-        "TOTAL": "TOTAL",
-        "DATE": "DATE",
-        "ACTIONS": "ACTIONS"
-      },
-      "DETAILS": {
-        "NUMERO": "NUMBER",
-        "FOURNISSEUR": "SUPPLIER",
-        "CLIENT": "CLIENT",
-        "SOURCE_TYPE": "SOURCE TYPE",
-        "SOURCE_ID": "SOURCE ID",
-        "MOTIF": "REASON",
-        "OBSERVATION": "OBSERVATION",
-        "TOTAL": "TOTAL",
-        "CREATED_AT": "CREATED AT",
-        "UPDATED_AT": "UPDATED AT"
-      },
-      "LIGNE_TABLE": {
-        "ARTICLE_ID": "ARTICLE ID",
-        "ARTICLE": "ARTICLE",
-        "QTY": "QTY",
-        "PRICE": "PRICE",
-        "TOTAL": "TOTAL",
-        "REMARQUE": "NOTE",
-        "ACTIONS": "ACTIONS"
-      },
-      "FORM": {
-        "FOURNISSEUR": "Supplier *",
-        "CLIENT": "Client *",
-        "SOURCE_BON": "Source Receipt *",
-        "MOTIF": "Reason *",
-        "MOTIF_PLACEHOLDER": "Reason for return",
-        "OBSERVATION": "Observation",
-        "OBSERVATION_PLACEHOLDER": "Optional note",
-        "SELECT_FOURNISSEUR": "— Select a supplier —",
-        "SELECT_CLIENT": "— Select a client —",
-        "SELECT_SOURCE": "— Select a source receipt —",
-        "SELECT_ARTICLE": "— Select an article —",
-        "ARTICLE": "Article *",
-        "QUANTITY": "Quantity *",
-        "PRICE": "Price *",
-        "REMARQUE": "Note",
-        "REMARQUE_PLACEHOLDER": "Optional remark",
-        "MOTIF_REQUIRED": "The reason is required for return receipts.",
-        "SOURCE_REQUIRED": "The source receipt is required for outgoing and return receipts.",
-        "LIGNES_REQUIRED": "Please add at least one line to create the receipt."
-      },
-      "SUCCESS": {
-        "CREATED": "Receipt created successfully.",
-        "UPDATED": "Receipt updated successfully.",
-        "DELETED": "Receipt \"{{numero}}\" deleted successfully."
-      },
-      "ERRORS": {
-        "DATE_FILTER_FAILED": "Date filter failed",
-        "LOAD_FAILED": "Failed to load receipts.",
-        "LOAD_DELETED_FAILED": "Failed to load deleted receipts.",
-        "LOAD_STATS_FAILED": "Failed to load statistics.",
-        "LOAD_SOURCE_BONS_FAILED": "Failed to load source receipts.",
-        "LOAD_ARTICLES_FAILED": "Failed to load articles.",
-        "LOAD_FOURNISSEURS_FAILED": "Failed to load suppliers.",
-        "LOAD_CLIENTS_FAILED": "Failed to load clients.",
-        "LOAD_SOURCE_BON_LIGNES_FAILED": "Failed to load source receipt lines.",
-        "NO_LIGNES": "Please add at least one line before creating the receipt.",
-        "OPERATION_FAILED": "Operation failed.",
-        "DELETE_FAILED": "Delete failed."
+      "search_placeholder": "Search by name, email, or role…",
+      "table": {
+        "head": {
+          "fullname": "Full name",
+          "email": "Email address",
+          "role": "Role",
+          "last_login": "Last login",
+          "actions": "Actions"
+        }
       }
     },
-    "ERRORS": {
-      "QUANTITY_EXCEEDS_STOCK":"Quantity cannot exceed {{stock}}",
-      "ARTICLES_NOT_FOUND": "No articles available in stock",
-      "CLIENTS_NOT_FOUND": "No clients available",
-      "FOURNISSEURS_NOT_FOUND": "No suppliers available",
-      "INSUFFICIENT_STOCK": "Quantity {{requested}} exceeds available stock {{max}}",
-      "INSUFFICIENT_STOCK_DETAIL": "{{article}}: requested {{requested}}, available {{available}}"
+    "deleted": {
+      "breadcrumb": "Deleted users",
+      "title": "Deleted accounts",
+      "stats": {
+        "active": "Active",
+        "deactivated": "Deactivated",
+        "deleted": "Deleted"
+      },
+      "search_placeholder": "Search by name, email, or role…",
+      "buttons": {
+        "table": {
+          "restore": "Restore",
+          "view": "View"
+        }
+      },
+      "table": {
+        "head": {
+          "fullname": "Full name",
+          "email": "Email address",
+          "role": "Role",
+          "last_login": "Last login",
+          "actions": "Actions"
+        }
+      }
     },
-    "LABELS": {
-      "AVAILABLE_STOCK":"Available quantity" ,
-      "UNIT": "Unit",
-      "UNITS": "Units"
+    "controles": {
+      "breadcrumb": "Access controls",
+      "title": "Controls",
+      "search_placeholder": "Search by category, label or description...",
+      "table": {
+        "head": {
+          "category": "Category",
+          "libelle": "Label",
+          "description": "Description",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "category": "Category",
+        "category_placeholder": "E.g., User management",
+        "libelle": "Label",
+        "libelle_placeholder": "E.g., View users",
+        "description": "Description",
+        "description_placeholder": "Describe the control purpose..."
+      },
+      "title_list": "Controls",
+      "title_details": "Control Details",
+      "title_add": "Add Control",
+      "title_edit": "Edit Control"
     },
-    "WARNINGS": {
-      "OUT_OF_STOCK": "⚠️ Out of stock! This item is no longer available.",
-      "LOW_STOCK": "⚠️ Low stock! Only {{count}} units remaining.",
-      "CRITICAL_STOCK": "⚠️ Critical stock! Only {{count}} units left."
+    "roles": {
+      "breadcrumb": "Role management",
+      "title": "Roles",
+      "search_placeholder": "Search by role name...",
+      "table": {
+        "head": {
+          "libelle": "Role name",
+          "id": "ID",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "libelle": "Role name",
+        "libelle_placeholder": "e.g., Manager"
+      },
+      "title_list": "Roles",
+      "title_details": "Role details",
+      "title_add": "Add role",
+      "title_edit": "Edit role"
+    },
+    "register": {
+      "roles": {
+        "ACCOUNTANT": "Accountant",
+        "SYSTEM_ADMIN": "System admin",
+        "STOCK_MANAGER": "Stock manager",
+        "SALES_MANAGER": "Sales manager"
+      },
+      "breadcrumb": "User registration",
+      "title": "Register new user",
+      "title_panel": "Create account",
+      "subtitle": "Fill in the details to create a new user account",
+      "full_name": "Full name",
+      "full_name_placeholder": "John Doe",
+      "login": "Login",
+      "login_placeholder": "johndoe",
+      "email": "Email",
+      "email_placeholder": "john.doe@example.com",
+      "role": "Role",
+      "select_role": "-- Select a role --",
+      "password": "Password",
+      "password_placeholder": "Enter a strong password",
+      "generate_password": "Generate password",
+      "register_button": "Register user",
+      "creating": "Creating...",
+      "validation": {
+        "required": "This field is required.",
+        "min_length": "Minimum {{min}} characters required.",
+        "max_length": "Maximum {{max}} characters allowed.",
+        "invalid_email": "Please enter a valid email address (e.g., name@example.com).",
+        "invalid_login": "Login may only contain lowercase letters a‑z, digits 0‑9, and underscores (_). No spaces or uppercase.",
+        "name_required": "Name is required (2–200 characters, letters/numbers/spaces/some punctuation).",
+        "password_required": "Password is required.",
+        "pattern_invalid": "Invalid format.",
+        "integer_only": "Only integer numbers are allowed.",
+        "decimal_only": "Only decimal numbers are allowed.",
+        "alphanumeric": "Only letters, numbers, and spaces are allowed.",
+        "alpha_only": "Only letters and spaces are allowed.",
+        "password_strength": {
+          "weak": "Weak",
+          "fair": "Fair",
+          "good": "Good",
+          "strong": "Strong"
+        }
+      }
+    },
+    "login": {
+      "title": "Glad for having you back !",
+      "login": "Login",
+      "login_placeholder": "johndoe",
+      "login_required": "Login is required.",
+      "password": "Password",
+      "password_placeholder": "Enter your password",
+      "password_required": "Password is required.",
+      "sign_in": "Sign in",
+      "connecting": "Connecting…"
+    },
+    "audit_log": {
+      "breadcrumb": "Audit log",
+      "title": "Audit log",
+      "refresh": "Refresh",
+      "clear": "Clear logs",
+      "filter_user": "Filter by user ID...",
+      "all": "All",
+      "success": "Success",
+      "failed": "Failed",
+      "no_logs": "No audit logs found.",
+      "action": "Action",
+      "performed_by": "Performed by",
+      "target": "Target",
+      "ip_address": "IP address",
+      "timestamp": "Timestamp",
+      "actions": {
+        "Login": "Login",
+        "Logout": "Logout",
+        "TokenRefreshed": "Token refreshed",
+        "TokenRevoked": "Token revoked",
+        "TokenValidated": "Token validated",
+        "TokenValidationFailed": "Token validation failed",
+        "UserRegistered": "User registered",
+        "PasswordChanged": "Password changed",
+        "PasswordChangedByAdmin": "Password changed by admin",
+        "ProfileUpdated": "Profile updated",
+        "UserActivated": "User activated",
+        "UserDeactivated": "User deactivated",
+        "UserDeleted": "User deleted",
+        "UserRestored": "User restored",
+        "RoleCreated": "Role created",
+        "RoleUpdated": "Role updated",
+        "RoleDeleted": "Role deleted",
+        "ControleCreated": "Control created",
+        "ControleUpdated": "Control updated",
+        "ControleDeleted": "Control deleted",
+        "Unauthorized": "Unauthorized access",
+        "UserNotFound": "User not found",
+        "UnhandledError": "Unhandled error"
+      },
+      "details": {
+        "metadata": "Metadata",
+        "user_agent": "User agent",
+        "close": "Close"
+      },
+      "confirmations": {
+        "clear_logs": "All audit logs will be permanently deleted. Do you want to proceed?"
+      },
+      "responses": {
+        "errors": {
+          "internal_error": "An internal error occurred. Please try again later."
+        },
+        "success": {
+          "logs_cleared": "Audit logs cleared successfully."
+        }
+      }
+    },
+    "changePassword": {
+      "breadcrumb": "Change password",
+      "title": "Change password",
+      "title_panel": "Change password",
+      "subtitle": "Set a new password for the user",
+      "new_password": "New password",
+      "new_password_placeholder": "Enter a new password",
+      "admin_notice": "You are changing the password for another user. The user will be prompted to change it on next login.",
+      "back": "Back",
+      "generate": "Generate",
+      "change_button": "Change password",
+      "saving": "Saving...",
+      "validation": {
+        "password_required": "Password is required.",
+        "min_length": "Minimum {{min}} characters required."
+      }
+    },
+    "profile": {
+      "changePassword": {
+        "breadcrumb": "Change password",
+        "title_required": "Password change required",
+        "title_change": "Change password",
+        "subtitle_required": "For security reasons, you must change your password before continuing.",
+        "subtitle_change": "Choose a strong password that you don't use elsewhere.",
+        "current_password": "Current password",
+        "current_password_placeholder": "Enter your current password",
+        "new_password": "New password",
+        "new_password_placeholder": "Enter a new password",
+        "generate": "Generate",
+        "change_button": "Change password",
+        "saving": "Saving...",
+        "success_dialog": {
+          "title": "Password changed",
+          "message": "Your password has been updated successfully. You will be redirected to the home page.",
+          "button": "Got it"
+        },
+        "validation": {
+          "password_required": "Password is required.",
+          "password_same": "New password cannot be the same as the current one.",
+          "min_length": "Minimum {{min}} characters required."
+        },
+        "errors": {
+          "change_failed": "Failed to change password. Please check your current password and try again.",
+          "invalid_current_password": "Current password is incorrect.",
+          "password_too_weak": "Password is too weak. Please choose a stronger password.",
+          "password_same_as_old": "New password cannot be the same as the current one."
+        }
+      },
+      "breadcrumb": "User profile",
+      "title_own": "My profile",
+      "title_other": "User profile",
+      "hero": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "role": "Role"
+      },
+      "actions": {
+        "edit_profile": "Edit profile",
+        "change_password": "Change password",
+        "system_settings": "System settings"
+      },
+      "personal_info": {
+        "title": "Personal information",
+        "full_name": "Full name",
+        "login": "Login",
+        "email": "Email address",
+        "member_since": "Member since",
+        "last_updated": "Last updated"
+      },
+      "account_details": {
+        "title": "Account details",
+        "auth_id": "Authentication ID",
+        "status": "Status",
+        "last_login": "Last login"
+      },
+      "edit_profile": {
+        "title": "Edit profile",
+        "full_name": "Full name",
+        "email": "Email",
+        "no_changes": "No changes to save",
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "validation": {
+          "required": "This field is required.",
+          "name_max": "Maximum 100 characters allowed.",
+          "alpha_only": "Only letters and spaces are allowed.",
+          "email_invalid": "Please enter a valid email address.",
+          "email_max": "Email cannot exceed 255 characters."
+        }
+      },
+      "notifications": {
+        "profile_updated": "Your profile has been updated successfully.",
+        "update_failed": "Failed to update profile. Please try again.",
+        "load_failed": "Could not load user profile. Please try again later."
+      },
+      "settings": {
+        "breadcrumb": "System settings",
+        "title": "System settings",
+        "edit": "Edit",
+        "undo": "Undo",
+        "save_changes": "Save changes",
+        "saving": "Saving",
+        "processing": "Processing",
+        "tenant_details": "Tenant details",
+        "edit_tenant_info": "Edit tenant information",
+        "form": {
+          "name": "Tenant name",
+          "name_placeholder": "Enter tenant name",
+          "email": "Email address",
+          "email_placeholder": "admin@tenant.com",
+          "phone": "Phone number",
+          "phone_placeholder": "+21612345678",
+          "address": "Address",
+          "address_placeholder": "Street, city, postal code",
+          "currency": "Currency",
+          "locale": "Locale",
+          "timezone": "Timezone",
+          "logo_url": "Logo URL (optional)",
+          "logo_url_placeholder": "https://acme.com/logo.png",
+          "primary_color": "Primary color",
+          "secondary_color": "Secondary color"
+        },
+        "currencies": {
+          "TND": "Tunisian Dinar",
+          "EUR": "Euro",
+          "USD": "US Dollar"
+        },
+        "locales": {
+          "EN": "English",
+          "FR": "French",
+          "AR": "Arabic"
+        },
+        "timezones": {
+          "UTC": "UTC",
+          "AFRICA_TUNIS": "Africa/Tunis (UTC+1)",
+          "EUROPE_PARIS": "Europe/Paris (UTC+1)",
+          "EUROPE_LONDON": "Europe/London (UTC)"
+        },
+        "validation": {
+          "required": "This field is required.",
+          "min_length": "Minimum {{min}} characters required.",
+          "max_length": "Maximum {{max}} characters allowed.",
+          "invalid_email": "Please enter a valid email address (e.g., name@example.com).",
+          "invalid_phone": "Phone number must contain 8 to 15 digits and may start with a '+'. No spaces, dashes, or parentheses.",
+          "invalid_hex_color": "Enter a valid hex color code (e.g., #4e7cff – exactly 6 hex digits after #).",
+          "invalid_url": "Enter a valid URL starting with https:// (e.g., https://example.com).",
+          "alpha_only": "Only letters and spaces are allowed."
+        },
+        "responses": {
+          "errors": {
+            "update_failed": "Failed to update system settings.",
+            "TENANT_001": "Tenant not found.",
+            "TENANT_002": "Tenant subscription not found.",
+            "TENANT_003": "Subdomain is invalid .",
+            "TENANT_009": "Email is invalid .",
+            "NOT_FOUND": "The requested resource was not found.",
+            "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+            "INVALID_ARGUMENT": "Invalid argument provided.",
+            "UNAUTHORIZED": "Unauthorized access.",
+            "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later."
+          },
+          "success": {
+            "update_success": "System settings updated."
+          }
+        }
+      }
+    },
+    "responses": {
+      "errors": {
+        "AUTH_001": "Email already exists.",
+        "AUTH_002": "Invalid credentials.",
+        "AUTH_003": "Your account is inactive. Please contact support.",
+        "AUTH_004": "Account already active.",
+        "AUTH_005": "Token already revoked.",
+        "AUTH_006": "Unauthorized access.",
+        "AUTH_007": "You are not allowed to perform this operation on your own account.",
+        "AUTH_008": "Security violation.",
+        "AUTH_009": "User not found.",
+        "AUTH_013": "Invalid argument provided.",
+        "AUTH_014": "Operation is not allowed in the current state.",
+        "AUTH_015": "Login already exists.",
+        "AUTH_016": "Validation error.",
+        "AUTH_017": "A duplicate entry was detected: {{key}}",
+        "AUTH_018": "Invalid refresh token.",
+        "AUTH_019": "Your session has expired. Please log in again.",
+        "RATE_LIMIT": "Too many requests. Please slow down.",
+        "SERVER_UNREACHABLE": "Server unreachable.",
+        "ACCESS_DENIED": "Access denied.",
+        "AUTH_003_TITLE": "Account deactivated.",
+        "SERVER_UNREACHABLE_MSG": "Unable to connect to the server. Check your connection or try again later.",
+        "SERVICE_UNAVAILABLE": "Service unavailable.",
+        "SERVICE_UNAVAILABLE_MSG": "The requested service is temporarily unavailable. Please try again later.",
+        "RATE_LIMIT_TENANTS": "Too many registration attempts. Please wait 10 minutes before retrying.",
+        "RATE_LIMIT_LOGIN": "Too many login attempts. Please wait {{seconds}} seconds before retrying.",
+        "RATE_LIMIT_FALLBACK": "a few minutes",
+        "TENANT_USER_LIMIT_REACHED": "Your plan's user limit has been reached. Please upgrade your subscription.",
+        "AUTH_000": "An unknown error occurred.",
+        "INTERNAL_ERROR": "An internal error occurred. Please try again later.",
+        "AUTH_010": "Role not found.",
+        "AUTH_011": "Control not found.",
+        "AUTH_012": "Privilege not found.",
+        "reset_failed": "Failed to change the password. Please try again later.",
+        "update_failed": "Failed to update profile.",
+        "load_failed": "Could not load user profile. Please try again later.",
+        "login_exists": "Login already exists.",
+        "email_exists": "Email already exists.",
+        "DUPLICATE_ENTRY": "A duplicate entry was detected: {{key}}"
+      },
+      "success": {
+        "password_changed": "Password changed successfully.",
+        "user_deactivated": "User {{fullname}} deactivated successfully.",
+        "user_activated": "User {{fullname}} activated successfully.",
+        "user_registered": "User {{fullname}} has been registered successfully.",
+        "user_deleted": "User {{fullname}} deleted successfully.",
+        "user_restored": "User {{fullname}} restored successfully.",
+        "controle_created": "control \"{{name}}\" created successfully.",
+        "controle_updated": "control \"{{name}}\" updated successfully.",
+        "controle_deleted": "control \"{{name}}\" deleted successfully.",
+        "role_created": "Role \"{{name}}\" created successfully.",
+        "role_updated": "Role \"{{name}}\" updated successfully.",
+        "role_deleted": "Role \"{{name}}\" deleted successfully.",
+        "reset_success_title": "Password changed",
+        "reset_success_message": "The password has been updated successfully.",
+        "got_it": "Got it",
+        "profile_updated": "Profile updated successfully.",
+        "privilege_updated": "Privilege updated successfully."
+      }
+    },
+    "permissions": {
+      "breadcrumb": "Permissions",
+      "title_list": "Permission matrix",
+      "roles": "Roles",
+      "controls": "Controls",
+      "services": "Services",
+      "grant_tooltip": "Grant \"{{controle}}\" to {{role}}",
+      "revoke_tooltip": "Revoke \"{{controle}}\" from {{role}}",
+      "errors": {
+        "load_matrix_failed": "Failed to load the permission matrix. Please try again.",
+        "load_privileges_failed": "Failed to load privileges. Please try again.",
+        "operation_failed": "Operation failed. Please try again."
+      }
+    },
+    "confirmations": {
+      "login_change_warning": {
+        "title": "Login will be changed",
+        "message": "Login will be changed to {{login}}, since login cannot contain spaces nor uppercase letters. Do you want to proceed with this username?",
+        "confirm_text": "Proceed"
+      },
+      "delete_role": {
+        "title": "Delete role?",
+        "message": "Role \"{{name}}\" will be permanently deleted. Do you want to proceed?",
+        "confirm_text": "Delete"
+      },
+      "delete_controle": {
+        "title": "Delete control?",
+        "message": "Control \"{{name}}\" will be permanently deleted. do you want to proceed?",
+        "confirm_text": "Delete"
+      },
+      "deactivate_user": {
+        "title": "Deactivating user",
+        "message": "The current user `{{fullname}}` will be deactivated meaning he won't be able to login nor accessing his account until he got reactivated.",
+        "confirm_text": "Deactivate anyways"
+      },
+      "delete_user": {
+        "title": "Deleting user",
+        "message": "The current user `{{fullname}}` will be deleted.",
+        "confirm_text": "Delete anyways"
+      },
+      "restore_user": {
+        "title": "Restoring deleted user",
+        "message": "The current user `{{fullname}}` is deleted and he will be restored back.",
+        "confirm_text": "Restore"
+      }
     }
   },
-  "INVOICES": {
-    "KEYWORD": "Invoice",
-    "KEYWORD_PLURAL": "Invoices",
-    "BREADCRUMB": "ERP › Invoices",
-    "BREADCRUMB_ANALYTICS": "ERP › Invoices › Analytics",
-    "BREADCRUMB_NEW": "ERP › Invoices › New Invoice",
-    "TITLE_LIST": "Invoices",
-    "TITLE_DELETED": "Deleted Invoices",
-    "TITLE_ANALYTICS": "Invoice Analytics",
-    "TITLE_NEW": "New Invoice",
-    "TITLE_EDIT": "Edit Invoice",
-    "TITLE_DETAILS": "Invoice Details",
-    "NEW_BUTTON": "+ New Invoice",
-    "BACK_BUTTON": "← Back",
-    "SEARCH_PLACEHOLDER": "Search by number or client…",
-    "NO_RESULTS": "No invoices found.",
-    "TABS": {
-      "ACTIVE": "Active",
-      "DELETED": "Deleted",
-      "ANALYTICS": "Analytics"
+  "tenants": {
+    "list":{
+      "breadcrumb": "Tenants management",
+      "breadcrumb_analytics": "Tenant analytics",
+      "title_list": "Tenants",
+      "title_edit": "Edit Tenant",
+      "title_details": "Tenant Details",
+      "title_analytics": "Tenant Analytics",
+      "search_placeholder": "Search by name, email, subdomain…",
+      "no_plan": "No plan",
+      "tabs": {
+        "active": "Active",
+        "deleted": "Deleted",
+        "suspended": "Suspended",
+        "analytics": "Analytics"
+      },
+      "stats": {
+        "total": "Total",
+        "active": "Active",
+        "suspended": "Suspended",
+        "deleted": "Deleted",
+        "total_mrr": "Total MRR",
+        "status_breakdown": "Status breakdown",
+        "all_tenants_by_status": "All tenants by status",
+        "top_plans": "Top plans",
+        "by_revenue": "By revenue",
+        "revenue_by_plan": "Revenue by plan",
+        "annual_projection": "Annual projection",
+        "loading": "Loading statistics…",
+        "no_data": "No data available."
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "plan": "Plan",
+        "subscription_date": "Subscription date",
+        "actions": "Actions",
+        "rank": "Rank",
+        "tenants": "Tenants",
+        "revenue": "Revenue (TND)"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended",
+        "deleted": "Deleted"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "suspend": "Suspend",
+        "activate": "Activate",
+        "delete": "Delete",
+        "restore": "Restore"
+      },
+      "currencies": {
+        "TND": "Tunisian Dinar",
+        "EUR": "Euro",
+        "USD": "US Dollar"
+      },
+      "locales": {
+        "EN": "English",
+        "FR": "French",
+        "AR": "Arabic"
+      },
+      "periods": {
+        "MONTH": "Monthly",
+        "YEAR": "Yearly"
+      },
+      "dialog": {
+        "suspend_tenant_title": "Suspend tenant?",
+        "suspend_tenant_message": "Tenant \"{{name}}\" will be suspended and users will lose access. Do you want to proceed?",
+        "suspend_confirm": "Suspend",
+        "activate_tenant_title": "Activate tenant?",
+        "activate_tenant_message": "Tenant \"{{name}}\" will be reactivated. Do you want to proceed?",
+        "activate_confirm": "Activate",
+        "delete_tenant_title": "Delete tenant?",
+        "delete_tenant_message": "Tenant \"{{name}}\" will be permanently deleted. Do you want to proceed?",
+        "delete_confirm": "Delete",
+        "remove_subscription_title": "Remove subscription?",
+        "remove_subscription_confirm": "The subscription for \"{{name}}\" will be removed. Do you want to proceed?",
+        "remove_confirm": "Remove"
+      }
     },
-    "STATUS": {
-      "DRAFT": "DRAFT",
-      "UNPAID": "UNPAID",
-      "PAID": "PAID",
-      "CANCELLED": "CANCELLED",
-      "DELETED": "DELETED"
+    "view":{
+        "tenant_info": "Tenant information",
+        "subscription_info": "Subscription information",
+        "plan_details": "Plan details",
+        "name": "Name",
+        "subdomain": "Subdomain",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "currency": "Currency",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "status": "Status",
+        "created": "Created at",
+        "plan_name": "Plan name",
+        "plan_code": "Plan code",
+        "code": "Code",
+        "start_date": "Start date",
+        "end_date": "End date",
+        "period": "Billing period",
+        "monthly_price": "Monthly price",
+        "yearly_price": "Yearly price",
+        "max_users": "Max users",
+        "max_storage": "Max storage",
+        "users": "users"
     },
-    "STATS": {
-      "TOTAL": "Total",
+    "edit":{
+        "tenant_details": "Tenant details",
+        "edit_tenant_info": "Edit tenant information",
+        "name": "Name",
+        "name_placeholder": "E.g., Acme Corporation",
+        "email": "Email address",
+        "email_placeholder": "admin@acme.com",
+        "phone": "Phone number",
+        "phone_placeholder": "+21612345678",
+        "address": "Address",
+        "address_placeholder": "Street, city, postal code",
+        "currency": "Currency",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "subscription": "Subscription",
+        "manage_subscription": "Manage the tenant's subscription plan",
+        "current_subscription": "Current subscription",
+        "no_subscription": "No subscription assigned.",
+        "select_plan": "Select plan",
+        "billing_period": "Billing period",
+        "assign_subscription": "Assign subscription",
+        "update_subscription": "Update subscription",
+        "remove_subscription": "Remove subscription"
+    },
+    "subscription": {
+      "expiry_notice": "Your subscription has expired. Please renew to continue using the platform.",
+      "renew_title": "Renew your subscription",
+      "renew_subtitle": "Choose a plan to restore access to your workspace.",
+      "renew_with": "Continue with {{name}}",
+      "select_to_renew": "Select a plan to renew",
+      "renewed_success": "Your subscription has been renewed successfully. Redirecting…"
+    },
+    "plans": {
+      "already_have_account": "Already have an account?",
+      "sign_in": "Sign in",
+      "title": "Choose your plan",
+      "subtitle": "Start free, scale as you grow. No hidden fees.",
+      "select_plan": "Select plan",
+      "continue_with": "Continue with {{name}}",
+      "continue_default": "Select a plan to continue",
+      "month": "Monthly",
+      "year": "Yearly",
+      "popular": "Popular",
+      "save_badge": "Save {{percent}}%",
+      "starter_desc": "Perfect for small teams getting started.",
+      "pro_desc": "For growing businesses that need more power.",
+      "enterprise_desc": "Custom solutions for large organisations.",
+      "users": "Up to {{count}} users",
+      "storage": "{{size}} storage",
+      "feature_erp": "Full ERP suite access",
+      "feature_isolation": "Dedicated tenant isolation",
+      "feature_support": "Priority support",
+      "selected": "Selected",
+      "select": "Select plan",
+      "get_started": "Get started",
+      "contact_support": "Contact support"
+    },
+    "onboarding": {
+      "title": "Set up your workspace",
+      "subtitle": "Tell us a bit about your company to get started.",
+      "plan_label": "Plan: {{name}}",
+      "company_name": "Company name",
+      "company_name_placeholder": "Acme Corporation",
+      "business_email": "Business email",
+      "business_email_placeholder": "admin@acme.com",
+      "phone": "Phone number",
+      "phone_placeholder": "+21612345678",
+      "subdomain": "Subdomain",
+      "subdomain_placeholder": "acme",
+      "subdomain_suffix": ".erpsuite.app",
+      "subdomain_hint": "Only lowercase letters, digits, and hyphens. Cannot start or end with a hyphen.",
+      "address": "Address",
+      "address_placeholder": "Street, city, postal code",
+      "address_hint": "Optional — used for invoices and documents.",
+      "logo_url": "Logo URL (optional)",
+      "logo_url_placeholder": "https://acme.com/logo.png",
+      "section_branding": "Branding",
+      "primary_color": "Primary color",
+      "secondary_color": "Secondary color",
+      "section_regional": "Regional settings",
+      "currency": "Currency",
+      "locale": "Locale",
+      "timezone": "Timezone",
+      "back_to_plans": "← Back to plans",
+      "create_workspace": "Create workspace",
+      "success_title": "Your workspace is ready!",
+      "success_body": "Your subscription has been created successfully. You will be redirected to the login page in a few seconds.",
+      "success_label": "Redirecting to login…",
+      "errors": {
+        "load_failed": "Failed to load onboarding data. Please try again."
+      }
+    },
+    "responses":{
+      "errors": {
+        "plans_load_failed": "Failed to load plans. Please try again.",
+        "teants_load_failed": "Failed to load tenants. Please try again.",
+        "load_analytics_failed": "Failed to load analytics. Please try again.",
+        "update_failed": "Failed to update tenant. Please try again.",
+        "delete_failed": "Failed to delete tenant. Please try again.",
+        "restore_failed": "Failed to restore tenant. Please try again.",
+        "suspend_failed": "Failed to suspend tenant. Please try again.",
+        "activate_failed": "Failed to activate tenant. Please try again.",
+        "assign_subscription_failed": "Failed to assign subscription. Please try again.",
+        "remove_subscription_failed": "Failed to remove subscription. Please try again.",
+
+        "TENANT_001": "Tenant not found.",
+        "TENANT_002": "No active subscription found for this tenant.",
+        "TENANT_003": "Subdomain is invalid .",
+        "TENANT_004": "A tenant with this {{field}} already exists.",
+        "TENANT_005": "This tenant has an active subscription and cannot be deleted.",
+        "TENANT_006": "Tenant is already active.",
+        "TENANT_007": "Tenant is already deleted.",
+        "TENANT_008": "Cannot delete or suspend a tenant with an active subscription.",
+        "TENANT_009": "Email is invalid .",
+
+        "PLAN_001": "Subscription plan not found.",
+        "PLAN_002": "A subscription plan with this code already exists.",
+        "PLAN_003": "This plan is currently assigned to {{count}} tenant(s) and cannot be deleted.",
+        "PLAN_004": "This subscription plan is inactive and cannot be assigned.",
+
+        "SUBSCRIPTION_001": "Tenant already has an active subscription.",
+        "SUBSCRIPTION_002": "Failed to assign subscription. Please check the plan and try again.",
+
+        "NOT_FOUND": "The requested resource was not found.",
+        "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+        "INVALID_ARGUMENT": "Invalid argument provided.",
+        "UNAUTHORIZED": "You are not authorized to perform this action.",
+        "INTERNAL_SERVER_ERROR": "An internal server error occurred. Please try again later."
+      },
+      "success": {
+        "updated": "Tenant updated successfully.",
+        "deleted": "Tenant deleted successfully.",
+        "restored": "Tenant restored successfully.",
+        "suspended": "Tenant suspended successfully.",
+        "activated": "Tenant activated successfully.",
+        "subscription_assigned": "Subscription assigned successfully.",
+        "subscription_removed": "Subscription removed successfully."
+      }
+    }
+  },
+  "articles": {
+    "breadcrumb": "Articles management",
+    "title_list": "Active Articles",
+    "title_deleted": "Deleted Articles",
+    "title_add": "Add Article",
+    "title_edit": "Edit Article",
+    "title_details": "Article Details",
+    "search_placeholder": "Search by reference, name, category…",
+    "add_button": "Add article",
+    "stats": {
+      "articles": "Articles",
+      "deleted": "Deleted",
+      "categories": "Categories"
+    },
+    "table": {
+      "code_ref": "Reference",
+      "name": "Name",
+      "category": "Category",
+      "price": "Unit price",
+      "actions": "Actions"
+    },
+    "details": {
+      "code": "Reference",
+      "name": "Name",
+      "category": "Category",
+      "unit_price": "Unit price",
+      "unit": "Unit",
+      "tva": "TVA (%)",
+      "bar_code": "Barcode",
+      "created_at": "Created at",
+      "updated_at": "Last updated"
+    },
+    "form": {
+      "add_title": "Add Article",
+      "edit_title": "Edit Article",
+      "article_name": "Article name",
+      "name_placeholder": "E.g., Printer paper A4",
+      "unit_price": "Unit price",
+      "unit_price_placeholder": "E.g., 12.50",
+      "unit": "Unit of measure",
+      "select_unit": "— Select a unit —",
+      "tva": "TVA (%)",
+      "tva_placeholder": "E.g., 19",
+      "bar_code": "Barcode",
+      "barcode_placeholder": "8 or 13-digit barcode",
+      "category": "Category",
+      "select_category": "— Select a category —"
+    },
+    "confirmations": {
+      "delete_article": {
+        "title": "Delete article?",
+        "message": "Article `{{name}}` will be permanently deleted. Do you want to proceed?",
+        "confirm_text": "Delete"
+      }
+    },
+    "responses": {
+      "errors": {
+        "ART_001": "Article not found.",
+        "ART_002": "An article with this reference or barcode already exists.",
+        "ART_003": "Article is already active.",
+        "ART_004": "Article is already inactive.",
+        "CAT_001": "Category not found.",
+        "CAT_002": "A category with this name already exists.",
+        "ARTICLE_CATEGORY_DELETE_FAIL": "This category cannot be deleted because it is assigned to one or more articles.",
+        "DUPLICATE_ARTICLE_CODE": "An article with this reference code already exists.",
+        "DUPLICATE_ARTICLE_BARCODE": "An article with this barcode already exists.",
+        "DUPLICATE_CATEGORY_NAME": "A category with this name already exists.",
+        "DUPLICATE_ENTRY": "A duplicate entry was detected: {{key}}",
+        "NOT_FOUND": "The requested resource was not found.",
+        "OUT_OF_RANGE": "The provided value is out of the allowed range.",
+        "NULL_ARGUMENT": "A required value was not provided.",
+        "BAD_ARGUMENT": "Invalid argument provided.",
+        "INVALID_OP": "This operation is not allowed in the current state.",
+        "UNAUTHORIZED": "Unauthorized access.",
+        "SERVER_ERROR": "An internal error occurred. Please try again later.",
+        "DATABASE_ERROR": "A database error occurred. Please try again later."
+      },
+      "success": {
+        "article_created": "Article \"{{name}}\" created successfully.",
+        "article_updated": "Article \"{{name}}\" updated successfully.",
+        "article_deleted": "Article \"{{name}}\" deleted successfully.",
+        "article_restored": "Article \"{{name}}\" restored successfully."
+      }
+    },
+    "categories": {
+      "breadcrumb": "Article categories",
+      "title_list": "Article Categories",
+      "title_deleted": "Deleted Categories",
+      "title_add": "Add Category",
+      "title_edit": "Edit Category",
+      "title_details": "Category Details",
+      "search_placeholder": "Search by name…",
+      "add_button": "Add category",
+      "stats": {
+        "active": "Active",
+        "deleted": "Deleted"
+      },
+      "table": {
+        "name": "Name",
+        "tva": "TVA (%)",
+        "actions": "Actions"
+      },
+      "details": {
+        "id": "ID",
+        "name": "Name",
+        "tva": "TVA (%)"
+      },
+      "form": {
+        "add_title": "Add Category",
+        "edit_title": "Edit Category",
+        "name": "Category name",
+        "name_placeholder": "E.g., Electronics",
+        "tva": "TVA (%)",
+        "tva_placeholder": "E.g., 19"
+      },
+      "confirmations": {
+        "delete_category": {
+          "title": "Delete category?",
+          "message": "Category \"{{name}}\" will be permanently deleted. Do you want to proceed?",
+          "confirm_text": "Delete"
+        }
+      },
+      "responses": {
+        "errors": {
+          "load_failed": "Failed to load categories. Please try again.",
+          "load_deleted_failed": "Failed to load deleted categories. Please try again.",
+          "load_stats_failed": "Failed to load category statistics. Please try again."
+        },
+        "success": {
+          "category_created": "Category \"{{name}}\" created successfully.",
+          "category_updated": "Category updated successfully.",
+          "category_deleted": "Category \"{{name}}\" deleted successfully.",
+          "category_restored": "Category \"{{name}}\" restored successfully."
+        }
+      }
+    }
+  },
+  "clients": {
+    "breadcrumb": "Clients management",
+    "title_list": "Active Clients",
+    "title_deleted": "Deleted Clients",
+    "title_blocked": "Blocked Clients",
+    "title_add": "Add Client",
+    "title_edit": "Edit Client",
+    "title_details": "Client Details",
+    "keyword": "Client",
+    "search_placeholder": "Search by name, email, address…",
+    "add_button": "Add client",
+    "stats": {
+      "active": "Active",
+      "blocked": "Blocked",
+      "deleted": "Deleted"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email address",
+      "credit_limit": "Credit limit",
+      "actions": "Actions"
+    },
+    "details": {
+      "name": "Name",
+      "email": "Email address",
+      "address": "Address",
+      "phone": "Phone",
+      "tax_number": "Tax number",
+      "discount_rate": "Discount rate",
+      "credit_limit": "Credit limit",
+      "outstanding_balance": "Outstanding balance",
+      "remaining_credit": "Remaining credit",
+      "due_payment_period": "Due payment period",
+      "delai_retour": "Return delay",
+      "status": "Status",
+      "created_at": "Created at",
+      "updated_at": "Last updated",
+      "assigned_categories": "Assigned categories",
+      "no_categories": "No categories assigned to this client.",
+      "select_category": "— Select a category —"
+    },
+    "form": {
+      "add_title": "Add Client",
+      "edit_title": "Edit Client",
+      "full_name": "Full name",
+      "name_placeholder": "E.g., Acme Corporation",
+      "email": "Email address",
+      "email_placeholder": "contact@acme.com",
+      "address": "Address",
+      "address_placeholder": "Street, city, postal code",
+      "phone": "Phone number",
+      "phone_placeholder": "+21612345678",
+      "tax_number": "Tax number",
+      "tax_number_placeholder": "E.g., 1234567A",
+      "credit_limit": "Credit limit",
+      "credit_limit_placeholder": "E.g., 5000",
+      "due_payment_period": "Due payment period (days)",
+      "due_payment_period_placeholder": "E.g., 30",
+      "delai_retour": "Return delay (days)",
+      "delai_retour_placeholder": "E.g., 14"
+    },
+    "confirmations": {
+      "delete_client": {
+        "title": "Delete client?",
+        "message": "Client \"{{name}}\" will be permanently deleted. Do you want to proceed?",
+        "confirm_text": "Delete"
+      },
+      "restore_client": {
+        "title": "Restore client?",
+        "message": "Client \"{{name}}\" will be restored and made active again. Do you want to proceed?",
+        "confirm_text": "Restore"
+      },
+      "block_client": {
+        "title": "Block client?",
+        "message": "Client \"{{name}}\" will be blocked and will no longer be able to transact. Do you want to proceed?",
+        "confirm_text": "Block"
+      },
+      "unblock_client": {
+        "title": "Unblock client?",
+        "message": "Client \"{{name}}\" will be unblocked. Do you want to proceed?",
+        "confirm_text": "Unblock"
+      },
+      "remove_category": {
+        "title": "Remove category",
+        "message": "Category \"{{name}}\" will be removed from this client. Do you want to proceed?",
+        "confirm_text": "Remove"
+      }
+    },
+    "responses": {
+      "errors": {
+        "CLIENT_NOT_FOUND": "Client not found.",
+        "CATEGORY_NOT_FOUND": "Category not found.",
+        "CLIENT_CATEGORY_DELETE_FAIL": "This category cannot be deleted because it is assigned to one or more clients.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "BUSINESS_RULE_VIOLATION": "This operation violates a business rule.",
+        "INVALID_RANGE": "The provided value is out of the allowed range.",
+        "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+        "DUPLICATE_ENTRY": "A duplicate entry was detected: {{key}}",
+        "DUPLICATE_CLIENT_EMAIL": "A client with this email address already exists.",
+        "DUPLICATE_CLIENT_NAME": "A client with this name already exists.",
+        "DUPLICATE_CATEGORY_CODE": "A category with this code already exists.",
+        "DATABASE_ERROR": "A database error occurred. Please try again later.",
+        "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later.",
+        "load_failed":"Failed to load clients. Please try again."
+      },
+      "success": {
+        "client_created": "Client \"{{name}}\" created successfully.",
+        "client_updated": "Client \"{{name}}\" updated successfully.",
+        "client_deleted": "Client \"{{name}}\" deleted successfully.",
+        "client_restored": "Client \"{{name}}\" restored successfully.",
+        "client_blocked": "Client \"{{name}}\" blocked successfully.",
+        "client_unblocked": "Client \"{{name}}\" unblocked successfully.",
+        "client_category_added": "Category added to client successfully.",
+        "client_category_removed": "Category \"{{name}}\" removed from client successfully."
+      }
+    },
+    "categories": {
+      "breadcrumb": "Client categories",
+      "title_list": "Client Categories",
+      "title_details": "Category Details",
+      "title_add": "Add Category",
+      "title_edit": "Edit Category",
+      "search_placeholder": "Search by code, name…",
+      "add_button": "Add category",
+      "stats": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleted": "Deleted"
+      },
+      "table": {
+        "code": "Code",
+        "name": "Name",
+        "delai_retour": "Return delay",
+        "discount": "Discount",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "details": {
+        "code": "Code",
+        "name": "Name",
+        "due_payment_period": "Due payment period",
+        "delai_retour": "Return delay",
+        "discount_rate": "Discount rate",
+        "credit_limit_multiplier": "Credit limit multiplier",
+        "bulk_pricing": "Bulk pricing",
+        "status": "Status",
+        "created_at": "Created at",
+        "updated_at": "Last updated"
+      },
+      "form": {
+        "add_title": "Add Category",
+        "edit_title": "Edit Category",
+        "name": "Category name",
+        "name_placeholder": "E.g., Premium",
+        "code": "Code",
+        "code_placeholder": "E.g.,Cat-A",
+        "delai_retour": "Return delay (days)",
+        "delai_retour_placeholder": "E.g., 30",
+        "due_payment_period": "Due payment period (days)",
+        "due_payment_period_placeholder": "E.g., 30",
+        "discount_rate": "Discount rate (%)",
+        "discount_rate_placeholder": "E.g., 10",
+        "credit_limit_multiplier": "Credit limit multiplier",
+        "credit_limit_placeholder": "E.g., 1.5",
+        "bulk_pricing": "Bulk pricing: {{value}}"
+      },
+      "confirmations": {
+        "delete_category": {
+          "title": "Delete category?",
+          "message": "Category \"{{name}}\" will be deleted. Do you want to proceed?",
+          "confirm_text": "Delete"
+        },
+        "deactivate_category": {
+          "title": "Deactivate category?",
+          "message": "Category \"{{name}}\" will be deactivated. Do you want to proceed?",
+          "confirm_text": "Deactivate"
+        },
+        "activate_category": {
+          "title": "Activate category?",
+          "message": "Category \"{{name}}\" will be activated. Do you want to proceed?",
+          "confirm_text": "Activate"
+        }
+      },
+      "responses": {
+        "errors": {
+          "load_failed": "Failed to load categories. Please try again.",
+          "load_deleted_failed": "Failed to load deleted categories. Please try again.",
+          "load_stats_failed": "Failed to load category statistics. Please try again."
+        },
+        "success": {
+          "category_created": "Category created successfully.",
+          "category_updated": "Category updated successfully.",
+          "category_deleted": "Category deleted successfully.",
+          "category_restored": "Category restored successfully.",
+          "category_activated": "Category status updated successfully."
+        }
+      }
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "min_length": "Minimum {{min}} characters required.",
+    "max_length": "Maximum {{max}} characters allowed.",
+    "invalid_email": "Please enter a valid email address (e.g., name@example.com).",
+    "invalid_phone": "Phone number must contain 8 to 15 digits and may start with a '+'. No spaces, dashes, or parentheses.",
+    "invalid_hex_color": "Enter a valid hex color code (e.g., #4e7cff – exactly 6 hex digits after #).",
+    "invalid_url": "Enter a valid URL starting with https:// (e.g., https://example.com).",
+    "invalid_slug": "Only lowercase letters, digits, and hyphens are allowed. Cannot start or end with a hyphen.",
+    "alpha_only": "Only letters and spaces are allowed.",
+    "alphanumeric": "Only letters, numbers, and spaces are allowed.",
+    "integer_only": "Only integer numbers are allowed.",
+    "decimal_only": "Only decimal numbers are allowed.",
+    "name_min": "Minimum 2 characters required.",
+    "name_max": "Maximum 200 characters allowed.",
+    "address_min": "Address must be at least 5 characters.",
+    "address_pattern": "Address contains invalid characters.",
+    "tax_number_invalid": "Tax number may only contain letters and numbers.",
+    "tax_number_max": "Tax number cannot exceed 50 characters.",
+    "credit_limit_invalid": "Credit limit must be at least 1000.",
+    "due_payment_period_invalid": "Due payment period must be between 7 and 180 days.",
+    "delai_retour_invalid": "Return delay must be between 7 and 270 days.",
+    "client_categories_empty": "Please create at least one client category before adding clients.",
+    "code_min": "Minimum 2 characters required.",
+    "code_max": "Maximum 50 characters allowed.",
+    "invalid": "Invalid format.",
+    "discount_rate_invalid": "Discount rate must be between 0 and 100.",
+    "multiplier_invalid": "Credit limit multiplier must be between 1 and 2.",
+    "tva_invalid": "TVA must be between 0 and 100.",
+    "price_invalid": "Price must be greater than 0.",
+    "barcode_invalid": "Barcode must be 8 or 13 digits.",
+    "article_categories_empty": "Please create at least one article category before adding articles.",
+    "min_value": "Value must be at least {{min}}.",
+    "notes_max": "Notes cannot exceed {{max}} characters."
+  },
+  "errors": {
+    "no_plan_selected": "No plan selected. Please go back and choose a plan.",
+    "unknown": "An unexpected error occurred. Please try again.",
+    "internal_error": "An internal error occurred. Please try again later.",
+    "article_not_found": "Article not found."
+  },
+  "stock": {
+    "breadcrumb": "Stock Management",
+    "fournisseurs": {
+      "title": "Suppliers",
+      "title_details": "Supplier Details",
+      "search_placeholder": "Search by name, phone, tax number…",
+      "add_button": "Add Supplier",
+      "edit_button": "Edit Supplier",
+      "stats": {
+        "active": "Active Suppliers",
+        "blocked": "Blocked Suppliers",
+        "deleted": "Deleted Suppliers"
+      },
+      "table": {
+        "name": "Supplier Name",
+        "phone": "Phone",
+        "partnership_date": "Partnership Date",
+        "actions": "Actions"
+      },
+      "details": {
+        "name": "Supplier Name",
+        "address": "Address",
+        "phone": "Phone",
+        "email": "Email",
+        "tax_number": "Tax Number",
+        "rib": "RIB",
+        "status": "Status",
+        "created_at": "Created At",
+        "updated_at": "Last Updated"
+      },
+      "status": {
+        "active": "Active",
+        "blocked": "Blocked",
+        "deleted": "Deleted"
+      },
+      "form": {
+        "add_title": "Add Supplier",
+        "edit_title": "Edit Supplier",
+        "full_name": "Full name",
+        "name_placeholder": "E.g., Acme Supplies",
+        "phone": "Phone number",
+        "phone_placeholder": "+21612345678",
+        "address": "Address",
+        "address_placeholder": "Street, city, postal code",
+        "tax_number": "Tax number",
+        "tax_number_placeholder": "E.g., 1234567A",
+        "rib": "RIB",
+        "rib_placeholder": "Bank account number",
+        "email": "Email address",
+        "email_placeholder": "contact@acme.com"
+      },
+      "confirmations": {
+        "delete_fournisseur": {
+          "title": "Delete supplier?",
+          "message": "Supplier \"{{name}}\" will be permanently deleted. Do you want to proceed?"
+        },
+        "block_fournisseur": {
+          "title": "Block supplier?",
+          "message": "Supplier \"{{name}}\" will be blocked and will no longer be able to transact. Do you want to proceed?"
+        },
+        "unblock_fournisseur": {
+          "title": "Unblock supplier?",
+          "message": "Supplier \"{{name}}\" will be unblocked. Do you want to proceed?"
+        }
+      },
+      "validation": {
+        "name_min": "Minimum 2 characters required.",
+        "name_max": "Maximum 200 characters allowed.",
+        "address_min": "Address must be at least 5 characters.",
+        "address_pattern": "Address contains invalid characters.",
+        "rib_invalid": "RIB must contain only letters and numbers (10-34 characters).",
+        "tax_number_invalid": "Tax number may only contain letters and numbers.",
+        "tax_number_max": "Tax number cannot exceed 50 characters."
+      }
+    },
+    "responses": {
+      "errors": {
+        "STOCK_001": "Insufficient stock to complete this operation.",
+        "STOCK_002": "Stock entry receipt (Bon d'entrée) not found.",
+        "STOCK_003": "Stock exit receipt (Bon de sortie) not found.",
+        "STOCK_004": "Stock return receipt (Bon de retour) not found.",
+        "STOCK_006": "Article not found.",
+        "STOCK_007": "Client not found.",
+        "STOCK_008": "This article was not part of the original receipt.",
+        "STOCK_009": "Return quantity exceeds the quantity from the source receipt.",
+        "EXTERNAL_SERVICE_ERROR": "An external service is currently unavailable. Please try again later.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "BUSINESS_RULE_VIOLATION": "This operation violates a business rule.",
+        "INVALID_RANGE": "The provided value is out of the allowed range.",
+        "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+        "DATABASE_ERROR": "A database error occurred. Please try again later.",
+        "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later.",
+        "FOURNISSEUR_NOT_FOUND": "Supplier not found.",
+        "FOURNISSEUR_BLOCKED": "This supplier is blocked and cannot be used.",
+        "LOAD_FOURNISSEURS_FAILED": "Failed to load suppliers. Please try again.",
+        "LOAD_DELETED_FOURNISSEURS_FAILED": "Failed to load deleted suppliers. Please try again.",
+        "LOAD_BLOCKED_FOURNISSEURS_FAILED": "Failed to load blocked suppliers. Please try again.",
+        "LOAD_FOURNISSEUR_STATS_FAILED": "Failed to load supplier statistics. Please try again.",
+        "CREATE_FOURNISSEUR_FAILED": "Failed to create supplier. Please try again.",
+        "UPDATE_FOURNISSEUR_FAILED": "Failed to update supplier. Please try again.",
+        "DELETE_FOURNISSEUR_FAILED": "Failed to delete supplier. Please try again.",
+        "RESTORE_FOURNISSEUR_FAILED": "Failed to restore supplier. Please try again.",
+        "BLOCK_FOURNISSEUR_FAILED": "Failed to block supplier. Please try again.",
+        "UNBLOCK_FOURNISSEUR_FAILED": "Failed to unblock supplier. Please try again.",
+        "INSUFFICIENT_STOCK": "Insufficient stock. Maximum available is {{max}}, but you requested {{requested}}.",
+        "MERGED_QUANTITY_EXCEEDS_STOCK": "Total quantity for \"{{article}}\" would be {{total}}, exceeding available stock ({{max}}).",
+        "FOURNISSEURS_NOT_FOUND": "No suppliers available. Please add a supplier first.",
+        "ARTICLES_NOT_FOUND": "No articles available. Please add articles with stock first.",
+        "CLIENTS_NOT_FOUND": "No clients available. Please add a client first.",
+        "QUANTITY_EXCEEDS_STOCK": "Requested quantity exceeds available stock.",
+        "INSUFFICIENT_STOCK_DETAIL": "Insufficient stock for this operation.",
+        "fournisseurs_not_found":"No suppliers were found, try adding at least one supplier in order to receive articles from."
+      },
+      "success": {
+        "fournisseur_created": "Supplier \"{{name}}\" created successfully.",
+        "fournisseur_updated": "Supplier \"{{name}}\" updated successfully.",
+        "fournisseur_deleted": "Supplier \"{{name}}\" deleted successfully.",
+        "fournisseur_restored": "Supplier restored successfully.",
+        "fournisseur_blocked": "Supplier \"{{name}}\" blocked successfully.",
+        "fournisseur_unblocked": "Supplier \"{{name}}\" unblocked successfully."
+      }
+    },
+    "bons": {
+      "title_entre": "Stock Entry Receipts",
+      "title_sortie": "Stock Exit Receipts",
+      "title_retour": "Stock Return Receipts",
+      "tab_entre": "Entries",
+      "tab_sortie": "Exits",
+      "tab_retour": "Returns",
+      "new_bon": "New Receipt",
+      "edit_bon": "Edit Receipt",
+      "create_bon": "Create Receipt",
+      "save_changes": "Save Changes",
+      "add_ligne": "Add Line",
+      "edit_ligne": "Edit Line",
+      "remove_ligne": "Remove Line",
+      "no_lignes": "No lines added yet",
+      "lignes": "Lines",
+      "ligne_count": "{{count}} line(s)",
+      "ligne_required": "(at least one line required)",
+      "search_placeholder": "Search by number, observation...",
+      "stats": {
+        "total": "Total Receipts"
+      },
+      "table": {
+        "numero": "Receipt Number",
+        "observation": "Observation",
+        "total": "Total Amount",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "details": {
+        "numero": "Receipt Number",
+        "fournisseur": "Supplier",
+        "client": "Client",
+        "source_type": "Source Type",
+        "source_id": "Source ID",
+        "motif": "Reason",
+        "observation": "Observation",
+        "total": "Total",
+        "created_at": "Created At",
+        "updated_at": "Last Updated"
+      },
+      "ligne_table": {
+        "article_id": "Article Reference",
+        "article": "Article",
+        "qty": "Quantity",
+        "price": "Unit Price",
+        "total": "Total",
+        "remarque": "Remark",
+        "actions": "Actions"
+      },
+      "form": {
+        "fournisseur": "Supplier",
+        "client": "Client",
+        "select_fournisseur": "Select a supplier",
+        "select_client": "Select a client",
+        "source_bon": "Source Receipt",
+        "select_source": " Select a source receipt",
+        "motif": "Reason for return",
+        "motif_placeholder": "Why is this being returned?",
+        "observation": "Observation",
+        "observation_placeholder": "Additional notes",
+        "article": "Article",
+        "select_article": "Select an article",
+        "quantity": "Quantity",
+        "price": "Unit Price",
+        "remarque": "Remark",
+        "remarque_placeholder": "Optional remark for this line",
+        "source_required": "Please select a source receipt first.",
+        "motif_required": "Please provide a reason for the return.",
+        "lignes_required": "Please add at least one line item."
+      },
+      "confirmations": {
+        "delete_bon": {
+          "title": "Delete Receipt?",
+          "message": "Receipt \"{{numero}}\" will be permanently deleted. Do you want to proceed?"
+        },
+        "validation": {
+          "min_value": "Value must be at least {{min}}.",
+          "max_quantity": "Maximum quantity allowed is {{max}}.",
+          "invalid_price": "Please enter a valid price."
+        }
+      },
+      "errors": {
+        "load_failed": "Failed to load receipts. Please try again.",
+        "load_source_bons_failed": "Failed to load source receipts. Please try again.",
+        "load_source_bon_lignes_failed": "Failed to load source receipt lines. Please try again.",
+        "load_articles_failed": "Failed to load articles. Please try again.",
+        "date_filter_failed": "Failed to filter by date range. Please try again.",
+        "no_lignes": "Please add at least one line before saving.",
+        "operation_failed": "Operation failed. Please try again.",
+        "delete_failed": "Failed to delete receipt. Please try again.",
+        "article_not_found": "Article not found."
+      },
+      "success": {
+        "created": "Receipt created successfully.",
+        "updated": "Receipt updated successfully.",
+        "deleted": "Receipt \"{{numero}}\" deleted successfully."
+      }
+    },
+    "labels": {
+      "available_stock": "Available stock",
+      "units": "units"
+    }
+  },
+  "invoices": {
+    "breadcrumb": "Invoices management",
+    "breadcrumb_new": "New invoice",
+    "breadcrumb_analytics": "Analytics",
+    "title_list": "Invoices",
+    "title_new": "Create Invoice",
+    "title_edit": "Edit Invoice",
+    "title_details": "Invoice Details",
+    "title_analytics": "Invoice Analytics",
+    "new_button": "New invoice",
+    "search_placeholder": "Search by number, client, status…",
+    "no_results": "No invoices found.",
+    "overdue_tooltip": "This invoice is overdue.",
+    "status": {
       "DRAFT": "Draft",
       "UNPAID": "Unpaid",
-      "CANCELLED": "Cancelled",
-      "DELETED": "Deleted",
-      "OVERDUE": "Overdue",
-      "OUTSTANDING": "Outstanding",
-      "REVENUE_TTC": "Revenue TTC",
-      "AVG_INVOICE_HT": "Avg Invoice HT",
-      "AVG_PAYMENT_DAYS": "Avg days to due",
-      "TOTAL_INVOICES": "Total Invoices",
-      "VOLUME": "Volume KPI",
-      "STATUS_BREAKDOWN": "Status Breakdown",
-      "ALL_INVOICES_BY_STATUS": "All invoices by current status",
-      "TOP_CLIENTS": "Top Clients",
-      "BY_PAID_REVENUE": "By paid revenue TTC",
-      "MONTHLY_BREAKDOWN": "Monthly Breakdown",
-      "CURRENT_YEAR_ISSUED_VS_PAID": "Current year — issued vs paid",
-      "MONTH": "MONTH",
-      "ISSUED": "ISSUED",
-      "ISSUED_TTC": "ISSUED TTC",
       "PAID": "Paid",
-      "PAID_TTC": "PAID TTC",
-      "LOADING": "Loading statistics…",
-      "NO_PAID_INVOICES": "No paid invoices yet.",
-      "ACTIONS": "ACTIONS"
+      "CANCELLED": "Cancelled",
+      "DELETED": "Deleted"
     },
-    "CHART": {
-      "Y_AXIS_LABEL": "Amount (TND)",
-      "X_AXIS_LABEL": "Month"
+    "tabs": {
+      "active": "Active",
+      "deleted": "Deleted",
+      "analytics": "Analytics"
     },
-    "TABLE": {
-      "NUMBER": "NUMBER",
-      "CLIENT": "CLIENT",
-      "DATE": "DATE",
-      "DUE_DATE": "DUE DATE",
-      "TOTAL_TTC": "TOTAL TTC",
-      "STATUS": "STATUS",
-      "ACTIONS": "ACTIONS",
-      "RANK": "#",
-      "INVOICES": "INVOICES",
-      "REVENUE_TTC": "REVENUE TTC"
+    "stats": {
+      "total": "Total",
+      "total_invoices": "Total invoices",
+      "draft": "Draft",
+      "unpaid": "Unpaid",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "revenue_ttc": "Revenue (TTC)",
+      "avg_invoice_ht": "Avg. invoice (HT)",
+      "avg_payment_days": "Avg. payment days",
+      "loading": "Loading statistics…",
+      "status_breakdown": "Status breakdown",
+      "all_invoices_by_status": "All invoices by status",
+      "month_breakdown": "Monthly breakdown",
+      "current_year_issued_vs_paid": "Current year — Issued vs Paid",
+      "top_clients": "Top clients",
+      "by_paid_revenue": "By paid revenue",
+      "no_paid_invoices": "No paid invoices yet."
     },
-    "DETAILS": {
-      "INVOICE_INFO": "Invoice Info",
-      "CLIENT_INFO": "Client",
-      "LINE_ITEMS": "Line Items",
-      "INVOICE_NUMBER": "INVOICE NUMBER",
-      "STATUS": "STATUS",
-      "INVOICE_DATE": "INVOICE DATE",
-      "DUE_DATE": "DUE DATE",
-      "TOTAL_HT": "TOTAL HT",
-      "TOTAL_TVA": "TOTAL TVA",
-      "TOTAL_TTC": "TOTAL TTC",
-      "AMOUNT_PAID":"AMOUNT PAID",
-      "AMOUNT_TO_PAY":"REMAINING TO PAY",
-      "NOTES": "NOTES",
-      "NAME": "NAME",
-      "ADDRESS": "ADDRESS",
-      "CREATED": "CREATED",
-      "UPDATED": "UPDATED",
-      "ARTICLE": "ARTICLE",
-      "BAR_CODE": "BAR CODE",
-      "QTY": "QTY",
-      "UNIT_HT": "UNIT HT",
-      "TAX": "TAX",
-      "TOTAL_HT_COL": "TOTAL HT",
-      "TOTAL_TTC_COL": "TOTAL TTC",
-      "NO_ITEMS": "No items on this invoice.",
-      "ITEMS_COUNT": "{{count}} item(s)",
-      "TOTALS": "Totals"
+    "table": {
+      "invoice_number": "Invoice number",
+      "client": "Client",
+      "due_date": "Due date",
+      "total_ttc": "Total (TTC)",
+      "status": "Status",
+      "actions": "Actions",
+      "invoices": "Invoices",
+      "rank": "Rank",
+      "revenue_ttc": "Revenue (TTC)",
+      "date": "Invoice date"
     },
-    "FORM": {
-      "TAX_PER_LINE": "Calculate tax per line item (subtotal × tax rate per line)",
-      "TAX_PER_LINE_LABEL": "Per line",
-      "TAX_PER_INVOICE": "Calculate tax on invoice total (sum of line subtotals × tax rate)",
-      "TAX_PER_INVOICE_LABEL": "Per invoice",
-      "FINAL_TOTAL_TTC":"FINAL TOTAL (VAT included)",
-      "BULK_DISCOUNT_APPLIED": "Bulk discount applied",
-      "DISCOUNT_RATE":"Discount Rate ({{rate}} %)",
-      "YOU_SAVE": "Amount saved",
-      "CREDIT_LIMIT_REMAINING": "Remaining Credit:",
-      "CREDIT_LIMIT_CURRENT_USAGE": "Credit used:",
-      "NO_LIMIT":"No credit limit set",
-      "CREDIT_LIMIT_WARNING":"Credit limit warning",
-      "STOCK":"Qty in stock",
-      "BULK_NOT_ELIGIBLE": "Not eligible",
-      "EDIT_INVOICE_INFO": "Edit invoice information",
-      "ORIGINAL_TOTAL": "Original total",
-      "DISCOUNT_ROW":"Discounted amount",
-      "FINAL_TOTALS":"Final amount",
-      "SELECTED_CLIENT": "Client details",
-      "BULK_PRICING_LABEL":"Bulk pricing",
-      "WHOLE_NUMBERS_ONLY":"Whole numbers allowed.",
-      "DECIMALS_ALLOWED":"Decimals allowed.",
-      "CLIENT_NAME_LABEL": "Client name",
-      "BULK_ELIGIBLE": "eligible",
-      "LIMIT_WARNING":"Credit limit warning",
-      "CREDIT_LIMIT_LABEL":"Credit limit",
-      "SELECT_ARTICLE_FIRST":"Select an article",
-      "CLIENT_NOT_SELECTED_MATTOOLTIP":"Select a client before adding a line.",
-      "INVOICE_DETAILS": "Invoice Details",
-      "FILL_INVOICE_CLIENT_INFO": "Fill in the invoice and client information",
-      "INVOICE_NUMBER": "Invoice Number *",
-      "INVOICE_DATE": "Invoice Date *",
-      "DUE_DATE": "Due Date *",
-      "DUE_DATE_AUTO_TOOLTIP":"Due date of the invoice is computed based on the payement period the selected client have.",
-      "DUE_DATE_HINT": "Due date calculated: {{days}} days after invoice date",
-      "CLIENT": "Client *",
-      "CLIENT_ADDRESS": "Client Address *",
-      "ADDITIONAL_NOTES": "Additional Notes",
-      "ADDITIONAL_NOTES_PLACEHOLDER": "Optional notes…",
-      "CLIENT_ADDRESS_PLACEHOLDER": "123 Street, City",
-      "SEARCH_CLIENT": "Search client by name or email…",
-      "SELECT_CLIENT": "Select a client",
-      "LINE_ITEMS": "Line Items",
-      "ITEMS_COUNT": "item(s) · HT: {{ht}} TND · TTC: {{ttc}} TND",
-      "ADD_ITEM": "+ Add Item",
-      "NO_ITEMS_YET": "No items yet. Click (+ Add Item) to begin.",
-      "ARTICLE": "Article *",
-      "SELECT_ARTICLE": "— Select article —",
-      "QUANTITY": "Quantity *",
-      "UNIT_PRICE_HT": "Unit Price HT *",
-      "TAX_RATE": "Tax Rate",
-      "PREVIEW": "Preview",
-      "CANCEL": "Cancel",
-      "UPDATE_ITEM": "Update Item",
-      "CREATE_INVOICE": "Create Invoice",
-      "EDIT_ITEM": "Edit Item",
-      "REMOVE": "Remove"
+    "actions": {
+      "finalize": "Finalize",
+      "mark_as_paid": "Mark as paid",
+      "cancel": "Cancel",
+      "restore": "Restore",
+      "preview": "Preview",
+      "print": "Download",
+      "view": "View",
+      "delete": "Delete"
     },
-    "ACTIONS": {
-      "VIEW": "View details",
-      "DELETE": "Delete",
-      "RESTORE": "Restore",
-      "FINALIZE": "Finalize",
-      "MARK_AS_PAID": "Mark as Paid",
-      "CANCEL": "Cancel",
-      "PRINT": "Print invoice",
-      "PREVIEW": "Preview invoice"
+    "details": {
+      "invoice_info": "Invoice information",
+      "client_info": "Client information",
+      "invoice_number": "Invoice number",
+      "status": "Status",
+      "invoice_date": "Invoice date",
+      "due_date": "Due date",
+      "total_ht": "Total (excl. tax)",
+      "total_tva": "Total TVA",
+      "total_ttc": "Total (incl. tax)",
+      "amount_to_pay": "Amount to pay",
+      "amount_paid": "Amount paid",
+      "notes": "Notes",
+      "name": "Name",
+      "address": "Address",
+      "created": "Created at",
+      "updated": "Last updated",
+      "line_items": "Invoice lines",
+      "items_count": "{{count}} item(s)",
+      "article": "Article",
+      "article_label": "Article",
+      "bar_code": "Barcode",
+      "qty": "Qty",
+      "unit_ht": "Unit price (HT)",
+      "tax": "TVA",
+      "total_ht_col": "Total HT",
+      "total_ttc_col": "Total TTC",
+      "no_items": "No items on this invoice.",
+      "totals": "Totals"
     },
-    "DIALOG": {
-      "CANCEL_INVOICE_TITLE": "Cancel Invoice",
-      "CANCEL_INVOICE_MESSAGE": "Invoice \"{{number}}\" will be cancelled. This action cannot be undone. Do you want to proceed?",
-      "CANCEL_CONFIRM": "Cancel Invoice",
-      "DELETE_INVOICE_TITLE": "Delete Invoice",
-      "DELETE_INVOICE_MESSAGE": "Invoice \"{{number}}\" will be soft-deleted. Do you want to proceed?",
-      "DELETE_CONFIRM": "Delete",
-      "GO_BACK": "Go Back",
-      "UNSAVED_CHANGES_TITLE": "Unsaved Changes",
-      "UNSAVED_CHANGES_MESSAGE": "You have unsaved changes. Do you really want to leave?"
+    "form": {
+      "create_invoice": "Create invoice",
+      "invoice_details": "Invoice details",
+      "fill_invoice_client_info": "Fill in the client and invoice information",
+      "edit_invoice_info": "Edit invoice information",
+      "selected_client": "Selected client",
+      "client_name_label": "Client",
+      "client_address": "Client address",
+      "client_address_placeholder": "Will be filled automatically",
+      "invoice_date": "Invoice date",
+      "due_date": "Due date",
+      "due_date_hint": "Auto-calculated from client payment terms.",
+      "due_date_auto_tooltip": "Automatically set based on client due payment period.",
+      "additional_notes": "Additional notes",
+      "additional_notes_placeholder": "Optional notes for this invoice…",
+      "line_items": "Line items",
+      "items_count": "{{count}} item(s)",
+      "no_items_yet": "No items added yet. Use the form below to add items.",
+      "article": "Article",
+      "quantity": "Quantity",
+      "unit_price_ht": "Unit price (HT)",
+      "tax_rate": "TVA (%)",
+      "tax_per_line": "Tax per line",
+      "tax_per_line_label": "TVA applied per line item",
+      "tax_per_invoice": "Tax per invoice",
+      "tax_per_invoice_label": "TVA applied to invoice total",
+      "discount_row": "Discount",
+      "bulk_pricing_label": "Bulk pricing",
+      "bulk_eligible": "Eligible for bulk discount",
+      "bulk_not_eligible": "Not eligible for bulk discount",
+      "bulk_discount_applied": "Bulk discount applied",
+      "you_save": "You save {{amount}} TND",
+      "original_total": "Original total",
+      "credit_limit_label": "Credit limit",
+      "credit_limit_current_usage": "Current usage",
+      "credit_limit_remaining": "Remaining credit",
+      "credit_limit_warning": "This invoice exceeds the client's remaining credit limit.",
+      "final_totals": "Totals",
+      "final_total_ttc": "Total TTC",
+      "preview": "Preview",
+      "add_item": "Add item",
+      "update_item": "Update item",
+      "whole_numbers_only": "Whole numbers only (e.g. 1, 2, 3).",
+      "decimals_allowed": "Decimals allowed (e.g. 1.5, 2.75)."
     },
-    "ERRORS": {
-      "HAS_SUFFICIENT_CREDIT": "Credit available: {{remainingCredit}} TND",
-      "INSUFFICIENT_CREDIT": "Credit limit exceeded. Limit: {{creditLimit}} TND, Current used: {{currentOutstanding}} TND, This invoice: {{invoiceTotal}} TND",
-      "LOAD_FAILED": "Failed to load invoices.",
-      "LOAD_DELETED_FAILED": "Failed to load deleted invoices.",
-      "LOAD_STATS_FAILED": "Failed to load statistics.",
-      "CREATE_FAILED": "Failed to create invoice.",
-      "UPDATE_FAILED": "Failed to update invoice.",
-      "DELETE_FAILED": "Failed to delete invoice.",
-      "RESTORE_FAILED": "Failed to restore invoice.",
-      "FINALIZE_FAILED": "Failed to finalize invoice.",
-      "MARK_PAID_FAILED": "Failed to mark invoice as paid.",
-      "CANCEL_FAILED": "Failed to cancel invoice.",
-      "LOAD_DETAILS_FAILED": "Failed to load invoice details.",
-      "LOAD_CLIENTS_FAILED": "Failed to load clients.",
-      "LOAD_ARTICLES_FAILED": "Failed to load articles.",
-      "CLIENT_NOT_FOUND": "Client not found",
-      "CREDIT_LIMIT_EXCEEDED": "Credit limit exceeded. Cannot create invoice.",
-      "CREDIT_LIMIT_EXCEEDED_ARTICLES": "Cannot add items – client credit limit exceeded",
-      "VALIDATION_FAILED": "Validation failed. Please try again.",
-      "CLIENT_BLOCKED": "Client {{client}} is blocked",
-      "CLIENT_DELETED": "Client {{client}} is deleted"
+    "dialog": {
+      "cancel_invoice_title": "Cancel invoice?",
+      "cancel_invoice_message": "Invoice \"{{number}}\" will be cancelled. This action cannot be undone. Do you want to proceed?",
+      "cancel_confirm": "Cancel invoice",
+      "delete_invoice_title": "Delete invoice?",
+      "delete_invoice_message": "Invoice \"{{number}}\" will be permanently deleted. Do you want to proceed?",
+      "delete_confirm": "Delete",
+      "go_back": "Go back"
     },
-    "SUCCESS": {
-      "CREATED": "Invoice created successfully.",
-      "UPDATED": "Invoice updated successfully.",
-      "DELETED": "Invoice deleted successfully.",
-      "RESTORED": "Invoice restored successfully.",
-      "FINALIZED": "Invoice finalized successfully.",
-      "MARKED_PAID": "Invoice marked as paid successfully.",
-      "CANCELLED": "Invoice cancelled successfully."
-    },
-    "OVERDUE_TOOLTIP": "This invoice is overdue"
+    "responses": {
+      "errors": {
+        "DUPLICATE_INVOICE_NUMBER": "An invoice with this number already exists for this tenant.",
+        "VALIDATION_ERROR": "Validation error. Please check the provided data.",
+        "UNAUTHORIZED": "You are not authorized to perform this action.",
+        "INVOICE_NOT_FOUND": "Invoice not found.",
+        "INVOICE_ALREADY_EXISTS": "An invoice with this reference already exists.",
+        "INVOICE_INVALID_OPERATION": "This operation is not allowed in the current invoice state.",
+        "INVOICE_DOMAIN_ERROR": "A business rule violation occurred. Please check the invoice data.",
+        "CLIENT_BLOCKED": "This client is currently blocked and cannot be invoiced.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later.",
+        "load_failed": "Failed to load invoices. Please try again.",
+        "load_stats_failed": "Failed to load invoice statistics. Please try again.",
+        "create_failed": "Failed to create invoice. Please try again.",
+        "update_failed": "Failed to update invoice. Please try again.",
+        "delete_failed": "Failed to delete invoice. Please try again.",
+        "restore_failed": "Failed to restore invoice. Please try again.",
+        "finalize_failed": "Failed to finalize invoice. Please try again.",
+        "cancel_failed": "Failed to cancel invoice. Please try again.",
+        "client_not_found": "Client not found.",
+        "client_blocked": "This client is currently blocked and cannot be invoiced.",
+        "client_deleted": "This client has been deleted and cannot be invoiced.",
+        "credit_limit_exceeded": "This invoice exceeds the client's credit limit.",
+        "credit_limit_exceeded_articles": "Adding this item would exceed the client's credit limit.",
+        "insufficient_credit": "Insufficient client credit to create this invoice.",
+        "pdf_preview_failed": "PDF preview failed. Please try again.",
+        "pdf_download_failed": "PDF generation failed. Please try again.",
+        "load_clients_failed": "Failed to load clients. Please try again."
+      },
+      "success": {
+        "created": "Invoice created successfully.",
+        "updated": "Invoice updated successfully.",
+        "deleted": "Invoice deleted successfully.",
+        "restored": "Invoice restored successfully.",
+        "finalized": "Invoice finalized successfully.",
+        "cancelled": "Invoice cancelled successfully."
+      }
+    }
   },
-  "PAYMENTS": {
-    "BREADCRUMB":"ERP › Payments",
-    "TITLE_LIST":"Payments",
-    "TITLE_DETAILS": "Payment details",
-    "NO_RESULTS":"No results found",
-    "FORM": {
-      "TITLE":"Record payment",
-      "METHOD": "Payment method:",
-      "SELECT_METHOD":"Select payment method",
-      "PAYMENT_DATE": "Payment date:",
-      "EXTERNAL_REFERENCE": "External refernce:",
-      "NOTES": "Notes:",
-      "TOTAL_AMOUNT": "Total amount:",
-      "ALLOCATE_AMOUNTS": "Allocate payment",
-      "INVOICE": "Invoice",
-      "SELECT_INVOICE": "Select an invoice",
-      "AMOUNT": "Amount:",
-      "ADD_LINE": "Add payment",
-      "REMAINING": "Remaining"
+  "payments": {
+    "breadcrumb": "Payments management",
+    "title_list": "Payments",
+    "title_details": "Payment Details",
+    "new_button": "New payment",
+    "search_placeholder": "Search by number…",
+    "no_results": "No payments found.",
+    "stats": {
+      "done": "Done",
+      "cancelled": "Cancelled"
     },
-    "VALIDATION":{
-      "TOTAL_AMOUNT": "Total amount must be strictly positive.",
-      "ALLOCATED_AMOUNT": "Allocated amount must be strictly positive.",
-      "EXCEEDS_REMAINING": "Amount exceeds remaining to pay."
+    "tabs": {
+      "done": "Done",
+      "cancelled": "Cancelled"
     },
-    "TOOLTIPS":{
-      "TOTAL_AMOUNT": "This amount is the sum of the allocations from the payment done by the selected client. No need to set it since it will be calculated automatically."
+    "table": {
+      "number": "Payment number",
+      "total_amount": "Total amount",
+      "date": "Payment date",
+      "method": "Method",
+      "actions": "Actions"
     },
-    "METHOD": {
-      "ESPECE":         "Cash",
-      "CHEQUE":         "Cheque",
-      "VIREMENT":       "Bank Transfer",
-      "CARTE_BANCAIRE": "Credit Card",
-      "MOBILE_PAYMENT": "Mobile Payment",
-      "AUTRE":          "Other"
+    "actions": {
+      "view": "View",
+      "correct": "Correct details",
+      "cancel": "Cancel payment",
+      "full_payment": "Full payment"
     },
-    "SUCCESS":{
-      "CREATED":"Payment created successfully.",
-      "CANCELLED":"Payment cancelled successfully.",
-      "CORRECTED": "Payment corrected successfully."
-
-    },
-    "ERRORS":{
-      "CREATE_FAILED":"Failed to create payment.",
-      "CANCELLED":"Failed to cancel payment.",
-      "CORRECTED": "Failed to correct payment.",
-      "UNPAID_INVOICES_NOT_FOUND": "No unpaid invoices were found."
-    },
-    "TABS":{
-      "DONE":"Done",
+    "status": {
+      "DONE": "Done",
       "CANCELLED": "Cancelled"
     },
-    "TABLE":{
-      "NUMBER": "NUMBER",
-      "DATE": "DATE",
-      "METHOD": "METHOD",
-      "TOTAL_AMOUNT": "TOTAL AMOUNT",
-      "ACTIONS":"ACTIONS"
+    "details": {
+      "number": "Payment number",
+      "date": "Payment date",
+      "status": "Status",
+      "cancelled_at": "Cancelled at",
+      "total_amount": "Total amount",
+      "method": "Method",
+      "external_ref": "External reference",
+      "notes": "Notes",
+      "allocations": "Invoice allocations"
     },
-    "DETAILS":{
-      "NUMBER": "Payment number:",
-      "DATE": "Payment date:",
-      "METHOD": "Payment method:",
-      "TOTAL_AMOUNT": "Total amount:",
-      "STATUS": "Payment status:",
-      "NOTES": "Notes:",
-      "CANCELLED_AT": "Cancelled at:",
-      "EXTERNAL_REF": "Reference",
-      "ALLOCATIONS": "Payment allocations"
+    "form": {
+      "title": "Record payment",
+      "total_amount": "Total amount",
+      "method": "Payment method",
+      "select_method": "— Select a method —",
+      "payment_date": "Payment date",
+      "external_reference": "External reference",
+      "notes": "Notes",
+      "allocate_amounts": "Allocate amounts",
+      "add_line": "Add line",
+      "select_client_first": "Please select a client to see available invoices.",
+      "invoice": "Invoice",
+      "select_invoice": "Select an invoice",
+      "remaining": "Remaining",
+      "amount": "Amount"
     },
-    "STATUS":{
-      "CANCELLED":"CANCELLED",
-      "DONE": "DONE"
+    "method": {
+      "ESPECE": "Cash",
+      "CHEQUE": "Cheque",
+      "VIREMENT": "Bank transfer",
+      "CARTE_BANCAIRE": "Bank card",
+      "MOBILE_PAYMENT": "Mobile payment",
+      "AUTRE": "Other"
     },
-    "ACTIONS":{
-      "VIEW": "View details",
-      "CANCEL": "Cancel payment",
-      "CORRECT": "Correct payment details"
+    "tooltips": {
+      "total_amount": "Automatically calculated from allocated invoice amounts."
     },
-    "NEW_BUTTON":"+ New payment",
-    "STATS":{
-      "CANCELLED":"Cancelled",
-      "DONE": "Done"
-    }
-  },
-  "AUDIT":{
-    "BREADCRUMB": "Audit Logs",
-    "TITLE": "Audit Trail",
-    "REFRESH": "Refresh",
-    "CLEAR": "Clear logs",
-    "FILTER_USER": "Filter by user ID…",
-    "ALL": "All",
-    "SUCCESS": "Success",
-    "FAILED": "Failed",
-    "ACTION": "Action",
-    "PERFORMED_BY": "Performed by",
-    "TARGET": "Target user",
-    "IP_ADDRESS": "IP address",
-    "TIMESTAMP": "Timestamp",
-    "NO_LOGS": "No audit logs found",
-    "DETAILS": {
-      "METADATA": "Additional metadata",
-      "USER_AGENT": "User agent",
-      "CLOSE": "Close"
+    "validation": {
+      "total_amount": "Total amount must be greater than 0.",
+      "allocated_amount": "Please enter a valid amount.",
+      "exceeds_remaining": "Amount cannot exceed the remaining balance of {{max}} TND."
     },
-    "ACTIONS": {
-      "Login": "Login",
-      "Logout": "Logout",
-      "TokenRefreshed": "Token refreshed",
-      "TokenRevoked": "Token revoked",
-      "TokenValidated": "Token validated",
-      "TokenValidationFailed": "Token validation failed",
-      "UserRegistered": "User registered",
-      "PasswordChanged": "Password changed",
-      "PasswordChangedByAdmin": "Password changed by admin",
-      "ProfileUpdated": "Profile updated",
-      "UserActivated": "User activated",
-      "UserDeactivated": "User deactivated",
-      "UserDeleted": "User deleted",
-      "UserRestored": "User restored",
-      "RoleCreated": "Role created",
-      "RoleUpdated": "Role updated",
-      "RoleDeleted": "Role deleted",
-      "ControleCreated": "Control created",
-      "ControleUpdated": "Control updated",
-      "ControleDeleted": "Control deleted",
-      "Unauthorized": "Unauthorized attempt",
-      "UserNotFound": "User not found",
-      "UnhandledError": "Unhandled error"
-    },
-
-    "COMMON":{
-      "VIEW": "View details",
-      "PREVIOUS": "Previous",
-      "NEXT": "Next",
-      "PAGE_OF": "Page {{current}} of {{total}}",
-      "OK": "OK"
-    },
-
-    "ERRORS":{
-      "INTERNAL_ERROR": "An internal error occurred. Please try again later.",
-      "CONFIRMATION.CLEAR_AUDIT_LOGS": "Are you sure you want to clear all audit logs? This action cannot be undone.",
-      "SUCCESS.AUDIT_LOG_CLEARED": "Audit logs have been cleared successfully."
-    }
-  },
-  "REFUNDS": {
-    "BREADCRUMB": "Refunds",
-    "TITLE_LIST": "Refund Requests",
-    "SEARCH_PLACEHOLDER": "Search by client or ID…",
-    "NO_RESULTS": "No refunds found.",
-
-    "STATS": {
-      "TOTAL": "Total",
-      "PENDING": "Pending",
-      "COMPLETED": "Completed"
-    },
-
-    "TABS": {
-      "ALL": "All",
-      "PENDING": "Pending",
-      "COMPLETED": "Completed"
-    },
-
-    "TABLE": {
-      "ID": "Refund ID",
-      "CLIENT": "Client",
-      "INVOICE": "Invoice",
-      "STATUS": "Status",
-      "LINES": "Lines",
-      "TOTAL_AMOUNT": "Total Amount",
-      "ACTIONS": "Actions"
-    },
-
-    "STATUS": {
-      "PENDING": "Pending",
-      "COMPLETED": "Completed"
-    },
-
-    "ACTIONS": {
-      "VIEW": "View details",
-      "COMPLETE": "Mark as completed"
-    },
-
-    "COMPLETE": {
-      "TITLE": "Complete Refund",
-      "DESC": "Enter the reason for the refund to confirm it has been processed.",
-      "REASON_LABEL": "Reason",
-      "REASON_PLACEHOLDER": "Reason of the refund..",
-      "CONFIRM": "Confirm"
-    },
-
-    "SUCCESS": {
-      "COMPLETED": "Refund marked as completed successfully."
-    },
-
-    "ERRORS": {
-      "LOAD_FAILED": "Failed to load refunds. Please try again.",
-      "COMPLETE_FAILED": "Failed to complete refund. Please try again."
-    },
-    "VIEW": {
-      "TITLE": "Refund Details",
-      "REFUND_INFO": "Refund Information",
-      "REFUND_ID": "Refund ID",
-      "STATUS": "Status",
-      "TOTAL_AMOUNT": "Total Refund Amount",
-      "LINE_COUNT": "Number of Lines",
-      "CLIENT_INFO": "Client Information",
-      "CLIENT_NOT_FOUND": "Client information unavailable.",
-      "INVOICE_INFO": "Invoice Information",
-      "INVOICE_NOT_FOUND": "Invoice information unavailable.",
-      "LINES": "Refund Lines",
-      "LINES_SUBTITLE": "line(s)",
-      "TOTAL": "Total",
-      "NO_LINES": "No refund lines found.",
-      "TABLE": {
-        "PAYMENT_NUMBER": "Payment Number",
-        "PAYMENT_DATE": "Payment Date",
-        "METHOD": "Method",
-        "AMOUNT": "Refunded Amount",
-        "PAYMENT_LINK": "Payment",
-        "VIEW_PAYMENT": "View payment"
+    "responses": {
+      "errors": {
+        "DUPLICATE_PAYMENT_NUMBER": "A payment with this number already exists.",
+        "DUPLICATE_EXTERNAL_REFERENCE": "A payment with this external reference already exists.",
+        "DUPLICATE_ENTRY": "A duplicate entry was detected: {{key}}",
+        "PAYMENT_NOT_FOUND": "Payment not found.",
+        "INVOICE_NOT_FOUND": "Invoice not found.",
+        "PAYMENT_ALREADY_CANCELLED": "This payment has already been cancelled.",
+        "INVOICE_ALREADY_PAID": "This invoice has already been fully paid.",
+        "INVOICE_ALREADY_CANCELLED": "This invoice has already been cancelled.",
+        "PAYMENT_DOMAIN_ERROR": "A payment rule was violated. Please check the data.",
+        "INVALID_ARGUMENT": "Invalid argument provided.",
+        "INVALID_OPERATION": "This operation is not allowed in the current state.",
+        "NOT_FOUND": "The requested resource was not found.",
+        "INTERNAL_SERVER_ERROR": "An internal error occurred. Please try again later.",
+        "load_failed": "Failed to load payments. Please try again.",
+        "create_failed": "Failed to record payment. Please try again.",
+        "cancel_failed": "Failed to cancel payment. Please try again.",
+        "unpaid_invoices_not_found": "No unpaid invoices available."
+      },
+      "success": {
+        "created": "Payment recorded successfully.",
+        "cancelled": "Payment cancelled successfully."
       }
     },
-    "FORM":{
-      "TITLE": "Complete Refund"
+    "refunds": {
+      "breadcrumb": "Refunds",
+      "title_list": "Refunds",
+      "search_placeholder": "Search by ID or client…",
+      "no_results": "No refunds found.",
+      "stats": {
+        "total": "Total",
+        "pending": "Pending",
+        "completed": "Completed"
+      },
+      "tabs": {
+        "all": "All",
+        "pending": "Pending",
+        "completed": "Completed"
+      },
+      "table": {
+        "id": "ID",
+        "client": "Client",
+        "invoice": "Invoice",
+        "status": "Status",
+        "lines": "Lines",
+        "total_amount": "Total amount",
+        "actions": "Actions"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "COMPLETED": "Completed"
+      },
+      "actions": {
+        "view": "View",
+        "complete": "Confirm refund"
+      },
+      "view": {
+        "title": "Refund details",
+        "refund_info": "Refund information",
+        "refund_id": "Refund ID",
+        "status": "Status",
+        "total_amount": "Total amount",
+        "line_count": "Lines",
+        "client_info": "Client information",
+        "client_not_found": "Client not found.",
+        "invoice_info": "Invoice information",
+        "invoice_not_found": "Invoice not found.",
+        "lines": "Refund lines",
+        "lines_subtitle": "line(s)",
+        "total": "Total",
+        "no_lines": "No lines on this refund.",
+        "table": {
+          "payment_number": "Payment number",
+          "payment_date": "Payment date",
+          "method": "Method",
+          "amount": "Amount",
+          "payment_link": "Payment",
+          "view_payment": "View payment"
+        }
+      },
+      "form": {
+        "title": "Confirm refund"
+      },
+      "complete": {
+        "reason_label": "Refund reason",
+        "reason_placeholder": "Enter the refund reason or reference…"
+      },
+      "errors": {
+        "load_failed": "Failed to load refunds. Please try again.",
+        "complete_failed": "Failed to complete refund. Please try again."
+      },
+      "success": {
+        "completed": "Refund completed successfully."
+      }
     }
-  },
-  "CONTROLES": {
-    "BREADCRUMB": "CONTROLE MANAGEMENT",
-    "TITLE_LIST": "List Controls",
-    "TITLE_ADD": "Add Control",
-    "TITLE_EDIT": "Edit Control",
-    "TITLE_DETAILS": "Control Details",
-    "ADD_BUTTON": "Add Control",
-    "SEARCH_PLACEHOLDER": "Search by libelle, category or description...",
-    "TABLE": {
-      "CATEGORY": "Category",
-      "LIBELLE": "Libelle",
-      "DESCRIPTION": "Description",
-      "ACTIONS": "Actions"
-    },
-    "FORM": {
-      "CATEGORY": "Category",
-      "CATEGORY_PLACEHOLDER": "e.g. Security, Finance...",
-      "LIBELLE": "Libelle",
-      "LIBELLE_PLACEHOLDER": "Enter control name",
-      "DESCRIPTION": "Description",
-      "DESCRIPTION_PLACEHOLDER": "Describe the control..."
-    },
-    "ERRORS": {
-      "LOAD_FAILED": "Failed to load controls.",
-      "CREATE_FAILED": "Failed to create control.",
-      "UPDATE_FAILED": "Failed to update control.",
-      "DELETE_FAILED": "Failed to delete control \"{{name}}\"."
-    }
-  },
-  "ROLES": {
-    "BREADCRUMB": "ROLE MANAGEMENT",
-    "TITLE_LIST": "List Roles",
-    "TITLE_ADD": "Add Role",
-    "TITLE_EDIT": "Edit Role",
-    "TITLE_DETAILS": "Role Details",
-    "ADD_BUTTON": "Add Role",
-    "SEARCH_PLACEHOLDER": "Search roles...",
-    "TABLE": {
-      "LIBELLE": "Libelle",
-      "ID": "ID",
-      "ACTIONS": "ACTIONS"
-    },
-    "FORM": {
-      "LIBELLE": "Libelle",
-      "LIBELLE_PLACEHOLDER": "e.g. ADMIN, MANAGER..."
-    },
-    "ERRORS": {
-      "LOAD_FAILED": "Failed to load roles.",
-      "CREATE_FAILED": "Failed to create role.",
-      "UPDATE_FAILED": "Failed to update role.",
-      "DELETE_FAILED": "Failed to delete role \"{{name}}\"."
-    }
-  },
-  "PERMISSIONS": {
-    "BREADCRUMB":"PERMISSIONS MANAGEMENT",
-    "TITLE_LIST": "Assign/Remove permissions.",
-    "ROLES": "Roles",
-    "CONTROLS": "Controls",
-    "SERVICES": "Services",
-    "GRANT_TOOLTIP": "Grant {{controle}} to {{role}}",
-    "REVOKE_TOOLTIP": "Revoke {{controle}} from {{role}}",
-    "ERRORS": {
-      "LOAD_MATRIX_FAILED": "Failed to load permission matrix.",
-      "LOAD_PRIVILEGES_FAILED": "Failed to load privileges.",
-      "OPERATION_FAILED": "Operation failed, please retry later."
-    }
-  },
-  "PASSWORD": {
-    "BREADCRUMB": "ACCOUNT SECURITY",
-    "TITLE": "Reset User Password",
-    "SUBTITLE": "Set a new password for this user. They will be required to change it on next login.",
-    "NEW_PASSWORD": "New Password",
-    "NEW_PASSWORD_PLACEHOLDER": "Set a new password for the user",
-    "GENERATE": "Generate",
-    "RESET": "Reset Password",
-    "BACK": "Back",
-    "SAVING": "Saving…",
-    "ADMIN_NOTICE": "The user will be prompted to change this password immediately on their next login.",
-    "RESET_SUCCESS_TITLE": "Password Reset",
-    "RESET_SUCCESS_MESSAGE": "The password has been reset. The user will be required to change it on next login.",
-    "GOT_IT": "Got it",
-    "ERRORS": {
-      "RESET_FAILED": "Failed to reset password."
-    }
-  },
-  "USERS": {
-    "BREADCRUMB": "USER MANAGEMENT",
-    "TITLE_ACTIVE": "Active Users",
-    "TITLE_DEACTIVATED": "Deactivated Users",
-    "TITLE_DELETED": "Deleted Users",
-    "TITLE_REGISTER": "Register User",
-    "ADD_BUTTON": "Add User",
-    "SEARCH_PLACEHOLDER": "Search users…",
-    "STATS": {
-      "ACTIVE": "Active Users",
-      "DEACTIVATED": "Deactivated",
-      "DELETED": "Deleted Users"
-    },
-    "TABLE": {
-      "FULL_NAME": "FULL NAME",
-      "EMAIL": "EMAIL",
-      "ROLE": "ROLE",
-      "LAST_LOGIN": "LAST LOGIN",
-      "ACTIONS": "ACTIONS",
-      "NO_LOGIN": "No Log-in",
-      "JOINED": "JOINED"
-    },
-    "REGISTER": {
-      "TITLE": "Register New User",
-      "SUBTITLE": "Password will be auto-generated or set manually",
-      "FULL_NAME": "Full Name",
-      "FULL_NAME_PLACEHOLDER": "Enter full name",
-      "LOGIN": "Login",
-      "LOGIN_PLACEHOLDER": "Enter login",
-      "EMAIL": "Email",
-      "EMAIL_PLACEHOLDER": "Enter email address",
-      "ROLE": "Role",
-      "SELECT_ROLE": "Select a role",
-      "PASSWORD": "Password",
-      "PASSWORD_PLACEHOLDER": "Enter password",
-      "GENERATE_PASSWORD": "Generate Password",
-      "REGISTER_BUTTON": "Register User",
-      "CREATING": "Creating…"
-    },
-    "PROFILE": {
-      "TITLE": "My Profile",
-      "FULL_NAME": "Full name",
-      "EMAIL": "Email",
-      "ROLE": "Role",
-      "LAST_LOGIN": "Last login",
-      "MEMBER_SINCE": "Member since",
-      "EDIT_PROFILE": "Edit Profile",
-      "CHANGE_PASSWORD": "Change Password",
-      "PASSWORD_REQUIRED_TITLE": "Password Change Required",
-      "PASSWORD_REQUIRED_SUBTITLE": "For your security, you must set a new password before continuing.",
-      "PASSWORD_SUBTITLE": "We recommend your new password be more complex than your current.",
-      "CURRENT_PASSWORD": "Current password",
-      "CURRENT_PASSWORD_PLACEHOLDER": "Enter current password",
-      "NEW_PASSWORD": "New password",
-      "NEW_PASSWORD_PLACEHOLDER": "Enter new password",
-      "CONFIRM_PASSWORD": "Confirm password",
-      "PERSONAL_INFO": "Personal Information",
-      "ACCOUNT_DETAILS": "Account Details",
-      "AUTH_ID": "Auth ID",
-      "STATUS": "Status",
-      "ACTIVE":"Active",
-      "INACTIVE": "Inactive",
-      "LAST_UPDATED": "Last Updated",
-      "NO_CHANGES": "No changes have been made",
-      "LOAD_ERROR_TITLE": "Loading Error",
-      "LOAD_ERROR_MESSAGE": "Failed to load profile.",
-      "UPDATE_ERROR_TITLE": "Update Error",
-      "SUCCESS_TITLE": "Operation done successfully",
-      "PASSWORD_CHANGE_SUCCESS_TITLE": "Password Changed",
-      "PASSWORD_CHANGE_SUCCESS_MESSAGE": "Password has been changed successfully. You will use it on next login.",
-      "PASSWORD_CHANGE_FAILED": "Failed to change password.",
-      "UNDERSTOOD": "Understood",
-      "GENERATE_PASSWORD": "Generate Password"
-    },
-    "ERRORS": {
-      "LOAD_DEACTIVATED_FAILED": "Failed to load deactivated users.",
-      "LOAD_STATS_FAILED": "Failed to load user statistics.",
-      "ACTIVATE_FAILED": "Failed to reactivate user \"{{name}}\".",
-      "DELETE_FAILED": "Failed to delete user.",
-      "LOAD_DELETED_FAILED": "Failed to load deleted users.",
-      "RESTORE_FAILED": "Failed to restore user.",
-      "LOAD_ACTIVE_FAILED": "Failed to load active users.",
-      "DEACTIVATE_FAILED": "Failed to deactivate user.",
-      "LOAD_ROLES_FAILED": "Failed to load roles.",
-      "LOGIN_EXISTS_TITLE": "Invalid Login",
-      "LOGIN_EXISTS": "Please choose a login other than {{login}}.",
-      "EMAIL_EXISTS_TITLE": "Invalid Email",
-      "EMAIL_EXISTS": "Please choose an email other than {{email}}.",
-      "CHECK_FAILED": "Failed to validate user information.",
-      "REGISTER_FAILED": "Failed to register user."
-    }
-  },
-  "HOME": {
-    "WELCOME": "Welcome back, {{name}} 👋",
-    "LAST_LOGIN": "Last login: {{time}}",
-    "QUICK_ACCESS_TITLE": "Quick Access",
-    "GUEST": "Guest",
-    "QUICK_ACCESS": {
-      "MY_PROFILE": "My Profile",
-      "MANAGE_USERS": "Manage Users",
-      "REGISTER_USER": "Register User",
-      "DEACTIVATED_USERS": "Deactivated Users",
-      "DELETED_USERS": "Deleted Users",
-      "CONTROLES": "Controles",
-      "ROLES": "Roles",
-      "PERMISSIONS": "Permissions",
-      "ARTICLES": "Articles",
-      "ARTICLE_CATEGORIES": "Article Categories",
-      "CLIENTS": "Clients",
-      "CLIENT_CATEGORIES": "Client Categories",
-      "FOURNISSEURS": "Suppliers",
-      "BONS": "Receipts",
-      "INVOICES": "Invoices",
-      "AUDIT_LOG": "Audit Log",
-      "REPORTS": "Reports"
-    }
-  },
-  "LOGIN": {
-    "TITLE": "Login",
-    "LOGIN": "Login",
-    "PASSWORD": "Password",
-    "LOGIN_PLACEHOLDER": "Enter your login",
-    "PASSWORD_PLACEHOLDER": "Enter your password",
-    "SIGN_IN": "Sign In",
-    "CONNECTING": "Connecting...",
-    "LOGIN_REQUIRED": "Login required",
-    "PASSWORD_REQUIRED": "Password required"
-  },
-  "DIALOG": {
-    "RATE_LIMIT": "Rate Limit Reached",
-    "SERVER_UNREACHABLE": "Server Unreachable",
-    "SERVICE_UNAVAILABLE": "Service Unavailable",
-    "SESSION_EXPIRED": "Session Expired",
-    "ACCOUNT_DEACTIVATED": "Account Deactivated",
-    "ACCESS_DENIED": "Access Denied",
-    "CANCEL": "Cancel",
-    "CONFIRM": "Confirm",
-    "OK": "OK"
-  },
-  "CHANGE_LANGUAGE": {
-    "PREFIX": "Switch to",
-    "ENGLISH": "English",
-    "FRENCH": "French"
-  },
-  "TOGGLE_THEME": {
-    "LIGHT": "Switch to light theme",
-    "DARK": "Switch to dark theme"
-  },
-  "SESSION": {
-    "EXPIRED_TITLE": "Session Expired",
-    "EXPIRED_MESSAGE": "Your session has expired. Please login again to continue."
-  },
-  "ACCOUNT": {
-    "INVALID_TITLE": "Account Issue",
-    "INVALID_MESSAGE": "Your account is no longer active or has been deleted. Please contact support."
   }
 }

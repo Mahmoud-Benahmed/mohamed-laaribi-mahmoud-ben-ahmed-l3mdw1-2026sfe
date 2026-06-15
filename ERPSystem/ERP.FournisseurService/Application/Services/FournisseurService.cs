@@ -10,11 +10,13 @@ public class FournisseurService : IFournisseurService
 {
     private readonly IFournisseurRepository _repo;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ITenantContext _tenantContext;
 
-    public FournisseurService(IFournisseurRepository repo, IEventPublisher eventPublisher)
+    public FournisseurService(IFournisseurRepository repo, IEventPublisher eventPublisher, ITenantContext tenantContext)
     {
         _repo = repo;
         _eventPublisher = eventPublisher;
+        _tenantContext = tenantContext;
     }
 
     // =========================
@@ -23,8 +25,14 @@ public class FournisseurService : IFournisseurService
     public async Task<FournisseurResponseDto> CreateAsync(CreateFournisseurRequestDto dto)
     {
         Fournisseur f = Fournisseur.Create(
-            dto.Name, dto.Address, dto.Phone,
-            dto.TaxNumber, dto.RIB, dto.Email);
+            dto.Name, dto.Address, dto.Phone, dto.RIB, 
+            dto.Email,
+            dto.TaxNumber, 
+            _tenantContext.TenantId);
+
+        if (await _repo.DuplicateExists(dto.Email, dto.TaxNumber, dto.RIB))
+            throw new DuplicateKeyException($"Fournisseur.RIB: {dto.RIB} | Fournisseur.Email: {dto.Email} | Fournisseur.TaxNumber: {dto.TaxNumber}");
+
         await _repo.AddAsync(f);
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
@@ -38,7 +46,12 @@ public class FournisseurService : IFournisseurService
     public async Task<FournisseurResponseDto> UpdateAsync(Guid id, UpdateFournisseurRequestDto dto)
     {
         Fournisseur f = await _repo.GetByIdAsync(id) ?? throw new FournisseurNotFoundException(id);
-        f.Update(dto.Name, dto.Address, dto.Phone, dto.TaxNumber, dto.RIB, dto.Email);
+
+        if (await _repo.DuplicateExists(dto.Email, dto.TaxNumber, dto.RIB, id))
+            throw new DuplicateKeyException($"Fournisseur.RIB: {dto.RIB} | Fournisseur.Email: {dto.Email} | Fournisseur.TaxNumber: {dto.TaxNumber}");
+
+        f.Update(dto.Name, dto.Address, dto.Phone, dto.RIB, dto.Email, dto.TaxNumber);
+        
         await _repo.SaveChangesAsync();
         FournisseurResponseDto res = f.ToResponseDto();
         await _eventPublisher.PublishAsync(FournisseurTopics.Updated, res);

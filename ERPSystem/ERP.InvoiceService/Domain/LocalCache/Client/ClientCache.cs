@@ -1,8 +1,11 @@
-﻿namespace ERP.InvoiceService.Domain.LocalCache.Client;
+﻿using ERP.InvoiceService.Application.DTOs;
+
+namespace ERP.InvoiceService.Domain.LocalCache.Client;
 
 public class ClientCache
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string Address { get; private set; } = default!;
@@ -22,30 +25,24 @@ public class ClientCache
 
     private ClientCache() { }
 
-    public static ClientCache Create(
-        Guid id,
-        string name, string email, string address,
-        decimal? creditLimit = null,  // ← Made nullable with default
-        string? phone = null, string? taxNumber = null,
-        int? delaiRetour = null,
-        int? duePaymentPeriod = null,
-        bool isBlocked = false, bool isDeleted = false, DateTime? createdAt = null, DateTime? updatedAt = null)
+    public static ClientCache Create(ClientResponseDto dto)
     {
         return new ClientCache
         {
-            Id = id,
-            Name = name.Trim(),
-            Email = email.Trim().ToLowerInvariant(),
-            Address = address.Trim(),
-            Phone = phone?.Trim(),
-            TaxNumber = taxNumber?.Trim(),
-            CreditLimit = creditLimit,
-            DelaiRetour = delaiRetour,
-            DuePaymentPeriod = duePaymentPeriod,
-            IsBlocked = isBlocked,
-            IsDeleted = isDeleted,
-            CreatedAt = createdAt ?? DateTime.UtcNow,  // ← was always DateTime.UtcNow
-            UpdatedAt = updatedAt,
+            Id = dto.Id,
+            TenantId = dto.TenantId,
+            Name = dto.Name.Trim(),
+            Email = dto.Email.Trim().ToLowerInvariant(),
+            Address = dto.Address.Trim(),
+            Phone = dto.Phone?.Trim(),
+            TaxNumber = dto.TaxNumber?.Trim(),
+            CreditLimit = dto.CreditLimit,
+            DelaiRetour = dto.DelaiRetour,
+            DuePaymentPeriod = dto.DuePaymentPeriod,
+            IsBlocked = dto.IsBlocked,
+            IsDeleted = dto.IsDeleted,
+            CreatedAt = dto.CreatedAt, 
+            UpdatedAt = dto.UpdatedAt,
         };
     }
 
@@ -202,7 +199,8 @@ public class ClientCache
 
     public int GetEffectiveDuePaymentPeriod()
     {
-        if (DuePaymentPeriod.HasValue) return DuePaymentPeriod.Value;
+        if (DuePaymentPeriod.HasValue && DuePaymentPeriod.Value > 0)
+            return DuePaymentPeriod.Value;
 
         int categoryMax = ClientCategories
             .Select(cc => cc.Category)
@@ -211,7 +209,7 @@ public class ClientCache
             .DefaultIfEmpty(0)
             .Max();
 
-        return categoryMax;
+        return categoryMax > 0 ? categoryMax : 30;
     }
 
     public bool CanPlaceOrder(decimal orderAmount, decimal currentBalance)

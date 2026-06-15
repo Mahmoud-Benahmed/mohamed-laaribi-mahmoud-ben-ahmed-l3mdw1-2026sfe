@@ -1,17 +1,32 @@
-﻿using ERP.FournisseurService.Domain;
+﻿using ERP.FournisseurService.Application.Services;
+using ERP.FournisseurService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ERP.FournisseurService.Infrastructure.Persistence;
 
-public sealed class FournisseurDbContext(DbContextOptions<FournisseurDbContext> options) : DbContext(options)
+public class FournisseurDbContext : DbContext
 {
-    // Entities
+    private readonly Guid? _tenantId;
     public DbSet<Fournisseur> Fournisseurs => Set<Fournisseur>();
 
+    public FournisseurDbContext(
+        DbContextOptions<FournisseurDbContext> options,
+        ITenantContext? tenantContext = null)
+        : base(options)
+    {
+        _tenantId = tenantContext?.TenantId;
+    }
 
-    protected override void OnModelCreating(ModelBuilder m) =>
+    protected override void OnModelCreating(ModelBuilder m)
+    {
         m.ApplyConfigurationsFromAssembly(typeof(FournisseurDbContext).Assembly);
+
+        m.Entity<Fournisseur>()
+         .HasQueryFilter(f => 
+            !f.IsDeleted &&
+            (_tenantId == null || f.TenantId == _tenantId));
+    }
 }
 
 
@@ -26,7 +41,9 @@ internal sealed class FournisseurConfiguration : IEntityTypeConfiguration<Fourni
         b.Property(f => f.Address).IsRequired().HasMaxLength(500);
         b.Property(f => f.Phone).IsRequired().HasMaxLength(50);
         b.Property(f => f.Email).HasMaxLength(200);
-        b.Property(f => f.TaxNumber).IsRequired().HasMaxLength(50);
+        b.Property(f => f.TaxNumber)
+            .IsRequired(false)   // ← was IsRequired()
+            .HasMaxLength(50);
         b.Property(f => f.RIB).IsRequired().HasMaxLength(50);
         b.Property(f => f.IsDeleted).IsRequired();
         b.Property(f => f.IsBlocked).IsRequired();
@@ -35,11 +52,10 @@ internal sealed class FournisseurConfiguration : IEntityTypeConfiguration<Fourni
                  .IsConcurrencyToken(false)
                  .ValueGeneratedNever();
 
-        b.HasIndex(f => f.TaxNumber)
-         .IsUnique()
-         .HasDatabaseName("IX_Fournisseurs_TaxNumber")
-         .HasFilter("[IsDeleted] = 0");
-
+        b.HasIndex(f => new { f.TaxNumber, f.TenantId })
+            .IsUnique()
+            .HasDatabaseName("IX_Fournisseurs_TaxNumber")
+            .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL"); // ← add IS NOT NULL
 
         b.HasQueryFilter(f => !f.IsDeleted);
     }

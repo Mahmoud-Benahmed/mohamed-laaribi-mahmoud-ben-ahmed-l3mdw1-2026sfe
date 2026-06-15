@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using ERP.InvoiceService.Application.Interfaces;
+using ERP.InvoiceService.Application.Services;
 using ERP.InvoiceService.Application.Services.LocalCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ArticleCache;
 using ERP.InvoiceService.Application.Services.LocalCache.ClientCache;
@@ -11,7 +12,9 @@ using ERP.InvoiceService.Infrastructure.Messaging.Events.ArticleEvents.ArticleCa
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using ERP.InvoiceService.Infrastructure.Messaging.Events.Payment;
+using ERP.InvoiceService.Infrastructure.Messaging.Events.TenantEvent;
 using ERP.InvoiceService.Infrastructure.Persistence;
+using ERP.InvoiceService.Infrastructure.Persistence.Repositories;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache.ArticleCache;
 using ERP.InvoiceService.Infrastructure.Persistence.Repositories.LocalCache.ClientCache;
@@ -19,8 +22,14 @@ using InvoiceService.Application.Interfaces;
 using InvoiceService.Middleware;
 using InvoiceService.Services;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.EnableDebugging = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +82,18 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // =========================
 // REPOSITORIES
@@ -82,6 +103,9 @@ builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 // =========================
 // SERVICES
 // =========================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddScoped<ITenantCacheRepository, TenantCacheRepository>();
 builder.Services.AddScoped<IInvoiceNumberGenerator, InvoiceNumberGenerator>();
 builder.Services.AddScoped<IInvoicesService, InvoicesService>();
 
@@ -114,8 +138,11 @@ builder.Services.AddHostedService<PaymentEventConsumer>();
 
 
 builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 builder.Services.AddScoped<IInvoicePdfGenerator, InvoicePdfGenerator>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
+builder.Services.AddHostedService<OverdueInvoiceJob>();
 
 // =========================
 // CONTROLLERS & API
@@ -160,6 +187,10 @@ using (IServiceScope scope = app.Services.CreateScope())
         ClientCategoryTopics.Deleted, ClientCategoryTopics.Restored,
 
         PaymentTopics.Cancelled, PaymentTopics.InvoicePaid,
+
+        TenantTopics.TenantCreated,
+        TenantTopics.TenantUpdated,
+        TenantTopics.TenantDeleted
     };
 
     int maxRetries = 30;
@@ -235,13 +266,16 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     InvoiceDbContext context = scope.ServiceProvider.GetRequiredService<InvoiceDbContext>();
 
-    await context.Database.EnsureDeletedAsync();
     await context.Database.MigrateAsync();
 }
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -251,5 +285,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

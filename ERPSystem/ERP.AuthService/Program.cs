@@ -1,22 +1,29 @@
+using Confluent.Kafka;
 using ERP.AuthService.Application.Interfaces;
 using ERP.AuthService.Application.Interfaces.Repositories;
 using ERP.AuthService.Application.Interfaces.Services;
 using ERP.AuthService.Application.Services;
 using ERP.AuthService.Domain;
+using ERP.AuthService.Infrastructure.ApiClient;
 using ERP.AuthService.Infrastructure.Configuration;
+using ERP.AuthService.Infrastructure.Messaging;
 using ERP.AuthService.Infrastructure.Persistence;
 using ERP.AuthService.Infrastructure.Persistence.Repositories;
+using ERP.AuthService.Infrastructure.Persistence.Seeder;
 using ERP.AuthService.Infrastructure.Security;
 using ERP.AuthService.Middleware;
 using ERPrivileges.AuthService.Infrastructure.Persistence.Seeder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 using System.Text;
 
 
@@ -24,6 +31,8 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // ── Add environment variables
 builder.Configuration.AddEnvironmentVariables();
+
+ConfigurationManager config = builder.Configuration;
 
 // ── Controllers & Swagger
 builder.Services.AddControllers()
@@ -33,29 +42,59 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
+
+builder.Services.AddHttpClient<ITenantApiClient, TenantApiClient>(client =>
+{
+    var address = config[$"TenantService:Address"]
+       ?? throw new InvalidOperationException(
+           $"TenantService address not found in configuration."
+        );
+
+    client.BaseAddress = new Uri(address);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Enum Serializing (0 => "string")
+
 BsonSerializer.RegisterSerializer(new EnumSerializer<Theme>(BsonType.String));
 BsonSerializer.RegisterSerializer(new EnumSerializer<Language>(BsonType.String));
-
-// ── Mongo GUID Serializer
 BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+
+/////////////////////////////
 // ── Mongo Configuration
+////////////////////////////
 builder.Services
     .AddOptions<MongoSettings>()
     .Bind(builder.Configuration.GetSection("MongoSettings"))
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-
-builder.Services.AddSingleton<MongoDbContext>(sp =>
+builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    MongoSettings settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
-    return new MongoDbContext(settings.ConnectionString, settings.DatabaseName);
+    var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    return new MongoClient(settings.RootConnectionString);
 });
+
+builder.Services.AddScoped<MongoDbContext>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    var tenantContext = sp.GetRequiredService<ITenantContext>();
+    return new MongoDbContext(settings.DatabaseName, tenantContext, sp.GetRequiredService<IMongoClient>());
+});
+
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+builder.Services.AddHealthChecks()
+    .AddMongoDb(sp => sp.GetRequiredService<IMongoClient>(), name: "mongo")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // ── Read JWT secret from env
 // ── JWT Settings
@@ -82,10 +121,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Secret not found"),
+            ValidIssuer = builder.Configuration["JWT:Issuer"] ?? throw new Exception("JWT:Issuer not found"),
 
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Secret not found"),
+            ValidAudience = builder.Configuration["JWT:Audience"] ?? throw new Exception("JWT:Audience not found"),
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(5),
@@ -116,26 +155,29 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 // ── Dependency Injection
+builder.Services.AddScoped<IRefreshTokenHashingHelper, RefreshTokenHashingHelper>();
 builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IControleRepository, ControleRepository>();
 builder.Services.AddScoped<IPrivilegeRepository, PrivilegeRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<ITenantCacheRepository, TenantCacheRepository>();
+
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IControleService, ControleService>();
 builder.Services.AddScoped<IPrivilegeService, PrivilegeService>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
+builder.Services.AddScoped<ITenantCacheService, TenantCacheService>();
 
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
 
 builder.Services.AddScoped<IAuditLogger, AuditLogger>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
 
-builder.Services.AddHttpContextAccessor();
-
-//builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
 WebApplication app = builder.Build();
 
@@ -143,39 +185,42 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
+    var mongoSettings = services.GetRequiredService<IOptions<MongoSettings>>().Value;
+    var env = services.GetRequiredService<IWebHostEnvironment>();
 
-    MongoDbContext dbContext = services.GetRequiredService<MongoDbContext>();
+    await MongoDbUserInitializer.EnsureAppUserCreatedAsync(mongoSettings);
 
-    // ── Initialize MongoDB indexes
-    await MongoDbInitializer.InitializeAsync(dbContext);
+    // ✅ get from DI — no tenant context at startup so HasTenant = false naturally
+    var dbContext = services.GetRequiredService<MongoDbContext>();
 
-    // ── Seed data
-    await AuthServiceSeeder.SeedAsync(
-        dbContext,
-        services.GetRequiredService<IAuditLogRepository>(),
-        services.GetRequiredService<IAuthUserRepository>(),
-        services.GetRequiredService<IRoleRepository>(),
-        services.GetRequiredService<IControleRepository>(),
-        services.GetRequiredService<IPrivilegeRepository>(),
-        services.GetRequiredService<IPasswordHasher<AuthUser>>(),
-        services.GetRequiredService<IConfiguration>()
-    );
+    await MongoDbInitializer.InitializeAsync(dbContext, env, mongoSettings);
+
+    await GlobalSeeder.InitializeAsync(dbContext, mongoSettings, env, services);
 }
 
 // =========================
 // PIPELINE
 // =========================
-app.UseSwagger();
-app.UseSwaggerUI();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment()) 
 {
-    app.UseHttpsRedirection();
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ValidateUserMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<ValidateUserMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Name != "self"
+});
+
 
 app.Run();

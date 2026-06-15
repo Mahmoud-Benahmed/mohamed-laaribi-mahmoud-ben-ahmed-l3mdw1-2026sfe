@@ -10,6 +10,7 @@ using ERP.StockService.Application.Services.LocalCache.Fournisseur;
 using ERP.StockService.Application.Services.LocalCache.InvoiceCache;
 using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Article;
 using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.Category;
+using ERP.StockService.Infrastructure.Messaging.Events.ArticleEvents.TenantEvent;
 using ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Category;
 using ERP.StockService.Infrastructure.Messaging.Events.ClientEvents.Client;
 using ERP.StockService.Infrastructure.Messaging.Events.FournisseurEvents;
@@ -20,8 +21,10 @@ using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
 using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache.ArticleCache;
 using ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache.ClientCache;
 using ERP.StockService.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -42,13 +45,45 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Unified validation error response — Data Annotations return this shape
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            string message = string.Join(" | ", context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+
+            return new BadRequestObjectResult(new
+            {
+                statusCode = 400,
+                code = "VALIDATION ERROR",
+                message
+            });
+        };
+    }); ;
+
+var kafkaConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:BootstrapServers"]
+};
+
+///////////////////////////////////////////////////
+// Health Checks
+///////////////////////////////////////////////////
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: "sql")
+    .AddKafka(kafkaConfig)
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // =========================
 // DEPENDENCY INJECTION
 // =========================
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<IBonEntreRepository, BonEntreRepository>();
 builder.Services.AddScoped<IBonSortieRepository, BonSortieRepository>();
 builder.Services.AddScoped<IBonRetourRepository, BonRetourRepository>();
@@ -93,28 +128,11 @@ builder.Services.AddHostedService<InvoiceEventConsumer>();
 
 builder.Services.AddScoped<IInvoiceBonSortieMappingRepository, InvoiceBonSortieMappingRepository>();
 
+builder.Services.AddHostedService<TenantLifecycleConsumer>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
+// =========================
 // CONTROLLERS & API
 // =========================
-builder.Services
-    .AddControllers(options =>
-        options.SuppressAsyncSuffixInActionNames = false)
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        // Unified validation error response — Data Annotations return this shape
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            string message = string.Join(" | ", context.ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage));
-
-            return new BadRequestObjectResult(new
-            {
-                statusCode = 400,
-                code = "VALIDATION ERROR",
-                message
-            });
-        };
-    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -152,6 +170,9 @@ using (IServiceScope scope = app.Services.CreateScope())
 
         ClientCategoryTopics.Created, ClientCategoryTopics.Updated,
         ClientCategoryTopics.Deleted, ClientCategoryTopics.Restored,
+
+        FournisseurTopics.Created, FournisseurTopics.Updated,
+        FournisseurTopics.Deleted, FournisseurTopics.Restored,
 
         InvoiceTopics.Created, InvoiceTopics.Cancelled,
     };
@@ -215,12 +236,15 @@ using (IServiceScope scope = app.Services.CreateScope())
 using (IServiceScope scope = app.Services.CreateScope())
 {
     StockDbContext db = scope.ServiceProvider.GetRequiredService<StockDbContext>();
-    await db.Database.EnsureDeletedAsync();
+
     await db.Database.MigrateAsync();
 }
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -230,5 +254,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name is "sql" or "kafka"
+});
 
 app.Run();

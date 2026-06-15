@@ -42,7 +42,7 @@ public class JournalStockRepository : IJournalStockRepository
                 ArticleId = g.Key,
                 TotalStock = g.Sum(j => j.Quantity)
             })
-            .Where(s => s.TotalStock != 0)  // ← CRITICAL: Remove zero stock articles
+            .Where(s => s.TotalStock > 0)
             .ToListAsync();
 
         Dictionary<string, List<StockItem>> result = new Dictionary<string, List<StockItem>>

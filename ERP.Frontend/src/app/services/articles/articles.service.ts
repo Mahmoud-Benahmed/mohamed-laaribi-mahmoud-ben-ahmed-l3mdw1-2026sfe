@@ -65,7 +65,7 @@ export interface PagedResultDto<T> {
 
 @Injectable({ providedIn: 'root' })
 export class ArticleService {
-  private readonly base = `${environment.apiUrl}/articles`;
+  private readonly base = `${environment.routes.articles}`;
 
   constructor(private http: HttpClient) {}
 

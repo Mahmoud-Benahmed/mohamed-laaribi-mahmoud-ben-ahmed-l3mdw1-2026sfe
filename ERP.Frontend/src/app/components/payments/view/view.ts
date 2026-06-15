@@ -11,7 +11,7 @@ import { StockItem, StockService } from '../../../services/stock.service';
 import { AuthService, PRIVILEGES } from '../../../services/auth/auth.service';
 import { InvoiceDto, InvoiceService } from '../../../services/invoice.service';
 import { ArticleService, UnitEnum } from '../../../services/articles/articles.service';
-import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, Observable, of, take, tap } from 'rxjs';
 import { HttpError } from '../../../interfaces/HttpError';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModalComponent } from '../../modal/modal';
@@ -52,7 +52,11 @@ export class ViewPaymentComponent implements OnInit, OnDestroy {
   errors: string[] = [];
   successMessage: string | null = null
 
+  private invoicesCache = new Map<string, InvoiceDto>();
+  private invoiceFetchMap = new Map<string, Observable<InvoiceDto | null>>();
+
   invoicesCached: InvoiceWithPayment[] = [];
+
   selectedPayment: PaymentDto | null= null;
   paymentIdFromRoute: string|null=null;
   client$!: Observable<ClientResponseDto | null>;
@@ -118,7 +122,7 @@ export class ViewPaymentComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           const errorMsg = (err.error as HttpError)?.message
-            ?? this.translate.instant('INVOICES.ERRORS.LOAD_FAILED');
+            ?? this.translate.instant('invoices.responses.errors.load_failed');
           this.flash('error', errorMsg);
           this.cancel();
         }
@@ -136,8 +140,38 @@ export class ViewPaymentComponent implements OnInit, OnDestroy {
   }
 
 
-  getByInvoiceId(id: string): InvoiceWithPayment | null{
-    return this.invoicesCached.find(inv=> inv.id === id) ?? null;
+
+  getByInvoiceId(id: string): InvoiceWithPayment | null {
+    const cached = this.invoicesCache.get(id);
+    if (cached) {
+      // Find matching cache from paymentService or compute zero values
+      const cacheInfo = this.invoicesCached.find(i => i.id === id);
+      return {
+        ...cached,
+        paidAmount: cacheInfo?.paidAmount ?? 0,
+        remainingAmount: cacheInfo?.remainingAmount ?? cached.totalTTC
+      };
+    }
+
+    if (this.invoiceFetchMap.has(id)) return null;
+
+    const fetch$ = this.invoiceService.getById(id).pipe(
+      take(1),
+      map(invoice => {
+        if (invoice) this.invoicesCache.set(id, invoice);
+        this.invoiceFetchMap.delete(id);
+        return invoice;
+      }),
+      catchError(() => {
+        this.invoicesCache.set(id, null!);
+        this.invoiceFetchMap.delete(id);
+        return of(null);
+      })
+    );
+
+    this.invoiceFetchMap.set(id, fetch$);
+    fetch$.subscribe();
+    return null;
   }
 
   openEdit(){

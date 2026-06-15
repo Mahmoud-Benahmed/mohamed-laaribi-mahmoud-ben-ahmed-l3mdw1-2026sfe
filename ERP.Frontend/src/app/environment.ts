@@ -1,9 +1,8 @@
 export const environment = {
-  production: false,
-  docker: false,
+  production: true,
 
-  apiUrl: 'http://localhost:5000',
-  
+  apiUrl: '/api',
+
   routes: {
     auth:        '/auth',
     roles:       '/auth/roles',
@@ -14,5 +13,8 @@ export const environment = {
     stock:       '/stock',
     fournisseurs:'/fournisseurs',
     invoices:    '/invoices',
+    payment:    '/payment',
+    tenants:   '/tenants',
+    plans:   '/plans',
   },
 } as const;

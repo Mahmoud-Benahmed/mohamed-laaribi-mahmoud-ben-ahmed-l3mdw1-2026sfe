@@ -1,5 +1,7 @@
 ﻿using ERP.ArticleService.Application.DTOs;
 using ERP.ArticleService.Application.Interfaces;
+using ERP.ArticleService.Application.Services;
+using ERP.ArticleService.Infrastructure.Messaging;
 using ERP.ArticleService.Properties;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +11,10 @@ namespace ERP.ArticleService.API.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly IArticleService _articleService;
-
-        public ArticleController(IArticleService articleService)
+        private readonly ITenantContext _tenantContext;
+        public ArticleController(IArticleService articleService, ITenantContext tenantContext)
         {
+            _tenantContext = tenantContext;
             _articleService = articleService;
         }
 
@@ -95,6 +98,9 @@ namespace ERP.ArticleService.API.Controllers
         [HttpPost(ApiRoutes.Articles.Create)]
         public async Task<ActionResult<ArticleResponseDto>> Create([FromBody] CreateArticleRequestDto request)
         {
+            if (_tenantContext.TenantId is null)
+                return StatusCode(403, new { statusCode = 403, code = "TENANT_REQUIRED", message = "Tenant context is required." });
+
             ArticleResponseDto article = await _articleService.CreateAsync(request);
             return CreatedAtAction(
                 nameof(GetById),

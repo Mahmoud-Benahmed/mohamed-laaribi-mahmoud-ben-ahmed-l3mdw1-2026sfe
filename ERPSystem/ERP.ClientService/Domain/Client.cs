@@ -3,6 +3,7 @@
 public class Client
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; private set; }
     public string Name { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string Address { get; private set; } = default!;
@@ -27,7 +28,9 @@ public class Client
         decimal? creditLimit = null,  // ← Made nullable with default
         string? phone = null, string? taxNumber = null,
         int? delaiRetour = null,
-        int? duePaymentPeriod = null)
+        int? duePaymentPeriod = null,
+        Guid? tenantId = null
+        )
     {
         ValidateName(name);
         ValidateEmail(email);
@@ -39,6 +42,7 @@ public class Client
         return new Client
         {
             Id = Guid.NewGuid(),
+            TenantId= tenantId,
             Name = name.Trim(),
             Email = email.Trim().ToLowerInvariant(),
             Address = address.Trim(),
@@ -79,7 +83,7 @@ public class Client
             throw new InvalidOperationException(
                 $"Client already has category '{category.Name}'.");
 
-        ClientCategory clientCategory = ClientCategory.Create(Id, category.Id, Guid.Empty, category);
+        ClientCategory clientCategory = ClientCategory.Create(Id, category.Id, assignedById, category);
         ClientCategories.Add(clientCategory);
 
         UpdatedAt = DateTime.UtcNow;
@@ -161,10 +165,11 @@ public class Client
     {
         if (DelaiRetour.HasValue) return DelaiRetour.Value;
 
+        if (ClientCategories.Count == 0) return null;
+
         int categoryMax = ClientCategories
-            .Select(cc => cc.Category)
-            .Where(c => c is { IsActive: true, IsDeleted: false })
-            .Select(c => c.DelaiRetour)
+            .Where(cc => cc.Category is { IsActive: true, IsDeleted: false })
+            .Select(cc => cc.Category!.DelaiRetour)
             .DefaultIfEmpty(0)
             .Max();
 
@@ -173,16 +178,14 @@ public class Client
 
     public decimal? GetEffectiveCreditLimit()  // ← Returns nullable decimal
     {
-        // If no base credit limit, return null
         if (!CreditLimit.HasValue || CreditLimit.Value <= 0)
             return null;
 
-        // Get the highest multiplier from active categories
         decimal multiplier = ClientCategories
-            .Select(cc => cc.Category)
-            .Where(c => c is { IsActive: true, IsDeleted: false } && c.CreditLimitMultiplier.HasValue)
-            .Select(c => c.CreditLimitMultiplier!.Value)  // Use ! after filtering
-            .DefaultIfEmpty(1m)  // Default to 1 if no multipliers found
+            .Where(cc => cc.Category is { IsActive: true, IsDeleted: false }
+                      && cc.Category.CreditLimitMultiplier.HasValue)
+            .Select(cc => cc.Category!.CreditLimitMultiplier!.Value)
+            .DefaultIfEmpty(1m)
             .Max();
 
         return CreditLimit.Value * multiplier;
@@ -203,7 +206,8 @@ public class Client
 
     public int GetEffectiveDuePaymentPeriod()
     {
-        if (DuePaymentPeriod.HasValue) return DuePaymentPeriod.Value;
+        if (DuePaymentPeriod.HasValue && DuePaymentPeriod.Value > 0)
+            return DuePaymentPeriod.Value;
 
         int categoryMax = ClientCategories
             .Select(cc => cc.Category)
@@ -212,7 +216,7 @@ public class Client
             .DefaultIfEmpty(0)
             .Max();
 
-        return categoryMax;
+        return categoryMax > 0 ? categoryMax : 30; // ← fallback to 30 days
     }
 
     public bool CanPlaceOrder(decimal orderAmount, decimal currentBalance)

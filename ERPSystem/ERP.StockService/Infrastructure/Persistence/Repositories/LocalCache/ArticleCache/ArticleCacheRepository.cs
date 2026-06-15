@@ -1,4 +1,5 @@
 ﻿using ERP.StockService.Application.Interfaces;
+using ERP.StockService.Application.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
@@ -6,8 +7,13 @@ namespace ERP.StockService.Infrastructure.Persistence.Repositories.LocalCache;
 public sealed class ArticleCacheRepository : IArticleCacheRepository
 {
     private readonly StockDbContext _db;
+    private readonly ITenantContext _tenantContext;
 
-    public ArticleCacheRepository(StockDbContext db) => _db = db;
+    public ArticleCacheRepository(StockDbContext db, ITenantContext tenantContext)
+    {
+        _db = db;
+        _tenantContext= tenantContext;
+    }
 
     public async Task<List<Domain.LocalCache.Article.ArticleCache>> GetByIdsAsync(List<Guid> ids)
     => await _db.ArticleCaches
@@ -18,6 +24,12 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         => await _db.ArticleCaches
             .Include(a => a.Category)
             .FirstOrDefaultAsync(a => a.Id == id);
+
+    public async Task<Domain.LocalCache.Article.ArticleCache?> GetByIdDeletedAsync(Guid id)
+        => await _db.ArticleCaches
+            .IgnoreQueryFilters()
+            .Include(a => a.Category)
+            .FirstOrDefaultAsync(a => a.Id == id && a.TenantId == _tenantContext.TenantId);
 
     public async Task<Domain.LocalCache.Article.ArticleCache?> GetByBarCodeAsync(string barCode)
         => await _db.ArticleCaches
@@ -54,7 +66,7 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         {
             string q = search.Trim().ToLower();
             baseQuery = baseQuery.Where(c =>
-                c.BarCode.ToLower().Contains(q) ||
+                (c.BarCode != null && c.BarCode.ToLower().Contains(q)) ||
                 c.Libelle.ToLower().Contains(q) ||
                 c.CodeRef.ToLower().Contains(q)
             );
@@ -64,27 +76,28 @@ public sealed class ArticleCacheRepository : IArticleCacheRepository
         int totalCount = await baseQuery.CountAsync();
 
         List<Domain.LocalCache.Article.ArticleCache> items = await baseQuery
-            .OrderBy(a => a.Libelle)
-            .Include(a => a.Category)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+                .Include(a => a.Category)
+                .OrderBy(a => a.Libelle)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
         return (items, totalCount);
     }
-
-    public async Task AddAsync(Domain.LocalCache.Article.ArticleCache article)
-        => await _db.ArticleCaches.AddAsync(article);
-
     public async Task SaveChangesAsync()
         => await _db.SaveChangesAsync();
 
-    public async Task DeleteAsync(Domain.LocalCache.Article.ArticleCache article)
+    public Task AddAsync(Domain.LocalCache.Article.ArticleCache article)
     {
-        if (article == null)
-            throw new ArgumentNullException(nameof(article));
-
-        _db.ArticleCaches.Remove(article); // Use correct DbSet
-        await _db.SaveChangesAsync();
+        _db.ArticleCaches.Add(article);
+        return Task.CompletedTask;
     }
+
+    public Task DeleteAsync(Domain.LocalCache.Article.ArticleCache article)
+    {
+        if (article is null) throw new ArgumentNullException(nameof(article));
+        _db.ArticleCaches.Remove(article);
+        return Task.CompletedTask;
+    }
+
 }

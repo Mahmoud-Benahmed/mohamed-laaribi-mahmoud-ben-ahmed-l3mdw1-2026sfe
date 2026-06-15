@@ -1,11 +1,24 @@
 @use '@angular/material' as mat;
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
 :root {
   --sidebar-w: 210px;
   --sidebar-w-sm: 60px;
   --topbar-h: 54px;
+
+  // Tenant brand colors — overridden at runtime by TenantThemeService
+  --tenant-primary:        #4f7cff;  // fallback matches current --accent
+  --tenant-secondary:      #7c4dff;  // fallback
+
+  // Derived variants (work automatically when --tenant-primary changes)
+  --tenant-primary-bg:     color-mix(in srgb, var(--tenant-primary) 10%, transparent);
+  --tenant-primary-border: color-mix(in srgb, var(--tenant-primary) 25%, transparent);
+
+  // Replace hardcoded --accent with tenant-aware alias
+  --accent:        var(--tenant-primary);
+  --accent-bg:     var(--tenant-primary-bg);
+  --accent-border: var(--tenant-primary-border);
+
+  // Rest unchanged
   --bg: #0c0d11;
   --sidebar-bg: #111318;
   --sidebar-border: #1d1f28;
@@ -14,9 +27,6 @@
   --text: #e4e6f0;
   --text-soft: #8b90a8;
   --text-muted: #4e526a;
-  --accent: #4f7cff;
-  --accent-bg: rgba(79, 124, 255, 0.1);
-  --accent-border: rgba(79, 124, 255, 0.25);
   --danger: #ff5c72;
   --border: #1d1f28;
   --radius: 8px;
@@ -38,6 +48,7 @@
   --chip-role-bg:     rgba(124, 77, 255, 0.12);
   --chip-role-border: rgba(124, 77, 255, 0.3);
   --chip-role-color:  #c6b2ff;
+
 }
 
 [data-theme="light"] {
@@ -54,8 +65,7 @@
   --sidebar-border: #e2e6f0;
   --chip-role-bg:     rgba(124, 77, 255, 0.15);
   --chip-role-border: rgba(124, 77, 255, 0.4);
-  --chip-role-color:  #522fb9; // darker purple for readability on white
-
+  --chip-role-color:  #522fb9;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
