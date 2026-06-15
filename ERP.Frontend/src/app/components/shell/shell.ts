@@ -81,6 +81,12 @@ export class ShellComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subs.add(
+      this.translate.onLangChange.subscribe(() => {
+        this.breadcrumbs = this.getBreadcrumbs(this.router.url);
+      })
+    );
+
     const url = this.router.url;
     this.breadcrumbs = this.getBreadcrumbs(url);
     if (url.startsWith('/users') || url.startsWith('/permissions')) this.openGroups['auth'] = true;
@@ -99,116 +105,116 @@ export class ShellComponent implements OnInit, OnDestroy {
     // Special dynamic routes (with parameters)
     if (url.startsWith('/change-password/')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('auth.changePassword.title') } // Use lowercase key
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'auth.changePassword.title' } // Use lowercase key
       ];
     }
 
     if (url.startsWith('/users/register')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('nav.auth.register') }
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.register' }
       ];
     }
     if (url.startsWith('/users/deactivated')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('nav.auth.deactivated') }
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.deactivated' }
       ];
     }
     if (url.startsWith('/users/deleted')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('nav.auth.deleted') }
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.deleted' }
       ];
     }
     if (url.startsWith('/users/categories')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('nav.auth.controles') }
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'nav.auth.controles' }
       ];
     }
     if (url.startsWith('/users/roles')) {
       return [
-        { label: t('nav.auth.roles'), link: '/roles' },
-        { label: t('nav.auth.roles') }
+        { label: 'nav.auth.roles', link: '/roles' },
+        { label: 'nav.auth.roles' }
       ];
     }
     if (url.startsWith('/users/')) {
       return [
-        { label: t('nav.auth.list'), link: '/users' },
-        { label: t('auth.profile.edit_profile.title') } // Use lowercase key from your JSON
+        { label: 'nav.auth.list', link: '/users' },
+        { label: 'auth.profile.edit_profile.title' } // Use lowercase key from your JSON
       ];
     }
     if (url.startsWith('/users')) {
-      return [{ label: t('nav.auth.list') }];
+      return [{ label: 'nav.auth.list' }];
     }
 
     // Articles
     if (url.startsWith('/articles/categories')) {
       return [
-        { label: t('nav.articles.main'), link: '/articles' },
-        { label: t('nav.articles.categories') }
+        { label: 'nav.articles.main', link: '/articles' },
+        { label: 'nav.articles.categories' }
       ];
     }
     if (url.startsWith('/articles')) {
-      return [{ label: t('nav.articles.main') }];
+      return [{ label: 'nav.articles.main' }];
     }
 
     // Clients
     if (url.startsWith('/clients/categories')) {
       return [
-        { label: t('nav.clients.main'), link: '/clients' },
-        { label: t('nav.clients.categories') }
+        { label: 'nav.clients.main', link: '/clients' },
+        { label: 'nav.clients.categories' }
       ];
     }
     if (url.startsWith('/clients')) {
-      return [{ label: t('nav.clients.main') }];
+      return [{ label: 'nav.clients.main' }];
     }
 
     // Invoices
     if (url.startsWith('/invoices')) {
-      return [{ label: t('nav.invoices.main') }];
+      return [{ label: 'nav.invoices.main' }];
     }
 
     // Stock
     if (url.startsWith('/stock/fournisseurs')) {
       return [
-        { label: t('nav.stock.main'), link: '/stock' },
-        { label: t('nav.stock.suppliers') }
+        { label: 'nav.stock.main', link: '/stock' },
+        { label: 'nav.stock.suppliers' }
       ];
     }
     if (url.startsWith('/stock/bons')) {
       return [
-        { label: t('nav.stock.main'), link: '/stock' },
-        { label: t('nav.stock.bons') }
+        { label: 'nav.stock.main', link: '/stock' },
+        { label: 'nav.stock.bons' }
       ];
     }
     if (url.startsWith('/stock')) {
-      return [{ label: t('nav.stock.main') }];
+      return [{ label: 'nav.stock.main' }];
     }
 
     // Payments
     if (url.startsWith('/payments/refunds')) {
       return [
-        { label: t('nav.payments.main'), link: '/payments' },
-        { label: t('nav.payments.refunds') }
+        { label: 'nav.payments.main', link: '/payments' },
+        { label: 'nav.payments.refunds' }
       ];
     }
     if (url.startsWith('/payments')) {
-      return [{ label: t('nav.payments.main') }];
+      return [{ label: 'nav.payments.main' }];
     }
 
     // Other top-level routes
-    if(url.startsWith('/subscription-expiry')) return [{label: t('tenants.subscription.renew_title')}];
-    if (url.startsWith('/permissions')) return [{ label: t('nav.auth.permissions') }];
-    if (url.startsWith('/audit-log')) return [{ label: t('nav.auth.audit_log') }];
-    if (url.startsWith('/profile')) return [{ label: t('home.quick_access.my_profile') }];
-    if (url.startsWith('/change-password')) return [{ label: t('auth.profile.changePassword.title_change') }];
-    if (url.startsWith('/tenants')) return [{ label: t('nav.tenants.main') }];
-    if (url.startsWith('/home')) return [{ label: t('nav.home') }];
+    if(url.startsWith('/subscription-expiry')) return [{label: 'tenants.subscription.renew_title'}];
+    if (url.startsWith('/permissions')) return [{ label: 'nav.auth.permissions' }];
+    if (url.startsWith('/audit-log')) return [{ label: 'nav.auth.audit_log' }];
+    if (url.startsWith('/profile')) return [{ label: 'home.quick_access.my_profile' }];
+    if (url.startsWith('/change-password')) return [{ label: 'auth.profile.changePassword.title_change' }];
+    if (url.startsWith('/tenants')) return [{ label: 'nav.tenants.main' }];
+    if (url.startsWith('/home')) return [{ label: 'nav.home' }];
 
-    return [{ label: t('common.select') }]; // fallback - lowercase
+    return [{ label: t('common.select') }];
   }
 
   private resizeListener = () => {

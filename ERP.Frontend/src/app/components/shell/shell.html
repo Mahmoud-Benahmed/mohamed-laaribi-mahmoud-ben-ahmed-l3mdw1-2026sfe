@@ -423,19 +423,16 @@
           <mat-icon>menu</mat-icon>
         </button>
         <div class="shell-topbar__breadcrumb">
-          <span class="shell-topbar__breadcrumb-root">ERPSuite</span>
-
           <ng-container *ngFor="let crumb of breadcrumbs; let last = last">
-            <mat-icon>chevron_right</mat-icon>
             <a *ngIf="crumb.link && !last"
-              class="shell-topbar__breadcrumb-link"
-              [routerLink]="crumb.link">
+              class="shell-topbar__breadcrumb-link">
               {{ crumb.label | translate }}
             </a>
             <span *ngIf="!crumb.link || last"
                   class="shell-topbar__breadcrumb-page">
               {{ crumb.label | translate }}
             </span>
+            <mat-icon *ngIf="crumb.link && !last">chevron_right</mat-icon>
           </ng-container>
         </div>
       </div>
