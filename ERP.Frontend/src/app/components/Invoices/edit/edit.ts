@@ -757,7 +757,8 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
     };
 
     this.invoiceService.update(this.selectedInvoice!.id, updateDto).subscribe({
-      next: () => {
+      next: (updated) => {
+        this.selectedInvoice= updated;
         this.flash('success', this.translate.instant('invoices.responses.success.updated'));
 
         setTimeout(() => {
