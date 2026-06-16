@@ -813,7 +813,7 @@
       "subdomain_hint": "Only lowercase letters, digits, and hyphens. Cannot start or end with a hyphen.",
       "address": "Address",
       "address_placeholder": "Street, city, postal code",
-      "address_hint": "Optional — used for invoices and documents.",
+      "address_hint": "Required — used for invoices and documents.",
       "logo_url": "Logo URL (optional)",
       "logo_url_placeholder": "https://acme.com/logo.png",
       "section_branding": "Branding",

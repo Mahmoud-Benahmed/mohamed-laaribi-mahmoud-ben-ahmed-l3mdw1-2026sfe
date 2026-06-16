@@ -113,6 +113,7 @@
                 <span class="field-hint">{{ `${templateTranslationKey}address_hint` | translate }}</span>
                 <span class="field-error" *ngIf="form.get('address')?.touched && form.get('address')?.errors">
                   <ng-container *ngIf="form.get('address')?.errors?.['required']">{{ 'validation.required' | translate }}</ng-container>
+                  <ng-container *ngIf="form.get('address')?.errors?.['pattern']">{{ 'validation.invalid' | translate }}</ng-container>
                   <ng-container *ngIf="form.get('address')?.errors?.['maxlength']">{{ 'validation.max_length' | translate : { max: form.get('address')?.errors?.['maxlength'].requiredLength } }}</ng-container>
                 </span>
               </div>

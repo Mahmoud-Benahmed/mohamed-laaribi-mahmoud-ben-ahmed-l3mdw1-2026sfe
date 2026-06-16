@@ -812,7 +812,7 @@
       "subdomain_hint": "Uniquement lettres minuscules, chiffres et traits d'union. Ne peut pas commencer ni finir par un trait d'union.",
       "address": "Adresse",
       "address_placeholder": "Rue, ville, code postal",
-      "address_hint": "Optionnel — utilisé pour les factures et documents.",
+      "address_hint": "Requis — utilisé pour les factures et documents.",
       "logo_url": "URL du logo (optionnel)",
       "logo_url_placeholder": "https://acme.com/logo.png",
       "section_branding": "Personnalisation",
