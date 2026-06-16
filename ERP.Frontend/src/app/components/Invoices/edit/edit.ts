@@ -17,6 +17,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomToggleComponent } from "../../toggle-slider/toggle-slider";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyConfigService } from '../../../services/currency-config.service';
+import { generateUuid } from '../../../util/PasswordUtil';
 
 interface PendingItem {
   _localId: string;
@@ -188,7 +189,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       const taxAmount = Math.round(totalHT * (taxRate / 100) * 100) / 100;
       const totalTTC  = Math.round((totalHT + taxAmount) * 100) / 100;
       return {
-        _localId: crypto.randomUUID(),
+        _localId: generateUuid(),
         articleId: item.articleId,
         articleName: item.articleName,
         articleBarCode: item.articleBarCode,
@@ -523,7 +524,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
       };
     } else {
       this.pendingItems.push({
-        _localId: crypto.randomUUID(),
+        _localId: generateUuid(),
         articleId, articleName: master.libelle ?? '',
         articleBarCode: master.barCode ?? '',
         quantity, uniPriceHT, effectivePriceHT,
