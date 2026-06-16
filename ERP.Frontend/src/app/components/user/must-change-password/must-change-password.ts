@@ -40,9 +40,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 export class MustChangePasswordComponent implements OnInit {
   @ViewChild('passwordFormRef') passwordFormRef!: NgForm;
 
+  public authService = inject(AuthService);
   private translate = inject(TranslateService);
   private passwordService = inject(PasswordService);
-  private authService = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
