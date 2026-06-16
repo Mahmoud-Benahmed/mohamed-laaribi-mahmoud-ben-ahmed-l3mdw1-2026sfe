@@ -10,7 +10,7 @@ public class ClientCache
     public string Email { get; private set; } = default!;
     public string Address { get; private set; } = default!;
     public string? Phone { get; private set; }
-    public int? DuePaymentPeriod { get; private set; }
+    public int DuePaymentPeriod { get; private set; }
     public string? TaxNumber { get; private set; }
     public decimal? CreditLimit { get; private set; }  // ← Made nullable
     public int? DelaiRetour { get; private set; }
@@ -34,11 +34,11 @@ public class ClientCache
             Name = dto.Name.Trim(),
             Email = dto.Email.Trim().ToLowerInvariant(),
             Address = dto.Address.Trim(),
+            DuePaymentPeriod = dto.DuePaymentPeriod,
             Phone = dto.Phone?.Trim(),
             TaxNumber = dto.TaxNumber?.Trim(),
             CreditLimit = dto.CreditLimit,
             DelaiRetour = dto.DelaiRetour,
-            DuePaymentPeriod = dto.DuePaymentPeriod,
             IsBlocked = dto.IsBlocked,
             IsDeleted = dto.IsDeleted,
             CreatedAt = dto.CreatedAt, 
@@ -47,8 +47,10 @@ public class ClientCache
     }
 
     public void Update(
-        string name, string email, string address, decimal? creditLimit = null,
-        int? delaiRetour = null, int? duePaymentPeriod = null,
+        string name, string email, string address,
+        int duePaymentPeriod, 
+        decimal? creditLimit = null,
+        int? delaiRetour = null, 
         string? phone = null, string? taxNumber = null,
         bool isBlocked = false, bool isDeleted = false,
         DateTime? createdAt = null, DateTime? updatedAt = null)
@@ -58,11 +60,11 @@ public class ClientCache
         Address = address.Trim();
         Phone = phone?.Trim();
         TaxNumber = taxNumber?.Trim();
-        CreditLimit = creditLimit;        // ← was missing
-        DelaiRetour = delaiRetour;        // ← was missing
-        DuePaymentPeriod = duePaymentPeriod; // ← was missing
-        IsBlocked = isBlocked;            // ← was missing
-        IsDeleted = isDeleted;            // ← was missing
+        CreditLimit = creditLimit;        
+        DelaiRetour = delaiRetour;        
+        DuePaymentPeriod = duePaymentPeriod;
+        IsBlocked = isBlocked;
+        IsDeleted = isDeleted;
         CreatedAt = createdAt ?? CreatedAt;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -191,17 +193,8 @@ public class ClientCache
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ClearDuePaymentPeriod()
-    {
-        DuePaymentPeriod = null;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
     public int GetEffectiveDuePaymentPeriod()
     {
-        if (DuePaymentPeriod.HasValue && DuePaymentPeriod.Value > 0)
-            return DuePaymentPeriod.Value;
-
         int categoryMax = ClientCategories
             .Select(cc => cc.Category)
             .Where(c => c is { IsActive: true, IsDeleted: false })
@@ -209,7 +202,7 @@ public class ClientCache
             .DefaultIfEmpty(0)
             .Max();
 
-        return categoryMax > 0 ? categoryMax : 30; // ← fallback to 30 days
+        return categoryMax > DuePaymentPeriod ? categoryMax : DuePaymentPeriod; // ← fallback to 30 days
     }
 
     public bool CanPlaceOrder(decimal orderAmount, decimal currentBalance)

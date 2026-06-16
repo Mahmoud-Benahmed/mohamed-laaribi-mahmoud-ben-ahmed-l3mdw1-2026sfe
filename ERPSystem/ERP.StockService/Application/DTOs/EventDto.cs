@@ -1,12 +1,12 @@
 ﻿namespace ERP.StockService.Application.DTOs;
 
-// CLient DTOs
+// Client DTOs
 public sealed record ClientResponseDto(
     Guid Id,
     string Name,
     string Email,
     string Address,
-    int? DuePaymentPeriod,
+    int DuePaymentPeriod,
     string? Phone,
     string? TaxNumber,
     decimal? CreditLimit,

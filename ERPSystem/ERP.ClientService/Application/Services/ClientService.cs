@@ -78,10 +78,8 @@ public class ClientService : IClientService
         client.Update(request.Name, request.Email, request.Address,
             request.Phone, request.TaxNumber);
 
-        if (request.DuePaymentPeriod is > 0)        // ← pattern match guards against 0
+        if (request.DuePaymentPeriod is > 0)
             client.SetDuePaymentPeriod(request.DuePaymentPeriod.Value);
-        else
-            client.ClearDuePaymentPeriod();
 
         if (request.CreditLimit.HasValue)
             client.SetCreditLimit(request.CreditLimit.Value);

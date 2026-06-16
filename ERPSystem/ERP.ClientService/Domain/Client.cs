@@ -8,7 +8,7 @@ public class Client
     public string Email { get; private set; } = default!;
     public string Address { get; private set; } = default!;
     public string? Phone { get; private set; }
-    public int? DuePaymentPeriod { get; private set; }
+    public int DuePaymentPeriod { get; private set; }
     public string? TaxNumber { get; private set; }
     public decimal? CreditLimit { get; private set; }  // ← Made nullable
     public int? DelaiRetour { get; private set; }
@@ -25,10 +25,10 @@ public class Client
 
     public static Client Create(
         string name, string email, string address,
+        int duePaymentPeriod=7,
         decimal? creditLimit = null,  // ← Made nullable with default
         string? phone = null, string? taxNumber = null,
         int? delaiRetour = null,
-        int? duePaymentPeriod = null,
         Guid? tenantId = null
         )
     {
@@ -46,11 +46,11 @@ public class Client
             Name = name.Trim(),
             Email = email.Trim().ToLowerInvariant(),
             Address = address.Trim(),
+            DuePaymentPeriod = duePaymentPeriod,
             Phone = phone?.Trim(),
             TaxNumber = taxNumber?.Trim(),
             CreditLimit = creditLimit,
             DelaiRetour = delaiRetour,
-            DuePaymentPeriod = duePaymentPeriod,
             CreatedAt = DateTime.UtcNow,
         };
     }
@@ -198,17 +198,8 @@ public class Client
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ClearDuePaymentPeriod()
-    {
-        DuePaymentPeriod = null;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
     public int GetEffectiveDuePaymentPeriod()
     {
-        if (DuePaymentPeriod.HasValue && DuePaymentPeriod.Value > 0)
-            return DuePaymentPeriod.Value;
-
         int categoryMax = ClientCategories
             .Select(cc => cc.Category)
             .Where(c => c is { IsActive: true, IsDeleted: false })
@@ -216,7 +207,7 @@ public class Client
             .DefaultIfEmpty(0)
             .Max();
 
-        return categoryMax > 0 ? categoryMax : 30; // ← fallback to 30 days
+        return categoryMax > DuePaymentPeriod ? categoryMax : DuePaymentPeriod;
     }
 
     public bool CanPlaceOrder(decimal orderAmount, decimal currentBalance)
@@ -278,9 +269,9 @@ public class Client
             throw new ArgumentException("Return delay must be at least 1 day.", nameof(days));
     }
 
-    private static void ValidateDuePaymentPeriod(int? days)
+    private static void ValidateDuePaymentPeriod(int days)
     {
-        if (days.HasValue && days <= 0)
+        if (days < 1)
             throw new ArgumentException(
                 "Due payment period must be at least 1 day.", nameof(days));
     }
