@@ -371,9 +371,17 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+        policy.SetIsOriginAllowed(origin =>
+        {
+            var uri = new Uri(origin);
+            if (uri.Host == "localhost" && uri.Port == 4200) return true;
+            if (uri.Scheme == "http" && (uri.Host == "erp.local" || uri.Host.EndsWith(".erp.local")))
+                return true;
+            return false;
+        })
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 //////////////////////////////////////////////////

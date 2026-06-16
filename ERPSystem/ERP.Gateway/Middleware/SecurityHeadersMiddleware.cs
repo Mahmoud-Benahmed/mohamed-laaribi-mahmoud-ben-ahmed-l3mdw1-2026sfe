@@ -32,7 +32,7 @@ public static class SecurityHeadersMiddleware
                 "font-src 'self' data:; " +
 
                 // API + Angular dev server
-                "connect-src 'self' http://localhost:4200 https://localhost:4200; " +
+                "connect-src 'self' http://localhost:4200 http://*.erp.local;" +
 
                 // block embedding
                 "frame-ancestors 'none'; " +
