@@ -106,10 +106,7 @@
         />
       </div>
       <button class="btn-add" (click)="openCreate()"
-              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()"
-              [disabled]="categories.length < 1"
-              [matTooltip]="categories.length < 1 ? ('validation.client_categories_empty' | translate): ''"
-          >
+              *ngIf="authService.hasPrivilege(PRIVILEGES.CLIENTS.CREATE_CLIENT) && isList()">
         + {{ 'clients.add_button' | translate }}
       </button>
     </div>
@@ -480,14 +477,17 @@
 
           <div class="form__field">
             <div class="form__label">
-              <label>{{ 'clients.form.due_payment_period' | translate }} <span class="form__optional">({{ 'common.optional' | translate }})</span></label>
+              <label>{{ 'clients.form.due_payment_period' | translate }}</label>
               <mat-icon>schedule</mat-icon>
             </div>
             <input class="form__input" type="number" formControlName="duePaymentPeriod"
               [placeholder]="'clients.form.due_payment_period_placeholder' | translate" min="7" max="180"
               [class.form__input--error]="clientForm.get('duePaymentPeriod')?.invalid && clientForm.get('duePaymentPeriod')?.touched"/>
-            <span class="form__error" *ngIf="clientForm.get('duePaymentPeriod')?.invalid && clientForm.get('duePaymentPeriod')?.touched">
-              {{ 'validation.due_payment_period_invalid' | translate }}
+            <span class="field__error" *ngIf="clientForm.get('duePaymentPeriod') as ctrl">
+              <ng-container *ngIf="ctrl.invalid && ctrl.touched">
+                <span *ngIf="ctrl.errors?.['required']">{{ 'validation.required' | translate }}</span>
+                <span *ngIf="ctrl.errors?.['pattern']">{{ 'validation.due_payment_period_invalid' | translate }}</span>
+              </ng-container>
             </span>
           </div>
         </div>

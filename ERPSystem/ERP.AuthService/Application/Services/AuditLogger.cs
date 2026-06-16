@@ -18,7 +18,7 @@ namespace ERP.AuthService.Application.Services
         public async Task LogAsync(
             AuditAction action,
             bool success,
-            Guid? tenantId= null,
+            Guid? tenantId = null,
             Guid? performedBy = null,
             Guid? targetUserId = null,
             string? failureReason = null,
@@ -43,17 +43,22 @@ namespace ERP.AuthService.Application.Services
             }
             catch (Exception ex)
             {
-                // Never let audit logging failure break the main flow
-                _logger.LogError(ex, "Failed to persist audit log for action {Action}", action);
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {// Never let audit logging failure break the main flow
+                    _logger.LogError(ex, "Failed to persist audit log for action {Action}", action);
+                }
             }
 
-            // Also write to structured console log for observability
-            if (success)
-                _logger.LogInformation("[AUDIT] {Action} | By: {PerformedBy} | Target: {TargetUserId} | IP: {IpAddress}",
-                    action, performedBy, targetUserId, ipAddress);
-            else
-                _logger.LogWarning("[AUDIT] {Action} FAILED | By: {PerformedBy} | Target: {TargetUserId} | Reason: {FailureReason} | IP: {IpAddress}",
-                    action, performedBy, targetUserId, failureReason, ipAddress);
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                // Also write to structured console log for observability
+                if (success)
+                    _logger.LogInformation("[AUDIT] {Action} | By: {PerformedBy} | Target: {TargetUserId} | IP: {IpAddress}",
+                        action, performedBy, targetUserId, ipAddress);
+                else
+                    _logger.LogWarning("[AUDIT] {Action} FAILED | By: {PerformedBy} | Target: {TargetUserId} | Reason: {FailureReason} | IP: {IpAddress}",
+                        action, performedBy, targetUserId, failureReason, ipAddress);
+            }
         }
     }
 }

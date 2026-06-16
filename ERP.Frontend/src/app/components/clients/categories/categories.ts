@@ -77,10 +77,10 @@ export class ClientCategoriesComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.categoryForm = this.fb.group({
-      name:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.alpha)]],
+      name:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       code:                  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(RegexPatterns.categoryCode)]],
       delaiRetour:           [null, [Validators.required, Validators.min(7), Validators.max(270), Validators.pattern(RegexPatterns.integer)]],
-      duePaymentPeriod:      [null, [Validators.required, Validators.min(7), Validators.max(180), Validators.pattern(RegexPatterns.integer)]],
+      duePaymentPeriod:      [7, [Validators.required, Validators.min(7), Validators.max(180), Validators.pattern(RegexPatterns.integer)]],
       discountRate:          [null, [Validators.min(0), Validators.max(100)]],
       creditLimitMultiplier: [null, [Validators.min(1), Validators.max(2)]],
       useBulkPricing:        [false],
@@ -376,7 +376,10 @@ export class ClientCategoriesComponent implements OnInit {
         creditLimitMultiplier: val.creditLimitMultiplier ?? null,
       };
       this.categoriesService.update(this.selectedCategory.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.categories.responses.success.category_updated')); },
+        next: (updated) => {
+          this.cancel();
+          this.selectedCategory= updated;
+          this.flash('success', this.translate.instant('clients.categories.responses.success.category_updated')); },
         error: (err: HttpErrorResponse) => {
           const msg = err.error?.message || this.translate.instant('clients.responses.errors.SERVER_ERROR');
           this.flash('error', msg);this.loading = false;

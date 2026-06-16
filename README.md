@@ -270,8 +270,8 @@ This project demonstrates:
 
 # 👥 Team
 
-* Backend Architecture & Auth: *Mohamed Laribi*
-* Frontend Development: *Mohamed Laribi + Mahmoud Ben Ahmed*
+* Backend Architecture & Auth: *Your Name*
+* Frontend Development: *Colleague Name*
 
 ---
 

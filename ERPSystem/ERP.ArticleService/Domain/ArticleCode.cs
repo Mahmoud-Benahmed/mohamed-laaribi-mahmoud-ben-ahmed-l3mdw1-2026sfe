@@ -22,7 +22,7 @@
             TenantId = tenantId;
             Padding = padding;
             Prefix = !string.IsNullOrEmpty(prefix)
-                ? $"{prefix.Trim().ToUpperInvariant()}-ART"
+                ? prefix.Trim().ToUpperInvariant()
                 : "ART";
             LastNumber = 0;
         }

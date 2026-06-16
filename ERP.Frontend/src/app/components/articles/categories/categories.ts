@@ -72,7 +72,7 @@ export class ArticleCategoriesComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), Validators.pattern(RegexPatterns.alpha)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), Validators.pattern(RegexPatterns.safeText)]],
       tva:  [null, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
@@ -318,13 +318,11 @@ export class ArticleCategoriesComponent implements OnInit {
       });
     } else if (this.isEdit() && this.selectedCategory) {
       this.categoryService.update(this.selectedCategory.id, dto).subscribe({
-        next: () => {
+        next: (updated) => {
           this.cancel();
-          this.reload();
+          this.selectedCategory= updated;
           this.flash('success', this.translate.instant('articles.categories.responses.success.category_updated'));        },
         error: (err: HttpErrorResponse) => {
-          console.log(err);
-          
           const msg = err.error?.message || this.translate.instant('articles.responses.errors.SERVER_ERROR');
           this.flash('error', msg);
         },

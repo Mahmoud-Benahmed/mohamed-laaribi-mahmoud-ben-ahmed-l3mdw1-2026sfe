@@ -25,8 +25,8 @@ public record CreateClientRequestDto(
     [RegularExpression(RegexPatterns.SafeText, ErrorMessage = "Invalid characters.")]
     string Address,
 
-    [Range(7, 180 , ErrorMessage = "Due payment period must be at least 7 days and not exceed 180 days")]
-    int? DuePaymentPeriod = null,
+    [Required][Range(7,180, ErrorMessage = "Due payment period must be at least 7 day and not exceed 180 days.")]
+    int DuePaymentPeriod,               // ← added
 
     [Range(7, 270, ErrorMessage = "Return delay must be at least 7 days and not exceed 270 days.")]
     int? DelaiRetour = null,

@@ -32,32 +32,54 @@ namespace ERP.ArticleService.Infrastructure.Persistence
         /// </summary>
         public async Task<string> GenerateArticleCodeAsync()
         {
-            var tenantId = _tenantContext.TenantId ?? throw new InvalidOperationException("Tenant not set.");
+            var tenantId = _tenantContext.TenantId
+                ?? throw new InvalidOperationException("Tenant not set.");
 
+            // Build dynamic prefix from tenant slug
+            string shortPrefix = _tenantContext.Slug ?? "ART";
+            shortPrefix = shortPrefix.Replace("-", "").ToUpperInvariant();
+            shortPrefix = shortPrefix.Length > 3 ? shortPrefix[..3] : shortPrefix;
 
-            await using IDbContextTransaction transaction = await _context.Database
-                .BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                ArticleCode articleCode = await _context.ArticleCodes.FromSqlRaw(@"
-                                SELECT TOP 1 *
-                                FROM ArticleCodes WITH (UPDLOCK, ROWLOCK)
-                                WHERE TenantId = {0}
-                                ORDER BY Id", tenantId)
-                    .FirstOrDefaultAsync() 
-                    ??   throw new InvalidOperationException(
-                                "No ArticleCode configuration row found. " +
-                                "Please seed the ArticleCodes table with an initial row.");
+                // Lock and retrieve existing row (SQL Server specific)
+                var articleCode = await _context.ArticleCodes
+                    .FromSqlRaw(@"
+                SELECT TOP 1 *
+                FROM ArticleCodes WITH (UPDLOCK, ROWLOCK)
+                WHERE TenantId = {0}
+                ORDER BY Id", tenantId)
+                    .FirstOrDefaultAsync();
 
+                if (articleCode == null)
+                {
+                    // Create new sequence row
+                    articleCode = new ArticleCode(shortPrefix, tenantId);
+                    _context.ArticleCodes.Add(articleCode);
+                    await _context.SaveChangesAsync();   // persist immediately to avoid duplicate key race
+                }
+                else
+                {
+                    // Ensure we have the latest values (reload from DB)
+                    await _context.Entry(articleCode).ReloadAsync();
+                }
+
+                // Increment and format the code
                 articleCode.Increment();
-
                 string generatedCode = articleCode.FormatCode(DateTime.UtcNow.Year);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return generatedCode;
+            }
+            catch (DbUpdateException)   // Handles unique constraint violation (duplicate TenantId) or concurrency
+            {
+                await transaction.RollbackAsync();
+                // Retry the whole operation once (same as InvoiceNumberGenerator pattern)
+                return await GenerateArticleCodeAsync();
             }
             catch
             {

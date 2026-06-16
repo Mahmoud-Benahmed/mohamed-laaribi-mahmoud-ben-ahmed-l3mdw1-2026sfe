@@ -31,6 +31,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FournisseurResponse } from '../../../services/fournisseur.service';
 import { CurrencyConfigService } from '../../../services/currency-config.service';
 import { take } from 'rxjs';
+import { generateUuid } from '../../../util/PasswordUtil';
 
 export type BonType = 'entre' | 'sortie' | 'retour';
 
@@ -539,7 +540,7 @@ export class BonsComponent implements OnInit {
               existing.total = existing.quantity * existing.price;
             } else {
               aggregated.set(l.articleId, {
-                _localId: crypto.randomUUID(),
+                _localId: generateUuid(),
                 articleId: l.articleId,
                 articleLabel: this.getArticleLabel(l.articleId),
                 quantity: l.quantity,
@@ -758,7 +759,7 @@ export class BonsComponent implements OnInit {
           };
         } else {
           this.pendingLignes.push({
-            _localId: crypto.randomUUID(),
+            _localId: generateUuid(),
             articleId: val.articleId, articleLabel: label,
             quantity: val.quantity, price: val.price,
             remarque: val.remarque || null,
@@ -793,7 +794,7 @@ export class BonsComponent implements OnInit {
           };
         } else {
           this.selectedBon.lignes.push({
-            id: `temp_${crypto.randomUUID()}`,
+            id: `temp_${generateUuid()}`,
             articleId: val.articleId, quantity: val.quantity,
             price: val.price, remarque: val.remarque || null,
             total: val.quantity * val.price,

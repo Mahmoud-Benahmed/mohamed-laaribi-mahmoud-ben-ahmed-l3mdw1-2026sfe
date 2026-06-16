@@ -39,20 +39,25 @@ public sealed class KafkaTopicInitializer : IHostedService
                     NumPartitions = 1,
                     ReplicationFactor = 1
                 }));
-
-            _logger.LogInformation(
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                _logger.LogInformation(
                 "Kafka topics ensured: {Topics}", string.Join(", ", Topics));
+            }
         }
         catch (CreateTopicsException ex)
         {
-            foreach (var result in ex.Results)
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
-                // TopicAlreadyExists is fine — idempotent
-                if (result.Error.Code != ErrorCode.TopicAlreadyExists)
+                foreach (var result in ex.Results)
                 {
-                    _logger.LogError(
-                        "Failed to create topic {Topic}: {Reason}",
-                        result.Topic, result.Error.Reason);
+                    // TopicAlreadyExists is fine — idempotent
+                    if (result.Error.Code != ErrorCode.TopicAlreadyExists)
+                    {
+                        _logger.LogError(
+                            "Failed to create topic {Topic}: {Reason}",
+                            result.Topic, result.Error.Reason);
+                    }
                 }
             }
         }

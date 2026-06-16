@@ -1,6 +1,7 @@
 ﻿using ERP.PaymentService.Application.Interfaces;
 using ERP.PaymentService.Application.Services;
 using ERP.PaymentService.Domain;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -27,17 +28,26 @@ public class PaymentNumberGenerator : IPaymentNumberGenerator
         try
         {
             PaymentSequence? sequence = await _context.PaymentSequences
-                .FirstOrDefaultAsync(s => s.TenantId == _tenantContext.TenantId);
+                .FromSqlInterpolated($@"
+                SELECT * FROM PaymentSequences WITH (UPDLOCK, HOLDLOCK)
+                WHERE TenantId = {_tenantContext.TenantId} AND Year = {currentYear}")
+                .FirstOrDefaultAsync();
 
             if (sequence is null)
             {
                 sequence = new PaymentSequence(currentYear, _tenantContext.TenantId);
                 _context.PaymentSequences.Add(sequence);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                await _context.Entry(sequence).ReloadAsync();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+                {
+                    // Another concurrent request inserted the row for this tenant/year first.
+                    await transaction.RollbackAsync();
+                    return await GenerateNextPaymentNumberAsync();
+                }
             }
 
             sequence.GetNextNumber();

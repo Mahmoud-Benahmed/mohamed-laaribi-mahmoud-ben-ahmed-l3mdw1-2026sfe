@@ -281,7 +281,7 @@ internal class ClientCacheConfiguration : IEntityTypeConfiguration<ClientCache>
         b.Property(c => c.TaxNumber).HasMaxLength(50);
         b.Property(c => c.CreditLimit).HasPrecision(18, 3);
         b.Property(c => c.DelaiRetour);        // nullable int — no IsRequired
-        b.Property(c => c.DuePaymentPeriod);   // nullable int — no IsRequired
+        b.Property(c => c.DuePaymentPeriod).IsRequired();
         b.Property(c => c.IsBlocked).IsRequired();
         b.Property(c => c.IsDeleted).IsRequired();
         b.Property(c => c.CreatedAt).IsRequired();

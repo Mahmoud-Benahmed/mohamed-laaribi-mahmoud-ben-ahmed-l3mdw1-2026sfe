@@ -22,14 +22,24 @@ namespace ERP.ArticleService.Infrastructure.Persistence.Seeders
 
             if (exists)
             {
-                _logger.LogInformation("ArticleCode row already exists for tenant {TenantId}, skipping.", tenantId);
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogInformation("ArticleCode row already exists for tenant {TenantId}, skipping.", tenantId);
+
+                }
                 return;
             }
 
-            var articleCode = new ArticleCode(slug, tenantId, 6);
+            string shortPrefix = slug.Replace("-", "").ToUpperInvariant();
+            shortPrefix = shortPrefix.Length > 3 ? shortPrefix[..3] : shortPrefix;
+            var articleCode = new ArticleCode(shortPrefix, tenantId, 6);
+
             await _context.ArticleCodes.AddAsync(articleCode);
             await _context.SaveChangesAsync();
-            _logger.LogInformation("ArticleCode config row seeded for tenant {TenantId}: ART, padding 6.", tenantId);
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                _logger.LogInformation("ArticleCode config row seeded for tenant {TenantId}: ART, padding 6.", tenantId);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import { CreateInvoiceDto, InvoiceService, TaxCalculationMode } from '../../../s
 import { ArticleResponseDto, UnitEnum } from '../../../services/articles/articles.service';
 import { HttpError } from '../../../interfaces/HttpError';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { generateUuid } from '../../../util/PasswordUtil';
 
 interface PendingItem {
   _localId: string;
@@ -371,7 +372,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
         };
       } else {
         this.pendingItems.push({
-          _localId: crypto.randomUUID(),
+          _localId: generateUuid(),
           articleId, articleName: master.libelle ?? '',
           articleBarCode: master.barCode ?? '',
           quantity, uniPriceHT, effectivePriceHT,
