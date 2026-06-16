@@ -63,8 +63,8 @@ export class OnboardingComponent implements OnInit , OnDestroy{
       address:        ['', [Validators.required, Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
       logoUrl:        ['', [Validators.maxLength(500)]],
       // Branding
-      primaryColor:   ['#4e7cff', [Validators.pattern(RegexPatterns.hexColor)]],
-      secondaryColor: ['#a0b4ff', [Validators.pattern(RegexPatterns.hexColor)]],
+      primaryColor:   ['#1565C0', [Validators.pattern(RegexPatterns.hexColor)]],
+      secondaryColor: ['#FF6F00', [Validators.pattern(RegexPatterns.hexColor)]],
       // Regional
       currency:       ['TND',          Validators.required],
       locale:         ['fr-TN',        Validators.required],
@@ -125,13 +125,13 @@ export class OnboardingComponent implements OnInit , OnDestroy{
   fillColorTextInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const controlName = input.getAttribute('formControlName') as string;
-    this.form.get(controlName)?.setValue(input.value, { emitEvent: false });
+    this.form.get(controlName)?.setValue(input.value.toUpperCase(), { emitEvent: false });
   }
 
   fillColorInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const controlName = input.getAttribute('formControlName') as string;
-    const value = input.value.trim();
+    const value = input.value.trim().toUpperCase();
 
     // Only update if it's a valid hex color
     if (RegexPatterns.hexColor.test(value)) {
