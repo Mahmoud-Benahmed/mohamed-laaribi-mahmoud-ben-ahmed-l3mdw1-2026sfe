@@ -34,8 +34,8 @@
                 throw new ArgumentException("Prix must be positive");
 
             int resolvedTVA = tva ?? category.TVA;
-            if (resolvedTVA <= 0)
-                throw new ArgumentException("TVA must be greater than zero.");
+            if (resolvedTVA < 0)
+                throw new ArgumentException("TVA must be greater or equal to zero.");
 
             Id = Guid.NewGuid();
             TenantId= tenantId;
