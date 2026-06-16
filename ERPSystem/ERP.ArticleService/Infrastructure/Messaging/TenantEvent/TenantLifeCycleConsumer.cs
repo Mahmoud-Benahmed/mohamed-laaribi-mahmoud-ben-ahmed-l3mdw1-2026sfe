@@ -39,7 +39,10 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Tenant Kafka consumer started");
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        {
+            _logger.LogInformation("Tenant Kafka consumer started");
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -69,9 +72,12 @@ public sealed class TenantLifecycleConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogError(ex,
                     "Error processing message from topic '{Topic}'",
                     result?.Topic ?? "unknown");
+                }
             }
         }
     }
@@ -85,10 +91,12 @@ public sealed class TenantLifecycleConsumer : BackgroundService
 
         var provisioner = scope.ServiceProvider.GetRequiredService<ITenantProvisioningService>();
         await provisioner.ProvisionAsync(evt.TenantId, evt.Slug);
-
-        _logger.LogInformation(
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        {
+            _logger.LogInformation(
             "Tenant provisioned: {TenantId} / {Slug}",
             evt.TenantId, evt.Slug);
+        }
     }
 
     private async Task HandleTenantDeleted(string payload, IServiceScope scope)
@@ -99,9 +107,12 @@ public sealed class TenantLifecycleConsumer : BackgroundService
         var provisioner = scope.ServiceProvider.GetRequiredService<ITenantProvisioningService>();
         await provisioner.DeleteAllByTenantIdAsync(evt.TenantId);
 
-        _logger.LogInformation(
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        {
+            _logger.LogInformation(
             "Tenant deleted: {TenantId}",
             evt.TenantId);
+        }
     }
     // ── Dispose ───────────────────────────────────────────────────────────────
 

@@ -198,42 +198,55 @@ namespace ERP.AuthService.Application.Services
 
             if (_tenantContext.TenantId is not null)
             {
-                _logger.LogInformation(
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogInformation(
                     "Validating subscription limits for tenant '{TenantId}'",
                     _tenantContext.TenantId);
-
+                }
                 var subscription =
                     await _tenantApi.ResolveAsync(_tenantContext.TenantId.Value);
 
                 if (subscription?.Plan is null)
                 {
-                    _logger.LogWarning(
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                    {
+                        _logger.LogWarning(
                         "Tenant '{TenantId}' has no active subscription plan",
                         _tenantContext.TenantId);
-
-                    return null;
+                    }
+                    throw new SubscriptionPlanNotFoundException();
                 }
 
-                _logger.LogInformation(
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogInformation(
                     "Tenant '{TenantId}' uses plan '{PlanCode}' with max users {MaxUsers}",
                     subscription.TenantId,
                     subscription.Plan.Code,
                     subscription.Plan.MaxUsers);
+                }
 
                 int currentUserCount = await _userRepository.CountByTenantIdAsync(_tenantContext.TenantId.Value);
 
-                _logger.LogInformation(
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogInformation(
                     "Tenant '{TenantId}' current user count: {CurrentUserCount}",
                     subscription.TenantId,
                     currentUserCount);
+                }
 
                 if (currentUserCount >= subscription.Plan.MaxUsers)
                 {
-                    _logger.LogWarning(
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                    {
+                        _logger.LogWarning(
                         "Tenant '{TenantId}' exceeded user limit ({CurrentUserCount}/{MaxUsers})",
                         subscription.TenantId,
                         currentUserCount,
                         subscription.Plan.MaxUsers);
+                    }
                     throw new TenantUserLimitReachedException();
                 }
 
@@ -540,9 +553,9 @@ namespace ERP.AuthService.Application.Services
                        ?? throw new UserNotFoundException(authUserId);
 
             Role adminRole = await _roleRepository.GetByLibelleAsync(Roles.SystemAdmin) ?? throw new RoleNotFoundException($"Unable to find `{Roles.SystemAdmin}` role");
-            
-            if (await _userRepository.CountByRoleIdAsync(adminRole.Id) < 2)
-                throw new InvalidOperationException("Cannot Deactivate the only Admin of the system");
+
+            if (user.RoleId == adminRole.Id && await _userRepository.CountByRoleIdAsync(adminRole.Id) < 2)
+                throw new InvalidOperationException("Cannot deactivate the only Admin of the system");
 
             if (!user.IsActive)
                 throw new UserInactiveException();

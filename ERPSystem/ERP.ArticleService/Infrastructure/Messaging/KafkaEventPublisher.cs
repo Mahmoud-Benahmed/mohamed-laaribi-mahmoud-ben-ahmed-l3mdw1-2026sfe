@@ -53,13 +53,13 @@ public class KafkaEventPublisher : IEventPublisher, IDisposable
                 Timestamp = new Timestamp(DateTime.UtcNow)
             };
 
-            _logger.LogInformation(
-                "Publishing event to Kafka - Topic: {Topic}, EventId: {EventId}, Type: {EventType}, Size: {Size} bytes",
-                topic, eventId, typeof(T).Name, json.Length);
 
             // Log the actual content (only in development)
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
+                _logger.LogInformation(
+                    "Publishing event to Kafka - Topic: {Topic}, EventId: {EventId}, Type: {EventType}, Size: {Size} bytes",
+                    topic, eventId, typeof(T).Name, json.Length);
                 _logger.LogDebug("Event payload: {Json}", json);
             }
 
@@ -67,17 +67,22 @@ public class KafkaEventPublisher : IEventPublisher, IDisposable
             DeliveryResult<string, string> deliveryResult = await _producer.ProduceAsync(topic, message);
 
             stopwatch.Stop();
-
-            _logger.LogInformation(
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                _logger.LogInformation(
                 "Event published successfully - Topic: {Topic}, Partition: {Partition}, Offset: {Offset}, " +
                 "EventId: {EventId}, Duration: {Duration}ms",
                 topic, deliveryResult.Partition, deliveryResult.Offset, eventId, stopwatch.ElapsedMilliseconds);
+            }
         }
         catch (ProduceException<string, string> ex)
         {
-            _logger.LogError(ex,
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                _logger.LogError(ex,
                 "Failed to publish event to {Topic} - Error: {ErrorCode}, Reason: {Reason}",
                 topic, ex.Error.Code, ex.Error.Reason);
+            }
             throw;
         }
         catch (Exception ex)
