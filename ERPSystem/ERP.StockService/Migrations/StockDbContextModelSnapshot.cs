@@ -477,7 +477,7 @@ namespace ERP.StockService.Migrations
                     b.Property<int?>("DelaiRetour")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DuePaymentPeriod")
+                    b.Property<int>("DuePaymentPeriod")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
