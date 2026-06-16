@@ -84,7 +84,7 @@ export class FournisseurComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.fournisseurForm = this.fb.group({
-      name:      ['', [Validators.required, Validators.pattern(RegexPatterns.alpha), Validators.minLength(2), Validators.maxLength(200)]],
+      name:      ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(2), Validators.maxLength(200)]],
       address:   ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(5), Validators.maxLength(500)]],
       phone:     ['', [Validators.required, Validators.pattern(RegexPatterns.phone), Validators.maxLength(20)]],
       taxNumber: ['', [Validators.pattern(RegexPatterns.alphaNumeric), Validators.maxLength(50)]],
@@ -373,9 +373,9 @@ export class FournisseurComponent implements OnInit {
       };
 
       this.service.updateFournisseur(this.selectedFournisseur.id, dto).subscribe({
-        next: () => {
+        next: (updated) => {
           this.cancel();
-          this.reload();
+          this.selectedFournisseur=updated;
           this.flash('success', this.translate.instant('stock.responses.success.fournisseur_updated', { name: val.name }));
         },
         error: (err) => {

@@ -103,13 +103,13 @@ export class ClientsComponent implements OnInit {
     private invoiceService: InvoiceService,
   ) {
     this.clientForm = this.fb.group({
-      name:             ['', [Validators.required, Validators.pattern(RegexPatterns.alpha), Validators.minLength(2), Validators.maxLength(200)]],
+      name:             ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(2), Validators.maxLength(200)]],
       email:            ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
       address:          ['', [Validators.required, Validators.pattern(RegexPatterns.safeText), Validators.minLength(5), Validators.maxLength(500)]],
       phone:            ['', [Validators.maxLength(20), Validators.pattern(RegexPatterns.phone)]],
       taxNumber:        ['', [Validators.maxLength(50), Validators.pattern(RegexPatterns.alphaNumeric)]],
+      duePaymentPeriod: [7, [Validators.required,Validators.min(7), Validators.max(180)]],
       creditLimit:      [null, this.optionalMin(1000)],
-      duePaymentPeriod: [null, this.optionalRange(7, 180)],
       delaiRetour:      [null, this.optionalRange(7, 270)],
     });
   }
@@ -473,7 +473,7 @@ export class ClientsComponent implements OnInit {
         duePaymentPeriod: val.duePaymentPeriod,
       };
       this.clientsService.update(this.selectedClient.id, dto).subscribe({
-        next: () => { this.cancel(); this.reload(); this.flash('success', this.translate.instant('clients.responses.success.client_updated', { name: val.name })); },
+        next: (updated) => { this.cancel(); this.selectedClient= updated; this.flash('success', this.translate.instant('clients.responses.success.client_updated', { name: val.name })); },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.unknown')),
       });
     }

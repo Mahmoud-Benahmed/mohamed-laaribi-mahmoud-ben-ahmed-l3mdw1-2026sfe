@@ -81,12 +81,12 @@ export class ArticleComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.articleForm = this.fb.group({
-      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.alphaNumeric)]],
-      prix:       [null, [Validators.required, Validators.min(0.01)]],
+      libelle:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(RegexPatterns.safeText)]],
+      prix:       [null, [Validators.required, Validators.min(0.01),  Validators.pattern(RegexPatterns.decimal)]],
       categoryId: ['', Validators.required],
       unit:       ['', Validators.required],
       barCode:    ['', [Validators.required, Validators.minLength(8), Validators.maxLength(13), Validators.pattern(RegexPatterns.barCode)]],
-      tva:        [null, [Validators.min(0.01), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
+      tva:        [null, [Validators.min(0), Validators.max(100), Validators.pattern(RegexPatterns.integer)]],
     });
   }
 
@@ -236,6 +236,7 @@ export class ArticleComponent implements OnInit {
     }
     this.loadCategories();
     this.loadStats();
+    this.cdr.markForCheck();
   }
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
@@ -352,9 +353,9 @@ export class ArticleComponent implements OnInit {
         tva: val.tva,
       };
       this.articleService.update(this.selectedArticle.id, dto).subscribe({
-        next: () => {
+        next: (updated) => {
           this.cancel();
-          this.reload();
+            this.selectedArticle= updated;
           this.flash('success', this.translate.instant('articles.responses.success.article_updated', { name: val.libelle }));
         },
         error: (err) => this.flash('error', (err.error as HttpError)?.message ?? this.translate.instant('errors.internal_error')),
