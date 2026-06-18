@@ -106,14 +106,16 @@
       </div>
 
       <button class="btn-add"
-              *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.ADD_ENTRY) && isList()"
-              (click)="openCreate()"
-              [disabled]="
-                (activeBonType === 'entre' && fournisseurs.length === 0) ||
-                ((activeBonType === 'retour' || activeBonType === 'sortie') && articles.length === 0)
-              "
-              [matTooltip]="getAddButtonTooltip()"
-        >
+                    *ngIf="authService.hasPrivilege(PRIVILEGES.STOCK.ADD_ENTRY) && isList()"
+                    (click)="openCreate()"
+                    [disabled]="
+                      (activeBonType === 'entre' && fournisseurs.length === 0) ||
+                      (activeBonType === 'sortie' && clients.length === 0) ||
+                      ((activeBonType === 'retour' || activeBonType === 'sortie') && articles.length === 0) ||
+                      (allSourceBons.length === 0 && activeBonType === 'retour')
+                    "
+                    [matTooltip]="getAddButtonTooltip()"
+              >
         {{ 'stock.bons.new_bon' | translate }}
       </button>
     </div>
