@@ -5,6 +5,7 @@ using ERP.StockService.Domain;
 using ERP.StockService.Domain.LocalCache.Article;
 using ERP.StockService.Domain.LocalCache.Client;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Reflection;
 
 namespace ERP.StockService.Application.Services;
 
@@ -45,6 +46,38 @@ public class BonRetourService : IBonRetourService
     // =========================
     public async Task<BonRetourResponseDto> CreateAsync(CreateBonRetourRequestDto dto)
     {
+        // in case the sourceBon is BonSortie (RetourBonType.BonSortie), check if it exists
+        if (dto.SourceType.Equals(RetourSourceType.BonSortie))
+        {
+            // fetch bonSortie to get its ClientId
+            var bonSortie = await _bonSortieRepo.GetByIdAsync(dto.SourceId)
+                ?? throw new BonSortieNotFoundException(dto.SourceId); // Better to use specific exception
+
+            // fetch client to check his DelaiRetour
+            var client = await _clientCacheRepository.GetByIdAsync(bonSortie.ClientId)
+                ?? throw new ClientNotFoundException(bonSortie.ClientId);
+
+            int? delayDays = client.GetEffectiveDelaiRetour();
+            if (delayDays.HasValue)
+            {
+                // Convert days to TimeSpan
+                TimeSpan delay = TimeSpan.FromDays(delayDays.Value);
+
+                // Calculate the deadline
+                DateTime deadline = bonSortie.CreatedAt.Add(delay);
+
+                // If the current UTC time exceeds the deadline, reject the return
+                if (DateTime.UtcNow > deadline)
+                {
+                    // Use a built-in exception with a meaningful message
+                    throw new RetourDelayExceededException(bonSortie.Id, deadline);
+                }
+            }
+
+        }
+
+
+
         // 1. Validate input
         if (dto.Lignes == null || dto.Lignes.Count == 0)
             throw new ArgumentException("At least one ligne is required.");

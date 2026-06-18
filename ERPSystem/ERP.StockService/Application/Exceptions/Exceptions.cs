@@ -1,4 +1,6 @@
-﻿namespace ERP.StockService.Application.Exceptions;
+﻿using static ERP.StockService.Properties.ApiRoutes;
+
+namespace ERP.StockService.Application.Exceptions;
 
 public class BonNotFoundException(Guid id)
     : KeyNotFoundException($"Bon with '{id}' was not found.");
@@ -39,6 +41,20 @@ public sealed class ClientBlockedException : InvalidOperationException
 {
     public ClientBlockedException(Guid id)
         : base($"Client '{id}' is blocked and cannot perform this operation.") { }
+}
+
+public sealed class RetourDelayExceededException : InvalidOperationException
+{
+    public Guid BonSortieId { get; }
+    public DateTime Deadline { get; }
+
+    public RetourDelayExceededException(Guid bonSortieId, DateTime deadline)
+        : base($"Cannot create return for BonSortie {bonSortieId}: " +
+               $"deadline ({deadline:yyyy-MM-dd HH:mm}) has passed.")
+    {
+        BonSortieId = bonSortieId;
+        Deadline = deadline;
+    }
 }
 
 

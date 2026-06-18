@@ -110,6 +110,13 @@ public class GlobalExceptionMiddleware
                 StatusCode = (int)HttpStatusCode.Forbidden
             },
 
+            RetourDelayExceededException ex => new ErrorResponse
+            {
+                Code = "STOCK_013",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Conflict,
+            },
+
             // ── External service unavailable ─────────────────────────────────
             HttpRequestException ex => new ErrorResponse
             {
