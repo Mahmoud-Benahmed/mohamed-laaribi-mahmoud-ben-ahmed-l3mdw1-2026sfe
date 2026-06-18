@@ -343,6 +343,7 @@ export class BonsComponent implements OnInit {
 
     let fournisseurs$: Observable<{ items: FournisseurResponse[]; totalCount: number } | null> = of(null);
     let sourceBons$: Observable<any> = of(null);
+    let clients$: Observable<{ items: ClientResponseDto[]; totalCount: number } | null> = of(null);
 
     if (this.activeBonType === 'entre') {
       fournisseurs$ = this.stock.getFournisseursPaged(1, 1000).pipe(
@@ -353,12 +354,23 @@ export class BonsComponent implements OnInit {
         entres: this.stock.getBonEntres(1, 1000),
         sorties: this.stock.getBonSorties(1, 1000),
       });
+    } else if (this.activeBonType === 'sortie') {
+      clients$ = this.stock.getClientsPaged(1, 1000).pipe(
+        map(res => ({ items: res.items.filter(clt=> !clt.isBlocked), totalCount: res.totalCount }))
+      );
     }
 
-    forkJoin({ list: list$, articles: articles$, fournisseurs: fournisseurs$, sourceBons: sourceBons$ })
+
+    forkJoin({
+        list: list$,
+        articles: articles$,
+        fournisseurs: fournisseurs$,
+        sourceBons: sourceBons$,
+        clients: clients$
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ list, articles, fournisseurs, sourceBons }) => {
+        next: ({ list, articles, fournisseurs, sourceBons, clients }) => {
           this.dataSource.data = list.items;
           this.totalCount = list.totalCount;
 
@@ -381,6 +393,13 @@ export class BonsComponent implements OnInit {
             this.fournisseurs = fournisseurs.items.filter(f => !f.isDeleted && !f.isBlocked);
             if (this.isList() && this.fournisseurs.length > 0) {
               this.headerForm.patchValue({ fournisseurId: this.fournisseurs[0].id }, { emitEvent: false });
+            }
+          }
+
+          if (this.activeBonType === 'sortie' && clients && clients.items) {
+            this.clients = clients.items;
+            if (this.isList() && this.clients.length > 0 && !this.headerForm.get('clientId')?.value) {
+              this.selectClient(this.clients[0]);
             }
           }
 
@@ -572,6 +591,7 @@ export class BonsComponent implements OnInit {
   }
 
   openCreate(): void {
+    console.log(this.allSourceBons);
     if (this.isCreate()) return;
     this.masterRetourMap.clear();
     this.syncArticles();
@@ -1047,8 +1067,17 @@ export class BonsComponent implements OnInit {
   getAddButtonTooltip(): string {
     if (this.fournisseurs.length === 0 && this.activeBonType === 'entre')
       return this.translate.instant('stock.responses.errors.fournisseurs_not_found');
+
+    if (this.clients.length === 0 && this.activeBonType === 'sortie')
+      return this.translate.instant('stock.responses.errors.clients_not_found');
+
     if (this.articles.length === 0 && (this.activeBonType === 'retour' || this.activeBonType === 'sortie'))
       return this.translate.instant('stock.responses.errors.articles_not_found');
+
+    if (this.allSourceBons.length === 0 && this.activeBonType === 'retour')
+      return this.translate.instant('stock.responses.errors.source_bons_not_found');
+
+
     return '';
   }
 

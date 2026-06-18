@@ -389,7 +389,7 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
   isOutOfStock(stock: number): boolean { return stock === 0; }
 
   getAddButtonTooltip(): string {
-    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
+    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.articles_not_found') : '';
   }
 
   checkArticleStock(articleId: string, _requestedQuantity: number): void {

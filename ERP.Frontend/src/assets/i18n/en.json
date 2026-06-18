@@ -1342,6 +1342,9 @@
         "STOCK_007": "Client not found.",
         "STOCK_008": "This article was not part of the original receipt.",
         "STOCK_009": "Return quantity exceeds the quantity from the source receipt.",
+        "STOCK_010": "Supplier not found.",
+        "STOCK_011": "Supplier is blocked, unable to procceed.",
+        "STOCK_012": "Client is blocker, unable to procceed.",
         "EXTERNAL_SERVICE_ERROR": "An external service is currently unavailable. Please try again later.",
         "NOT_FOUND": "The requested resource was not found.",
         "BUSINESS_RULE_VIOLATION": "This operation violates a business rule.",
@@ -1368,7 +1371,10 @@
         "CLIENTS_NOT_FOUND": "No clients available. Please add a client first.",
         "QUANTITY_EXCEEDS_STOCK": "Requested quantity exceeds available stock.",
         "INSUFFICIENT_STOCK_DETAIL": "Insufficient stock for this operation.",
-        "fournisseurs_not_found":"No suppliers were found, try adding at least one supplier in order to receive articles from."
+        "fournisseurs_not_found":"No suppliers were found, try adding at least one supplier in order to buy articles from.",
+        "clients_not_found": "No clients were found, try adding at least one client in order to sell articles to.",
+        "articles_not_found": "No articles were found, try adding at least one article.",
+        "source_bons_not_found": "No receipts were found. Return receipt requires an entry/exit receipt to create already existing but none were found."
       },
       "success": {
         "fournisseur_created": "Supplier \"{{name}}\" created successfully.",

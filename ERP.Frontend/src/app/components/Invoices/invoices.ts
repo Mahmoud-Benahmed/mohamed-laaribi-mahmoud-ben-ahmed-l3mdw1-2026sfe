@@ -121,7 +121,7 @@ export class InvoicesComponent implements OnInit, OnDestroy {
       // load articles + invoices + stats in parallel
       forkJoin({
           articles: this.loadArticlesWithStock(),
-          clients: this.stock.getClientsPaged(1, 100).pipe(catchError(() => of({ items: [] }))),
+          clients: this.invoiceService.getClientsPaged(1, 100).pipe(catchError(() => of({ items: [] }))),
           invoices: this.invoiceService.getAll(this.currentPage, this.currentSize),
           stats: this.invoiceService.getStats()
       }).subscribe({
@@ -352,8 +352,8 @@ export class InvoicesComponent implements OnInit, OnDestroy {
   }
 
   getAddButtonTooltip(): string {
-    if(this.articles.length< 1) return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
-    else if(this.clients.length< 1) return this.clients.length === 0 ? this.translate.instant('stock.responses.errors.CLIENTS_NOT_FOUND') : '';
+    if(this.articles.length < 1) return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.articles_not_found') : '';
+    else if(this.clients.length< 1) return this.clients.length === 0 ? this.translate.instant('stock.responses.errors.clients_not_found') : '';
     else return '';
   }
 

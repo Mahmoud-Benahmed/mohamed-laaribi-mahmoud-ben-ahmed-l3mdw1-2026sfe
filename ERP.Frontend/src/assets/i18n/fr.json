@@ -1337,6 +1337,9 @@
         "STOCK_007": "Client non trouvé.",
         "STOCK_008": "Cet article ne faisait pas partie du bon d'origine.",
         "STOCK_009": "La quantité retournée dépasse la quantité du bon source.",
+        "STOCK_010": "Fournisseur introuvable.",
+        "STOCK_011": "Le fournisseur est bloqué, impossible de poursuivre l'opération.",
+        "STOCK_012": "Le client est bloqué, impossible de poursuivre l'opération.",
         "EXTERNAL_SERVICE_ERROR": "Un service externe est actuellement indisponible. Veuillez réessayer plus tard.",
         "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
         "BUSINESS_RULE_VIOLATION": "Cette opération viole une règle métier.",
@@ -1363,7 +1366,10 @@
         "CLIENTS_NOT_FOUND": "Aucun client disponible. Veuillez d'abord ajouter un client.",
         "QUANTITY_EXCEEDS_STOCK": "La quantité demandée dépasse le stock disponible.",
         "INSUFFICIENT_STOCK_DETAIL": "Stock insuffisant pour cette opération.",
-        "fournisseurs_not_found": "Aucun fournisseur trouvé. Veuillez ajouter au moins un fournisseur pour pouvoir réceptionner des articles."
+        "fournisseurs_not_found": "Aucun fournisseur n'a été trouvé. Veuillez en ajouter au moins un afin de pouvoir acheter des articles.",
+        "clients_not_found": "Aucun client n'a été trouvé. Veuillez en ajouter au moins un afin de pouvoir vendre des articles.",
+        "articles_not_found": "Aucun article n'a été trouvé. Veuillez en ajouter au moins un.",
+        "source_bons_not_found": "Aucun bon n'a été trouvé. Le bon de retour nécessite un bon d'entré/sortie qui est déjà créé mais aucun existe."
       },
       "success": {
         "fournisseur_created": "Le fournisseur \"{{name}}\" a été créé avec succès.",

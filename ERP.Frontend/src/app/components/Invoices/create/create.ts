@@ -269,7 +269,7 @@ export class CreateInvoiceComponent implements OnInit, OnDestroy{
   }
 
   getAddButtonTooltip(): string {
-    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.ARTICLES_NOT_FOUND') : '';
+    return this.articles.length === 0 ? this.translate.instant('stock.responses.errors.articles_not_found') : '';
   }
 
   getQuantityMax(): number {
