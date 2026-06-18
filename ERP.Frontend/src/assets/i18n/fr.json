@@ -1340,6 +1340,7 @@
         "STOCK_010": "Fournisseur introuvable.",
         "STOCK_011": "Le fournisseur est bloqué, impossible de poursuivre l'opération.",
         "STOCK_012": "Le client est bloqué, impossible de poursuivre l'opération.",
+        "STOCK_013": "Impossible de créer le bonRetour, le création a été réalizé hors la période permise.",
         "EXTERNAL_SERVICE_ERROR": "Un service externe est actuellement indisponible. Veuillez réessayer plus tard.",
         "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
         "BUSINESS_RULE_VIOLATION": "Cette opération viole une règle métier.",
