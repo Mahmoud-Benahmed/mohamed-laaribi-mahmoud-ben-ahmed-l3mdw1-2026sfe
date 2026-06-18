@@ -576,6 +576,8 @@ export class EditInvoiceComponent implements OnInit, OnDestroy{
         originalTotal:    Math.round(originalTotalTTC * 100) / 100,
         discountedTotal:  Math.round(discountedTotalTTC * 100) / 100,
       };
+      console.log(this.discountInfo);
+      
 
       const finalTotal = applies ? discountedTotalTTC : originalTotalTTC;
 
