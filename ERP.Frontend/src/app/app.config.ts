@@ -36,9 +36,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),provideHttpClient(withInterceptors([
       apiInterceptor,
       LoadingInterceptor,
-      errorTranslateInterceptor,
       TenantInactiveInterceptor,
-      AuthInterceptor
+      AuthInterceptor,
+      errorTranslateInterceptor
     ])),
     provideTranslateService({
       fallbackLang: 'en',
