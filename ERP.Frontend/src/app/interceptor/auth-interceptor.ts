@@ -92,12 +92,13 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
         if (code === 'AUTH_006') return throwError(() => error);
 
         const isInactive = code === 'AUTH_003';
+        const isAuthCode = !code || code.startsWith('AUTH_');
 
         dialog.open(ModalComponent, {
           width: '540px',
           data: {
             title:       isInactive ? e('AUTH_003_TITLE') : e('ACCESS_DENIED'),
-            message:     code ? e(code) : e('AUTH_006'),
+            message:     isAuthCode ? e(code ?? 'AUTH_006') : (error.error?.message ?? e('AUTH_006')),
             confirmText: t('common.confirm'),
             showCancel:  false,
             icon:        isInactive ? 'person_off' : 'block',
