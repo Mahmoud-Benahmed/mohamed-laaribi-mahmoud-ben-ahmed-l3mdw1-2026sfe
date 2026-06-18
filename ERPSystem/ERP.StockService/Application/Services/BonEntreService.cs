@@ -38,8 +38,11 @@ public class BonEntreService : IBonEntreService
     // =========================
     public async Task<BonEntreResponseDto> CreateAsync(CreateBonEntreRequestDto dto)
     {
-        _ = await _fournisseurCacheRepository.GetByIdAsync(dto.FournisseurId)
-            ?? throw new KeyNotFoundException($"Fournisseur with Id:{dto.FournisseurId} not found.");
+        var fournisseur = await _fournisseurCacheRepository.GetByIdAsync(dto.FournisseurId)
+            ?? throw new FournisseurNotFoundException(dto.FournisseurId);
+
+        if(fournisseur.IsBlocked)
+            throw new FournisseurBlockedException(dto.FournisseurId);
 
         if (dto.Lignes is null or { Count: 0 })
             throw new ArgumentException("At least one ligne is required.");

@@ -91,6 +91,24 @@ public class GlobalExceptionMiddleware
                 Message = ex.Message,
                 StatusCode = (int)HttpStatusCode.UnprocessableEntity
             },
+            FournisseurNotFoundException ex => new ErrorResponse
+            {
+                Code = "STOCK_010",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.NotFound
+            },
+            FournisseurBlockedException ex => new ErrorResponse
+            {
+                Code = "STOCK_011",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Forbidden
+            },
+            ClientBlockedException ex => new ErrorResponse
+            {
+                Code = "STOCK_012",
+                Message = ex.Message,
+                StatusCode = (int)HttpStatusCode.Forbidden
+            },
 
             // ── External service unavailable ─────────────────────────────────
             HttpRequestException ex => new ErrorResponse

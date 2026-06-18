@@ -37,8 +37,11 @@ public class BonSortieService : IBonSortieService
     // =========================
     public async Task<BonSortieResponseDto> CreateAsync(CreateBonSortieRequestDto dto)
     {
-        _ = await _clientCacheRepository.GetByIdAsync(dto.ClientId)
-            ?? throw new KeyNotFoundException($"Client with Id {dto.ClientId} not found");
+        var client = await _clientCacheRepository.GetByIdAsync(dto.ClientId)
+            ?? throw new ClientNotFoundException(dto.ClientId);
+
+        if (client.IsBlocked)
+            throw new ClientBlockedException(client.Id);
 
         if (dto.Lignes is null or { Count: 0 })
             throw new ArgumentException("At least one ligne is required.");

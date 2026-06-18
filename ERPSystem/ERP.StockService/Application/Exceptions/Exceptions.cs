@@ -25,11 +25,25 @@ public class RetourQuantityExceedsSourceException : Exception
     {
     }
 }
+
+public class FournisseurNotFoundException(Guid id)
+    : KeyNotFoundException($"Fournisseur '{id}' was not found.");
+
 public class ClientNotFoundException : Exception
 {
     public ClientNotFoundException(Guid id)
         : base($"Client with id '{id}' was not found.") { }
 }
+
+public sealed class ClientBlockedException : InvalidOperationException
+{
+    public ClientBlockedException(Guid id)
+        : base($"Client '{id}' is blocked and cannot perform this operation.") { }
+}
+
+
+public class FournisseurBlockedException(Guid id)
+    : InvalidOperationException($"Fournisseur '{id}' is blocked.");
 
 public class ArticleNotFoundException : Exception
 {
