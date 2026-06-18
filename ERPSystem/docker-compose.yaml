@@ -331,7 +331,7 @@ services:
       - ./../ERP.Frontend:/app
       - /app/node_modules
       - erp-frontend-html:/app/dist/ERP.Frontend/browser
-    command: sh -c "npm install && npx ng build --configuration=development --watch"
+    command: sh -c "npm install && npx ng build --configuration=production"
     networks: [erp-network]
 
 # ─────────────────────────────────────────────────────────────
